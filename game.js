@@ -104,7 +104,7 @@ const platforms = [
         id: 6,
         color: "#9FC131",
         x: 180,
-        y: 200,
+        y: 320,
         w: 80,
         h: 25,
         elasticity: 0.5,
@@ -296,16 +296,16 @@ function update() {
         }
     }
 
-    // fall off world - zmień warunek na granice świata
+    // fall off world
     if (player.y > WORLD_SIZE.height) {
         resetGame();
     }
 
-    // --- AKTUALIZACJA KAMERY ---
+    // --- CAMERA UPDATE ---
     CAMERA.x = player.x + player.w / 2 - CAMERA.width / 2;
     CAMERA.y = player.y + player.h / 2 - CAMERA.height / 2;
 
-    // (Opcjonalnie) Zablokuj kamerę, aby nie wychodziła poza mapę:
+    // Block camera, to that player can't see outside of world bounds
     CAMERA.x = Math.max(0, Math.min(CAMERA.x, WORLD_SIZE.width - CAMERA.width));
     CAMERA.y = Math.max(
         0,
@@ -313,17 +313,31 @@ function update() {
     );
 }
 
+function drawPlayer() {
+    // Player (Agent Cooper style semi-sprite)
+    // Suit jacket
+    ctx.fillStyle = "#1a1a1a";
+    ctx.fillRect(player.x, player.y, player.w, player.h);
+    // Face (pale complexion, centered at the top)
+    ctx.fillStyle = "#ffdbac";
+    ctx.fillRect(player.x + 6, player.y + 2, player.w - 12, 12);
+    // White shirt peeking out from under the jacket
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(player.x + 10, player.y + 14, player.w - 20, 10);
+    // Black tie
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(player.x + 13, player.y + 14, 4, 12);
+}
+
 // ====== DRAW ======
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-    // Przesuń świat w kierunku przeciwnym do pozycji kamery
+    // Move the world according to camera position
     ctx.translate(-CAMERA.x, -CAMERA.y);
 
-    // Player
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.w, player.h);
+    drawPlayer();
 
     // Platforms
     for (const p of platforms) {
