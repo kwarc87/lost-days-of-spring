@@ -1,0 +1,61 @@
+.container {
+    margin: 0;
+    background: #fff;
+}
+canvas {
+    display: block;
+    margin: 20px auto;
+    background: #87ceeb;
+}
+
+/* ===== DEBUG PANEL ===== */
+#debug {
+    margin: 0 auto;
+    min-width: 220px;
+    max-width: 280px;
+
+    background: rgba(15, 23, 32, 0.92);
+    backdrop-filter: blur(6px);
+
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    padding: 12px 14px;
+
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 14px;
+    line-height: 1.4;
+
+    color: #e5e7eb;
+    box-shadow:
+            0 10px 25px rgba(0, 0, 0, 0.35),
+            inset 0 1px 0 rgba(255, 255, 255, 0.03);
+
+    pointer-events: none;
+}
+
+#debug > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+
+    padding: 3px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+#debug > div:last-child {
+    border-bottom: none;
+}
+
+#debug strong {
+    font-weight: 500;
+    color: #93c5fd;
+}
+
+#debug div {
+    color: #f8fafc;
+}
+
+#debug div:has(strong) {
+    font-variant-numeric: tabular-nums;
+}
