@@ -43,6 +43,7 @@ const player = {
     lastGroundId: null,
     lastGroundType: null,
     bounceCount: 0,
+    facing: "front",
 };
 
 // ====== CAMERA ======
@@ -72,37 +73,41 @@ const GAME_LOOP = {
 const platforms = [
     {
         id: 2,
-        color: "#042940",
+        color: "#2a7049", // emerald grass
+        secondaryColor: "#1e140d", // dark dirt
         x: 0,
         y: 480,
         w: 600,
-        h: 20,
+        h: 80,
         elasticity: 0,
         type: "normal",
     },
     {
         id: 3,
-        color: "#042940",
+        color: "#2a7049",
+        secondaryColor: "#1e140d",
         x: 800,
         y: 480,
         w: 300,
-        h: 20,
+        h: 80,
         elasticity: 0,
         type: "normal",
     },
     {
         id: 4,
-        color: "#042940",
+        color: "#2a7049",
+        secondaryColor: "#1e140d",
         x: 1180,
         y: 480,
         w: 300,
-        h: 20,
+        h: 80,
         elasticity: 0,
         type: "normal",
     },
     {
         id: 6,
-        color: "#9FC131",
+        color: "#4682b4", // slightly bouncy - bluish rubber
+        secondaryColor: "rgba(255, 255, 255, 0.4)",
         x: 180,
         y: 320,
         w: 80,
@@ -112,7 +117,8 @@ const platforms = [
     },
     {
         id: 7,
-        color: "#9FC131",
+        color: "#4682b4",
+        secondaryColor: "rgba(255, 255, 255, 0.4)",
         x: 880,
         y: 190,
         w: 60,
@@ -122,7 +128,8 @@ const platforms = [
     },
     {
         id: 8,
-        color: "#DBF227",
+        color: "#d95a00", // booster - orange
+        secondaryColor: "#ffe600", // glossy yellow top
         x: 670,
         y: 420,
         w: 160,
@@ -132,7 +139,8 @@ const platforms = [
     },
     {
         id: 10,
-        color: "#042940",
+        color: "#2a7049",
+        secondaryColor: "#1e140d",
         x: 90,
         y: 425,
         w: 130,
@@ -142,7 +150,8 @@ const platforms = [
     },
     {
         id: 11,
-        color: "#008F8C",
+        color: "#932fa6", // highly bouncy - purple rubber
+        secondaryColor: "rgba(255, 255, 255, 0.4)",
         x: 410,
         y: 290,
         w: 110,
@@ -152,7 +161,8 @@ const platforms = [
     },
     {
         id: 12,
-        color: "#008F8C",
+        color: "#932fa6",
+        secondaryColor: "rgba(255, 255, 255, 0.4)",
         x: 1130,
         y: 250,
         w: 210,
@@ -161,6 +171,31 @@ const platforms = [
         type: "normal",
     },
 ];
+
+const enemies = [
+    {
+        platformId: 10,
+        w: 24,
+        h: 30,
+        speed: 1.5,
+        color: "#8B0000", // creepy dark red
+    },
+];
+
+function initEnemies() {
+    for (const enemy of enemies) {
+        const p = platforms.find((pl) => pl.id === enemy.platformId);
+        if (p) {
+            enemy.x = p.x + p.w / 2 - enemy.w / 2;
+            enemy.y = p.y - enemy.h;
+            enemy.minX = p.x;
+            enemy.maxX = p.x + p.w;
+            enemy.vx = enemy.speed;
+        }
+    }
+}
+
+initEnemies();
 
 // ====== HELPERS ======
 function rectsCollide(a, b) {
@@ -199,6 +234,8 @@ function resetGame() {
     player.lastGroundId = null;
     player.lastGroundType = null;
     player.bounceCount = 0;
+
+    initEnemies();
 }
 
 // ====== UPDATE ======
@@ -206,7 +243,16 @@ function update() {
     // Controls
     player.vx = 0;
     if (keys["ArrowLeft"]) player.vx = -player.speed;
-    if (keys["ArrowRight"]) player.vx = player.speed;
+    if (keys["ArrowRight"]) player.vx += player.speed;
+
+    if (player.vx > 0) {
+        player.facing = "right";
+    } else if (player.vx < 0) {
+        player.facing = "left";
+    } else {
+        player.facing = "front";
+    }
+
     if (keys["ControlLeft"] || keys["ControlRight"]) {
         if (!player.crouch) {
             player.crouch = true;
@@ -296,6 +342,25 @@ function update() {
         }
     }
 
+    // --- ENEMIES UPDATE ---
+    for (const enemy of enemies) {
+        enemy.x += enemy.vx;
+
+        // patrol bounds
+        if (enemy.x <= enemy.minX) {
+            enemy.x = enemy.minX;
+            enemy.vx = Math.abs(enemy.speed);
+        } else if (enemy.x + enemy.w >= enemy.maxX) {
+            enemy.x = enemy.maxX - enemy.w;
+            enemy.vx = -Math.abs(enemy.speed);
+        }
+
+        // check collision with player
+        if (rectsCollide(player, enemy)) {
+            resetGame();
+        }
+    }
+
     // fall off world
     if (player.y > WORLD_SIZE.height) {
         resetGame();
@@ -314,19 +379,88 @@ function update() {
 }
 
 function drawPlayer() {
-    // Player (Agent Cooper style semi-sprite)
+    ctx.save();
+
+    const cx = player.x + player.w / 2;
+    const cy = player.y + player.h / 2;
+
+    if (player.facing === "left") {
+        ctx.translate(cx, cy);
+        ctx.scale(-1, 1);
+        ctx.translate(-cx, -cy);
+    }
+
     // Suit jacket
     ctx.fillStyle = "#1a1a1a";
     ctx.fillRect(player.x, player.y, player.w, player.h);
-    // Face (pale complexion, centered at the top)
-    ctx.fillStyle = "#ffdbac";
-    ctx.fillRect(player.x + 6, player.y + 2, player.w - 12, 12);
-    // White shirt peeking out from under the jacket
+
+    if (player.facing === "front") {
+        // Face - centered
+        ctx.fillStyle = "#ffdbac";
+        ctx.fillRect(player.x + 6, player.y + 2, player.w - 12, 12);
+
+        // White shirt - centered
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(player.x + 10, player.y + 14, player.w - 20, 10);
+
+        // Black tie - centered
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(player.x + 13, player.y + 14, 4, 12);
+    } else {
+        // Face - facing right/left side
+        ctx.fillStyle = "#ffdbac";
+        ctx.fillRect(player.x + 10, player.y + 2, player.w - 12, 12);
+
+        // Hair
+        ctx.fillStyle = "#0a0a0a";
+        ctx.fillRect(player.x, player.y, player.w - 8, 14);
+
+        // White shirt side angle
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(player.x + 14, player.y + 14, player.w - 20, 10);
+
+        // Black tie side angle
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(player.x + 17, player.y + 14, 4, 12);
+    }
+
+    ctx.restore();
+}
+
+function drawPlatform(p) {
+    ctx.save();
+
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+
+    if (p.type === "booster" || p.elasticity > 0) {
+        // Bouncy platforms and boosters - glossy/bright layer on top
+        ctx.fillStyle = p.secondaryColor;
+        ctx.fillRect(p.x, p.y, p.w, 6);
+    } else {
+        // Regular ground - add dirt underneath
+        ctx.fillStyle = p.secondaryColor;
+        ctx.fillRect(p.x, p.y + 12, p.w, p.h - 12);
+    }
+
+    // Subtle common border, tying the style together
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(p.x, p.y, p.w, p.h);
+
+    ctx.restore();
+}
+
+function drawEnemy(e) {
+    ctx.fillStyle = e.color;
+    ctx.fillRect(e.x, e.y, e.w, e.h);
+
+    // Little creepy eye showing direction
+    const eyeOffset = e.vx > 0 ? 10 : 0;
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(player.x + 10, player.y + 14, player.w - 20, 10);
-    // Black tie
+    ctx.fillRect(e.x + 3 + eyeOffset, e.y + 6, 8, 8);
     ctx.fillStyle = "#000000";
-    ctx.fillRect(player.x + 13, player.y + 14, 4, 12);
+    ctx.fillRect(e.x + 5 + eyeOffset, e.y + 8, 4, 4);
 }
 
 // ====== DRAW ======
@@ -341,8 +475,12 @@ function draw() {
 
     // Platforms
     for (const p of platforms) {
-        ctx.fillStyle = p.color;
-        ctx.fillRect(p.x, p.y, p.w, p.h);
+        drawPlatform(p);
+    }
+
+    // Enemies
+    for (const e of enemies) {
+        drawEnemy(e);
     }
 
     ctx.restore();

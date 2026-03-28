@@ -1,6 +1,9 @@
+body {
+    background: #000;
+}
+
 .container {
     margin: 0;
-    background: #fff;
 }
 #game {
     display: block;
