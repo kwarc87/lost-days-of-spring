@@ -28,14 +28,15 @@ canvas {
 
     color: #e5e7eb;
     box-shadow:
-            0 10px 25px rgba(0, 0, 0, 0.35),
-            inset 0 1px 0 rgba(255, 255, 255, 0.03);
+        0 10px 25px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03);
 
     pointer-events: none;
 }
 
 #debug > div {
     display: flex;
+
     justify-content: space-between;
     gap: 8px;
 

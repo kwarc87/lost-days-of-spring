@@ -5,14 +5,18 @@ const debugEl = document.getElementById("debug");
 // ====== INPUT ======
 const keys = {};
 
-window.addEventListener("keydown", e => {
+window.addEventListener("keydown", (e) => {
     keys[e.code] = true;
-    if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight","Space"].includes(e.code)) {
+    if (
+        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(
+            e.code,
+        )
+    ) {
         e.preventDefault();
     }
 });
 
-window.addEventListener("keyup", e => keys[e.code] = false);
+window.addEventListener("keyup", (e) => (keys[e.code] = false));
 
 // ====== PLAYER ======
 const player = {
@@ -45,28 +49,115 @@ const PHYSICS = {
 const GAME_LOOP = {
     fixedDt: 1 / 60,
     maxFrameTime: 0.25,
-}
+};
 
 const platforms = [
-    { id: 2, color: "#042940", x: 0, y: 380, w: 600, h: 20, elasticity: 0, type: "normal" },
-    { id: 3, color: "#042940", x: 0, y: 0, w: 20, h: 400, elasticity: 0, type: "normal" },
-    { id: 4, color: "#042940", x: 0, y: 0, w: 600, h: 20, elasticity: 0, type: "normal" },
-    { id: 5, color: "#042940", x: 580, y: 0, w: 20, h: 400, elasticity: 0, type: "normal" },
-    { id: 6, color: "#9FC131", x: 180, y: 200, w: 80, h: 25 , elasticity: 0.5, type: "normal" },
-    { id: 7, color: "#9FC131", x: 480, y: 90, w: 60, h: 25 , elasticity: 0.5, type: "normal" },
-    { id: 8, color: "#DBF227", x: 370, y: 320, w: 160, h: 25, type: "booster", boostSpeed: 11 },
-    { id: 9, color: "#042940", x: 100, y: 90, w: 120, h: 25, elasticity: 0, type: "normal" },
-    { id: 10, color: "#042940", x: 90, y: 280, w: 130, h: 25, elasticity: 0, type: "normal" },
-    { id: 11, color: "#008F8C", x: 410, y: 190, w: 110, h: 25, elasticity: 0.9, type: "normal" },
+    {
+        id: 2,
+        color: "#042940",
+        x: 0,
+        y: 380,
+        w: 600,
+        h: 20,
+        elasticity: 0,
+        type: "normal",
+    },
+    {
+        id: 3,
+        color: "#042940",
+        x: 0,
+        y: 0,
+        w: 20,
+        h: 400,
+        elasticity: 0,
+        type: "normal",
+    },
+    {
+        id: 4,
+        color: "#042940",
+        x: 0,
+        y: 0,
+        w: 600,
+        h: 20,
+        elasticity: 0,
+        type: "normal",
+    },
+    {
+        id: 5,
+        color: "#042940",
+        x: 580,
+        y: 0,
+        w: 20,
+        h: 400,
+        elasticity: 0,
+        type: "normal",
+    },
+    {
+        id: 6,
+        color: "#9FC131",
+        x: 180,
+        y: 200,
+        w: 80,
+        h: 25,
+        elasticity: 0.5,
+        type: "normal",
+    },
+    {
+        id: 7,
+        color: "#9FC131",
+        x: 480,
+        y: 90,
+        w: 60,
+        h: 25,
+        elasticity: 0.5,
+        type: "normal",
+    },
+    {
+        id: 8,
+        color: "#DBF227",
+        x: 370,
+        y: 320,
+        w: 160,
+        h: 25,
+        type: "booster",
+        boostSpeed: 11,
+    },
+    {
+        id: 9,
+        color: "#042940",
+        x: 100,
+        y: 90,
+        w: 120,
+        h: 25,
+        elasticity: 0,
+        type: "normal",
+    },
+    {
+        id: 10,
+        color: "#042940",
+        x: 90,
+        y: 280,
+        w: 130,
+        h: 25,
+        elasticity: 0,
+        type: "normal",
+    },
+    {
+        id: 11,
+        color: "#008F8C",
+        x: 410,
+        y: 190,
+        w: 110,
+        h: 25,
+        elasticity: 0.9,
+        type: "normal",
+    },
 ];
 
 // ====== HELPERS ======
 function rectsCollide(a, b) {
     return (
-        a.x < b.x + b.w &&
-        a.x + a.w > b.x &&
-        a.y < b.y + b.h &&
-        a.y + a.h > b.y
+        a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
     );
 }
 
@@ -78,7 +169,7 @@ function canStandUp() {
         x: player.x,
         y: newY,
         w: player.w,
-        h: standHeight
+        h: standHeight,
     };
 
     for (const p of platforms) {
@@ -121,7 +212,11 @@ function update() {
             player.h = player.originalHeight;
         }
     }
-    if ((keys["ArrowUp"] || keys["Space"]) && player.onGroundId !== null && player.onGroundType !== 'booster') {
+    if (
+        (keys["ArrowUp"] || keys["Space"]) &&
+        player.onGroundId !== null &&
+        player.onGroundType !== "booster"
+    ) {
         player.vy = -player.jump;
         player.bounceCount = 0;
         player.onGroundId = null;
@@ -158,7 +253,8 @@ function update() {
                 player.y = p.y - player.h;
                 player.onGroundId = p.id;
                 player.onGroundType = p.type;
-                player.bounceCount = player.lastGroundId !== p.id ? 1 : player.bounceCount + 1;
+                player.bounceCount =
+                    player.lastGroundId !== p.id ? 1 : player.bounceCount + 1;
                 player.lastGroundType = p.type;
                 player.lastGroundId = p.id;
 
@@ -168,7 +264,10 @@ function update() {
 
                 if (p.type === "normal") {
                     const impactSpeed = player.vy;
-                    player.vy = player.bounceCount === 1 ? -impactSpeed * p.elasticity : -impactSpeed * p.elasticity*0.75;
+                    player.vy =
+                        player.bounceCount === 1
+                            ? -impactSpeed * p.elasticity
+                            : -impactSpeed * p.elasticity * 0.75;
 
                     if (Math.abs(player.vy) < PHYSICS.minBounceSpeed) {
                         player.vy = 0;
@@ -178,7 +277,6 @@ function update() {
 
                 // only one Y AXIS collision for frame
                 break;
-
             } else {
                 // hit ceiling
                 player.y = p.y + p.h;
@@ -189,7 +287,6 @@ function update() {
             }
         }
     }
-
 
     // fall off world
     if (player.y > canvas.height) {
