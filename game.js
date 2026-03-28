@@ -8,9 +8,15 @@ const keys = {};
 window.addEventListener("keydown", (e) => {
     keys[e.code] = true;
     if (
-        ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(
-            e.code,
-        )
+        [
+            "ArrowUp",
+            "ArrowDown",
+            "ArrowLeft",
+            "ArrowRight",
+            "Space",
+            "ControlLeft",
+            "ControlRight",
+        ].includes(e.code)
     ) {
         e.preventDefault();
     }
@@ -39,7 +45,19 @@ const player = {
     bounceCount: 0,
 };
 
+// ====== CAMERA ======
+const CAMERA = {
+    x: 0,
+    y: 0,
+    width: canvas.width,
+    height: canvas.height,
+};
+
 // ====== WORLD ======
+const WORLD_SIZE = {
+    width: 2000,
+    height: 600,
+};
 const PHYSICS = {
     gravity: 0.25,
     minBounceSpeed: 0.5,
@@ -56,7 +74,7 @@ const platforms = [
         id: 2,
         color: "#042940",
         x: 0,
-        y: 380,
+        y: 480,
         w: 600,
         h: 20,
         elasticity: 0,
@@ -65,30 +83,20 @@ const platforms = [
     {
         id: 3,
         color: "#042940",
-        x: 0,
-        y: 0,
-        w: 20,
-        h: 400,
+        x: 800,
+        y: 480,
+        w: 300,
+        h: 20,
         elasticity: 0,
         type: "normal",
     },
     {
         id: 4,
         color: "#042940",
-        x: 0,
-        y: 0,
-        w: 600,
+        x: 1180,
+        y: 480,
+        w: 300,
         h: 20,
-        elasticity: 0,
-        type: "normal",
-    },
-    {
-        id: 5,
-        color: "#042940",
-        x: 580,
-        y: 0,
-        w: 20,
-        h: 400,
         elasticity: 0,
         type: "normal",
     },
@@ -105,8 +113,8 @@ const platforms = [
     {
         id: 7,
         color: "#9FC131",
-        x: 480,
-        y: 90,
+        x: 880,
+        y: 190,
         w: 60,
         h: 25,
         elasticity: 0.5,
@@ -115,28 +123,18 @@ const platforms = [
     {
         id: 8,
         color: "#DBF227",
-        x: 370,
-        y: 320,
+        x: 670,
+        y: 420,
         w: 160,
         h: 25,
         type: "booster",
         boostSpeed: 11,
     },
     {
-        id: 9,
-        color: "#042940",
-        x: 100,
-        y: 90,
-        w: 120,
-        h: 25,
-        elasticity: 0,
-        type: "normal",
-    },
-    {
         id: 10,
         color: "#042940",
         x: 90,
-        y: 280,
+        y: 425,
         w: 130,
         h: 25,
         elasticity: 0,
@@ -146,8 +144,18 @@ const platforms = [
         id: 11,
         color: "#008F8C",
         x: 410,
-        y: 190,
+        y: 290,
         w: 110,
+        h: 25,
+        elasticity: 0.9,
+        type: "normal",
+    },
+    {
+        id: 12,
+        color: "#008F8C",
+        x: 1130,
+        y: 250,
+        w: 210,
         h: 25,
         elasticity: 0.9,
         type: "normal",
@@ -199,7 +207,7 @@ function update() {
     player.vx = 0;
     if (keys["ArrowLeft"]) player.vx = -player.speed;
     if (keys["ArrowRight"]) player.vx = player.speed;
-    if (keys["ArrowDown"]) {
+    if (keys["ControlLeft"] || keys["ControlRight"]) {
         if (!player.crouch) {
             player.crouch = true;
             player.h = player.crouchHeight;
@@ -288,15 +296,30 @@ function update() {
         }
     }
 
-    // fall off world
-    if (player.y > canvas.height) {
+    // fall off world - zmień warunek na granice świata
+    if (player.y > WORLD_SIZE.height) {
         resetGame();
     }
+
+    // --- AKTUALIZACJA KAMERY ---
+    CAMERA.x = player.x + player.w / 2 - CAMERA.width / 2;
+    CAMERA.y = player.y + player.h / 2 - CAMERA.height / 2;
+
+    // (Opcjonalnie) Zablokuj kamerę, aby nie wychodziła poza mapę:
+    CAMERA.x = Math.max(0, Math.min(CAMERA.x, WORLD_SIZE.width - CAMERA.width));
+    CAMERA.y = Math.max(
+        0,
+        Math.min(CAMERA.y, WORLD_SIZE.height - CAMERA.height),
+    );
 }
 
 // ====== DRAW ======
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    // Przesuń świat w kierunku przeciwnym do pozycji kamery
+    ctx.translate(-CAMERA.x, -CAMERA.y);
 
     // Player
     ctx.fillStyle = player.color;
@@ -307,6 +330,8 @@ function draw() {
         ctx.fillStyle = p.color;
         ctx.fillRect(p.x, p.y, p.w, p.h);
     }
+
+    ctx.restore();
 }
 
 function updateDebug() {

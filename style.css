@@ -8,10 +8,14 @@ canvas {
     background: #87ceeb;
 }
 
-/* ===== DEBUG PANEL ===== */
-#debug {
+/* ===== DEBUG & CONTROLS PANELS ===== */
+#debug,
+#controls {
+    position: absolute;
+    top: 0;
+
     margin: 0 auto;
-    min-width: 220px;
+    min-width: 260px;
     max-width: 280px;
 
     background: rgba(15, 23, 32, 0.92);
@@ -34,7 +38,17 @@ canvas {
     pointer-events: none;
 }
 
-#debug > div {
+#debug {
+    left: 0;
+}
+
+#controls {
+    right: 0;
+    left: auto;
+}
+
+#debug > div,
+#controls > div {
     display: flex;
 
     justify-content: space-between;
@@ -44,19 +58,23 @@ canvas {
     border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
 }
 
-#debug > div:last-child {
+#debug > div:last-child,
+#controls > div:last-child {
     border-bottom: none;
 }
 
-#debug strong {
+#debug strong,
+#controls strong {
     font-weight: 500;
     color: #93c5fd;
 }
 
-#debug div {
+#debug div,
+#controls div {
     color: #f8fafc;
 }
 
-#debug div:has(strong) {
+#debug div:has(strong),
+#controls div:has(strong) {
     font-variant-numeric: tabular-nums;
 }
