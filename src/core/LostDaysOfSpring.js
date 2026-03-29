@@ -5,6 +5,7 @@ import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
 import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
 import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
+import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, debugId) {
@@ -46,6 +47,7 @@ export class LostDaysOfSpring {
         this.playerRenderer = DefaultPlayerRenderer;
         this.platformRenderer = DefaultPlatformRenderer;
         this.enemyRenderer = DefaultEnemyRenderer;
+        this.collectibleRenderer = DefaultCollectibleRenderer;
         this.worldRenderer = DefaultWorldRenderer;
         this.pauseRenderer = DefaultPauseRenderer;
 
@@ -70,6 +72,7 @@ export class LostDaysOfSpring {
         this.WORLD_SIZE = levelData.worldSize;
         this.platforms = levelData.platforms;
         this.enemies = levelData.enemies;
+        this.collectibles = levelData.collectibles;
 
         // Reset dynamic player properties according to level start
         Object.assign(this.player, {
@@ -84,6 +87,7 @@ export class LostDaysOfSpring {
             lastGroundId: null,
             lastGroundType: null,
             bounceCount: 0,
+            collectiblesCount: 0,
         });
 
         // Initialize dynamic entity defaults
@@ -225,6 +229,7 @@ export class LostDaysOfSpring {
             this.player.bounceCount = 0;
             this.player.onGroundId = null;
             this.player.onGroundType = null;
+            this.player.isJumping = true;
         }
 
         // Physics
@@ -234,9 +239,10 @@ export class LostDaysOfSpring {
         if (
             this.player.vy < 0 &&
             !this.keys["ArrowUp"] &&
-            !this.keys["Space"]
+            !this.keys["Space"] &&
+            this.player.isJumping
         ) {
-            currentGravity *= 2.5;
+            currentGravity *= 2;
         }
 
         this.player.vy += currentGravity;
@@ -279,6 +285,7 @@ export class LostDaysOfSpring {
                     this.player.y = p.y - this.player.h;
                     this.player.onGroundId = p.id;
                     this.player.onGroundType = p.type;
+                    this.player.isJumping = false;
                     this.player.bounceCount =
                         this.player.lastGroundId !== p.id
                             ? 1
@@ -337,6 +344,14 @@ export class LostDaysOfSpring {
             this.resetGame();
         }
 
+        // --- COLLECTIBLES UPDATE ---
+        for (const c of this.collectibles || []) {
+            if (!c.collected && this.rectsCollide(this.player, c)) {
+                c.collected = true;
+                this.player.collectiblesCount++;
+            }
+        }
+
         // --- CAMERA UPDATE ---
         this.CAMERA.x =
             this.player.x + this.player.w / 2 - this.CAMERA.width / 2;
@@ -383,6 +398,15 @@ export class LostDaysOfSpring {
         }
     }
 
+    drawCollectible(p) {
+        if (
+            this.collectibleRenderer &&
+            typeof this.collectibleRenderer.draw === "function"
+        ) {
+            this.collectibleRenderer.draw(this.ctx, p);
+        }
+    }
+
     drawWorld() {
         if (
             this.worldRenderer &&
@@ -405,15 +429,21 @@ export class LostDaysOfSpring {
 
         this.ctx.translate(-this.CAMERA.x, -this.CAMERA.y);
 
-        this.drawPlayer();
-
         for (const p of this.platforms) {
             this.drawPlatform(p);
+        }
+
+        for (const c of this.collectibles || []) {
+            if (!c.collected) {
+                this.drawCollectible(c);
+            }
         }
 
         for (const e of this.enemies) {
             this.drawEnemy(e);
         }
+
+        this.drawPlayer();
 
         this.ctx.restore();
     }

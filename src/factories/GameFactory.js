@@ -19,7 +19,6 @@ export const GameFactory = {
         elasticity = 0.5,
         color = "#4f1260",
         secondaryColor = "#1e140d",
-        type = "normal",
     ) => ({
         id,
         x,
@@ -29,7 +28,7 @@ export const GameFactory = {
         color,
         secondaryColor,
         elasticity,
-        type,
+        type: "normal",
     }),
     booster: (id, x, y, w, h, boostSpeed = 11) => ({
         id,
@@ -71,6 +70,16 @@ export const GameFactory = {
         lastGroundId: null,
         lastGroundType: null,
         bounceCount: 0,
+        collectiblesCount: 0,
+        ...overrides,
+    }),
+    collectible: (id, x, y, overrides = {}) => ({
+        id,
+        x,
+        y,
+        w: 40,
+        h: 40,
+        collected: false,
         ...overrides,
     }),
 };
