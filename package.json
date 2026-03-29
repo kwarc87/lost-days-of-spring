@@ -1,21 +1,22 @@
 {
-  "name": "lost-days-of-spring",
-  "version": "1.0.0",
-  "main": "game.js",
-  "scripts": {
-    "lint": "eslint game.js",
-    "lint:fix": "eslint game.js --fix",
-    "format": "prettier --write game.js style.css index.html"
-  },
-  "prettier": {
-    "files": "{**/*,*}.{js,ts,jsx,tsx,json,css,html}"
-  },
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "eslint": "^9.39.4",
-    "prettier": "^3.8.1"
-  }
+    "name": "lost-days-of-spring",
+    "version": "1.0.1",
+    "main": "game.js",
+    "scripts": {
+        "bust-cache": "node cache-bust.js",
+        "lint": "eslint game.js",
+        "lint:fix": "eslint game.js --fix",
+        "format": "prettier --write game.js style.css index.html"
+    },
+    "prettier": {
+        "files": "{**/*,*}.{js,ts,jsx,tsx,json,css,html}"
+    },
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "devDependencies": {
+        "@eslint/js": "^9.39.4",
+        "eslint": "^9.39.4",
+        "prettier": "^3.8.1"
+    }
 }
