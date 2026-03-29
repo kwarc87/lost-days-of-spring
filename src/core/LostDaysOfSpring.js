@@ -24,11 +24,11 @@ export class LostDaysOfSpring {
             vx: 0,
             vy: 0,
             color: "#005C53",
-            speed: 4,
+            speed: 6,
             crouch: false,
             crouchHeight: 25,
             originalHeight: 45,
-            jump: 8,
+            jump: 13,
             onGroundId: null,
             onGroundType: null,
             lastGroundId: null,
@@ -46,8 +46,9 @@ export class LostDaysOfSpring {
 
         // ====== PHYSICS ======
         this.PHYSICS = {
-            gravity: 0.25,
+            gravity: 0.6,
             minBounceSpeed: 0.5,
+            maxFallSpeed: 16,
         };
 
         // ====== GAME LOOP CONFIG ======
@@ -232,7 +233,23 @@ export class LostDaysOfSpring {
         }
 
         // Physics
-        this.player.vy += this.PHYSICS.gravity;
+        let currentGravity = this.PHYSICS.gravity;
+
+        // Variable jump height: fall faster if jump key is released while ascending
+        if (
+            this.player.vy < 0 &&
+            !this.keys["ArrowUp"] &&
+            !this.keys["Space"]
+        ) {
+            currentGravity *= 2.5;
+        }
+
+        this.player.vy += currentGravity;
+
+        // Terminal velocity cap
+        if (this.player.vy > this.PHYSICS.maxFallSpeed) {
+            this.player.vy = this.PHYSICS.maxFallSpeed;
+        }
 
         // --- X AXIS ---
         this.player.x += this.player.vx;
