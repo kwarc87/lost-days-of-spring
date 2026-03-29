@@ -1,7 +1,10 @@
 import { LEVELS } from "../levels/levelsConfig.js";
+import { GameFactory } from "../factories/GameFactory.js";
 import { DefaultPlayerRenderer } from "../renderers/PlayerRenderers.js";
 import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
 import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
+import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
+import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, debugId) {
@@ -15,26 +18,8 @@ export class LostDaysOfSpring {
         // ====== GAME STATE ======
         this.currentLevelId = null;
 
-        // ====== PLAYER (Base static attributes) ======
-        this.player = {
-            x: 0,
-            y: 0,
-            w: 30,
-            h: 60,
-            vx: 0,
-            vy: 0,
-            color: "#005C53",
-            speed: 6,
-            crouch: false,
-            crouchHeight: 35,
-            originalHeight: 60,
-            jump: 13,
-            onGroundId: null,
-            onGroundType: null,
-            lastGroundId: null,
-            lastGroundType: null,
-            bounceCount: 0,
-        };
+        // ====== PLAYER (Base static attributes set by factory) ======
+        this.player = GameFactory.player();
 
         // ====== CAMERA ======
         this.CAMERA = {
@@ -61,6 +46,8 @@ export class LostDaysOfSpring {
         this.playerRenderer = DefaultPlayerRenderer;
         this.platformRenderer = DefaultPlatformRenderer;
         this.enemyRenderer = DefaultEnemyRenderer;
+        this.worldRenderer = DefaultWorldRenderer;
+        this.pauseRenderer = DefaultPauseRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -117,6 +104,14 @@ export class LostDaysOfSpring {
 
     setEnemyRenderer(rendererStrategy) {
         this.enemyRenderer = rendererStrategy;
+    }
+
+    setWorldRenderer(rendererStrategy) {
+        this.worldRenderer = rendererStrategy;
+    }
+
+    setPauseRenderer(rendererStrategy) {
+        this.pauseRenderer = rendererStrategy;
     }
 
     initControls() {
@@ -388,10 +383,26 @@ export class LostDaysOfSpring {
         }
     }
 
+    drawWorld() {
+        if (
+            this.worldRenderer &&
+            typeof this.worldRenderer.drawBackground === "function"
+        ) {
+            this.worldRenderer.drawBackground(
+                this.ctx,
+                this.canvas,
+                this.CAMERA,
+            );
+        }
+    }
+
     draw() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.save();
+
+        this.drawWorld();
+
         this.ctx.translate(-this.CAMERA.x, -this.CAMERA.y);
 
         this.drawPlayer();
@@ -456,18 +467,12 @@ export class LostDaysOfSpring {
             this.stop();
 
             // Draw pause overlay
-            this.ctx.save();
-            this.ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-            this.ctx.fillStyle = "#ffffff";
-            this.ctx.font = "40px sans-serif";
-            this.ctx.textAlign = "center";
-            this.ctx.fillText(
-                "PAUSED",
-                this.canvas.width / 2,
-                this.canvas.height / 2,
-            );
-            this.ctx.restore();
+            if (
+                this.pauseRenderer &&
+                typeof this.pauseRenderer.drawPauseScreen === "function"
+            ) {
+                this.pauseRenderer.drawPauseScreen(this.ctx, this.canvas);
+            }
         } else {
             this.start();
         }

@@ -8,11 +8,11 @@ export const LEVELS = {
             // --- GROUND FLOOR ---
             GameFactory.ground(1, 0, 2550, 1200, 50),
 
-            GameFactory.ground(21, 400, 2450, 800, 55),
+            GameFactory.bouncy(21, 400, 2450, 800, 45, 0.75),
 
             // --- FIRST ASCENT (Spiral to the right) ---
             GameFactory.ground(2, 200, 2450, 100, 20),
-            GameFactory.ground(3, 400, 2350, 100, 20),
+            GameFactory.ground(3, 400, 2330, 100, 20),
             GameFactory.ground(4, 600, 2250, 100, 20),
             GameFactory.ground(5, 800, 2150, 400, 40), // Right wall landing
 
@@ -36,10 +36,10 @@ export const LEVELS = {
             GameFactory.ground(17, 0, 530, 250, 40),
 
             // --- FINAL STEPS (Top of the tower approach) ---
-            GameFactory.ground(18, 350, 420, 80, 20),
-            GameFactory.ground(19, 550, 350, 80, 20),
-            GameFactory.ground(20, 750, 250, 450, 40),
+            GameFactory.ground(18, 350, 400, 120, 20),
+            GameFactory.ground(19, 550, 280, 80, 20),
+            GameFactory.ground(20, 750, 180, 450, 40),
         ],
-        enemies: [GameFactory.enemy(21, 6)],
+        enemies: [GameFactory.enemy(21, 4)],
     }),
 };

@@ -5,21 +5,31 @@ export const GameFactory = {
         y,
         w,
         h,
-        color: "#2a7049", // emerald grass
-        secondaryColor: "#1e140d", // dark dirt
+        color: "#2A4619",
+        secondaryColor: "#1e140d",
         elasticity: 0,
         type: "normal",
     }),
-    bouncy: (id, x, y, w, h, elasticity = 0.5) => ({
+    bouncy: (
         id,
         x,
         y,
         w,
         h,
-        color: elasticity > 0.6 ? "#932fa6" : "#4682b4",
-        secondaryColor: "rgba(255, 255, 255, 0.4)",
+        elasticity = 0.5,
+        color = "#4f1260",
+        secondaryColor = "#1e140d",
+        type = "normal",
+    ) => ({
+        id,
+        x,
+        y,
+        w,
+        h,
+        color,
+        secondaryColor,
         elasticity,
-        type: "normal",
+        type,
     }),
     booster: (id, x, y, w, h, boostSpeed = 11) => ({
         id,
@@ -27,18 +37,40 @@ export const GameFactory = {
         y,
         w,
         h,
-        color: "#d95a00", // booster - orange
-        secondaryColor: "#ffe600", // glossy yellow top
+        color: "#d95a00",
+        secondaryColor: "#ffe600",
         elasticity: 0,
         type: "booster",
         boostSpeed,
     }),
     enemy: (platformId, speed = 1.5, overrides = {}) => ({
         platformId,
-        w: 24,
-        h: 30,
+        w: 36, // Wider cartoon aspect
+        h: 60, // Much taller cartoon aspect for big head
         speed,
-        color: "#8B0000",
+        mainColor: "#b21919", // Red suit
+        secondaryColor: "#ffffff", // White shirt
+        ...overrides,
+    }),
+    player: (overrides = {}) => ({
+        x: 0,
+        y: 0,
+        w: 40,
+        h: 80,
+        vx: 0,
+        vy: 0,
+        color: "#005C53",
+        speed: 6,
+        crouch: false,
+        crouchHeight: 50,
+        originalHeight: 80,
+        jump: 13,
+        isJumping: false,
+        onGroundId: null,
+        onGroundType: null,
+        lastGroundId: null,
+        lastGroundType: null,
+        bounceCount: 0,
         ...overrides,
     }),
 };
