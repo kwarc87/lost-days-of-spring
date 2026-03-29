@@ -8,6 +8,8 @@ export const LEVELS = {
             // --- GROUND FLOOR ---
             GameFactory.ground(1, 0, 2550, 1200, 50),
 
+            GameFactory.ground(21, 400, 2450, 800, 55),
+
             // --- FIRST ASCENT (Spiral to the right) ---
             GameFactory.ground(2, 200, 2450, 100, 20),
             GameFactory.ground(3, 400, 2350, 100, 20),
@@ -38,6 +40,6 @@ export const LEVELS = {
             GameFactory.ground(19, 550, 350, 80, 20),
             GameFactory.ground(20, 750, 250, 450, 40),
         ],
-        enemies: [],
+        enemies: [GameFactory.enemy(21, 6)],
     }),
 };

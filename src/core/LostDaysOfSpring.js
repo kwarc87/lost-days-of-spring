@@ -20,14 +20,14 @@ export class LostDaysOfSpring {
             x: 0,
             y: 0,
             w: 30,
-            h: 45,
+            h: 60,
             vx: 0,
             vy: 0,
             color: "#005C53",
             speed: 6,
             crouch: false,
-            crouchHeight: 25,
-            originalHeight: 45,
+            crouchHeight: 35,
+            originalHeight: 60,
             jump: 13,
             onGroundId: null,
             onGroundType: null,
@@ -253,6 +253,14 @@ export class LostDaysOfSpring {
 
         // --- X AXIS ---
         this.player.x += this.player.vx;
+
+        // World Bounds Check (X AXIS)
+        if (this.player.x < 0) {
+            this.player.x = 0;
+        } else if (this.player.x + this.player.w > this.WORLD_SIZE.width) {
+            this.player.x = this.WORLD_SIZE.width - this.player.w;
+        }
+
         for (const p of this.platforms) {
             if (this.rectsCollide(this.player, p)) {
                 if (this.player.vx > 0) {
