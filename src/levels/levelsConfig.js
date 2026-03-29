@@ -21,7 +21,7 @@ export const LEVELS = {
             GameFactory.ground(7, 450, 1950, 80, 20, 0.6),
 
             // --- THE BOOST TOWER (Fast vertical up catapult) ---
-            GameFactory.booster(9, 0, 1860, 280, 20, 25.5),
+            GameFactory.booster(9, 0, 1860, 280, 30, 25),
             GameFactory.ground(10, 320, 1400, 270, 20), // Catch platform in the middle
 
             // --- THIRD ASCENT (Spiral to right again) ---
