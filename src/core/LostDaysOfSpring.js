@@ -1,4 +1,7 @@
 import { LEVELS } from "../levels/levelsConfig.js";
+import { DefaultPlayerRenderer } from "../renderers/PlayerRenderers.js";
+import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
+import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, debugId) {
@@ -53,6 +56,11 @@ export class LostDaysOfSpring {
             maxFrameTime: 0.25,
         };
 
+        // Default player drawing method assigned via Strategy pattern
+        this.playerRenderer = DefaultPlayerRenderer;
+        this.platformRenderer = DefaultPlatformRenderer;
+        this.enemyRenderer = DefaultEnemyRenderer;
+
         this.lastTime = performance.now();
         this.accumulator = 0;
         this.loop = this.loop.bind(this);
@@ -96,6 +104,18 @@ export class LostDaysOfSpring {
         // Reset Camera
         this.CAMERA.x = 0;
         this.CAMERA.y = 0;
+    }
+
+    setPlayerRenderer(rendererStrategy) {
+        this.playerRenderer = rendererStrategy;
+    }
+
+    setPlatformRenderer(rendererStrategy) {
+        this.platformRenderer = rendererStrategy;
+    }
+
+    setEnemyRenderer(rendererStrategy) {
+        this.enemyRenderer = rendererStrategy;
     }
 
     initControls() {
@@ -317,100 +337,30 @@ export class LostDaysOfSpring {
     }
 
     drawPlayer() {
-        this.ctx.save();
-
-        const cx = this.player.x + this.player.w / 2;
-        const cy = this.player.y + this.player.h / 2;
-
-        if (this.player.vx < 0) {
-            this.ctx.translate(cx, cy);
-            this.ctx.scale(-1, 1);
-            this.ctx.translate(-cx, -cy);
+        if (
+            this.playerRenderer &&
+            typeof this.playerRenderer.draw === "function"
+        ) {
+            this.playerRenderer.draw(this.ctx, this.player);
         }
-
-        this.ctx.fillStyle = "#1a1a1a";
-        this.ctx.fillRect(
-            this.player.x,
-            this.player.y,
-            this.player.w,
-            this.player.h,
-        );
-
-        if (this.player.vx === 0) {
-            this.ctx.fillStyle = "#ffdbac";
-            this.ctx.fillRect(
-                this.player.x + 6,
-                this.player.y + 2,
-                this.player.w - 12,
-                12,
-            );
-
-            this.ctx.fillStyle = "#ffffff";
-            this.ctx.fillRect(
-                this.player.x + 10,
-                this.player.y + 14,
-                this.player.w - 20,
-                10,
-            );
-
-            this.ctx.fillStyle = "#000000";
-            this.ctx.fillRect(this.player.x + 13, this.player.y + 14, 4, 12);
-        } else {
-            this.ctx.fillStyle = "#ffdbac";
-            this.ctx.fillRect(
-                this.player.x + 10,
-                this.player.y + 2,
-                this.player.w - 12,
-                12,
-            );
-
-            this.ctx.fillStyle = "#0a0a0a";
-            this.ctx.fillRect(
-                this.player.x,
-                this.player.y,
-                this.player.w - 8,
-                14,
-            );
-
-            this.ctx.fillStyle = "#ffffff";
-            this.ctx.fillRect(
-                this.player.x + 14,
-                this.player.y + 14,
-                this.player.w - 20,
-                10,
-            );
-
-            this.ctx.fillStyle = "#000000";
-            this.ctx.fillRect(this.player.x + 17, this.player.y + 14, 4, 12);
-        }
-
-        this.ctx.restore();
     }
 
     drawPlatform(p) {
-        this.ctx.save();
-
-        this.ctx.fillStyle = p.color;
-        this.ctx.fillRect(p.x, p.y, p.w, p.h);
-        this.ctx.fillStyle = p.secondaryColor;
-        this.ctx.fillRect(p.x, p.y + 8, p.w, p.h - 8);
-
-        this.ctx.strokeStyle = "#111111";
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeRect(p.x, p.y, p.w, p.h);
-
-        this.ctx.restore();
+        if (
+            this.platformRenderer &&
+            typeof this.platformRenderer.draw === "function"
+        ) {
+            this.platformRenderer.draw(this.ctx, p);
+        }
     }
 
     drawEnemy(e) {
-        this.ctx.fillStyle = e.color;
-        this.ctx.fillRect(e.x, e.y, e.w, e.h);
-
-        const eyeOffset = e.vx > 0 ? 10 : 0;
-        this.ctx.fillStyle = "#ffffff";
-        this.ctx.fillRect(e.x + 3 + eyeOffset, e.y + 6, 8, 8);
-        this.ctx.fillStyle = "#000000";
-        this.ctx.fillRect(e.x + 5 + eyeOffset, e.y + 8, 4, 4);
+        if (
+            this.enemyRenderer &&
+            typeof this.enemyRenderer.draw === "function"
+        ) {
+            this.enemyRenderer.draw(this.ctx, e);
+        }
     }
 
     draw() {
