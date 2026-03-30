@@ -1,221 +1,123 @@
 /**
- * Default player rendering strategy (Agent Cooper in a pixel-art style)
+ * Agent Cooper / 90s outsider style player renderer.
+ * Pixel-art with detail achieved through colour and shape — no sub-pixel tricks.
+ * Multiple shade layers on hair, jacket and pants; softened silhouette corners.
  */
 export const DefaultPlayerRenderer = {
     draw: (ctx, player) => {
         ctx.save();
 
         const cx = player.x + player.w / 2;
-        const cy = player.y + player.h; // Anchor at the bottom center
+        const cy = player.y + player.h;
 
-        // Apply transformations:
-        // 1. Move to bottom center
-        // 2. Flip horizontally if moving left
         ctx.translate(cx, cy);
-        const scaleX = player.vx < 0 ? -1 : 1;
+        ctx.scale(player.facing === "left" ? -1 : 1, 1);
 
-        // Remove uniform squash for crouching, we will draw a custom sprite for it
-        ctx.scale(scaleX, 1);
+        const px = (x, y, w, h, c) => {
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, w, h);
+        };
 
-        // --- AGENT COOPER PIXEL ART (Cartoon/Big Head Style - base height 80px) ---
+        const suitBlue = "#102a43";
+        const suitGray = "#243b53";
+        const suitLight = "#334e68";
+
+        const jeansBlue = "#0E253A";
+        const jeansLight = "#193a59";
+        const dressBrown = "#34251b";
+
+        const shirtWhite = "#f0f4f7";
+        const shirtShade = "#cbd5e0";
+
+        const tieRed = "#d32f2f";
+        const tieDark = "#9a1b1b";
+
+        const hairBrown = "#3d2b1f";
+        const hairGloss = "#5e4638";
+
+        const skinBase = "#f9d5b0";
+        const skinShade = "#eac095";
+        const skinDeep = "#d4a77e";
+
+        const eyeColor = "#121212";
+
+        px(-20, -4, 40, 4, "rgba(0,0,0,0.2)");
 
         if (player.crouch) {
-            // == CROUCHING VIEW ==
-            // Hair - Messy
-            ctx.fillStyle = "#2b1d14"; // Dark brown
-            ctx.fillRect(-18, -48, 36, 12);
-            ctx.fillRect(-22, -42, 6, 8); // Messy sides
-            ctx.fillRect(16, -45, 8, 10);
-            ctx.fillStyle = "#4a3324"; // Hair highlight
-            ctx.fillRect(-14, -48, 12, 4);
+            px(-16, -6, 12, 6, dressBrown);
+            px(2, -6, 12, 6, dressBrown);
 
-            // Face
-            ctx.fillStyle = "#ffdbac";
-            ctx.fillRect(-14, -38, 28, 18);
-            // Shading under hair
-            ctx.fillStyle = "#e0c092";
-            ctx.fillRect(-14, -38, 28, 4);
+            px(-18, -14, 14, 8, jeansBlue);
+            px(2, -14, 14, 8, jeansBlue);
+            px(-16, -12, 6, 4, jeansLight);
 
-            // Eyes (tired/outsider look)
-            ctx.fillStyle = "#111111";
-            ctx.fillRect(-8, -30, 4, 4);
-            ctx.fillRect(4, -30, 4, 4);
-            ctx.fillStyle = "#886655"; // Eye bags
-            ctx.fillRect(-8, -26, 4, 2);
-            ctx.fillRect(4, -26, 4, 2);
+            px(-14, -18, 28, 4, jeansBlue);
+            px(-16, -24, 32, 8, suitBlue);
 
-            // Torso (Sports jacket)
-            ctx.fillStyle = "#2c3e50"; // Dark blue-grey jacket
-            ctx.fillRect(-18, -20, 36, 14);
-            ctx.fillStyle = "#34495e"; // Jacket highlight
-            ctx.fillRect(-14, -20, 10, 14);
-            ctx.fillRect(4, -20, 10, 14);
+            px(-16, -40, 32, 16, suitBlue);
+            px(-16, -40, 4, 14, suitLight);
+            px(12, -38, 4, 12, suitGray);
 
-            // Shirt & Red Tie
-            ctx.fillStyle = "#ecf0f1";
-            ctx.fillRect(-6, -20, 12, 10);
-            ctx.fillStyle = "#c0392b"; // Red tie
-            ctx.fillRect(-2, -20, 4, 8);
+            px(-4, -40, 10, 12, shirtWhite);
+            px(-2, -38, 4, 10, tieRed);
+            px(1, -32, 3, 4, tieDark);
 
-            // Arms resting on knees
-            ctx.fillStyle = "#2c3e50";
-            ctx.fillRect(-22, -18, 8, 12);
-            ctx.fillRect(14, -18, 8, 12);
+            px(-20, -38, 6, 12, suitBlue);
+            px(14, -38, 6, 12, suitBlue);
+            px(-20, -26, 6, 4, skinShade);
+            px(14, -26, 6, 4, skinBase);
 
-            // Hands (Empty)
-            ctx.fillStyle = "#ffdbac";
-            ctx.fillRect(-22, -6, 6, 6);
-            ctx.fillRect(16, -6, 6, 6);
+            const hy = 35;
+            px(-12, -74 + hy, 24, 20, skinBase);
+            px(-12, -74 + hy, 6, 20, skinShade);
+            px(-6, -58 + hy, 16, 4, skinDeep);
 
-            // Legs
-            ctx.fillStyle = "#29323c"; // Dark trousers/jeans
-            ctx.fillRect(-16, -10, 12, 6);
-            ctx.fillRect(4, -10, 12, 6);
+            px(2, -66 + hy, 4, 4, eyeColor);
+            px(12, -66 + hy, 4, 4, eyeColor);
 
-            // Shoes
-            ctx.fillStyle = "#1a1a1a";
-            ctx.fillRect(-18, -4, 14, 4);
-            ctx.fillRect(4, -4, 14, 4);
-        } else if (player.vx === 0) {
-            // == FRONT IDLE VIEW ==
-            // Hair - Messy
-            ctx.fillStyle = "#2b1d14";
-            ctx.fillRect(-16, -78, 32, 12);
-            ctx.fillRect(-20, -70, 6, 10); // Messy left
-            ctx.fillRect(14, -72, 8, 12); // Messy right
-            ctx.fillRect(-4, -82, 10, 6); // Top tuft
-            ctx.fillStyle = "#4a3324"; // Highlight
-            ctx.fillRect(-12, -78, 16, 4);
-
-            // Face
-            ctx.fillStyle = "#ffdbac";
-            ctx.fillRect(-14, -66, 28, 22);
-            ctx.fillStyle = "#e0c092"; // Shading
-            ctx.fillRect(-14, -66, 28, 4);
-            ctx.fillRect(-4, -50, 8, 4); // Nose shadow
-
-            // Eyes
-            ctx.fillStyle = "#111111";
-            ctx.fillRect(-8, -56, 4, 4);
-            ctx.fillRect(4, -56, 4, 4);
-            ctx.fillStyle = "#886655"; // Eye bags
-            ctx.fillRect(-8, -52, 4, 2);
-            ctx.fillRect(4, -52, 4, 2);
-
-            // Torso (Sports jacket open)
-            ctx.fillStyle = "#2c3e50"; // Base jacket
-            ctx.fillRect(-16, -44, 32, 26);
-            ctx.fillStyle = "#34495e"; // Jacket highlight/texture
-            ctx.fillRect(-14, -44, 10, 26);
-            ctx.fillRect(4, -44, 10, 26);
-
-            // Shirt
-            ctx.fillStyle = "#ecf0f1";
-            ctx.fillRect(-6, -44, 12, 22);
-            ctx.fillStyle = "#bdc3c7"; // Shirt shading
-            ctx.fillRect(-6, -44, 12, 4);
-
-            // Red Tie (Slightly loose)
-            ctx.fillStyle = "#c0392b";
-            ctx.fillRect(-2, -42, 4, 16);
-            ctx.fillRect(-1, -26, 2, 4);
-            ctx.fillStyle = "#e74c3c"; // Tie highlight
-            ctx.fillRect(0, -40, 2, 12);
-
-            // Arms (Relaxed, empty hands)
-            ctx.fillStyle = "#2c3e50";
-            ctx.fillRect(-22, -44, 6, 24); // Left arm
-            ctx.fillRect(16, -44, 6, 24); // Right arm
-            ctx.fillStyle = "#1a252f"; // Arm shadow
-            ctx.fillRect(-18, -44, 2, 24);
-            ctx.fillRect(16, -44, 2, 24);
-
-            // Hands
-            ctx.fillStyle = "#ffdbac";
-            ctx.fillRect(-22, -20, 6, 8);
-            ctx.fillRect(16, -20, 6, 8);
-
-            // Legs
-            ctx.fillStyle = "#29323c"; // Trousers
-            ctx.fillRect(-12, -18, 10, 14);
-            ctx.fillRect(2, -18, 10, 14);
-            ctx.fillStyle = "#1e242b"; // Inner leg shadow
-            ctx.fillRect(-4, -18, 2, 14);
-            ctx.fillRect(2, -18, 2, 14);
-
-            // Shoes
-            ctx.fillStyle = "#1a1a1a";
-            ctx.fillRect(-14, -4, 12, 4);
-            ctx.fillRect(2, -4, 12, 4);
-            ctx.fillStyle = "#333333"; // Shoe highlight
-            ctx.fillRect(-12, -4, 4, 2);
-            ctx.fillRect(4, -4, 4, 2);
+            px(-16, -82 + hy, 32, 10, hairBrown);
+            px(-12, -84 + hy, 24, 4, hairGloss);
+            px(8, -82 + hy, 12, 6, hairGloss);
         } else {
-            // == SIDE WALKING VIEW ==
-            // Hair - Messy blowing slightly
-            ctx.fillStyle = "#2b1d14";
-            ctx.fillRect(-12, -78, 24, 12);
-            ctx.fillRect(-16, -72, 8, 10); // Back messy
-            ctx.fillRect(-2, -82, 12, 6); // Top tuft
-            ctx.fillStyle = "#4a3324";
-            ctx.fillRect(-8, -78, 12, 4);
+            px(-14, -6, 12, 6, dressBrown);
+            px(2, -6, 12, 6, dressBrown);
+            px(-12, -3, 4, 3, "#251a13");
 
-            // Face Profile
-            ctx.fillStyle = "#ffdbac";
-            ctx.fillRect(-8, -66, 20, 22);
-            ctx.fillRect(12, -56, 4, 6); // Nose
-            ctx.fillStyle = "#e0c092"; // Shading
-            ctx.fillRect(-8, -66, 12, 22); // Back of head/neck darker
+            px(-12, -26, 10, 20, jeansBlue);
+            px(-12, -22, 10, 4, jeansLight);
 
-            // Eye
-            ctx.fillStyle = "#111111";
-            ctx.fillRect(4, -56, 4, 4);
-            ctx.fillStyle = "#886655";
-            ctx.fillRect(4, -52, 4, 2);
+            px(2, -26, 10, 20, jeansBlue);
+            px(2, -22, 10, 4, jeansLight);
 
-            // Torso (Sports jacket)
-            ctx.fillStyle = "#2c3e50";
-            ctx.fillRect(-10, -44, 20, 26);
-            ctx.fillStyle = "#34495e"; // Highlight front
-            ctx.fillRect(2, -44, 8, 26);
+            px(-12, -32, 24, 8, suitBlue);
 
-            // Shirt Collar
-            ctx.fillStyle = "#ecf0f1";
-            ctx.fillRect(4, -42, 6, 12);
-            // Red Tie
-            ctx.fillStyle = "#c0392b";
-            ctx.fillRect(8, -40, 4, 14);
-            ctx.fillStyle = "#e74c3c";
-            ctx.fillRect(10, -38, 2, 10);
+            px(-16, -53, 32, 25, suitBlue);
+            px(-16, -53, 4, 23, suitLight);
+            px(12, -49, 4, 20, suitGray);
 
-            // Back arm (swinging)
-            ctx.fillStyle = "#1a252f";
-            ctx.fillRect(-14, -42, 8, 20);
-            // Back Hand
-            ctx.fillStyle = "#e0c092"; // Darker skin for back
-            ctx.fillRect(-14, -22, 6, 6);
+            px(-4, -53, 12, 21, shirtWhite);
+            px(-4, -53, 4, 21, shirtShade);
+            px(-2, -51, 4, 19, tieRed);
+            px(1, -41, 3, 10, tieDark);
 
-            // Front arm (swinging)
-            ctx.fillStyle = "#2c3e50";
-            ctx.fillRect(0, -42, 8, 20);
-            ctx.fillStyle = "#34495e";
-            ctx.fillRect(4, -42, 4, 20);
-            // Front Hand (Empty)
-            ctx.fillStyle = "#ffdbac";
-            ctx.fillRect(2, -22, 6, 6);
+            px(-20, -49, 6, 21, suitBlue);
+            px(14, -49, 6, 21, suitBlue);
+            px(-20, -28, 6, 4, skinShade);
+            px(14, -28, 6, 4, skinBase);
 
-            // Legs walking
-            ctx.fillStyle = "#1e242b"; // Back leg darker
-            ctx.fillRect(-10, -18, 10, 14);
-            ctx.fillStyle = "#1a1a1a"; // Back shoe
-            ctx.fillRect(-12, -4, 12, 4);
+            px(-2, -55, 8, 4, skinShade);
 
-            ctx.fillStyle = "#29323c"; // Front leg brighter
-            ctx.fillRect(2, -18, 10, 14);
-            ctx.fillStyle = "#1a1a1a"; // Front shoe
-            ctx.fillRect(2, -4, 12, 4);
-            ctx.fillStyle = "#333333";
-            ctx.fillRect(4, -4, 4, 2);
+            px(-12, -75, 24, 22, skinBase);
+            px(-12, -75, 6, 22, skinShade);
+            px(-4, -57, 16, 4, skinDeep);
+
+            px(2, -67, 4, 4, eyeColor);
+            px(12, -67, 4, 4, eyeColor);
+
+            px(-16, -83, 34, 12, hairBrown);
+            px(-14, -85, 28, 4, hairGloss);
+            px(-16, -77, 8, 12, hairBrown);
+            px(12, -81, 10, 6, hairGloss);
         }
 
         ctx.restore();
@@ -236,10 +138,10 @@ export const DebugBoxPlayerRenderer = {
         ctx.lineWidth = 2;
         ctx.strokeRect(player.x, player.y, player.w, player.h);
 
-        // Draw the looking direction (a dot on the front side of the box)
+        // Direction dot
         ctx.fillStyle = "yellow";
-        const eyeOffset = player.vx < 0 ? 0 : player.w - 4;
-        ctx.fillRect(player.x + eyeOffset, player.y + 4, 4, 4);
+        const eyeOff = player.facing === "left" ? 0 : player.w - 4;
+        ctx.fillRect(player.x + eyeOff, player.y + 4, 4, 4);
 
         ctx.restore();
     },

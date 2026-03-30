@@ -6,12 +6,13 @@ import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
 import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
 import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
+import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
 
 export class LostDaysOfSpring {
-    constructor(canvasId, debugId) {
+    constructor(canvasId, showDebug = true) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
-        this.debugEl = document.getElementById(debugId);
+        this.showDebug = showDebug;
 
         // ====== INPUT ======
         this.keys = {};
@@ -20,7 +21,11 @@ export class LostDaysOfSpring {
         this.currentLevelId = null;
 
         // ====== PLAYER (Base static attributes set by factory) ======
-        this.player = GameFactory.player();
+        this.player = GameFactory.player({ weapon: GameFactory.weapon() });
+
+        // ====== WEAPON ======
+        this.bullets = [];
+        this.nextBulletId = 0;
 
         // ====== CAMERA ======
         this.CAMERA = {
@@ -50,6 +55,7 @@ export class LostDaysOfSpring {
         this.collectibleRenderer = DefaultCollectibleRenderer;
         this.worldRenderer = DefaultWorldRenderer;
         this.pauseRenderer = DefaultPauseRenderer;
+        this.weaponRenderer = DefaultWeaponRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -88,10 +94,15 @@ export class LostDaysOfSpring {
             lastGroundType: null,
             bounceCount: 0,
             collectiblesCount: 0,
+            facing: "right",
         });
 
         // Initialize dynamic entity defaults
         this.initEnemies();
+
+        // Reset bullets
+        this.bullets = [];
+        this.nextBulletId = 0;
 
         // Reset Camera
         this.CAMERA.x = 0;
@@ -200,10 +211,16 @@ export class LostDaysOfSpring {
     update() {
         // Controls
         this.player.vx = 0;
-        if (this.keys["ArrowLeft"]) this.player.vx = -this.player.speed;
-        if (this.keys["ArrowRight"]) this.player.vx += this.player.speed;
+        if (this.keys["ArrowLeft"]) {
+            this.player.vx = -this.player.speed;
+            this.player.facing = "left";
+        }
+        if (this.keys["ArrowRight"]) {
+            this.player.vx += this.player.speed;
+            this.player.facing = "right";
+        }
 
-        if (this.keys["ControlLeft"] || this.keys["ControlRight"]) {
+        if (this.keys["KeyS"] || this.keys["ArrowDown"]) {
             if (!this.player.crouch) {
                 this.player.crouch = true;
                 this.player.h = this.player.crouchHeight;
@@ -220,8 +237,39 @@ export class LostDaysOfSpring {
                 this.player.h = this.player.originalHeight;
             }
         }
+
+        // Shooting
+        if (this.keys["Space"]) {
+            this.player.shooting = true;
+            const now = performance.now();
+            if (
+                now - this.player.lastShootTime >
+                this.player.weapon.shootFrequency
+            ) {
+                const bulletVx =
+                    this.player.facing === "left"
+                        ? -this.player.weapon.speed
+                        : this.player.weapon.speed;
+                this.bullets.push({
+                    ...this.player.weapon.ammo,
+                    id: this.nextBulletId++,
+                    x:
+                        this.player.facing === "left"
+                            ? this.player.x
+                            : this.player.x +
+                              this.player.w -
+                              this.player.weapon.ammo.w,
+                    y: this.player.y + this.player.h / 2,
+                    vx: bulletVx,
+                });
+                this.player.lastShootTime = now;
+            }
+        } else {
+            this.player.shooting = false;
+        }
+
         if (
-            (this.keys["ArrowUp"] || this.keys["Space"]) &&
+            this.keys["ArrowUp"] &&
             this.player.onGroundId !== null &&
             this.player.onGroundType !== "booster"
         ) {
@@ -339,6 +387,32 @@ export class LostDaysOfSpring {
             }
         }
 
+        // --- BULLETS UPDATE ---
+        this.bullets = this.bullets.filter((bullet) => {
+            bullet.x += bullet.vx;
+            bullet.y += bullet.vy;
+
+            // Remove if outside world bounds
+            if (
+                bullet.x > this.WORLD_SIZE.width ||
+                bullet.x < 0 ||
+                bullet.y > this.WORLD_SIZE.height ||
+                bullet.y < 0
+            ) {
+                return false;
+            }
+
+            // Bullet-enemy collision
+            for (let i = this.enemies.length - 1; i >= 0; i--) {
+                if (this.rectsCollide(bullet, this.enemies[i])) {
+                    this.enemies.splice(i, 1);
+                    return false; // bullet consumed on hit
+                }
+            }
+
+            return true;
+        });
+
         // fall off world
         if (this.player.y > this.WORLD_SIZE.height) {
             this.resetGame();
@@ -407,6 +481,15 @@ export class LostDaysOfSpring {
         }
     }
 
+    drawWeapon(w) {
+        if (
+            this.weaponRenderer &&
+            typeof this.weaponRenderer.draw === "function"
+        ) {
+            this.weaponRenderer.draw(this.ctx, w);
+        }
+    }
+
     drawWorld() {
         if (
             this.worldRenderer &&
@@ -433,6 +516,10 @@ export class LostDaysOfSpring {
             this.drawPlatform(p);
         }
 
+        for (const w of this.bullets) {
+            this.drawWeapon(w);
+        }
+
         for (const c of this.collectibles || []) {
             if (!c.collected) {
                 this.drawCollectible(c);
@@ -449,9 +536,25 @@ export class LostDaysOfSpring {
     }
 
     updateDebug() {
-        if (!this.debugEl) return;
+        if (!this.showDebug) {
+            const el = document.getElementById("debug");
+            if (el) el.remove();
+            return;
+        }
 
-        this.debugEl.innerHTML = Object.entries(this.player)
+        let el = document.getElementById("debug");
+        if (!el) {
+            el = document.createElement("div");
+            el.id = "debug";
+            // Kontener gry jest rodzicem canvasa w index.html
+            if (this.canvas.parentElement) {
+                this.canvas.parentElement.insertBefore(el, this.canvas);
+            } else {
+                document.body.appendChild(el);
+            }
+        }
+
+        el.innerHTML = Object.entries(this.player)
             .map(
                 ([key, value]) => `<div><strong>${key}</strong> ${value}</div>`,
             )

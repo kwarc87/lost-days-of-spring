@@ -6,13 +6,13 @@ export const LEVELS = {
         playerStart: { x: 50, y: 2450 },
         platforms: [
             // --- GROUND FLOOR ---
-            GameFactory.ground(1, 0, 2550, 1200, 50),
+            GameFactory.ground(1, 0, 2550, 1200, 45),
 
-            GameFactory.bouncy(21, 400, 2450, 800, 45, 0.65),
+            GameFactory.bouncy(21, 400, 2430, 800, 60, 0.65),
 
             // --- FIRST ASCENT (Spiral to the right) ---
-            GameFactory.ground(2, 200, 2450, 100, 20),
-            GameFactory.ground(3, 400, 2330, 100, 20),
+            GameFactory.ground(2, 200, 2430, 100, 20),
+            GameFactory.ground(3, 400, 2310, 100, 20),
             GameFactory.ground(4, 600, 2250, 100, 20),
             GameFactory.ground(5, 800, 2150, 400, 40), // Right wall landing
 
@@ -72,10 +72,10 @@ export const LEVELS = {
             GameFactory.collectible(13, 150, 400),
             GameFactory.collectible(14, 1100, 1000),
             GameFactory.collectible(15, 1150, 1000),
-            GameFactory.collectible(16, 1150, 2400),
-            GameFactory.collectible(17, 1100, 2400),
-            GameFactory.collectible(18, 1050, 2400),
-            GameFactory.collectible(19, 1000, 2400),
+            GameFactory.collectible(16, 1150, 2380),
+            GameFactory.collectible(17, 1100, 2380),
+            GameFactory.collectible(18, 1050, 2380),
+            GameFactory.collectible(19, 1000, 2380),
             GameFactory.collectible(20, 620, 2180),
         ],
     }),
