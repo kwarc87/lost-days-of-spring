@@ -3,6 +3,7 @@
     "version": "1.0.1",
     "main": "game.js",
     "scripts": {
+        "dev": "vite",
         "bust-cache": "node cache-bust.js",
         "lint": "eslint game.js",
         "lint:fix": "eslint game.js --fix",
@@ -15,6 +16,7 @@
     "license": "ISC",
     "description": "",
     "devDependencies": {
+        "vite": "^8.0.1",
         "@eslint/js": "^9.39.4",
         "eslint": "^9.39.4",
         "prettier": "^3.8.1"
