@@ -83,6 +83,7 @@ export const GameFactory = {
         lastGroundType: null,
         bounceCount: 0,
         collectiblesCount: 0,
+        life: 6,
         facing: "right",
         shooting: false,
         lastShootTime: 0,

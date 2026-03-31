@@ -69,7 +69,9 @@ export class LostDaysOfSpring {
     }
 
     loadLevel(levelId) {
-        if (!LEVELS[levelId]) return;
+        if (!LEVELS[levelId]) {
+            return;
+        }
 
         this.currentLevelId = levelId;
         // Generate a fresh instance of the level data
@@ -94,6 +96,7 @@ export class LostDaysOfSpring {
             lastGroundType: null,
             bounceCount: 0,
             collectiblesCount: 0,
+            life: 6,
             facing: "right",
         });
 
@@ -209,7 +212,18 @@ export class LostDaysOfSpring {
     }
 
     update() {
-        // Controls
+        this.handleInput();
+        this.applyPhysics();
+        this.movePlayerX();
+        this.movePlayerY();
+        this.updateEnemies();
+        this.updateBullets();
+        this.updateCollectibles();
+        this.updateCamera();
+    }
+
+    // Handle keyboard input: movement, crouch, shooting, jump
+    handleInput() {
         this.player.vx = 0;
         if (this.keys["ArrowLeft"]) {
             this.player.vx = -this.player.speed;
@@ -279,8 +293,10 @@ export class LostDaysOfSpring {
             this.player.onGroundType = null;
             this.player.isJumping = true;
         }
+    }
 
-        // Physics
+    // Apply gravity and enforce terminal velocity
+    applyPhysics() {
         let currentGravity = this.PHYSICS.gravity;
 
         // Variable jump height: fall faster if jump key is released while ascending
@@ -299,11 +315,13 @@ export class LostDaysOfSpring {
         if (this.player.vy > this.PHYSICS.maxFallSpeed) {
             this.player.vy = this.PHYSICS.maxFallSpeed;
         }
+    }
 
-        // --- X AXIS ---
+    // Move player along the X axis and resolve platform collisions
+    movePlayerX() {
         this.player.x += this.player.vx;
 
-        // World Bounds Check (X AXIS)
+        // World bounds check (X axis)
         if (this.player.x < 0) {
             this.player.x = 0;
         } else if (this.player.x + this.player.w > this.WORLD_SIZE.width) {
@@ -320,15 +338,17 @@ export class LostDaysOfSpring {
                 this.player.vx = 0;
             }
         }
+    }
 
-        // --- Y AXIS ---
+    // Move player along the Y axis, resolve platform collisions, and check fall-off
+    movePlayerY() {
         this.player.y += this.player.vy;
         this.player.onGroundId = null;
         this.player.onGroundType = null;
 
         for (const p of this.platforms) {
             if (this.rectsCollide(this.player, p)) {
-                // landing on ground
+                // Landing on top of platform
                 if (this.player.vy > 0) {
                     this.player.y = p.y - this.player.h;
                     this.player.onGroundId = p.id;
@@ -362,7 +382,7 @@ export class LostDaysOfSpring {
                     }
                     break;
                 } else {
-                    // hit ceiling
+                    // Hit ceiling
                     this.player.y = p.y + p.h;
                     this.player.vy = 0;
                     break;
@@ -370,7 +390,14 @@ export class LostDaysOfSpring {
             }
         }
 
-        // --- ENEMIES UPDATE ---
+        // Fall off the bottom of the world
+        if (this.player.y > this.WORLD_SIZE.height) {
+            this.resetGame();
+        }
+    }
+
+    // Move enemies and check player-enemy collisions
+    updateEnemies() {
         for (const enemy of this.enemies) {
             enemy.x += enemy.vx;
 
@@ -386,8 +413,10 @@ export class LostDaysOfSpring {
                 this.resetGame();
             }
         }
+    }
 
-        // --- BULLETS UPDATE ---
+    // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions
+    updateBullets() {
         this.bullets = this.bullets.filter((bullet) => {
             bullet.x += bullet.vx;
             bullet.y += bullet.vy;
@@ -412,21 +441,20 @@ export class LostDaysOfSpring {
 
             return true;
         });
+    }
 
-        // fall off world
-        if (this.player.y > this.WORLD_SIZE.height) {
-            this.resetGame();
-        }
-
-        // --- COLLECTIBLES UPDATE ---
+    // Check player-collectible collisions and mark collected items
+    updateCollectibles() {
         for (const c of this.collectibles || []) {
             if (!c.collected && this.rectsCollide(this.player, c)) {
                 c.collected = true;
                 this.player.collectiblesCount++;
             }
         }
+    }
 
-        // --- CAMERA UPDATE ---
+    // Center camera on player and clamp to world bounds
+    updateCamera() {
         this.CAMERA.x =
             this.player.x + this.player.w / 2 - this.CAMERA.width / 2;
         this.CAMERA.y =
@@ -538,7 +566,9 @@ export class LostDaysOfSpring {
     updateDebug() {
         if (!this.showDebug) {
             const el = document.getElementById("debug");
-            if (el) el.remove();
+            if (el) {
+                el.remove();
+            }
             return;
         }
 
@@ -562,7 +592,9 @@ export class LostDaysOfSpring {
     }
 
     loop(now) {
-        if (!this.isRunning) return;
+        if (!this.isRunning) {
+            return;
+        }
 
         let frameTime = (now - this.lastTime) / 1000;
         this.lastTime = now;
