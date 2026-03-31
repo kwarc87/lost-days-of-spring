@@ -17,8 +17,8 @@ export const LEVELS = {
             GameFactory.ground(5, 800, 2150, 400, 40), // Right wall landing
 
             // --- SECOND ASCENT (Going back left with bouncy platforms) ---
-            GameFactory.ground(6, 650, 2050, 80, 20, 0.6),
-            GameFactory.ground(7, 450, 1950, 80, 20, 0.6),
+            GameFactory.ground(6, 560, 2050, 80, 20, 0.6),
+            GameFactory.ground(7, 400, 1950, 80, 20, 0.6),
 
             // --- THE BOOST TOWER (Fast vertical up catapult) ---
             GameFactory.booster(9, 0, 1860, 280, 30, 25),
@@ -26,13 +26,13 @@ export const LEVELS = {
 
             // --- THIRD ASCENT (Spiral to right again) ---
             GameFactory.ground(11, 650, 1300, 100, 20),
-            GameFactory.bouncy(12, 850, 1200, 170, 20, 0.65),
-            GameFactory.ground(13, 1050, 1100, 150, 40), // Right wall landing
+            GameFactory.ground(12, 850, 1220, 80, 20, 0.65),
+            GameFactory.bouncy(13, 1000, 1150, 200, 40), // Right wall landing
 
             // --- FOURTH ASCENT (Increasingly bouncy staircase to the left) ---
-            GameFactory.ground(14, 850, 1000, 100, 20, 0.6),
-            GameFactory.booster(15, 600, 900, 100, 20, 20),
-            GameFactory.ground(16, 380, 630, 100, 20, 22),
+            GameFactory.ground(14, 800, 1040, 100, 20, 0.6),
+            GameFactory.booster(15, 600, 930, 100, 20, 20),
+            GameFactory.ground(16, 380, 650, 100, 20, 22),
             GameFactory.ground(17, 0, 530, 250, 40),
 
             // --- FINAL STEPS (Top of the tower approach) ---
@@ -73,8 +73,8 @@ export const LEVELS = {
             GameFactory.collectible(11, 50, 400),
             GameFactory.collectible(12, 100, 400),
             GameFactory.collectible(13, 150, 400),
-            GameFactory.collectible(14, 1100, 1000),
-            GameFactory.collectible(15, 1150, 1000),
+            GameFactory.collectible(14, 1100, 1080),
+            GameFactory.collectible(15, 1150, 1080),
             GameFactory.collectible(16, 1150, 2380),
             GameFactory.collectible(17, 1100, 2380),
             GameFactory.collectible(18, 1050, 2380),
