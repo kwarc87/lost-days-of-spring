@@ -16,9 +16,18 @@ export class LostDaysOfSpring {
 
         // ====== INPUT ======
         this.keys = {};
+        this.KEYS = {
+            left: "ArrowLeft",
+            right: "ArrowRight",
+            jump: "ArrowUp",
+            crouch: "ArrowDown",
+            crouchAlt: "KeyS",
+            shoot: "Space",
+        };
 
         // ====== GAME STATE ======
         this.currentLevelId = null;
+        this.pendingReset = false;
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });
@@ -70,6 +79,7 @@ export class LostDaysOfSpring {
 
     loadLevel(levelId) {
         if (!LEVELS[levelId]) {
+            console.error(`[LostDaysOfSpring] Level ${levelId} not found.`);
             return;
         }
 
@@ -80,7 +90,7 @@ export class LostDaysOfSpring {
         this.WORLD_SIZE = levelData.worldSize;
         this.platforms = levelData.platforms;
         this.enemies = levelData.enemies;
-        this.collectibles = levelData.collectibles;
+        this.collectibles = levelData.collectibles ?? [];
 
         // Reset dynamic player properties according to level start
         Object.assign(this.player, {
@@ -98,6 +108,9 @@ export class LostDaysOfSpring {
             collectiblesCount: 0,
             life: 6,
             facing: "right",
+            isJumping: false,
+            shooting: false,
+            lastShootTime: 0,
         });
 
         // Initialize dynamic entity defaults
@@ -110,26 +123,6 @@ export class LostDaysOfSpring {
         // Reset Camera
         this.CAMERA.x = 0;
         this.CAMERA.y = 0;
-    }
-
-    setPlayerRenderer(rendererStrategy) {
-        this.playerRenderer = rendererStrategy;
-    }
-
-    setPlatformRenderer(rendererStrategy) {
-        this.platformRenderer = rendererStrategy;
-    }
-
-    setEnemyRenderer(rendererStrategy) {
-        this.enemyRenderer = rendererStrategy;
-    }
-
-    setWorldRenderer(rendererStrategy) {
-        this.worldRenderer = rendererStrategy;
-    }
-
-    setPauseRenderer(rendererStrategy) {
-        this.pauseRenderer = rendererStrategy;
     }
 
     initControls() {
@@ -207,11 +200,19 @@ export class LostDaysOfSpring {
     }
 
     resetGame() {
-        // Simply reload the current level to reset positions, enemies, etc.
-        this.loadLevel(this.currentLevelId);
+        // Defer level reload to the start of the next update tick to avoid
+        // mutating game state mid-loop (enemies, collectibles, bullets, etc.).
+        this.pendingReset = true;
     }
 
     update() {
+        // Process deferred reset at the top of the tick before any logic runs
+        if (this.pendingReset) {
+            this.pendingReset = false;
+            this.loadLevel(this.currentLevelId);
+            return;
+        }
+
         this.handleInput();
         this.applyPhysics();
         this.movePlayerX();
@@ -225,16 +226,16 @@ export class LostDaysOfSpring {
     // Handle keyboard input: movement, crouch, shooting, jump
     handleInput() {
         this.player.vx = 0;
-        if (this.keys["ArrowLeft"]) {
+        if (this.keys[this.KEYS.left]) {
             this.player.vx = -this.player.speed;
             this.player.facing = "left";
         }
-        if (this.keys["ArrowRight"]) {
+        if (this.keys[this.KEYS.right]) {
             this.player.vx += this.player.speed;
             this.player.facing = "right";
         }
 
-        if (this.keys["KeyS"] || this.keys["ArrowDown"]) {
+        if (this.keys[this.KEYS.crouchAlt] || this.keys[this.KEYS.crouch]) {
             if (!this.player.crouch) {
                 this.player.crouch = true;
                 this.player.h = this.player.crouchHeight;
@@ -253,7 +254,7 @@ export class LostDaysOfSpring {
         }
 
         // Shooting
-        if (this.keys["Space"]) {
+        if (this.keys[this.KEYS.shoot]) {
             this.player.shooting = true;
             const now = performance.now();
             if (
@@ -283,7 +284,7 @@ export class LostDaysOfSpring {
         }
 
         if (
-            this.keys["ArrowUp"] &&
+            this.keys[this.KEYS.jump] &&
             this.player.onGroundId !== null &&
             this.player.onGroundType !== "booster"
         ) {
@@ -302,8 +303,7 @@ export class LostDaysOfSpring {
         // Variable jump height: fall faster if jump key is released while ascending
         if (
             this.player.vy < 0 &&
-            !this.keys["ArrowUp"] &&
-            !this.keys["Space"] &&
+            !this.keys[this.KEYS.jump] &&
             this.player.isJumping
         ) {
             currentGravity *= 2;
@@ -584,11 +584,15 @@ export class LostDaysOfSpring {
             }
         }
 
-        el.innerHTML = Object.entries(this.player)
-            .map(
-                ([key, value]) => `<div><strong>${key}</strong> ${value}</div>`,
-            )
-            .join("");
+        el.textContent = "";
+        for (const [key, value] of Object.entries(this.player)) {
+            const row = document.createElement("div");
+            const label = document.createElement("strong");
+            label.textContent = key;
+            row.appendChild(label);
+            row.appendChild(document.createTextNode(" " + String(value)));
+            el.appendChild(row);
+        }
     }
 
     loop(now) {
