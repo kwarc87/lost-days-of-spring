@@ -11,9 +11,9 @@ export const LEVELS = {
             GameFactory.bouncy(21, 400, 2430, 800, 60, 0.65),
 
             // --- FIRST ASCENT (Spiral to the right) ---
-            GameFactory.ground(2, 200, 2430, 100, 20),
-            GameFactory.ground(3, 400, 2310, 100, 20),
-            GameFactory.ground(4, 600, 2250, 100, 20),
+            GameFactory.ground(2, 200, 2430, 110, 20),
+            GameFactory.ground(3, 400, 2310, 105, 20),
+            GameFactory.ground(4, 600, 2250, 115, 20),
             GameFactory.ground(5, 800, 2150, 400, 40), // Right wall landing
 
             // --- SECOND ASCENT (Going back left with bouncy platforms) ---
@@ -41,18 +41,21 @@ export const LEVELS = {
             GameFactory.ground(20, 750, 200, 450, 40), // The Top / Goal Area!
         ],
         enemies: [
-            GameFactory.enemy(21, 2),
-            GameFactory.enemy(5, 4, {
-                mainColor: "#eeba30",
-                secondaryColor: "#d3a625",
+            GameFactory.enemy(21, 2, {
+                mainColor: "#F2DCC9",
+                secondaryColor: "#BF3604",
             }),
-            GameFactory.enemy(10, 1, {
-                mainColor: "#733073",
-                secondaryColor: "#1e140d",
+            GameFactory.enemy(5, 4, {
+                mainColor: "#F2DCC9",
+                secondaryColor: "#65BFA6",
+            }),
+            GameFactory.enemy(10, 1.5, {
+                mainColor: "#F2DCC9",
+                secondaryColor: "#4A678C",
             }),
             GameFactory.enemy(20, 2, {
-                mainColor: "#fc3468",
-                secondaryColor: "#ffc2cd",
+                mainColor: "#8694A6",
+                secondaryColor: "#222C40",
             }),
         ],
 

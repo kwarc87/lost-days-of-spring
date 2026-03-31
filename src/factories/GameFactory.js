@@ -5,37 +5,33 @@ export const GameFactory = {
         y,
         w,
         h,
-        color: "#0dfa9d",
-        secondaryColor: "#08a567",
-        mossColor: "#05633e",
-        textureColor: "#1a2621",
-        patternColor: "#111815",
+        color: "#5c2040", // top edge highlight — lighter scarlet
+        secondaryColor: "#3a1528", // second edge strip — mid crimson
+        textureColor: "#2a1020", // brick face — dark crimson
+        patternColor: "#1e0c16", // mortar/base — visible against bg #06010a
+        mossColor: "#0dfa9d", // neon green glowing moss (accent only)
+        mossShadowColor: "#07965c", // darker green for moss shadow
+        accentColor: "#ff3a3a", // red warning accent
+        bottomLightColor: "#1e0c16", // lighter scarlet bottom (for short platforms)
+        bottomDarkColor: "#1b080f",
         elasticity: 0,
         type: "normal",
     }),
-    bouncy: (
+    bouncy: (id, x, y, w, h, elasticity = 0.5) => ({
         id,
         x,
         y,
         w,
         h,
-        elasticity = 0.5,
-        color = "#9d4edd",
-        secondaryColor = "#7b2cbf",
-        mossColor = "#3c096c",
-        textureColor = "#240046",
-        patternColor = "#10002b",
-    ) => ({
-        id,
-        x,
-        y,
-        w,
-        h,
-        color,
-        secondaryColor,
-        mossColor,
-        textureColor,
-        patternColor,
+        color: "#c42040", // top edge — vivid red
+        secondaryColor: "#8c1530", // second strip — deep red
+        textureColor: "#5a1020", // brick face — saturated crimson
+        patternColor: "#300c14", // mortar — dark red
+        mossColor: "#0dfa9d", // neon green accent
+        mossShadowColor: "#07965c",
+        accentColor: "#ff6040", // warm orange-red accent
+        bottomLightColor: "#29040d",
+        bottomDarkColor: "#300c14",
         elasticity,
         type: "normal",
     }),
@@ -56,11 +52,14 @@ export const GameFactory = {
     }),
     enemy: (platformId, speed = 1.5, overrides = {}) => ({
         platformId,
-        w: 36, // Wider cartoon aspect
-        h: 60, // Much taller cartoon aspect for big head
+        w: 36,
+        h: 76,
         speed,
-        mainColor: "#b21919", // Red suit
-        secondaryColor: "#ffffff", // White shirt
+        health: 15,
+        isDamaged: false,
+        damageTime: 0,
+        mainColor: "#e84855", // vivid coral red
+        secondaryColor: "#f7b32b", // warm amber yellow
         ...overrides,
     }),
     player: (overrides = {}) => ({
@@ -83,7 +82,6 @@ export const GameFactory = {
         lastGroundType: null,
         bounceCount: 0,
         collectiblesCount: 0,
-        life: 6,
         facing: "right",
         shooting: false,
         lastShootTime: 0,
@@ -101,13 +99,14 @@ export const GameFactory = {
     weapon: (overrides = {}) => ({
         id: null,
         color: "#ffc300",
-        speed: 18,
-        shootFrequency: 100,
+        speed: 12,
+        shootFrequency: 400,
         ammo: {
             vx: 0,
             vy: 0,
             w: 8,
             h: 8,
+            damage: 5,
         },
         ...overrides,
     }),

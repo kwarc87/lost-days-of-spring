@@ -1,31 +1,27 @@
 export const DefaultWeaponRenderer = {
     draw: (ctx, weapon) => {
         ctx.save();
+        ctx.imageSmoothingEnabled = false;
 
-        const cx = weapon.x + weapon.w / 2;
-        const cy = weapon.y + weapon.h / 2;
-        const rx = weapon.w / 2;
-        const ry = weapon.h / 2;
+        const { x, y, w, h } = weapon;
 
-        // Outer glow
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#ffd700";
+        // Drop shadow (1px offset, dark amber)
+        ctx.fillStyle = "#7a4400";
+        ctx.fillRect(x + 1, y + 1, w, h);
 
-        // Main bullet body
+        // Main body (gold)
         ctx.fillStyle = "#ffc200";
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillRect(x, y, w, h);
 
-        // Bright core
-        ctx.shadowBlur = 0;
-        ctx.fillStyle = "#ffffff";
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, Math.max(1, rx / 2), Math.max(1, ry / 2), 0, 0, Math.PI * 2);
-        ctx.fill();
+        // Mid shading — bottom and right edge strip (deeper gold)
+        ctx.fillStyle = "#c87800";
+        ctx.fillRect(x, y + h - 2, w, 2); // bottom strip
+        ctx.fillRect(x + w - 2, y, 2, h); // right strip
+
+        // Highlight — top-left corner (bright yellow, 2×2 px)
+        ctx.fillStyle = "#fff176";
+        ctx.fillRect(x, y, 2, 2);
 
         ctx.restore();
     },
 };
-
-

@@ -1,73 +1,128 @@
 /**
- * Default enemy rendering strategy (The Man From Another Place - Red Room dwarf style)
+ * Default enemy rendering strategy - chunky two-color pill/tablet with menacing brows and white legs
+ * Pixel art style: 8px grid, bold shapes, no sub-pixel detail
  */
 export const DefaultEnemyRenderer = {
     draw: (ctx, enemy) => {
         ctx.save();
+        ctx.imageSmoothingEnabled = false;
 
-        const cx = enemy.x + enemy.w / 2;
-        const cy = enemy.y + enemy.h; // Bottom center anchor
+        const cx = Math.round(enemy.x + enemy.w / 2);
+        const cy = Math.round(enemy.y + enemy.h);
 
-        // Flip horizontally if moving left
         ctx.translate(cx, cy);
         if (enemy.vx < 0) {
             ctx.scale(-1, 1);
         }
 
-        // The Man From Another Place details (Cartoon/Big Head Style - H:60px, W:36px)
+        const pw = 28; // pill width
+        const ph = 60; // pill height — tall and tablet-proportioned
+        const legH = 8; // leg area below pill
+        const px = -pw / 2; // -18 (left edge)
+        const py = -(ph + legH); // top of pill
 
-        // --- Hair & Head (Massive) ---
-        ctx.fillStyle = "#bbbbbb"; // Greyish sparse hair
-        ctx.fillRect(-16, -60, 32, 8);
-        ctx.fillRect(-18, -52, 6, 6); // Left side puff
+        // --- Legs (white — high contrast against dark backgrounds) ---
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(-8, -legH, 4, legH - 4); // left leg
+        ctx.fillRect(4, -legH, 4, legH - 4); // right leg
+        // Feet (wider than legs, slightly off-white)
+        ctx.fillStyle = "#cccccc";
+        ctx.fillRect(-10, -4, 8, 4); // left foot
+        ctx.fillRect(2, -4, 8, 4); // right foot
 
-        // Face
-        ctx.fillStyle = "#f5c3a2"; // Pale skin tone
-        ctx.fillRect(-14, -52, 28, 17);
+        // --- Pill shape builder: 2-step 4px caps (subtle tablet rounding, not lemon) ---
+        // Caps are only 8px each — 16/64 = 25% rounding, 75% straight body
+        const drawPill = (color) => {
+            ctx.fillStyle = color;
+            ctx.fillRect(px + 8, py, pw - 16, 4); // top cap step 1
+            ctx.fillRect(px + 4, py + 4, pw - 8, 4); // top cap step 2
+            ctx.fillRect(px, py + 8, pw, ph - 16); // main body
+            ctx.fillRect(px + 4, py + ph - 8, pw - 8, 4); // bottom cap step 1
+            ctx.fillRect(px + 8, py + ph - 4, pw - 16, 4); // bottom cap step 2
+        };
 
-        // Creepy staring eyes (facing forward looking at player)
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(-6, -45, 5, 5); // Left eye
-        ctx.fillRect(1, -45, 5, 5); // Right eye
+        // Top half — mainColor
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(px, py, pw, ph / 2);
+        ctx.clip();
+        drawPill(enemy.mainColor);
+        ctx.restore();
 
-        // Sinister grin
-        ctx.fillStyle = "#aa3333";
-        ctx.fillRect(-2, -38, 8, 2);
+        // Bottom half — secondaryColor
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(px, py + ph / 2, pw, ph / 2);
+        ctx.clip();
+        drawPill(enemy.secondaryColor);
+        ctx.restore();
 
-        // --- Body / Red Suit (Small compared to head) ---
-        ctx.fillStyle = enemy.mainColor; // Red suit torso
-        ctx.fillRect(-12, -35, 24, 20);
+        // Horizontal seam — 4px dark line across full pill width
+        ctx.fillStyle = "rgba(0,0,0,0.45)";
+        ctx.fillRect(px + 4, py + ph / 2 - 2, pw - 8, 4);
 
-        // --- White Shirt ---
-        ctx.fillStyle = enemy.secondaryColor;
-        ctx.fillRect(0, -35, 6, 15);
+        // --- Color shadows: pixel-art right-edge shadow + left-edge highlight ---
+        // Clip to pill silhouette to avoid overflow on stepped corners
+        const pillPath = () => {
+            ctx.beginPath();
+            ctx.moveTo(px + 8, py);
+            ctx.lineTo(px + pw - 8, py);
+            ctx.lineTo(px + pw - 8, py + 4);
+            ctx.lineTo(px + pw - 4, py + 4);
+            ctx.lineTo(px + pw - 4, py + 8);
+            ctx.lineTo(px + pw, py + 8);
+            ctx.lineTo(px + pw, py + ph - 8);
+            ctx.lineTo(px + pw - 4, py + ph - 8);
+            ctx.lineTo(px + pw - 4, py + ph - 4);
+            ctx.lineTo(px + pw - 8, py + ph - 4);
+            ctx.lineTo(px + pw - 8, py + ph);
+            ctx.lineTo(px + 8, py + ph);
+            ctx.lineTo(px + 8, py + ph - 4);
+            ctx.lineTo(px + 4, py + ph - 4);
+            ctx.lineTo(px + 4, py + ph - 8);
+            ctx.lineTo(px, py + ph - 8);
+            ctx.lineTo(px, py + 8);
+            ctx.lineTo(px + 4, py + 8);
+            ctx.lineTo(px + 4, py + 4);
+            ctx.lineTo(px + 8, py + 4);
+            ctx.closePath();
+        };
+        ctx.save();
+        pillPath();
+        ctx.clip();
+        ctx.fillStyle = "rgba(0,0,0,0.22)"; // right-edge shadow
+        ctx.fillRect(px + pw - 8, py, 8, ph);
+        ctx.fillStyle = "rgba(255,255,255,0.09)"; // left-edge highlight
+        ctx.fillRect(px, py, 8, ph);
+        ctx.restore();
 
-        // --- Arms (Suit colored) ---
-        // Back slightly hidden swinging arm
-        ctx.fillStyle = "#8a1313"; // Darker red for depth
-        ctx.fillRect(-16, -30, 6, 15);
+        // --- Eyes: 8×8 white blocks, 4×4 dark pupils — big and cartoony ---
+        const eyeY = py + 8;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(-12, eyeY, 8, 8); // left eye
+        ctx.fillRect(4, eyeY, 8, 8); // right eye
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillRect(-10, eyeY + 2, 4, 4); // left pupil
+        ctx.fillRect(6, eyeY + 2, 4, 4); // right pupil
 
-        // Front arm (in dynamic pose like his dance)
-        ctx.fillStyle = enemy.mainColor;
-        ctx.fillRect(8, -32, 10, 6); // Upper arm angled forward
-        ctx.fillRect(14, -40, 5, 10); // Forearm pointing up "dancing"
+        // --- Menacing brows: inner end lower than outer (angry V angle) ---
+        ctx.fillStyle = "#1a1a2e";
+        // Left brow: outer block high, inner block drops down toward center
+        ctx.fillRect(-14, eyeY - 6, 8, 4); // outer left
+        ctx.fillRect(-8, eyeY - 4, 4, 4); // inner left (drops toward center)
+        // Right brow: inner drops down, outer high
+        ctx.fillRect(4, eyeY - 4, 4, 4); // inner right
+        ctx.fillRect(6, eyeY - 6, 8, 4); // outer right
 
-        // Hands
-        ctx.fillStyle = "#f5c3a2";
-        ctx.fillRect(-16, -15, 6, 5); // Back hand
-        ctx.fillRect(14, -45, 5, 5); // Hand up in the air
-
-        // --- Legs / Pants (Suit colored but shaded slightly) ---
-        ctx.fillStyle = "#8a1313";
-
-        // Walking/Dancing leg animation step
-        ctx.fillRect(-10, -15, 8, 11); // Back leg
-        ctx.fillRect(2, -15, 8, 11); // Front leg
-
-        // --- Shoes ---
-        ctx.fillStyle = "#111111"; // Black shiny shoes
-        ctx.fillRect(-12, -4, 10, 4);
-        ctx.fillRect(2, -4, 11, 4);
+        // --- Damage flash: red overlay clipped to pill silhouette ---
+        if (enemy.isDamaged) {
+            ctx.save();
+            pillPath();
+            ctx.clip();
+            ctx.fillStyle = "rgba(255, 40, 40, 0.45)";
+            ctx.fillRect(px, py, pw, ph);
+            ctx.restore();
+        }
 
         ctx.restore();
     },

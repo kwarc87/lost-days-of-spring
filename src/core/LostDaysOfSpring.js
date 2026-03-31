@@ -1,7 +1,11 @@
 import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
 import { DefaultPlayerRenderer } from "../renderers/PlayerRenderers.js";
-import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
+import {
+    DefaultPlatformRenderer,
+    BouncyPlatformRenderer,
+    BoosterPlatformRenderer,
+} from "../renderers/PlatformRenderers.js";
 import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
 import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
@@ -23,6 +27,7 @@ export class LostDaysOfSpring {
             crouch: "ArrowDown",
             crouchAlt: "KeyS",
             shoot: "Space",
+            pause: "KeyP",
         };
 
         // ====== GAME STATE ======
@@ -49,6 +54,12 @@ export class LostDaysOfSpring {
             gravity: 0.6,
             minBounceSpeed: 0.5,
             maxFallSpeed: 16,
+        };
+
+        // ====== DEBUG ======
+        this.DEBUG = {
+            updateInterval: 50, // ms
+            lastUpdate: 0,
         };
 
         // ====== GAME LOOP CONFIG ======
@@ -130,21 +141,16 @@ export class LostDaysOfSpring {
             e.stopPropagation();
 
             // Toggle pause state
-            if (e.code === "KeyP" && !e.repeat) {
+            if (e.code === this.KEYS.pause && !e.repeat) {
                 this.togglePause();
             }
 
             this.keys[e.code] = true;
             if (
                 [
-                    "ArrowUp",
-                    "ArrowDown",
-                    "ArrowLeft",
-                    "ArrowRight",
-                    "Space",
+                    ...Object.values(this.KEYS),
                     "ControlLeft",
                     "ControlRight",
-                    "KeyP",
                 ].includes(e.code)
             ) {
                 e.preventDefault();
@@ -166,6 +172,9 @@ export class LostDaysOfSpring {
                 enemy.minX = p.x;
                 enemy.maxX = p.x + p.w;
                 enemy.vx = enemy.speed;
+                enemy.health = enemy.health ?? 15;
+                enemy.isDamaged = false;
+                enemy.damageTime = 0;
             }
         }
     }
@@ -398,7 +407,13 @@ export class LostDaysOfSpring {
 
     // Move enemies and check player-enemy collisions
     updateEnemies() {
+        const now = performance.now();
         for (const enemy of this.enemies) {
+            // Clear damage flash after 200ms
+            if (enemy.isDamaged && now - enemy.damageTime > 200) {
+                enemy.isDamaged = false;
+            }
+
             enemy.x += enemy.vx;
 
             if (enemy.x <= enemy.minX) {
@@ -434,7 +449,14 @@ export class LostDaysOfSpring {
             // Bullet-enemy collision
             for (let i = this.enemies.length - 1; i >= 0; i--) {
                 if (this.rectsCollide(bullet, this.enemies[i])) {
-                    this.enemies.splice(i, 1);
+                    const enemy = this.enemies[i];
+                    enemy.health -= bullet.damage;
+                    if (enemy.health <= 0) {
+                        this.enemies.splice(i, 1);
+                    } else {
+                        enemy.isDamaged = true;
+                        enemy.damageTime = performance.now();
+                    }
                     return false; // bullet consumed on hit
                 }
             }
@@ -445,7 +467,7 @@ export class LostDaysOfSpring {
 
     // Check player-collectible collisions and mark collected items
     updateCollectibles() {
-        for (const c of this.collectibles || []) {
+        for (const c of this.collectibles) {
             if (!c.collected && this.rectsCollide(this.player, c)) {
                 c.collected = true;
                 this.player.collectiblesCount++;
@@ -483,11 +505,14 @@ export class LostDaysOfSpring {
     }
 
     drawPlatform(p) {
-        if (
-            this.platformRenderer &&
-            typeof this.platformRenderer.draw === "function"
-        ) {
-            this.platformRenderer.draw(this.ctx, p);
+        let renderer = this.platformRenderer;
+        if (p.type === "bouncy") {
+            renderer = BouncyPlatformRenderer;
+        } else if (p.type === "booster") {
+            renderer = BoosterPlatformRenderer;
+        }
+        if (renderer && typeof renderer.draw === "function") {
+            renderer.draw(this.ctx, p);
         }
     }
 
@@ -538,17 +563,16 @@ export class LostDaysOfSpring {
 
         this.drawWorld();
 
-        this.ctx.translate(-this.CAMERA.x, -this.CAMERA.y);
-
-        for (const p of this.platforms) {
-            this.drawPlatform(p);
-        }
+        this.ctx.translate(
+            -Math.round(this.CAMERA.x),
+            -Math.round(this.CAMERA.y),
+        );
 
         for (const w of this.bullets) {
             this.drawWeapon(w);
         }
 
-        for (const c of this.collectibles || []) {
+        for (const c of this.collectibles) {
             if (!c.collected) {
                 this.drawCollectible(c);
             }
@@ -560,10 +584,14 @@ export class LostDaysOfSpring {
 
         this.drawPlayer();
 
+        for (const p of this.platforms) {
+            this.drawPlatform(p);
+        }
+
         this.ctx.restore();
     }
 
-    updateDebug() {
+    updateDebug(now) {
         if (!this.showDebug) {
             const el = document.getElementById("debug");
             if (el) {
@@ -572,11 +600,17 @@ export class LostDaysOfSpring {
             return;
         }
 
+        // Throttle debug panel updates to a human-readable interval
+        if (now - this.DEBUG.lastUpdate < this.DEBUG.updateInterval) {
+            return;
+        }
+        this.DEBUG.lastUpdate = now;
+
         let el = document.getElementById("debug");
         if (!el) {
             el = document.createElement("div");
             el.id = "debug";
-            // Kontener gry jest rodzicem canvasa w index.html
+            // Game container is the canvas parent element defined in index.html
             if (this.canvas.parentElement) {
                 this.canvas.parentElement.insertBefore(el, this.canvas);
             } else {
@@ -590,7 +624,11 @@ export class LostDaysOfSpring {
             const label = document.createElement("strong");
             label.textContent = key;
             row.appendChild(label);
-            row.appendChild(document.createTextNode(" " + String(value)));
+            const display =
+                value !== null && typeof value === "object"
+                    ? JSON.stringify(value).replace(/,/g, ", ")
+                    : String(value);
+            row.appendChild(document.createTextNode(" " + display));
             el.appendChild(row);
         }
     }
@@ -615,7 +653,7 @@ export class LostDaysOfSpring {
         }
 
         this.draw();
-        this.updateDebug();
+        this.updateDebug(now);
 
         window.requestAnimationFrame(this.loop);
     }
