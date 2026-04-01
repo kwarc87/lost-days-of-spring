@@ -60,9 +60,13 @@ export const DefaultPlatformRenderer = {
 
         // --- Sparse glowing moss drips: 1-2 per platform (deterministic) ---
         const mossCount = 1 + ((x * 7 + w) % 2 === 0 ? 1 : 0);
+        const maxDripLen = Math.floor(h * 0.8) - 14; // anchor(8) + tip(6) = 14 fixed px
         for (let i = 1; i <= mossCount; i++) {
             const mossX = x + Math.floor((w / (mossCount + 1)) * i);
-            const dripLen = 12 + (((Math.abs(x) + mossX) * 13) % 16); // 12–28px
+            const dripLen = Math.min(
+                12 + (((Math.abs(x) + mossX) * 13) % 16),
+                maxDripLen,
+            ); // 12–28px, capped at 80% of h
 
             // Anchor block (12×8) with shadow
             ctx.fillStyle = mossColor;

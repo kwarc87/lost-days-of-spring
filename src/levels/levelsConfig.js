@@ -37,7 +37,7 @@ export const LEVELS = {
 
             // --- FINAL STEPS (Top of the tower approach) ---
             GameFactory.ground(18, 350, 400, 80, 20),
-            GameFactory.ground(19, 550, 325, 80, 20),
+            GameFactory.ground(19, 550, 325, 100, 20),
             GameFactory.ground(20, 750, 200, 450, 40), // The Top / Goal Area!
         ],
         enemies: [

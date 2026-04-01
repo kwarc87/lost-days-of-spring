@@ -25,7 +25,7 @@ export class LostDaysOfSpring {
             right: "ArrowRight",
             jump: "ArrowUp",
             crouch: "ArrowDown",
-            crouchAlt: "KeyS",
+            crouchAlt: "KeyC",
             shoot: "Space",
             pause: "KeyP",
         };
@@ -51,9 +51,11 @@ export class LostDaysOfSpring {
 
         // ====== PHYSICS ======
         this.PHYSICS = {
-            gravity: 0.6,
+            gravity: 0.52,
             minBounceSpeed: 0.5,
-            maxFallSpeed: 16,
+            maxFallSpeed: 18,
+            fallGravityMultiplier: 1.35,
+            jumpCutGravityMultiplier: 2.1,
         };
 
         // ====== DEBUG ======
@@ -122,6 +124,8 @@ export class LostDaysOfSpring {
             isJumping: false,
             shooting: false,
             lastShootTime: 0,
+            jumpPressedAt: 0,
+            lastGroundedAt: 0,
         });
 
         // Initialize dynamic entity defaults
@@ -145,7 +149,12 @@ export class LostDaysOfSpring {
                 this.togglePause();
             }
 
+            if (e.code === this.KEYS.jump && !this.keys[e.code] && !e.repeat) {
+                this.player.jumpPressedAt = performance.now();
+            }
+
             this.keys[e.code] = true;
+
             if (
                 [
                     ...Object.values(this.KEYS),
@@ -234,16 +243,45 @@ export class LostDaysOfSpring {
 
     // Handle keyboard input: movement, crouch, shooting, jump
     handleInput() {
-        this.player.vx = 0;
-        if (this.keys[this.KEYS.left]) {
-            this.player.vx = -this.player.speed;
+        this.handleHorizontalMovementInput();
+        this.handleCrouchInput();
+        this.handleShootingInput();
+        this.handleJumpInput();
+    }
+
+    handleHorizontalMovementInput() {
+        let targetVx = 0;
+
+        if (this.keys[this.KEYS.left] && !this.keys[this.KEYS.right]) {
+            targetVx = -this.player.speed;
             this.player.facing = "left";
-        }
-        if (this.keys[this.KEYS.right]) {
-            this.player.vx += this.player.speed;
+        } else if (this.keys[this.KEYS.right] && !this.keys[this.KEYS.left]) {
+            targetVx = this.player.speed;
             this.player.facing = "right";
         }
 
+        const isAirborne = this.player.onGroundId === null;
+
+        const delta =
+            targetVx === 0
+                ? isAirborne
+                    ? this.player.airDeceleration
+                    : this.player.deceleration
+                : isAirborne
+                  ? this.player.airAcceleration
+                  : this.player.acceleration;
+
+        if (this.player.vx < targetVx) {
+            this.player.vx = Math.min(this.player.vx + delta, targetVx);
+            return;
+        }
+
+        if (this.player.vx > targetVx) {
+            this.player.vx = Math.max(this.player.vx - delta, targetVx);
+        }
+    }
+
+    handleCrouchInput() {
         if (this.keys[this.KEYS.crouchAlt] || this.keys[this.KEYS.crouch]) {
             if (!this.player.crouch) {
                 this.player.crouch = true;
@@ -252,17 +290,16 @@ export class LostDaysOfSpring {
                     this.player.y +
                     (this.player.originalHeight - this.player.crouchHeight);
             }
-        } else {
-            if (this.player.crouch && this.canStandUp()) {
-                this.player.crouch = false;
-                this.player.y =
-                    this.player.y -
-                    (this.player.originalHeight - this.player.crouchHeight);
-                this.player.h = this.player.originalHeight;
-            }
+        } else if (this.player.crouch && this.canStandUp()) {
+            this.player.crouch = false;
+            this.player.y =
+                this.player.y -
+                (this.player.originalHeight - this.player.crouchHeight);
+            this.player.h = this.player.originalHeight;
         }
+    }
 
-        // Shooting
+    handleShootingInput() {
         if (this.keys[this.KEYS.shoot]) {
             this.player.shooting = true;
             const now = performance.now();
@@ -291,31 +328,47 @@ export class LostDaysOfSpring {
         } else {
             this.player.shooting = false;
         }
+    }
 
-        if (
-            this.keys[this.KEYS.jump] &&
-            this.player.onGroundId !== null &&
-            this.player.onGroundType !== "booster"
-        ) {
+    handleJumpInput() {
+        const now = performance.now();
+        const jumpBuffered =
+            now - this.player.jumpPressedAt <= this.player.jumpBufferDuration;
+
+        const isTouchingGround = this.player.onGroundId !== null;
+        const isOnBooster = this.player.onGroundType === "booster";
+        const leftBoosterRecently = this.player.lastGroundType === "booster";
+
+        const hasCoyoteTime =
+            now - this.player.lastGroundedAt <= this.player.coyoteDuration &&
+            !leftBoosterRecently;
+
+        const canGroundJump =
+            !isOnBooster && (isTouchingGround || hasCoyoteTime);
+
+        if (jumpBuffered && canGroundJump) {
             this.player.vy = -this.player.jump;
             this.player.bounceCount = 0;
+            this.player.lastGroundedAt = 0;
             this.player.onGroundId = null;
             this.player.onGroundType = null;
             this.player.isJumping = true;
+            this.player.jumpPressedAt = 0;
         }
     }
 
     // Apply gravity and enforce terminal velocity
     applyPhysics() {
         let currentGravity = this.PHYSICS.gravity;
+        const isAscending = this.player.vy < 0;
+        const isFalling = this.player.vy > 0;
+        const jumpHeld = this.keys[this.KEYS.jump];
 
         // Variable jump height: fall faster if jump key is released while ascending
-        if (
-            this.player.vy < 0 &&
-            !this.keys[this.KEYS.jump] &&
-            this.player.isJumping
-        ) {
-            currentGravity *= 2;
+        if (isAscending && !jumpHeld && this.player.isJumping) {
+            currentGravity *= this.PHYSICS.jumpCutGravityMultiplier;
+        } else if (isFalling) {
+            currentGravity *= this.PHYSICS.fallGravityMultiplier;
         }
 
         this.player.vy += currentGravity;
@@ -333,8 +386,10 @@ export class LostDaysOfSpring {
         // World bounds check (X axis)
         if (this.player.x < 0) {
             this.player.x = 0;
+            this.player.vx = 0;
         } else if (this.player.x + this.player.w > this.WORLD_SIZE.width) {
             this.player.x = this.WORLD_SIZE.width - this.player.w;
+            this.player.vx = 0;
         }
 
         for (const p of this.platforms) {
@@ -362,6 +417,7 @@ export class LostDaysOfSpring {
                     this.player.y = p.y - this.player.h;
                     this.player.onGroundId = p.id;
                     this.player.onGroundType = p.type;
+                    this.player.lastGroundedAt = performance.now();
                     this.player.isJumping = false;
                     this.player.bounceCount =
                         this.player.lastGroundId !== p.id
@@ -506,7 +562,7 @@ export class LostDaysOfSpring {
 
     drawPlatform(p) {
         let renderer = this.platformRenderer;
-        if (p.type === "bouncy") {
+        if (p.elasticity > 0) {
             renderer = BouncyPlatformRenderer;
         } else if (p.type === "booster") {
             renderer = BoosterPlatformRenderer;
@@ -568,6 +624,10 @@ export class LostDaysOfSpring {
             -Math.round(this.CAMERA.y),
         );
 
+        for (const p of this.platforms) {
+            this.drawPlatform(p);
+        }
+
         for (const w of this.bullets) {
             this.drawWeapon(w);
         }
@@ -583,10 +643,6 @@ export class LostDaysOfSpring {
         }
 
         this.drawPlayer();
-
-        for (const p of this.platforms) {
-            this.drawPlatform(p);
-        }
 
         this.ctx.restore();
     }
