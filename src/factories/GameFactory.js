@@ -78,7 +78,7 @@ export const GameFactory = {
         crouch: false,
         crouchHeight: 50,
         originalHeight: 85,
-        jump: 13.2,
+        jump: 13.4,
         isJumping: false,
         jumpPressedAt: 0,
         jumpBufferDuration: 80,
