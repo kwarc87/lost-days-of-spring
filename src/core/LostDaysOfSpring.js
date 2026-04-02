@@ -11,6 +11,7 @@ import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
 import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
 import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
+import { DebugGridRenderer } from "../renderers/DebugRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -28,11 +29,13 @@ export class LostDaysOfSpring {
             crouchAlt: "KeyC",
             shoot: "Space",
             pause: "KeyP",
+            map: "KeyM",
         };
 
         // ====== GAME STATE ======
         this.currentLevelId = null;
         this.pendingReset = false;
+        this.mapView = false;
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });
@@ -83,6 +86,19 @@ export class LostDaysOfSpring {
         this.accumulator = 0;
         this.loop = this.loop.bind(this);
         this.isRunning = false;
+
+        this.mouse = { worldX: 0, worldY: 0 };
+        this.canvas.addEventListener("mousemove", (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const scaleX = this.canvas.width / rect.width;
+            const scaleY = this.canvas.height / rect.height;
+            this.mouse.worldX = Math.round(
+                (e.clientX - rect.left) * scaleX + this.CAMERA.x,
+            );
+            this.mouse.worldY = Math.round(
+                (e.clientY - rect.top) * scaleY + this.CAMERA.y,
+            );
+        });
 
         this.initControls();
 
@@ -147,6 +163,11 @@ export class LostDaysOfSpring {
             // Toggle pause state
             if (e.code === this.KEYS.pause && !e.repeat) {
                 this.togglePause();
+            }
+
+            // Toggle map overview
+            if (e.code === this.KEYS.map && !e.repeat) {
+                this.mapView = !this.mapView;
             }
 
             if (e.code === this.KEYS.jump && !this.keys[e.code] && !e.repeat) {
@@ -533,6 +554,10 @@ export class LostDaysOfSpring {
 
     // Center camera on player and clamp to world bounds
     updateCamera() {
+        if (this.mapView) {
+            return;
+        }
+
         this.CAMERA.x =
             this.player.x + this.player.w / 2 - this.CAMERA.width / 2;
         this.CAMERA.y =
@@ -619,10 +644,18 @@ export class LostDaysOfSpring {
 
         this.drawWorld();
 
-        this.ctx.translate(
-            -Math.round(this.CAMERA.x),
-            -Math.round(this.CAMERA.y),
-        );
+        if (this.mapView) {
+            const scale = Math.min(
+                this.canvas.width / this.WORLD_SIZE.width,
+                this.canvas.height / this.WORLD_SIZE.height,
+            );
+            this.ctx.scale(scale, scale);
+        } else {
+            this.ctx.translate(
+                -Math.round(this.CAMERA.x),
+                -Math.round(this.CAMERA.y),
+            );
+        }
 
         for (const p of this.platforms) {
             this.drawPlatform(p);
@@ -644,6 +677,10 @@ export class LostDaysOfSpring {
 
         this.drawPlayer();
 
+        if (this.showDebug) {
+            DebugGridRenderer.draw(this.ctx, this.CAMERA, this.WORLD_SIZE);
+        }
+
         this.ctx.restore();
     }
 
@@ -652,6 +689,10 @@ export class LostDaysOfSpring {
             const el = document.getElementById("debug");
             if (el) {
                 el.remove();
+            }
+            const cp = document.getElementById("cursor-pos");
+            if (cp) {
+                cp.remove();
             }
             return;
         }
@@ -687,6 +728,30 @@ export class LostDaysOfSpring {
             row.appendChild(document.createTextNode(" " + display));
             el.appendChild(row);
         }
+
+        let cp = document.getElementById("cursor-pos");
+        if (!cp) {
+            cp = document.createElement("div");
+            cp.id = "cursor-pos";
+            if (this.canvas.parentElement) {
+                this.canvas.parentElement.appendChild(cp);
+            } else {
+                document.body.appendChild(cp);
+            }
+        }
+        cp.textContent = "";
+        const rowX = document.createElement("div");
+        const lx = document.createElement("strong");
+        lx.textContent = "x";
+        rowX.appendChild(lx);
+        rowX.appendChild(document.createTextNode(" " + this.mouse.worldX));
+        cp.appendChild(rowX);
+        const rowY = document.createElement("div");
+        const ly = document.createElement("strong");
+        ly.textContent = "y";
+        rowY.appendChild(ly);
+        rowY.appendChild(document.createTextNode(" " + this.mouse.worldY));
+        cp.appendChild(rowY);
     }
 
     loop(now) {

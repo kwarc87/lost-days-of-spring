@@ -10,35 +10,34 @@ export const DefaultCollectibleRenderer = {
 
         // Shadow beneath the coin
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-        ctx.fillRect(x + 6, y + 27, 18, 6);
+        ctx.fillRect(x + 4, y + 23, 17, 3);
 
-        // Core Border (Dark Gold / Brown)
-        // Draw using 3x3 pixel art blocks to achieve a 30x30 total size
+        // Core Border (Dark Gold / Brown) — 25x25
         ctx.fillStyle = "#a87b00";
-        ctx.fillRect(x + 9, y + 0, 12, 30); // vertical core
-        ctx.fillRect(x + 3, y + 3, 24, 24); // main bulk square
-        ctx.fillRect(x + 0, y + 9, 30, 12); // horizontal core
+        ctx.fillRect(x + 8, y + 0, 9, 25); // vertical core
+        ctx.fillRect(x + 3, y + 3, 19, 19); // main bulk square
+        ctx.fillRect(x + 0, y + 8, 25, 9); // horizontal core
 
         // Coin Body (Bright Gold)
         ctx.fillStyle = "#ffd700";
-        ctx.fillRect(x + 9, y + 3, 12, 24);
-        ctx.fillRect(x + 6, y + 6, 18, 18);
-        ctx.fillRect(x + 3, y + 9, 24, 12);
+        ctx.fillRect(x + 8, y + 3, 9, 19);
+        ctx.fillRect(x + 5, y + 5, 15, 15);
+        ctx.fillRect(x + 3, y + 8, 19, 9);
 
         // Right/Bottom Inner Shading (Medium Gold)
         ctx.fillStyle = "#e5a700";
-        ctx.fillRect(x + 9, y + 24, 12, 3); // bottom edge inner
-        ctx.fillRect(x + 6, y + 21, 18, 3); // bottom slope inner
-        ctx.fillRect(x + 24, y + 9, 3, 12); // right edge inner
+        ctx.fillRect(x + 8, y + 20, 9, 2); // bottom edge inner
+        ctx.fillRect(x + 5, y + 18, 15, 2); // bottom slope inner
+        ctx.fillRect(x + 20, y + 8, 2, 9); // right edge inner
 
         // Center Engraving / Slot
         ctx.fillStyle = "#cc9500";
-        ctx.fillRect(x + 12, y + 9, 6, 12);
+        ctx.fillRect(x + 10, y + 8, 5, 9);
 
         // Shimmer / Shine (Top-Left corner)
         ctx.fillStyle = "#ffffff";
-        ctx.fillRect(x + 9, y + 6, 6, 3);
-        ctx.fillRect(x + 6, y + 9, 3, 6);
+        ctx.fillRect(x + 8, y + 5, 5, 2);
+        ctx.fillRect(x + 5, y + 8, 2, 5);
 
         ctx.restore();
     },

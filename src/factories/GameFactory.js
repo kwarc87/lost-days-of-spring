@@ -50,7 +50,8 @@ export const GameFactory = {
         type: "booster",
         boostSpeed,
     }),
-    enemy: (platformId, speed = 1.5, overrides = {}) => ({
+    enemy: (id, platformId, speed = 1.5, overrides = {}) => ({
+        id,
         platformId,
         w: 36,
         h: 76,
@@ -69,16 +70,15 @@ export const GameFactory = {
         h: 85,
         vx: 0,
         vy: 0,
-        color: "#005C53",
         acceleration: 0.65,
         deceleration: 0.85,
-        airAcceleration: 0.5,
-        airDeceleration: 0.35,
-        speed: 5.2,
+        airAcceleration: 0.55,
+        airDeceleration: 0.45,
+        speed: 5.8,
         crouch: false,
         crouchHeight: 50,
         originalHeight: 85,
-        jump: 13.4,
+        jump: 15.4,
         isJumping: false,
         jumpPressedAt: 0,
         jumpBufferDuration: 80,
@@ -99,8 +99,8 @@ export const GameFactory = {
         id,
         x,
         y,
-        w: 30,
-        h: 30,
+        w: 25,
+        h: 25,
         collected: false,
         ...overrides,
     }),
@@ -118,4 +118,44 @@ export const GameFactory = {
         },
         ...overrides,
     }),
+    rowOfCollectibles: (startId, count, startX, y, gap) =>
+        Array.from({ length: count }, (_, i) =>
+            GameFactory.collectible(startId + i, startX + i * gap, y),
+        ),
+    /**
+     * Half-pyramid staircase (left-aligned, widens towards the bottom).
+     * Row 0 = top (narrowest), row height-1 = bottom (widest).
+     * Each subsequent row is `width` block-units wider than the one above.
+     *
+     * @param {number} startId  - First platform id
+     * @param {number} startX   - Left edge X of all rows
+     * @param {number} startY   - Y of the topmost row
+     * @param {number} blockWidth  - Width of one block unit (default 50)
+     * @param {number} blockHeight - Height of one block unit (default 50)
+     * @param {number} height   - Number of rows/steps
+     * @param {number} width    - How many block-units each row adds relative to the one above
+     */
+    stairs: (
+        startId,
+        startX,
+        startY,
+        blockWidth = 50,
+        blockHeight = 50,
+        width,
+    ) => {
+        const platforms = [];
+        let id = startId;
+        for (let i = 0; i < width; i++) {
+            platforms.push(
+                GameFactory.ground(
+                    id++,
+                    startX + i * blockWidth,
+                    startY - i * blockHeight,
+                    blockWidth * width - i * blockWidth,
+                    blockHeight,
+                ),
+            );
+        }
+        return platforms;
+    },
 };

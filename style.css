@@ -18,7 +18,8 @@ body {
 
 /* ===== DEBUG & CONTROLS PANELS ===== */
 #debug,
-#controls {
+#controls,
+#cursor-pos {
     position: absolute;
     top: 0;
 
@@ -55,8 +56,16 @@ body {
     left: auto;
 }
 
+#cursor-pos {
+    right: 0;
+    left: auto;
+    top: auto;
+    bottom: 0;
+}
+
 #debug > div,
-#controls > div {
+#controls > div,
+#cursor-pos > div {
     display: flex;
 
     justify-content: space-between;
@@ -67,22 +76,26 @@ body {
 }
 
 #debug > div:last-child,
-#controls > div:last-child {
+#controls > div:last-child,
+#cursor-pos > div:last-child {
     border-bottom: none;
 }
 
 #debug strong,
-#controls strong {
+#controls strong,
+#cursor-pos strong {
     font-weight: 500;
     color: #93c5fd;
 }
 
 #debug div,
-#controls div {
+#controls div,
+#cursor-pos div {
     color: #f8fafc;
 }
 
 #debug div:has(strong),
-#controls div:has(strong) {
+#controls div:has(strong),
+#cursor-pos div:has(strong) {
     font-variant-numeric: tabular-nums;
 }
