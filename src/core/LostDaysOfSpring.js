@@ -12,6 +12,7 @@ import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
 import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
 import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
 import { DebugGridRenderer } from "../renderers/DebugRenderers.js";
+import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -81,6 +82,7 @@ export class LostDaysOfSpring {
         this.worldRenderer = DefaultWorldRenderer;
         this.pauseRenderer = DefaultPauseRenderer;
         this.weaponRenderer = DefaultWeaponRenderer;
+        this.hudRenderer = DefaultHubRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -120,6 +122,7 @@ export class LostDaysOfSpring {
         this.platforms = levelData.platforms;
         this.enemies = levelData.enemies;
         this.collectibles = levelData.collectibles ?? [];
+        this.currentLevelCollectiblesCount = this.collectibles.length;
 
         // Reset dynamic player properties according to level start
         Object.assign(this.player, {
@@ -682,6 +685,13 @@ export class LostDaysOfSpring {
         }
 
         this.ctx.restore();
+
+        this.hudRenderer.draw(
+            this.ctx,
+            this.canvas,
+            this.player,
+            this.currentLevelCollectiblesCount,
+        );
     }
 
     updateDebug(now) {

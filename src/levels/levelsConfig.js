@@ -6,7 +6,7 @@ export const LEVELS = {
         const collectiblesGap = 75;
         return {
             worldSize: { width: 6200, height: 2600 },
-            playerStart: { x: 5426, y: 250 },
+            playerStart: { x: 50, y: 2250 },
             platforms: [
                 // --- GROUND FLOOR ---
                 GameFactory.ground(1, 0, groundY, 6200, 45),
