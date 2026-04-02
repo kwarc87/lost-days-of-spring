@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Lost Days of Spring</title>
         <link rel="stylesheet" href="reset.css" />
-        <link rel="stylesheet" href="style.css?v=1775074257467" />
+        <link rel="stylesheet" href="style.css?v=1775161089623" />
     </head>
     <body>
         <div class="container">
@@ -23,6 +23,10 @@
             <div id="cursor-pos"></div>
             <canvas id="game" width="800" height="600"></canvas>
         </div>
-        <script type="module" src="./src/main.js?v=1775074257467"></script>
+        <script type="module">
+            import { LostDaysOfSpring } from "./src/core/LostDaysOfSpring.js?v=1775161089623";
+            const game = new LostDaysOfSpring("game", false);
+            game.start();
+        </script>
     </body>
 </html>

@@ -1,21 +1,20 @@
 export const GameFactory = {
-    ground: (id, x, y, w, h) => ({
+    solid: (id, x, y, w, h) => ({
         id,
         x,
         y,
         w,
         h,
-        color: "#5c2040", // top edge highlight — lighter scarlet
-        secondaryColor: "#3a1528", // second edge strip — mid crimson
-        textureColor: "#2a1020", // brick face — dark crimson
-        patternColor: "#1e0c16", // mortar/base — visible against bg #06010a
-        mossColor: "#0dfa9d", // neon green glowing moss (accent only)
-        mossShadowColor: "#07965c", // darker green for moss shadow
-        accentColor: "#ff3a3a", // red warning accent
-        bottomLightColor: "#1e0c16", // lighter scarlet bottom (for short platforms)
+        color: "#5c2040",
+        secondaryColor: "#3a1528",
+        textureColor: "#2a1020",
+        patternColor: "#1e0c16",
+        mossColor: "#0dfa9d",
+        mossShadowColor: "#07965c",
+        accentColor: "#ff3a3a",
+        bottomLightColor: "#1e0c16",
         bottomDarkColor: "#1b080f",
-        elasticity: 0,
-        type: "normal",
+        type: "solid",
     }),
     bouncy: (id, x, y, w, h, elasticity = 0.5) => ({
         id,
@@ -23,17 +22,17 @@ export const GameFactory = {
         y,
         w,
         h,
-        color: "#c42040", // top edge — vivid red
-        secondaryColor: "#8c1530", // second strip — deep red
-        textureColor: "#5a1020", // brick face — saturated crimson
-        patternColor: "#300c14", // mortar — dark red
-        mossColor: "#0dfa9d", // neon green accent
+        color: "#c42040",
+        secondaryColor: "#8c1530",
+        textureColor: "#5a1020",
+        patternColor: "#300c14",
+        mossColor: "#0dfa9d",
         mossShadowColor: "#07965c",
-        accentColor: "#ff6040", // warm orange-red accent
+        accentColor: "#ff6040",
         bottomLightColor: "#29040d",
         bottomDarkColor: "#300c14",
         elasticity,
-        type: "normal",
+        type: "bouncy",
     }),
     booster: (id, x, y, w, h, boostSpeed = 20) => ({
         id,
@@ -147,7 +146,7 @@ export const GameFactory = {
         let id = startId;
         for (let i = 0; i < width; i++) {
             platforms.push(
-                GameFactory.ground(
+                GameFactory.solid(
                     id++,
                     startX + i * blockWidth,
                     startY - i * blockHeight,

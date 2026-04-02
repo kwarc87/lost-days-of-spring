@@ -51,6 +51,8 @@ export class LostDaysOfSpring {
             y: 0,
             width: this.canvas.width,
             height: this.canvas.height,
+            lookAheadX: 0,
+            lookAheadY: 0,
         };
 
         // ====== PHYSICS ======
@@ -430,14 +432,18 @@ export class LostDaysOfSpring {
 
     // Move player along the Y axis, resolve platform collisions, and check fall-off
     movePlayerY() {
+        const previousY = this.player.y;
         this.player.y += this.player.vy;
         this.player.onGroundId = null;
         this.player.onGroundType = null;
 
         for (const p of this.platforms) {
             if (this.rectsCollide(this.player, p)) {
+                const wasAbove = previousY + this.player.h <= p.y;
+                const wasBelow = previousY >= p.y + p.h;
+
                 // Landing on top of platform
-                if (this.player.vy > 0) {
+                if (this.player.vy > 0 && wasAbove) {
                     this.player.y = p.y - this.player.h;
                     this.player.onGroundId = p.id;
                     this.player.onGroundType = p.type;
@@ -454,7 +460,12 @@ export class LostDaysOfSpring {
                         this.player.vy = -p.boostSpeed;
                     }
 
-                    if (p.type === "normal") {
+                    if (p.type === "solid") {
+                        this.player.vy = 0;
+                        this.player.bounceCount = 0;
+                    }
+
+                    if (p.type === "bouncy") {
                         const impactSpeed = this.player.vy;
                         this.player.vy =
                             this.player.bounceCount === 1
@@ -470,7 +481,9 @@ export class LostDaysOfSpring {
                         }
                     }
                     break;
-                } else {
+                }
+
+                if (this.player.vy < 0 && wasBelow) {
                     // Hit ceiling
                     this.player.y = p.y + p.h;
                     this.player.vy = 0;
@@ -561,15 +574,52 @@ export class LostDaysOfSpring {
             return;
         }
 
-        this.CAMERA.x =
-            this.player.x + this.player.w / 2 - this.CAMERA.width / 2;
-        this.CAMERA.y =
-            this.player.y + this.player.h / 2 - this.CAMERA.height / 2;
+        // ===== Horizontal look-ahead =====
+        const desiredLookAheadX = this.player.facing === "right" ? 120 : -120;
+
+        this.CAMERA.lookAheadX +=
+            (desiredLookAheadX - this.CAMERA.lookAheadX) * 0.02;
+
+        // ===== Vertical look-ahead =====
+        let desiredLookAheadY = 0;
+
+        if (this.player.vy > 1) {
+            desiredLookAheadY = 120;
+        } else if (this.player.vy < -1) {
+            desiredLookAheadY = -120;
+        }
+
+        if (this.player.crouch) {
+            desiredLookAheadY += 140;
+        }
+
+        this.CAMERA.lookAheadY +=
+            (desiredLookAheadY - this.CAMERA.lookAheadY) * 0.035;
+
+        // ===== Camera target =====
+        const targetX =
+            this.player.x + this.player.w / 2 + this.CAMERA.lookAheadX;
+
+        const playerFootY = this.player.y + this.player.h;
+
+        const targetY =
+            playerFootY -
+            this.player.originalHeight * 0.6 +
+            this.CAMERA.lookAheadY;
+
+        const desiredX = targetX - this.CAMERA.width / 2;
+        const desiredY = targetY - this.CAMERA.height / 2;
+
+        const smoothing = 0.15;
+
+        this.CAMERA.x += (desiredX - this.CAMERA.x) * smoothing;
+        this.CAMERA.y += (desiredY - this.CAMERA.y) * smoothing;
 
         this.CAMERA.x = Math.max(
             0,
             Math.min(this.CAMERA.x, this.WORLD_SIZE.width - this.CAMERA.width),
         );
+
         this.CAMERA.y = Math.max(
             0,
             Math.min(
@@ -590,7 +640,7 @@ export class LostDaysOfSpring {
 
     drawPlatform(p) {
         let renderer = this.platformRenderer;
-        if (p.elasticity > 0) {
+        if (p.type === "bouncy") {
             renderer = BouncyPlatformRenderer;
         } else if (p.type === "booster") {
             renderer = BoosterPlatformRenderer;
