@@ -6,26 +6,26 @@ export const LEVELS = {
         const collectiblesGap = 75;
         return {
             worldSize: { width: 6200, height: 2600 },
-            playerStart: { x: 50, y: 1400 },
+            playerStart: { x: 50, y: 1700 },
             platforms: [
                 // --- GROUND FLOOR ---
                 GameFactory.solid(1, 0, groundY, 6200, 45),
 
                 // --- LOWER-LEFT TERRAIN ---
                 GameFactory.solid(2, 450, 2400, 200, 50),
-                GameFactory.solid(3, 800, 2300, 500, 50),
-                GameFactory.solid(4, 1400, 2375, 200, 25),
-                GameFactory.solid(5, 1650, 2200, 800, 75),
+                GameFactory.solid(3, 800, 2250, 500, 50),
+                GameFactory.solid(4, 1400, 2175, 100, 25),
+                GameFactory.solid(5, 1650, 2075, 800, 75),
 
                 // --- PYRAMID (stairs IDs 6â€“11) ---
                 ...GameFactory.stairs(6, 2600, 2050, 100, 50, 6),
                 GameFactory.solid(12, 3200, 1800, 100, 300),
                 GameFactory.solid(13, 3300, 1800, 300, 100),
                 GameFactory.solid(14, 3600, 1800, 100, 300),
-                GameFactory.bouncy(15, 3700, 2050, 280, 50, 0.6),
+                GameFactory.bouncy(15, 3700, 2050, 400, 50, 0.6),
                 GameFactory.solid(16, 3700, 1900, 100, 50),
                 GameFactory.solid(17, 3850, 2350, 250, 200),
-                GameFactory.solid(18, 4200, 2175, 150, 25),
+                GameFactory.solid(18, 4250, 2200, 150, 25),
                 GameFactory.booster(19, 3900, 1700, 300, 25, 30),
                 GameFactory.booster(20, 3350, 2525, 200, 25, 23),
 
@@ -34,7 +34,7 @@ export const LEVELS = {
 
                 // --- CLOUDS ---
                 GameFactory.solid(22, 2300, 550, 300, 25),
-                GameFactory.solid(23, 2850, 600, 50, 25),
+                GameFactory.solid(23, 2850, 575, 50, 25),
                 GameFactory.solid(24, 3000, 700, 50, 25),
                 GameFactory.solid(25, 2850, 900, 50, 25),
                 GameFactory.solid(26, 2950, 1050, 100, 25),
@@ -42,7 +42,7 @@ export const LEVELS = {
                 GameFactory.bouncy(28, 4150, 900, 400, 150),
 
                 // --- RIGHT SIDE BASE ---
-                GameFactory.solid(29, 4450, 2000, 400, 25),
+                GameFactory.solid(29, 4550, 2000, 300, 25),
                 GameFactory.bouncy(30, 5400, 2430, 800, 60, 0.65),
 
                 // --- FIRST ASCENT ---
@@ -65,12 +65,12 @@ export const LEVELS = {
 
                 // --- FOURTH ASCENT ---
                 GameFactory.booster(41, 5690, 920, 140, 20, 21),
-                GameFactory.solid(42, 5380, 650, 100, 20),
-                GameFactory.solid(43, 5000, 530, 250, 40),
+                GameFactory.solid(42, 5350, 750, 150, 20),
+                GameFactory.solid(43, 5300, 350, 150, 20),
+                GameFactory.solid(44, 4900, 550, 250, 40),
 
                 // --- FINAL STEPS ---
-                GameFactory.solid(44, 5380, 350, 160, 20),
-                GameFactory.solid(45, 5750, 200, 450, 40),
+                GameFactory.solid(45, 5750, 350, 450, 40),
             ],
             enemies: [
                 // Lower-left terrain
@@ -79,16 +79,26 @@ export const LEVELS = {
                     secondaryColor: "#BF3604",
                     health: 5,
                 }),
-                GameFactory.enemy(2, 5, 1, {
+                GameFactory.enemy(2, 5, 2, {
+                    mainColor: "#F2DCC9",
+                    secondaryColor: "#34E3AE",
+                    health: 10,
+                }),
+                // Pyramid
+                GameFactory.enemy(3, 17, 2, {
+                    mainColor: "#F2DCC9",
+                    secondaryColor: "#34E3AE",
+                    health: 10,
+                }),
+                GameFactory.enemy(9, 29, 2, {
+                    mainColor: "#F2DCC9",
+                    secondaryColor: "#34E3AE",
+                    health: 10,
+                }),
+                GameFactory.enemy(10, 15, 1, {
                     mainColor: "#F2DCC9",
                     secondaryColor: "#BF3604",
                     health: 5,
-                }),
-                // Pyramid
-                GameFactory.enemy(3, 17, 4, {
-                    mainColor: "#F2DCC9",
-                    secondaryColor: "#65BFA6",
-                    health: 10,
                 }),
                 // Clouds
                 GameFactory.enemy(4, 22, 2, {
@@ -122,19 +132,19 @@ export const LEVELS = {
             ],
             collectibles: [
                 // --- LOWER-LEFT TERRAIN (C1 - C10) ---
-                GameFactory.collectible(1, 537, 2300),
+                GameFactory.collectible(1, 537, 2325),
                 ...GameFactory.rowOfCollectibles(
                     2,
                     3,
                     962,
-                    2225,
+                    2175,
                     collectiblesGap,
                 ),
                 ...GameFactory.rowOfCollectibles(
                     5,
                     6,
                     1875,
-                    2125,
+                    2000,
                     collectiblesGap,
                 ),
 
@@ -216,13 +226,21 @@ export const LEVELS = {
                 GameFactory.collectible(90, 5650, 2150),
 
                 // --- FINAL GOAL AREA (C91 - C126) ---
-                ...GameFactory.rowOfCollectibles(91, 12, 5775, 120, 35),
-                ...GameFactory.rowOfCollectibles(103, 12, 5775, 85, 35),
-                ...GameFactory.rowOfCollectibles(115, 12, 5775, 50, 35),
+                ...GameFactory.rowOfCollectibles(91, 12, 5775, 50, 35),
+                ...GameFactory.rowOfCollectibles(103, 12, 5775, 100, 35),
+                ...GameFactory.rowOfCollectibles(115, 12, 5775, 150, 35),
+                ...GameFactory.rowOfCollectibles(136, 12, 5775, 200, 35),
 
                 // --- CUSTOM (C127 - C135) ---
                 ...GameFactory.rowOfCollectibles(127, 5, 2750, 2450, 50),
-                ...GameFactory.rowOfCollectibles(132, 4, 3300, 1700, 50),
+                ...GameFactory.rowOfCollectibles(132, 4, 3400, 1700, 50),
+                ...GameFactory.rowOfCollectibles(
+                    148,
+                    3,
+                    4625,
+                    1700,
+                    collectiblesGap,
+                ),
             ],
         };
     },

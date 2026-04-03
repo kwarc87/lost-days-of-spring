@@ -18,9 +18,9 @@ export const DefaultPlayerRenderer = {
             ctx.fillRect(x, y, w, h);
         };
 
-        const suitBlue = "#102a43";
-        const suitGray = "#243b53";
-        const suitLight = "#334e68";
+        const suitBlue = player.isHit ? "#7a1212" : "#102a43";
+        const suitGray = player.isHit ? "#9e1f1f" : "#243b53";
+        const suitLight = player.isHit ? "#c43030" : "#334e68";
 
         const jeansBlue = "#0E253A";
         const jeansLight = "#193a59";

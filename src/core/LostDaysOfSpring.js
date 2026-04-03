@@ -14,6 +14,7 @@ import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
 import { DebugGridRenderer } from "../renderers/DebugRenderers.js";
 import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
+import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -39,8 +40,11 @@ export class LostDaysOfSpring {
         this.pendingReset = false;
         this.mapView = false;
         this.levelComplete = false;
+        this.gameOver = false;
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
+        this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.LEVEL_COMPLETE_DELAY = 7000; // ms until auto-restart
+        this.GAME_OVER_DELAY = 7000; // ms until auto-restart after game over
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });
@@ -57,6 +61,7 @@ export class LostDaysOfSpring {
             height: this.canvas.height, // viewport height in pixels
 
             smoothing: 0.15, // base interpolation factor for camera position (0–1)
+
             maxSmoothingY: 0.45, // max camera Y smoothing at terminal velocity
 
             lookAheadX: 0, // current horizontal look-ahead offset (interpolated)
@@ -64,12 +69,11 @@ export class LostDaysOfSpring {
             lookAheadXSmoothing: 0.02, // interpolation factor for horizontal look-ahead
 
             lookAheadY: 0, // current vertical look-ahead offset (interpolated)
-            lookAheadYTargetUp: 80, // look-ahead distance when ascending (pixels)
-            lookAheadYTargetDown: 160, // look-ahead distance when falling (pixels)
-            lookAheadYMinSmoothing: 0.04, // vertical look-ahead smoothing at low speed
-            lookAheadYMaxSmoothing: 0.25, // vertical look-ahead smoothing at terminal velocity
+            lookAheadYTargetUp: 120, // look-ahead distance when ascending (pixels)
+            lookAheadYTargetDown: 220, // look-ahead distance when falling (pixels)
+            lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing
 
-            anchorRatio: 0.6, // player height fraction used as vertical anchor point
+            lookAheadYTargetDownCrouch: 100,
         };
 
         // ====== PHYSICS ======
@@ -103,6 +107,7 @@ export class LostDaysOfSpring {
         this.weaponRenderer = DefaultWeaponRenderer;
         this.hudRenderer = DefaultHubRenderer;
         this.levelCompleteRenderer = DefaultLevelCompleteRenderer;
+        this.gameOverRenderer = DefaultGameOverRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -152,13 +157,15 @@ export class LostDaysOfSpring {
             vy: 0,
             crouch: false,
             h: this.player.originalHeight,
+            life: this.player.maxLife,
+            isHit: false,
+            lastHitTime: 0,
             onGroundId: null,
             onGroundType: null,
             lastGroundId: null,
             lastGroundType: null,
             bounceCount: 0,
             collectiblesCount: 0,
-            life: 6,
             facing: "right",
             isJumping: false,
             shooting: false,
@@ -166,6 +173,9 @@ export class LostDaysOfSpring {
             jumpPressedAt: 0,
             lastGroundedAt: 0,
         });
+
+        // Clear held keys to prevent ghost input on level start
+        this.keys = {};
 
         // Initialize dynamic entity defaults
         this.initEnemies();
@@ -177,10 +187,14 @@ export class LostDaysOfSpring {
         // Reset Camera
         this.CAMERA.x = 0;
         this.CAMERA.y = 0;
+        this.CAMERA.lookAheadX = 0;
+        this.CAMERA.lookAheadY = 0;
 
-        // Reset level-complete state
+        // Reset level-complete and game-over state
         this.levelComplete = false;
         this.levelCompleteAt = 0;
+        this.gameOver = false;
+        this.gameOverAt = 0;
     }
 
     initControls() {
@@ -188,7 +202,12 @@ export class LostDaysOfSpring {
             e.stopPropagation();
 
             // Dismiss level-complete screen early
-            if (e.code === this.KEYS.shoot && this.levelComplete && !e.repeat) {
+            if (e.code === "Escape" && this.levelComplete && !e.repeat) {
+                this.resetGame();
+            }
+
+            // Dismiss game-over screen early
+            if (e.code === "Escape" && this.gameOver && !e.repeat) {
                 this.resetGame();
             }
 
@@ -284,8 +303,8 @@ export class LostDaysOfSpring {
             return;
         }
 
-        // Freeze game logic while level-complete screen is shown
-        if (this.levelComplete) {
+        // Freeze game logic while level-complete or game-over screen is shown
+        if (this.levelComplete || this.gameOver) {
             return;
         }
 
@@ -297,6 +316,7 @@ export class LostDaysOfSpring {
         this.updateBullets();
         this.updateCollectibles();
         this.updateCamera();
+        this.updateDamageCooldown();
     }
 
     // Handle keyboard input: movement, crouch, shooting, jump
@@ -458,6 +478,7 @@ export class LostDaysOfSpring {
                     this.player.x = p.x + p.w;
                 }
                 this.player.vx = 0;
+                break;
             }
         }
     }
@@ -468,6 +489,15 @@ export class LostDaysOfSpring {
         this.player.y += this.player.vy;
         this.player.onGroundId = null;
         this.player.onGroundType = null;
+
+        // World bounds check (X axis)
+        if (this.player.y < 0) {
+            this.player.y = 0;
+            this.player.vy = 0;
+        } else if (this.player.y + this.player.h > this.WORLD_SIZE.height) {
+            this.player.y = this.WORLD_SIZE.height - this.player.h;
+            this.player.vy = 0;
+        }
 
         for (const p of this.platforms) {
             if (this.rectsCollide(this.player, p)) {
@@ -550,7 +580,39 @@ export class LostDaysOfSpring {
             }
 
             if (this.rectsCollide(this.player, enemy)) {
-                this.resetGame();
+                const playerCenterX = this.player.x + this.player.w / 2;
+                const enemyCenterX = enemy.x + enemy.w / 2;
+                const playerIsLeft = playerCenterX < enemyCenterX;
+
+                // Block player from staying inside enemy
+                if (playerIsLeft) {
+                    this.player.x = enemy.x - this.player.w;
+                } else {
+                    this.player.x = enemy.x + enemy.w;
+                }
+
+                if (now - this.player.lastHitTime >= this.player.hitCooldown) {
+                    this.player.life -= 1;
+                    this.player.lastHitTime = now;
+                    this.player.isHit = true;
+
+                    const hitFromLeft =
+                        this.player.x + this.player.w / 2 <
+                        enemy.x + enemy.w / 2;
+
+                    this.player.vx = hitFromLeft ? -18 : 18;
+                    this.player.vy = -6;
+
+                    if (this.player.life <= 0) {
+                        this.gameOver = true;
+                        this.gameOverAt = performance.now();
+                        return;
+                    }
+                }
+
+                // Only resolve one enemy collision per tick to prevent
+                // position thrashing when two enemies are adjacent.
+                break;
             }
         }
     }
@@ -586,6 +648,13 @@ export class LostDaysOfSpring {
                 }
             }
 
+            // Bullet-platform collision
+            for (let i = this.platforms.length - 1; i >= 0; i--) {
+                if (this.rectsCollide(bullet, this.platforms[i])) {
+                    return false; // bullet consumed on hit
+                }
+            }
+
             return true;
         });
     }
@@ -608,13 +677,11 @@ export class LostDaysOfSpring {
         }
     }
 
-    // Center camera on player and clamp to world bounds
     updateCamera() {
         if (this.mapView) {
             return;
         }
-
-        // ===== Horizontal look-ahead =====
+        // X
         const desiredLookAheadX =
             this.player.facing === "right"
                 ? this.CAMERA.lookAheadXTarget
@@ -624,61 +691,53 @@ export class LostDaysOfSpring {
             (desiredLookAheadX - this.CAMERA.lookAheadX) *
             this.CAMERA.lookAheadXSmoothing;
 
-        // ===== Vertical look-ahead =====
-        const vy = this.player.vy;
-        const maxFall = this.PHYSICS.maxFallSpeed;
+        const targetX =
+            this.player.x + this.player.w / 2 - this.CAMERA.width / 2;
+
+        const desiredCameraX = targetX + this.CAMERA.lookAheadX;
+
+        this.CAMERA.x +=
+            (desiredCameraX - this.CAMERA.x) * this.CAMERA.smoothing;
+
+        // Y
         let desiredLookAheadY = 0;
 
-        if (vy > 0) {
-            desiredLookAheadY = this.CAMERA.lookAheadYTargetDown;
-        } else if (vy < 0) {
-            desiredLookAheadY = -this.CAMERA.lookAheadYTargetUp;
+        if (this.player.vy < 0) {
+            const upRatio = Math.min(
+                Math.abs(this.player.vy) / this.player.jump,
+                1,
+            );
+            desiredLookAheadY =
+                -this.CAMERA.lookAheadYTargetUp * upRatio * upRatio;
+        } else if (this.player.vy > 0) {
+            const downRatio = Math.min(
+                this.player.vy / this.PHYSICS.maxFallSpeed,
+                1,
+            );
+            desiredLookAheadY =
+                this.CAMERA.lookAheadYTargetDown * downRatio * downRatio;
         }
 
         if (this.player.crouch) {
-            desiredLookAheadY += this.CAMERA.lookAheadYTargetDown;
+            desiredLookAheadY += this.CAMERA.lookAheadYTargetDownCrouch;
         }
 
-        // speedRatio: 0 when still, 1 at terminal velocity
-        const speedRatio = Math.min(Math.abs(vy) / maxFall, 1);
-
-        // Higher speed → faster look-ahead transition
-        // Quadratic curve so slow movement barely affects, fast movement ramps hard
-        const lookAheadSmoothingY =
-            this.CAMERA.lookAheadYMinSmoothing +
-            (this.CAMERA.lookAheadYMaxSmoothing -
-                this.CAMERA.lookAheadYMinSmoothing) *
-                speedRatio *
-                speedRatio;
-
         this.CAMERA.lookAheadY +=
-            (desiredLookAheadY - this.CAMERA.lookAheadY) * lookAheadSmoothingY;
-
-        // ===== Camera target =====
-        const targetX =
-            this.player.x + this.player.w / 2 + this.CAMERA.lookAheadX;
+            (desiredLookAheadY - this.CAMERA.lookAheadY) *
+            this.CAMERA.lookAheadYSmoothing;
 
         const playerFootY = this.player.y + this.player.h;
-
         const targetY =
             playerFootY -
-            this.player.originalHeight * this.CAMERA.anchorRatio +
-            this.CAMERA.lookAheadY;
+            this.player.originalHeight / 2 -
+            this.CAMERA.height / 2;
 
-        const desiredX = targetX - this.CAMERA.width / 2;
-        const desiredY = targetY - this.CAMERA.height / 2;
+        const desiredCameraY = targetY + this.CAMERA.lookAheadY;
 
-        this.CAMERA.x += (desiredX - this.CAMERA.x) * this.CAMERA.smoothing;
+        this.CAMERA.y +=
+            (desiredCameraY - this.CAMERA.y) * this.CAMERA.smoothing;
 
-        // Adaptive Y smoothing: ramp up when falling fast so camera keeps up
-        const fallRatio = Math.max(0, vy) / maxFall;
-        const cameraSmoothingY =
-            this.CAMERA.smoothing +
-            (this.CAMERA.maxSmoothingY - this.CAMERA.smoothing) *
-                fallRatio *
-                fallRatio;
-        this.CAMERA.y += (desiredY - this.CAMERA.y) * cameraSmoothingY;
-
+        // world bound
         this.CAMERA.x = Math.max(
             0,
             Math.min(this.CAMERA.x, this.WORLD_SIZE.width - this.CAMERA.width),
@@ -691,6 +750,16 @@ export class LostDaysOfSpring {
                 this.WORLD_SIZE.height - this.CAMERA.height,
             ),
         );
+    }
+
+    updateDamageCooldown() {
+        const now = performance.now();
+        if (
+            this.player.isHit &&
+            now - this.player.lastHitTime >= this.player.hitCooldown
+        ) {
+            this.player.isHit = false;
+        }
     }
 
     drawPlayer() {
@@ -810,6 +879,10 @@ export class LostDaysOfSpring {
         if (this.levelComplete) {
             this.drawLevelComplete();
         }
+
+        if (this.gameOver) {
+            this.drawGameOver();
+        }
     }
 
     drawLevelComplete() {
@@ -829,6 +902,25 @@ export class LostDaysOfSpring {
                 this.canvas,
                 this.player.collectiblesCount,
                 this.currentLevelCollectiblesCount,
+                remaining,
+            );
+        }
+    }
+
+    drawGameOver() {
+        const elapsed = performance.now() - this.gameOverAt;
+        const remaining = Math.max(
+            0,
+            Math.ceil((this.GAME_OVER_DELAY - elapsed) / 1000),
+        );
+
+        if (
+            this.gameOverRenderer &&
+            typeof this.gameOverRenderer.drawGameOverScreen === "function"
+        ) {
+            this.gameOverRenderer.drawGameOverScreen(
+                this.ctx,
+                this.canvas,
                 remaining,
             );
         }
@@ -928,9 +1020,12 @@ export class LostDaysOfSpring {
 
         if (
             this.levelComplete &&
-            performance.now() - this.levelCompleteAt >=
-                this.LEVEL_COMPLETE_DELAY
+            now - this.levelCompleteAt >= this.LEVEL_COMPLETE_DELAY
         ) {
+            this.resetGame();
+        }
+
+        if (this.gameOver && now - this.gameOverAt >= this.GAME_OVER_DELAY) {
             this.resetGame();
         }
 
