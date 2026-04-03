@@ -9,7 +9,7 @@ export const LEVELS = {
             playerStart: { x: 50, y: 1700 },
             platforms: [
                 // --- GROUND FLOOR ---
-                GameFactory.solid(1, 0, groundY, 6200, 45),
+                GameFactory.solid(1, 0, groundY, 6200, 50),
 
                 // --- LOWER-LEFT TERRAIN ---
                 GameFactory.solid(2, 450, 2400, 200, 50),

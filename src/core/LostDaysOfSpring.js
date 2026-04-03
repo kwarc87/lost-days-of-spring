@@ -490,13 +490,17 @@ export class LostDaysOfSpring {
         this.player.onGroundId = null;
         this.player.onGroundType = null;
 
-        // World bounds check (X axis)
+        // World bounds check (Y axis)
         if (this.player.y < 0) {
             this.player.y = 0;
             this.player.vy = 0;
         } else if (this.player.y + this.player.h > this.WORLD_SIZE.height) {
             this.player.y = this.WORLD_SIZE.height - this.player.h;
             this.player.vy = 0;
+
+            // hack to make user able to jump
+            this.player.onGroundId = 999999;
+            this.player.onGroundType = "solid";
         }
 
         for (const p of this.platforms) {
@@ -552,11 +556,6 @@ export class LostDaysOfSpring {
                     break;
                 }
             }
-        }
-
-        // Fall off the bottom of the world
-        if (this.player.y > this.WORLD_SIZE.height) {
-            this.resetGame();
         }
     }
 
