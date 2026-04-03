@@ -13,6 +13,7 @@ import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js
 import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
 import { DebugGridRenderer } from "../renderers/DebugRenderers.js";
 import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
+import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -37,6 +38,9 @@ export class LostDaysOfSpring {
         this.currentLevelId = null;
         this.pendingReset = false;
         this.mapView = false;
+        this.levelComplete = false;
+        this.levelCompleteAt = 0; // timestamp (ms) when level was completed
+        this.LEVEL_COMPLETE_DELAY = 7000; // ms until auto-restart
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });
@@ -47,12 +51,25 @@ export class LostDaysOfSpring {
 
         // ====== CAMERA ======
         this.CAMERA = {
-            x: 0,
-            y: 0,
-            width: this.canvas.width,
-            height: this.canvas.height,
-            lookAheadX: 0,
-            lookAheadY: 0,
+            x: 0, // current camera X position in world
+            y: 0, // current camera Y position in world
+            width: this.canvas.width, // viewport width in pixels
+            height: this.canvas.height, // viewport height in pixels
+
+            smoothing: 0.15, // base interpolation factor for camera position (0–1)
+            maxSmoothingY: 0.45, // max camera Y smoothing at terminal velocity
+
+            lookAheadX: 0, // current horizontal look-ahead offset (interpolated)
+            lookAheadXTarget: 180, // horizontal look-ahead distance in pixels
+            lookAheadXSmoothing: 0.02, // interpolation factor for horizontal look-ahead
+
+            lookAheadY: 0, // current vertical look-ahead offset (interpolated)
+            lookAheadYTargetUp: 80, // look-ahead distance when ascending (pixels)
+            lookAheadYTargetDown: 160, // look-ahead distance when falling (pixels)
+            lookAheadYMinSmoothing: 0.04, // vertical look-ahead smoothing at low speed
+            lookAheadYMaxSmoothing: 0.25, // vertical look-ahead smoothing at terminal velocity
+
+            anchorRatio: 0.6, // player height fraction used as vertical anchor point
         };
 
         // ====== PHYSICS ======
@@ -61,7 +78,7 @@ export class LostDaysOfSpring {
             minBounceSpeed: 0.5,
             maxFallSpeed: 18,
             fallGravityMultiplier: 1.35,
-            jumpCutGravityMultiplier: 2.1,
+            jumpCutGravityMultiplier: 4.1,
         };
 
         // ====== DEBUG ======
@@ -85,6 +102,7 @@ export class LostDaysOfSpring {
         this.pauseRenderer = DefaultPauseRenderer;
         this.weaponRenderer = DefaultWeaponRenderer;
         this.hudRenderer = DefaultHubRenderer;
+        this.levelCompleteRenderer = DefaultLevelCompleteRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -159,11 +177,20 @@ export class LostDaysOfSpring {
         // Reset Camera
         this.CAMERA.x = 0;
         this.CAMERA.y = 0;
+
+        // Reset level-complete state
+        this.levelComplete = false;
+        this.levelCompleteAt = 0;
     }
 
     initControls() {
         window.addEventListener("keydown", (e) => {
             e.stopPropagation();
+
+            // Dismiss level-complete screen early
+            if (e.code === this.KEYS.shoot && this.levelComplete && !e.repeat) {
+                this.resetGame();
+            }
 
             // Toggle pause state
             if (e.code === this.KEYS.pause && !e.repeat) {
@@ -254,6 +281,11 @@ export class LostDaysOfSpring {
         if (this.pendingReset) {
             this.pendingReset = false;
             this.loadLevel(this.currentLevelId);
+            return;
+        }
+
+        // Freeze game logic while level-complete screen is shown
+        if (this.levelComplete) {
             return;
         }
 
@@ -566,6 +598,14 @@ export class LostDaysOfSpring {
                 this.player.collectiblesCount++;
             }
         }
+
+        if (
+            !this.levelComplete &&
+            this.player.collectiblesCount >= this.currentLevelCollectiblesCount
+        ) {
+            this.levelComplete = true;
+            this.levelCompleteAt = performance.now();
+        }
     }
 
     // Center camera on player and clamp to world bounds
@@ -575,26 +615,44 @@ export class LostDaysOfSpring {
         }
 
         // ===== Horizontal look-ahead =====
-        const desiredLookAheadX = this.player.facing === "right" ? 120 : -120;
+        const desiredLookAheadX =
+            this.player.facing === "right"
+                ? this.CAMERA.lookAheadXTarget
+                : -this.CAMERA.lookAheadXTarget;
 
         this.CAMERA.lookAheadX +=
-            (desiredLookAheadX - this.CAMERA.lookAheadX) * 0.02;
+            (desiredLookAheadX - this.CAMERA.lookAheadX) *
+            this.CAMERA.lookAheadXSmoothing;
 
         // ===== Vertical look-ahead =====
+        const vy = this.player.vy;
+        const maxFall = this.PHYSICS.maxFallSpeed;
         let desiredLookAheadY = 0;
 
-        if (this.player.vy > 1) {
-            desiredLookAheadY = 120;
-        } else if (this.player.vy < -1) {
-            desiredLookAheadY = -120;
+        if (vy > 0) {
+            desiredLookAheadY = this.CAMERA.lookAheadYTargetDown;
+        } else if (vy < 0) {
+            desiredLookAheadY = -this.CAMERA.lookAheadYTargetUp;
         }
 
         if (this.player.crouch) {
-            desiredLookAheadY += 140;
+            desiredLookAheadY += this.CAMERA.lookAheadYTargetDown;
         }
 
+        // speedRatio: 0 when still, 1 at terminal velocity
+        const speedRatio = Math.min(Math.abs(vy) / maxFall, 1);
+
+        // Higher speed → faster look-ahead transition
+        // Quadratic curve so slow movement barely affects, fast movement ramps hard
+        const lookAheadSmoothingY =
+            this.CAMERA.lookAheadYMinSmoothing +
+            (this.CAMERA.lookAheadYMaxSmoothing -
+                this.CAMERA.lookAheadYMinSmoothing) *
+                speedRatio *
+                speedRatio;
+
         this.CAMERA.lookAheadY +=
-            (desiredLookAheadY - this.CAMERA.lookAheadY) * 0.035;
+            (desiredLookAheadY - this.CAMERA.lookAheadY) * lookAheadSmoothingY;
 
         // ===== Camera target =====
         const targetX =
@@ -604,16 +662,22 @@ export class LostDaysOfSpring {
 
         const targetY =
             playerFootY -
-            this.player.originalHeight * 0.6 +
+            this.player.originalHeight * this.CAMERA.anchorRatio +
             this.CAMERA.lookAheadY;
 
         const desiredX = targetX - this.CAMERA.width / 2;
         const desiredY = targetY - this.CAMERA.height / 2;
 
-        const smoothing = 0.15;
+        this.CAMERA.x += (desiredX - this.CAMERA.x) * this.CAMERA.smoothing;
 
-        this.CAMERA.x += (desiredX - this.CAMERA.x) * smoothing;
-        this.CAMERA.y += (desiredY - this.CAMERA.y) * smoothing;
+        // Adaptive Y smoothing: ramp up when falling fast so camera keeps up
+        const fallRatio = Math.max(0, vy) / maxFall;
+        const cameraSmoothingY =
+            this.CAMERA.smoothing +
+            (this.CAMERA.maxSmoothingY - this.CAMERA.smoothing) *
+                fallRatio *
+                fallRatio;
+        this.CAMERA.y += (desiredY - this.CAMERA.y) * cameraSmoothingY;
 
         this.CAMERA.x = Math.max(
             0,
@@ -742,6 +806,32 @@ export class LostDaysOfSpring {
             this.player,
             this.currentLevelCollectiblesCount,
         );
+
+        if (this.levelComplete) {
+            this.drawLevelComplete();
+        }
+    }
+
+    drawLevelComplete() {
+        const elapsed = performance.now() - this.levelCompleteAt;
+        const remaining = Math.max(
+            0,
+            Math.ceil((this.LEVEL_COMPLETE_DELAY - elapsed) / 1000),
+        );
+
+        if (
+            this.levelCompleteRenderer &&
+            typeof this.levelCompleteRenderer.drawLevelCompleteScreen ===
+                "function"
+        ) {
+            this.levelCompleteRenderer.drawLevelCompleteScreen(
+                this.ctx,
+                this.canvas,
+                this.player.collectiblesCount,
+                this.currentLevelCollectiblesCount,
+                remaining,
+            );
+        }
     }
 
     updateDebug(now) {
@@ -835,6 +925,14 @@ export class LostDaysOfSpring {
 
         this.draw();
         this.updateDebug(now);
+
+        if (
+            this.levelComplete &&
+            performance.now() - this.levelCompleteAt >=
+                this.LEVEL_COMPLETE_DELAY
+        ) {
+            this.resetGame();
+        }
 
         window.requestAnimationFrame(this.loop);
     }

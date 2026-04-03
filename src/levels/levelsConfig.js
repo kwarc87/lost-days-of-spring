@@ -6,7 +6,7 @@ export const LEVELS = {
         const collectiblesGap = 75;
         return {
             worldSize: { width: 6200, height: 2600 },
-            playerStart: { x: 50, y: 800 },
+            playerStart: { x: 50, y: 1400 },
             platforms: [
                 // --- GROUND FLOOR ---
                 GameFactory.solid(1, 0, groundY, 6200, 45),
@@ -121,7 +121,7 @@ export const LEVELS = {
                 }),
             ],
             collectibles: [
-                // --- LOWER-LEFT TERRAIN (C1â€“C10) ---
+                // --- LOWER-LEFT TERRAIN (C1 - C10) ---
                 GameFactory.collectible(1, 537, 2300),
                 ...GameFactory.rowOfCollectibles(
                     2,
@@ -138,7 +138,7 @@ export const LEVELS = {
                     collectiblesGap,
                 ),
 
-                // --- TREASURY (C11â€“C46) ---
+                // --- TREASURY (C11 - C46) ---
                 ...GameFactory.rowOfCollectibles(
                     11,
                     12,
@@ -161,7 +161,7 @@ export const LEVELS = {
                     collectiblesGap,
                 ),
 
-                // --- PYRAMID AREA (C47â€“C65) ---
+                // --- PYRAMID AREA (C47 - C65) ---
                 ...GameFactory.rowOfCollectibles(47, 5, 3337, 1950, 50),
                 ...GameFactory.rowOfCollectibles(52, 5, 3337, 2000, 50),
                 ...GameFactory.rowOfCollectibles(57, 5, 3337, 2050, 50),
@@ -174,7 +174,7 @@ export const LEVELS = {
                     collectiblesGap,
                 ),
 
-                // --- CLOUD AREA (C66â€“C72) ---
+                // --- CLOUD AREA (C66 - C72) ---
                 ...GameFactory.rowOfCollectibles(
                     66,
                     5,
@@ -190,7 +190,7 @@ export const LEVELS = {
                     collectiblesGap,
                 ),
 
-                // --- RIGHT SIDE / FIRST ASCENT (C73â€“C91) ---
+                // --- RIGHT SIDE / FIRST ASCENT (C73 - C90) ---
                 ...GameFactory.rowOfCollectibles(
                     73,
                     5,
@@ -200,25 +200,29 @@ export const LEVELS = {
                 ),
                 ...GameFactory.rowOfCollectibles(
                     78,
-                    10,
+                    9,
                     5550,
                     2500,
                     collectiblesGap,
                 ),
                 ...GameFactory.rowOfCollectibles(
-                    88,
+                    87,
                     2,
                     6000,
                     2100,
                     collectiblesGap,
                 ),
-                GameFactory.collectible(90, 5438, 2220),
-                GameFactory.collectible(91, 5650, 2150),
+                GameFactory.collectible(89, 5438, 2220),
+                GameFactory.collectible(90, 5650, 2150),
 
-                // --- FINAL GOAL AREA (C92â€“C127) ---
-                ...GameFactory.rowOfCollectibles(92, 12, 5775, 120, 35),
-                ...GameFactory.rowOfCollectibles(104, 12, 5775, 85, 35),
-                ...GameFactory.rowOfCollectibles(116, 12, 5775, 50, 35),
+                // --- FINAL GOAL AREA (C91 - C126) ---
+                ...GameFactory.rowOfCollectibles(91, 12, 5775, 120, 35),
+                ...GameFactory.rowOfCollectibles(103, 12, 5775, 85, 35),
+                ...GameFactory.rowOfCollectibles(115, 12, 5775, 50, 35),
+
+                // --- CUSTOM (C127 - C135) ---
+                ...GameFactory.rowOfCollectibles(127, 5, 2750, 2450, 50),
+                ...GameFactory.rowOfCollectibles(132, 4, 3300, 1700, 50),
             ],
         };
     },
