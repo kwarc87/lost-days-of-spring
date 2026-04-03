@@ -17,22 +17,22 @@ export const DefaultLevelCompleteRenderer = {
 
         // ── Measure text to size panel ───────────────────────────────────────
         const titleFont = `bold 24px "Silkscreen", monospace`;
-        const subFont   = `bold 13px "Silkscreen", monospace`;
+        const subFont = `bold 13px "Silkscreen", monospace`;
 
         ctx.font = titleFont;
         const titleW = Math.ceil(ctx.measureText("LEVEL COMPLETE!").width);
 
         ctx.font = subFont;
         const statsText = `Zebrano: ${collectiblesCount} / ${totalCollectibles}`;
-        const subText   = `Restart za ${remaining}s  –  ESC`;
+        const subText = `Restart za ${remaining}s  –  ESC`;
         const statsW = Math.ceil(ctx.measureText(statsText).width);
-        const subW   = Math.ceil(ctx.measureText(subText).width);
+        const subW = Math.ceil(ctx.measureText(subText).width);
 
-        const padX  = 32;
-        const padY  = 24;
-        const gap   = 16;
+        const padX = 32;
+        const padY = 24;
+        const gap = 16;
         const titleH = 24;
-        const lineH  = 13;
+        const lineH = 13;
 
         const panelW = Math.max(titleW, statsW, subW) + padX * 2;
         const panelH = padY + titleH + gap + lineH + gap + lineH + padY;
@@ -64,7 +64,11 @@ export const DefaultLevelCompleteRenderer = {
 
         // ── Countdown ────────────────────────────────────────────────────────
         ctx.fillStyle = "#7a8a99";
-        ctx.fillText(subText, w / 2, panelY + padY + titleH + gap + lineH + gap);
+        ctx.fillText(
+            subText,
+            w / 2,
+            panelY + padY + titleH + gap + lineH + gap,
+        );
 
         ctx.restore();
     },

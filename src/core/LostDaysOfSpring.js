@@ -81,8 +81,8 @@ export class LostDaysOfSpring {
             gravity: 0.52,
             minBounceSpeed: 0.5,
             maxFallSpeed: 18,
-            fallGravityMultiplier: 1.35,
-            jumpCutGravityMultiplier: 4.1,
+            fallGravityMultiplier: 1.45,
+            jumpCutGravityMultiplier: 2.8,
         };
 
         // ====== DEBUG ======
