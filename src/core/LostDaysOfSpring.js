@@ -413,7 +413,7 @@ export class LostDaysOfSpring {
     }
 
     handleShootingInput() {
-        const customShootingOffsetY = -3;
+        const customShootingOffsetY = -4;
         const customShootingOffsetX = 40;
         if (this.keys[this.KEYS.shoot]) {
             this.player.shooting = true;
