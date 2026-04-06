@@ -1,126 +1,174 @@
-/**
- * Agent Cooper / 90s outsider style player renderer.
- * Pixel-art with detail achieved through colour and shape — no sub-pixel tricks.
- * Multiple shade layers on hair, jacket and pants; softened silhouette corners.
- */
+// ─── Player animations — individual spritesheets per state ───────────────────
+// Each sheet: horizontal strip of 75×48 px frames, rendered at SCALE×.
+const SCALE = 3;
+const FW = 75;
+const FH = 48;
+const ANIMS = {
+    idle: { src: "textures/player/idle.png", frames: 4, fps: 4, offsetY: 4 },
+    walk: { src: "textures/player/walk.png", frames: 10, fps: 12 },
+    walkShoot: { src: "textures/player/walk-shoot.png", frames: 10, fps: 12 },
+    jump: { src: "textures/player/jump.png", frames: 3, fps: 10, offsetY: 24 },
+    jumpShoot: {
+        src: "textures/player/jump-shoot.png",
+        frames: 5,
+        fps: 10,
+        offsetY: -10,
+    },
+    shoot: { src: "textures/player/shoot.png", frames: 2, fps: 12 },
+    crouch: { src: "textures/player/crouch.png", frames: 6, fps: 10 },
+};
+
+const _imgs = {};
+let _jumpStartTime = null;
+let _lastAnimKey = null;
+let _offCanvas = null;
+let _offCtx = null;
+
+function getOffCanvas(w, h) {
+    if (!_offCanvas) {
+        _offCanvas = document.createElement("canvas");
+        _offCtx = _offCanvas.getContext("2d");
+    }
+    if (_offCanvas.width !== w || _offCanvas.height !== h) {
+        _offCanvas.width = w;
+        _offCanvas.height = h;
+    }
+    return { canvas: _offCanvas, ctx: _offCtx };
+}
+
+function ensureImgs() {
+    for (const [key, anim] of Object.entries(ANIMS)) {
+        if (!_imgs[key]) {
+            const img = new Image();
+            img.src = anim.src;
+            _imgs[key] = img;
+        }
+    }
+}
+
+function getAnimKey(player) {
+    if (player.crouch) {
+        return "crouch";
+    }
+    const airborne = player.onGroundId === null && !player.onGroundType;
+    if (airborne || player.isJumping) {
+        return player.shooting ? "jumpShoot" : "jump";
+    }
+    if (player.shooting) {
+        return Math.abs(player.vx) > 0.5 ? "walkShoot" : "shoot";
+    }
+    if (Math.abs(player.vx) > 0.5) {
+        return "walk";
+    }
+    return "idle";
+}
+
 export const DefaultPlayerRenderer = {
-    draw: (ctx, player) => {
-        ctx.save();
+    draw: (ctx, player, debug = false) => {
+        ensureImgs();
 
-        const cx = player.x + player.w / 2;
-        const cy = player.y + player.h;
+        const animKey = getAnimKey(player);
+        const anim = ANIMS[animKey];
+        const img = _imgs[animKey];
+        if (!img?.complete || !img.naturalWidth) {
+            return;
+        }
 
-        ctx.translate(cx, cy);
-        ctx.scale(player.facing === "left" ? -1 : 1, 1);
+        const isJumpAnim = animKey === "jump" || animKey === "jumpShoot";
+        if (isJumpAnim) {
+            if (_lastAnimKey !== "jump" && _lastAnimKey !== "jumpShoot") {
+                _jumpStartTime = Date.now();
+            }
+        }
+        _lastAnimKey = animKey;
 
-        const px = (x, y, w, h, c) => {
-            ctx.fillStyle = c;
-            ctx.fillRect(x, y, w, h);
-        };
-
-        const suitBlue = player.isHit ? "#7a1212" : "#102a43";
-        const suitGray = player.isHit ? "#9e1f1f" : "#243b53";
-        const suitLight = player.isHit ? "#c43030" : "#334e68";
-
-        const jeansBlue = "#0E253A";
-        const jeansLight = "#193a59";
-        const dressBrown = "#34251b";
-
-        const shirtWhite = "#f0f4f7";
-        const shirtShade = "#cbd5e0";
-
-        const tieRed = "#d32f2f";
-        const tieDark = "#9a1b1b";
-
-        const hairBrown = "#3d2b1f";
-        const hairGloss = "#5e4638";
-
-        const skinBase = "#f9d5b0";
-        const skinShade = "#eac095";
-        const skinDeep = "#d4a77e";
-
-        const eyeColor = "#121212";
-
-        px(-20, -4, 40, 4, "rgba(0,0,0,0.2)");
-
-        if (player.crouch) {
-            px(-16, -6, 12, 6, dressBrown);
-            px(2, -6, 12, 6, dressBrown);
-
-            px(-18, -14, 14, 8, jeansBlue);
-            px(2, -14, 14, 8, jeansBlue);
-            px(-16, -12, 6, 4, jeansLight);
-
-            px(-14, -18, 28, 4, jeansBlue);
-            px(-16, -24, 32, 8, suitBlue);
-
-            px(-16, -40, 32, 16, suitBlue);
-            px(-16, -40, 4, 14, suitLight);
-            px(12, -38, 4, 12, suitGray);
-
-            px(-4, -40, 10, 12, shirtWhite);
-            px(-2, -38, 4, 10, tieRed);
-            px(1, -32, 3, 4, tieDark);
-
-            px(-20, -38, 6, 12, suitBlue);
-            px(14, -38, 6, 12, suitBlue);
-            px(-20, -26, 6, 4, skinShade);
-            px(14, -26, 6, 4, skinBase);
-
-            const hy = 35;
-            px(-12, -74 + hy, 24, 20, skinBase);
-            px(-12, -74 + hy, 6, 20, skinShade);
-            px(-6, -58 + hy, 16, 4, skinDeep);
-
-            px(2, -66 + hy, 4, 4, eyeColor);
-            px(12, -66 + hy, 4, 4, eyeColor);
-
-            px(-16, -82 + hy, 32, 10, hairBrown);
-            px(-12, -84 + hy, 24, 4, hairGloss);
-            px(8, -82 + hy, 12, 6, hairGloss);
+        let fi;
+        if (isJumpAnim) {
+            const elapsed = Date.now() - (_jumpStartTime ?? Date.now());
+            fi = Math.min(
+                Math.floor(elapsed / (1000 / anim.fps)),
+                anim.frames - 1,
+            );
+        } else if (animKey === "crouch" && Math.abs(player.vx) <= 0.5) {
+            fi = 0;
         } else {
-            px(-14, -6, 12, 6, dressBrown);
-            px(2, -6, 12, 6, dressBrown);
-            px(-12, -3, 4, 3, "#251a13");
+            fi = Math.floor(Date.now() / (1000 / anim.fps)) % anim.frames;
+        }
+        const dw = FW * SCALE;
+        const dh = FH * SCALE;
 
-            px(-12, -26, 10, 20, jeansBlue);
-            px(-12, -22, 10, 4, jeansLight);
+        const isCrouch = animKey === "crouch";
+        // Sprite is drawn wider than hitbox; shift it forward so it aligns with the front.
+        // facing right → shift left (negative), facing left → shift right (positive).
+        const crouchOffsetX = isCrouch
+            ? player.facing === "left"
+                ? 18
+                : -18
+            : 0;
 
-            px(2, -26, 10, 20, jeansBlue);
-            px(2, -22, 10, 4, jeansLight);
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.translate(
+            player.x + player.w / 2 + crouchOffsetX,
+            player.y + player.h,
+        );
+        if (player.facing === "left") {
+            ctx.scale(-1, 1);
+        }
+        ctx.drawImage(
+            img,
+            fi * FW,
+            0,
+            FW,
+            FH,
+            -dw / 2,
+            -dh + (anim.offsetY ?? 0),
+            dw,
+            dh,
+        );
 
-            px(-12, -32, 24, 8, suitBlue);
+        if (player.isHit) {
+            const outlineSize = 3;
+            const drawX = -dw / 2;
+            const drawY = -dh + (anim.offsetY ?? 0);
 
-            px(-16, -53, 32, 25, suitBlue);
-            px(-16, -53, 4, 23, suitLight);
-            px(12, -49, 4, 20, suitGray);
+            const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
+            offCtx.clearRect(0, 0, dw, dh);
+            offCtx.imageSmoothingEnabled = false;
+            offCtx.drawImage(img, fi * FW, 0, FW, FH, 0, 0, dw, dh);
+            offCtx.globalCompositeOperation = "source-atop";
+            offCtx.fillStyle = "red";
+            offCtx.fillRect(0, 0, dw, dh);
+            offCtx.globalCompositeOperation = "source-over";
 
-            px(-4, -53, 12, 21, shirtWhite);
-            px(-4, -53, 4, 21, shirtShade);
-            px(-2, -51, 4, 19, tieRed);
-            px(1, -41, 3, 10, tieDark);
+            const offsets = [
+                [-outlineSize, 0],
+                [outlineSize, 0],
+                [0, -outlineSize],
+                [0, outlineSize],
+                [-outlineSize, -outlineSize],
+                [outlineSize, -outlineSize],
+                [-outlineSize, outlineSize],
+                [outlineSize, outlineSize],
+            ];
+            for (const [ox, oy] of offsets) {
+                ctx.drawImage(offCanvas, drawX + ox, drawY + oy);
+            }
 
-            px(-20, -49, 6, 21, suitBlue);
-            px(14, -49, 6, 21, suitBlue);
-            px(-20, -28, 6, 4, skinShade);
-            px(14, -28, 6, 4, skinBase);
-
-            px(-2, -55, 8, 4, skinShade);
-
-            px(-12, -75, 24, 22, skinBase);
-            px(-12, -75, 6, 22, skinShade);
-            px(-4, -57, 16, 4, skinDeep);
-
-            px(2, -67, 4, 4, eyeColor);
-            px(12, -67, 4, 4, eyeColor);
-
-            px(-16, -83, 34, 12, hairBrown);
-            px(-14, -85, 28, 4, hairGloss);
-            px(-16, -77, 8, 12, hairBrown);
-            px(12, -81, 10, 6, hairGloss);
+            // Redraw original sprite on top of the outline
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(img, fi * FW, 0, FW, FH, drawX, drawY, dw, dh);
         }
 
         ctx.restore();
+
+        if (debug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(player.x, player.y, player.w, player.h);
+            ctx.restore();
+        }
     },
 };
 

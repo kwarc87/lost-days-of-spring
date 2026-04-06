@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Lost Days of Spring</title>
         <link rel="stylesheet" href="reset.css" />
-        <link rel="stylesheet" href="style.css?v=1775250212134" />
+        <link rel="stylesheet" href="style.css?v=1775498627920" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -30,8 +30,11 @@
             <canvas id="game" width="800" height="600"></canvas>
         </div>
         <script type="module">
-            import { LostDaysOfSpring } from "./src/core/LostDaysOfSpring.js?v=1775250212134";
-            const game = new LostDaysOfSpring("game", false);
+            import { LostDaysOfSpring } from "./src/core/LostDaysOfSpring.js?v=1775498627920";
+            const debug =
+                new URLSearchParams(window.location.search).get("debug") ===
+                "true";
+            const game = new LostDaysOfSpring("game", debug);
             game.start();
         </script>
     </body>

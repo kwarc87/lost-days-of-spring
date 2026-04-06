@@ -3,7 +3,7 @@
  * Pixel art style: 8px grid, bold shapes, no sub-pixel detail
  */
 export const DefaultEnemyRenderer = {
-    draw: (ctx, enemy) => {
+    draw: (ctx, enemy, debug = false) => {
         ctx.save();
         ctx.imageSmoothingEnabled = false;
 
@@ -16,7 +16,7 @@ export const DefaultEnemyRenderer = {
         }
 
         const pw = 28; // pill width
-        const ph = 60; // pill height — tall and tablet-proportioned
+        const ph = 68; // pill height — tall and tablet-proportioned
         const legH = 8; // leg area below pill
         const px = -pw / 2; // -18 (left edge)
         const py = -(ph + legH); // top of pill
@@ -125,6 +125,14 @@ export const DefaultEnemyRenderer = {
         }
 
         ctx.restore();
+
+        if (debug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(enemy.x, enemy.y, enemy.w, enemy.h);
+            ctx.restore();
+        }
     },
 };
 
