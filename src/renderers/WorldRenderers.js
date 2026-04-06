@@ -374,21 +374,15 @@ function generateTexture() {
 
 // ─── Bottom-strip background layers ──────────────────────────────────────────
 let _bgImg = null; // ldos_background.png  — front tiles
-let _greenWallImg = null; // green_wall.png        — wall behind tiles
 let _blueBack = null; // blue-back.png         — nebula sky (layer 1)
 let _blueStars = null; // blue-stars.png        — stars overlay (layer 2)
-let _greenWallOff = null; // offscreen canvas for green_wall pattern source
-let _gwTempCanvas = null; // temp canvas for green_wall + holes compositing
 
 function ensureBgImg() {
     if (!_bgImg) {
         _bgImg = new Image();
         _bgImg.src = "textures/ldos_background.png";
     }
-    if (!_greenWallImg) {
-        _greenWallImg = new Image();
-        _greenWallImg.src = "textures/green_wall.png";
-    }
+
     if (!_blueBack) {
         _blueBack = new Image();
         _blueBack.src = "textures/background/blue-back.png";
@@ -424,88 +418,6 @@ function drawPatternStrip(ctx, texCanvas, cw, ch, groundY, cameraX, cameraY) {
     ctx.fillStyle = pat;
     ctx.fillRect(0, 0, cw, Math.min(stripBottom, ch));
     ctx.restore();
-}
-
-// Draws green_wall.png tiled in both axes with sky-peeking holes punched out.
-function drawGreenWallWithHoles(
-    ctx,
-    img,
-    cw,
-    ch,
-    stripScreenBottom,
-    cameraX,
-    parallax,
-) {
-    if (!img || !img.complete || img.naturalWidth === 0) {
-        return;
-    }
-    const bottom = Math.ceil(stripScreenBottom);
-    if (bottom <= 0) {
-        return;
-    }
-
-    const iw = img.naturalWidth;
-    const ih = img.naturalHeight;
-
-    // Build source offscreen canvas once
-    if (!_greenWallOff) {
-        _greenWallOff = document.createElement("canvas");
-        _greenWallOff.width = iw;
-        _greenWallOff.height = ih;
-        const octx = _greenWallOff.getContext("2d");
-        octx.imageSmoothingEnabled = false;
-        octx.drawImage(img, 0, 0);
-    }
-
-    // Reuse / recreate temp canvas when viewport changes
-    if (
-        !_gwTempCanvas ||
-        _gwTempCanvas.width !== cw ||
-        _gwTempCanvas.height !== ch
-    ) {
-        _gwTempCanvas = document.createElement("canvas");
-        _gwTempCanvas.width = cw;
-        _gwTempCanvas.height = ch;
-    }
-    const tctx = _gwTempCanvas.getContext("2d");
-    tctx.clearRect(0, 0, cw, ch);
-
-    // Tile in both directions, bottom-aligned to stripScreenBottom
-    const pat = tctx.createPattern(_greenWallOff, "repeat");
-    const ox = (((-cameraX * parallax) % iw) + iw) % iw;
-    const oy = ((bottom % ih) + ih) % ih;
-    pat.setTransform(new DOMMatrix([1, 0, 0, 1, ox, bottom - oy]));
-    tctx.fillStyle = pat;
-    tctx.fillRect(0, 0, cw, bottom);
-
-    // Punch holes so sky shows through
-    tctx.globalCompositeOperation = "destination-out";
-    const worldX = Math.round(cameraX * parallax);
-    const CELL_W = 460;
-    const CELL_H = 200;
-    const startCol = Math.floor(worldX / CELL_W) - 1;
-    const endCol = startCol + Math.ceil(cw / CELL_W) + 2;
-    const rowCount = Math.ceil(bottom / CELL_H) + 1;
-    for (let row = 0; row < rowCount; row++) {
-        for (let col = startCol; col <= endCol; col++) {
-            const seed = Math.abs(col * 2654435761 + row * 2246822519) >>> 0;
-            if (seed % 5 < 3) {
-                continue;
-            } // ~40% of cells have a hole
-            const hw = 70 + ((seed & 0xff) / 255) * 130;
-            const hh = 28 + (((seed >> 8) & 0xff) / 255) * 65;
-            const hx =
-                col * CELL_W - worldX + CELL_W * (((seed >> 16) & 0xff) / 255);
-            const hy = row * CELL_H + CELL_H * (((seed >> 24) & 0xff) / 255);
-            tctx.fillStyle = "rgba(0,0,0,1)";
-            tctx.beginPath();
-            tctx.ellipse(hx, hy, hw / 2, hh / 2, 0, 0, Math.PI * 2);
-            tctx.fill();
-        }
-    }
-    tctx.globalCompositeOperation = "source-over";
-
-    ctx.drawImage(_gwTempCanvas, 0, 0);
 }
 
 // Draws an image tiled horizontally at the bottom of the world.
