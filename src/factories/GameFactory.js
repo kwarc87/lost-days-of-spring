@@ -23,7 +23,7 @@ export const GameFactory = {
         originalWidth: 36,
         jumpHeight: 83,
         jump: 16.4,
-        isJumping: false,
+        jumpPressedByUser: false,
         jumpPressedAt: 0,
         jumpBufferDuration: 80,
         lastGroundedAt: 0,

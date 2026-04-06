@@ -167,7 +167,7 @@ export class LostDaysOfSpring {
             bounceCount: 0,
             collectiblesCount: 0,
             facing: "right",
-            isJumping: false,
+            jumpPressedByUser: false,
             shooting: false,
             lastShootTime: 0,
             jumpPressedAt: 0,
@@ -387,26 +387,34 @@ export class LostDaysOfSpring {
             onGround
         ) {
             if (!this.player.crouch && this.canCrouch()) {
-                this.player.crouch = true;
-                this.player.h = this.player.crouchHeight;
-                this.player.y +=
-                    this.player.originalHeight - this.player.crouchHeight;
-                this.player.x -=
-                    (this.player.crouchWidth - this.player.originalWidth) / 2;
-                this.player.w = this.player.crouchWidth;
+                this.handleCrouchStart();
             }
         } else if (this.player.crouch && this.canStandUp()) {
-            this.player.crouch = false;
-            this.player.y -=
-                this.player.originalHeight - this.player.crouchHeight;
-            this.player.h = this.player.originalHeight;
-            this.player.x +=
-                (this.player.crouchWidth - this.player.originalWidth) / 2;
-            this.player.w = this.player.originalWidth;
+            this.handleCrouchEnd(this.player.originalHeight);
         }
     }
 
+    handleCrouchStart() {
+        this.player.crouch = true;
+        this.player.h = this.player.crouchHeight;
+        this.player.y += this.player.originalHeight - this.player.crouchHeight;
+        this.player.x -=
+            (this.player.crouchWidth - this.player.originalWidth) / 2;
+        this.player.w = this.player.crouchWidth;
+    }
+
+    handleCrouchEnd(targetHeight) {
+        this.player.crouch = false;
+        this.player.y -= targetHeight - this.player.crouchHeight;
+        this.player.h = targetHeight;
+        this.player.x +=
+            (this.player.crouchWidth - this.player.originalWidth) / 2;
+        this.player.w = this.player.originalWidth;
+    }
+
     handleShootingInput() {
+        const customShootingOffsetY = -3;
+        const customShootingOffsetX = 40;
         if (this.keys[this.KEYS.shoot]) {
             this.player.shooting = true;
             const now = performance.now();
@@ -423,11 +431,15 @@ export class LostDaysOfSpring {
                     id: this.nextBulletId++,
                     x:
                         this.player.facing === "left"
-                            ? this.player.x
+                            ? this.player.x - customShootingOffsetX
                             : this.player.x +
                               this.player.w -
-                              this.player.weapon.ammo.w,
-                    y: this.player.y + this.player.h / 2 - 16,
+                              this.player.weapon.ammo.w +
+                              customShootingOffsetX,
+                    y:
+                        this.player.y +
+                        this.player.h / 2 +
+                        customShootingOffsetY,
                     vx: bulletVx,
                 });
                 this.player.lastShootTime = now;
@@ -465,7 +477,7 @@ export class LostDaysOfSpring {
             this.player.lastGroundedAt = 0;
             this.player.onGroundId = null;
             this.player.onGroundType = null;
-            this.player.isJumping = true;
+            this.player.jumpPressedByUser = true;
             this.player.jumpPressedAt = 0;
         }
     }
@@ -478,7 +490,7 @@ export class LostDaysOfSpring {
         const jumpHeld = this.keys[this.KEYS.jump];
 
         // Variable jump height: fall faster if jump key is released while ascending
-        if (isAscending && !jumpHeld && this.player.isJumping) {
+        if (isAscending && !jumpHeld && this.player.jumpPressedByUser) {
             currentGravity *= this.PHYSICS.jumpCutGravityMultiplier;
         } else if (isFalling) {
             currentGravity *= this.PHYSICS.fallGravityMultiplier;
@@ -521,17 +533,12 @@ export class LostDaysOfSpring {
     // Move player along the Y axis, resolve platform collisions, and check fall-off
     movePlayerY() {
         const previousY = this.player.y;
-        const wasOnGround = this.player.onGroundId !== null;
         this.player.y += this.player.vy;
         this.player.onGroundId = null;
         this.player.onGroundType = null;
 
         // When leaving the ground (fell off ledge, booster launch) — switch to jumpHeight
-        if (
-            wasOnGround &&
-            !this.player.crouch &&
-            this.player.h !== this.player.jumpHeight
-        ) {
+        if (!this.player.crouch) {
             this.player.y += this.player.h - this.player.jumpHeight;
             this.player.h = this.player.jumpHeight;
         }
@@ -546,6 +553,7 @@ export class LostDaysOfSpring {
             }
             this.player.y = this.WORLD_SIZE.height - this.player.h;
             this.player.vy = 0;
+            this.player.jumpPressedByUser = false;
 
             // hack to make user able to jump from world ground
             this.player.onGroundId = 999999;
@@ -570,22 +578,13 @@ export class LostDaysOfSpring {
                         !this.canStandUp() &&
                         this.canCrouch()
                     ) {
-                        this.player.crouch = true;
-                        this.player.y +=
-                            this.player.originalHeight -
-                            this.player.crouchHeight;
-                        this.player.h = this.player.crouchHeight;
-                        this.player.x -=
-                            (this.player.crouchWidth -
-                                this.player.originalWidth) /
-                            2;
-                        this.player.w = this.player.crouchWidth;
+                        this.handleCrouchStart();
                     }
 
                     this.player.onGroundId = p.id;
                     this.player.onGroundType = p.type;
                     this.player.lastGroundedAt = performance.now();
-                    this.player.isJumping = false;
+                    this.player.jumpPressedByUser = false;
                     this.player.bounceCount =
                         this.player.lastGroundId !== p.id
                             ? 1
@@ -631,12 +630,7 @@ export class LostDaysOfSpring {
 
         // If player fell off a ledge while crouching, restore normal hitbox
         if (this.player.crouch && this.player.onGroundId === null) {
-            this.player.crouch = false;
-            this.player.x +=
-                (this.player.crouchWidth - this.player.originalWidth) / 2;
-            this.player.w = this.player.originalWidth;
-            this.player.y += this.player.h - this.player.jumpHeight;
-            this.player.h = this.player.jumpHeight;
+            this.handleCrouchEnd(this.player.jumpHeight);
         }
     }
 

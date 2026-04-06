@@ -4,18 +4,40 @@ const SCALE = 3;
 const FW = 75;
 const FH = 48;
 const ANIMS = {
-    idle: { src: "textures/player/idle.png", frames: 4, fps: 4, offsetY: 4 },
-    walk: { src: "textures/player/walk.png", frames: 10, fps: 12 },
-    walkShoot: { src: "textures/player/walk-shoot.png", frames: 10, fps: 12 },
-    jump: { src: "textures/player/jump.png", frames: 3, fps: 10, offsetY: 24 },
+    idle: {
+        src: "textures/player/idle.png",
+        frames: [0, 1, 2, 3],
+        fps: 4,
+        offsetY: 4,
+    },
+    walk: {
+        src: "textures/player/walk.png",
+        frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        fps: 12,
+    },
+    walkShoot: {
+        src: "textures/player/walk-shoot.png",
+        frames: [1, 5, 7, 8, 9],
+        fps: 12,
+    },
+    jump: {
+        src: "textures/player/jump.png",
+        frames: [0, 1, 2],
+        fps: 10,
+        offsetY: 24,
+    },
     jumpShoot: {
         src: "textures/player/jump-shoot.png",
-        frames: 5,
+        frames: [3],
         fps: 10,
-        offsetY: -10,
+        offsetY: 2,
     },
-    shoot: { src: "textures/player/shoot.png", frames: 2, fps: 12 },
-    crouch: { src: "textures/player/crouch.png", frames: 6, fps: 10 },
+    shoot: { src: "textures/player/walk-shoot.png", frames: [7], fps: 12 },
+    crouch: {
+        src: "textures/player/crouch.png",
+        frames: [0, 1, 2, 3, 4, 5],
+        fps: 10,
+    },
 };
 
 const _imgs = {};
@@ -87,13 +109,15 @@ export const DefaultPlayerRenderer = {
             const elapsed = Date.now() - (_jumpStartTime ?? Date.now());
             fi = Math.min(
                 Math.floor(elapsed / (1000 / anim.fps)),
-                anim.frames - 1,
+                anim.frames.length - 1,
             );
         } else if (animKey === "crouch" && Math.abs(player.vx) <= 0.5) {
             fi = 0;
         } else {
-            fi = Math.floor(Date.now() / (1000 / anim.fps)) % anim.frames;
+            fi =
+                Math.floor(Date.now() / (1000 / anim.fps)) % anim.frames.length;
         }
+        fi = anim.frames[fi];
         const dw = FW * SCALE;
         const dh = FH * SCALE;
 
