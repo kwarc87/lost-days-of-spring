@@ -4,6 +4,7 @@
     "main": "game.js",
     "scripts": {
         "dev": "vite",
+        "build": "vite build",
         "bust-cache": "node cache-bust.js",
         "lint": "eslint game.js",
         "lint:fix": "eslint game.js --fix",
