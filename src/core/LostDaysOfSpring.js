@@ -45,6 +45,7 @@ export class LostDaysOfSpring {
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.LEVEL_COMPLETE_DELAY = 7000; // ms until auto-restart
         this.GAME_OVER_DELAY = 7000; // ms until auto-restart after game over
+        this.WORLD_GROUND_ID = "world-ground";
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });
@@ -61,8 +62,6 @@ export class LostDaysOfSpring {
             height: this.canvas.height, // viewport height in pixels
 
             smoothing: 0.15, // base interpolation factor for camera position (0–1)
-
-            maxSmoothingY: 0.45, // max camera Y smoothing at terminal velocity
 
             lookAheadX: 0, // current horizontal look-ahead offset (interpolated)
             lookAheadXTarget: 180, // horizontal look-ahead distance in pixels
@@ -83,6 +82,13 @@ export class LostDaysOfSpring {
             maxFallSpeed: 18,
             fallGravityMultiplier: 1.45,
             jumpCutGravityMultiplier: 2.8,
+        };
+
+        // ====== POSTURES ======
+        this.PLAYER_POSTURES = {
+            STANDING: "standing",
+            CROUCH: "crouch",
+            AIRBORNE: "airborne",
         };
 
         // ====== DEBUG ======
@@ -155,8 +161,9 @@ export class LostDaysOfSpring {
             y: levelData.playerStart.y,
             vx: 0,
             vy: 0,
-            crouch: false,
+            posture: this.PLAYER_POSTURES.STANDING,
             h: this.player.originalHeight,
+            w: this.player.originalWidth,
             life: this.player.maxLife,
             isHit: false,
             lastHitTime: 0,
@@ -269,15 +276,31 @@ export class LostDaysOfSpring {
         );
     }
 
-    canStandUp() {
-        const standHeight = this.player.originalHeight;
-        const newY = this.player.y - (standHeight - this.player.h);
+    canApplyPlayerPosture(posture, anchorY = "bottom", anchorX = "center") {
+        const hitbox = this.getPlayerHitboxForPosture(posture);
+
+        return this.canApplyPosture(hitbox.h, hitbox.w, anchorY, anchorX);
+    }
+
+    canApplyPosture(height, width, anchorY = "bottom", anchorX = "center") {
+        let nextX = this.player.x;
+        let nextY = this.player.y;
+
+        if (anchorX === "center") {
+            const centerX = this.player.x + this.player.w / 2;
+            nextX = centerX - width / 2;
+        }
+
+        if (anchorY === "bottom") {
+            const bottomY = this.player.y + this.player.h;
+            nextY = bottomY - height;
+        }
 
         const futurePlayer = {
-            x: this.player.x,
-            y: newY,
-            w: this.player.w,
-            h: standHeight,
+            x: nextX,
+            y: nextY,
+            w: width,
+            h: height,
         };
 
         for (const p of this.platforms) {
@@ -289,25 +312,69 @@ export class LostDaysOfSpring {
         return true;
     }
 
-    canCrouch() {
-        const futurePlayer = {
-            x:
-                this.player.x -
-                (this.player.crouchWidth - this.player.originalWidth) / 2,
-            y:
-                this.player.y +
-                (this.player.originalHeight - this.player.crouchHeight),
-            w: this.player.crouchWidth,
-            h: this.player.crouchHeight,
-        };
+    canStandUp() {
+        return this.canApplyPlayerPosture(this.PLAYER_POSTURES.STANDING);
+    }
 
-        for (const p of this.platforms) {
-            if (this.rectsCollide(futurePlayer, p)) {
-                return false;
-            }
+    canCrouch() {
+        return this.canApplyPlayerPosture(this.PLAYER_POSTURES.CROUCH);
+    }
+
+    isPlayerCrouching() {
+        return this.player.posture === this.PLAYER_POSTURES.CROUCH;
+    }
+
+    isPlayerAirborne() {
+        return this.player.posture === this.PLAYER_POSTURES.AIRBORNE;
+    }
+
+    isPlayerStanding() {
+        return this.player.posture === this.PLAYER_POSTURES.STANDING;
+    }
+
+    getPlayerHitboxForPosture(posture) {
+        switch (posture) {
+            case this.PLAYER_POSTURES.CROUCH:
+                return {
+                    w: this.player.crouchWidth,
+                    h: this.player.crouchHeight,
+                };
+
+            case this.PLAYER_POSTURES.AIRBORNE:
+                return {
+                    w: this.player.originalWidth,
+                    h: this.player.jumpHeight,
+                };
+
+            case this.PLAYER_POSTURES.STANDING:
+            default:
+                return {
+                    w: this.player.originalWidth,
+                    h: this.player.originalHeight,
+                };
+        }
+    }
+
+    applyPlayerHeight(nextHeight, anchorY = "top") {
+        if (anchorY === "bottom") {
+            const bottom = this.player.y + this.player.h;
+            this.player.h = nextHeight;
+            this.player.y = bottom - nextHeight;
+            return;
         }
 
-        return true;
+        this.player.h = nextHeight;
+    }
+
+    applyPlayerWidth(nextWidth, anchorX = "center") {
+        if (anchorX === "center") {
+            const centerX = this.player.x + this.player.w / 2;
+            this.player.w = nextWidth;
+            this.player.x = centerX - nextWidth / 2;
+            return;
+        }
+
+        this.player.w = nextWidth;
     }
 
     resetGame() {
@@ -386,30 +453,58 @@ export class LostDaysOfSpring {
             (this.keys[this.KEYS.crouchAlt] || this.keys[this.KEYS.crouch]) &&
             onGround
         ) {
-            if (!this.player.crouch && this.canCrouch()) {
+            if (!this.isPlayerCrouching() && this.canCrouch()) {
                 this.handleCrouchStart();
             }
-        } else if (this.player.crouch && this.canStandUp()) {
-            this.handleCrouchEnd(this.player.originalHeight);
+        } else if (this.isPlayerCrouching() && this.canStandUp()) {
+            this.handleCrouchEnd();
         }
     }
 
     handleCrouchStart() {
-        this.player.crouch = true;
-        this.player.h = this.player.crouchHeight;
-        this.player.y += this.player.originalHeight - this.player.crouchHeight;
-        this.player.x -=
-            (this.player.crouchWidth - this.player.originalWidth) / 2;
-        this.player.w = this.player.crouchWidth;
+        this.applyPosture(
+            this.PLAYER_POSTURES.CROUCH,
+            this.player.crouchHeight,
+            this.player.crouchWidth,
+            "bottom",
+        );
     }
 
-    handleCrouchEnd(targetHeight) {
-        this.player.crouch = false;
-        this.player.y -= targetHeight - this.player.crouchHeight;
-        this.player.h = targetHeight;
-        this.player.x +=
-            (this.player.crouchWidth - this.player.originalWidth) / 2;
-        this.player.w = this.player.originalWidth;
+    handleCrouchEnd() {
+        this.applyPosture(
+            this.PLAYER_POSTURES.STANDING,
+            this.player.originalHeight,
+            this.player.originalWidth,
+            "bottom",
+        );
+    }
+
+    handleLandingToStanding() {
+        this.applyPosture(
+            this.PLAYER_POSTURES.STANDING,
+            this.player.originalHeight,
+            this.player.originalWidth,
+            "bottom",
+        );
+    }
+
+    handleTransitionToAirborne() {
+        this.applyPosture(
+            this.PLAYER_POSTURES.AIRBORNE,
+            this.player.jumpHeight,
+            this.player.originalWidth,
+            "bottom",
+        );
+    }
+
+    handleCrouchToAirborne() {
+        this.handleTransitionToAirborne();
+    }
+
+    applyPosture(posture, height, width, anchorY = "bottom") {
+        this.player.posture = posture;
+        this.applyPlayerHeight(height, anchorY);
+        this.applyPlayerWidth(width, "center");
     }
 
     handleShootingInput() {
@@ -450,7 +545,7 @@ export class LostDaysOfSpring {
     }
 
     handleJumpInput() {
-        if (this.player.crouch) {
+        if (this.player.posture === this.PLAYER_POSTURES.CROUCH) {
             return;
         }
         const now = performance.now();
@@ -470,9 +565,9 @@ export class LostDaysOfSpring {
 
         if (jumpBuffered && canGroundJump) {
             this.player.vy = -this.player.jump;
-            this.player.y +=
-                this.player.originalHeight - this.player.jumpHeight;
-            this.player.h = this.player.jumpHeight;
+
+            this.handleTransitionToAirborne();
+
             this.player.bounceCount = 0;
             this.player.lastGroundedAt = 0;
             this.player.onGroundId = null;
@@ -533,105 +628,123 @@ export class LostDaysOfSpring {
     // Move player along the Y axis, resolve platform collisions, and check fall-off
     movePlayerY() {
         const previousY = this.player.y;
+        const previousH = this.player.h;
         this.player.y += this.player.vy;
         this.player.onGroundId = null;
         this.player.onGroundType = null;
 
         // When leaving the ground (fell off ledge, booster launch) — switch to jumpHeight
-        if (!this.player.crouch) {
-            this.player.y += this.player.h - this.player.jumpHeight;
-            this.player.h = this.player.jumpHeight;
+        if (!this.isPlayerCrouching() && !this.isPlayerAirborne()) {
+            this.handleTransitionToAirborne();
         }
 
-        // World bounds check (Y axis)
         if (this.player.y < 0) {
-            this.player.y = 0;
-            this.player.vy = 0;
+            this.handleWorldCeilHit();
         } else if (this.player.y + this.player.h > this.WORLD_SIZE.height) {
-            if (!this.player.crouch) {
-                this.player.h = this.player.originalHeight;
-            }
-            this.player.y = this.WORLD_SIZE.height - this.player.h;
-            this.player.vy = 0;
-            this.player.jumpPressedByUser = false;
-
-            // hack to make user able to jump from world ground
-            this.player.onGroundId = 999999;
-            this.player.onGroundType = "solid";
+            this.handleWorldGroundLanding();
         }
 
         for (const p of this.platforms) {
             if (this.rectsCollide(this.player, p)) {
-                const wasAbove = previousY + this.player.h <= p.y;
+                const wasAbove = previousY + previousH <= p.y;
                 const wasBelow = previousY >= p.y + p.h;
 
                 // Landing on top of platform
                 if (this.player.vy > 0 && wasAbove) {
-                    if (!this.player.crouch) {
-                        this.player.h = this.player.originalHeight;
-                    }
-                    this.player.y = p.y - this.player.h;
-
-                    // Auto-crouch if there's not enough headroom to stand
-                    if (
-                        !this.player.crouch &&
-                        !this.canStandUp() &&
-                        this.canCrouch()
-                    ) {
-                        this.handleCrouchStart();
-                    }
-
-                    this.player.onGroundId = p.id;
-                    this.player.onGroundType = p.type;
-                    this.player.lastGroundedAt = performance.now();
-                    this.player.jumpPressedByUser = false;
-                    this.player.bounceCount =
-                        this.player.lastGroundId !== p.id
-                            ? 1
-                            : this.player.bounceCount + 1;
-                    this.player.lastGroundType = p.type;
-                    this.player.lastGroundId = p.id;
-
-                    if (p.type === "booster") {
-                        this.player.vy = -p.boostSpeed;
-                    }
-
-                    if (p.type === "solid") {
-                        this.player.vy = 0;
-                        this.player.bounceCount = 0;
-                    }
-
-                    if (p.type === "bouncy") {
-                        const impactSpeed = this.player.vy;
-                        this.player.vy =
-                            this.player.bounceCount === 1
-                                ? -impactSpeed * p.elasticity
-                                : -impactSpeed * p.elasticity * 0.75;
-
-                        if (
-                            Math.abs(this.player.vy) <
-                            this.PHYSICS.minBounceSpeed
-                        ) {
-                            this.player.vy = 0;
-                            this.player.bounceCount = 0;
-                        }
-                    }
+                    this.handlePlatformLanding(p);
+                    this.handlePlatformLandingResponse(p);
                     break;
                 }
 
                 if (this.player.vy < 0 && wasBelow) {
                     // Hit ceiling
-                    this.player.y = p.y + p.h;
-                    this.player.vy = 0;
+                    this.handleCeilingHit(p);
                     break;
                 }
             }
         }
 
-        // If player fell off a ledge while crouching, restore normal hitbox
-        if (this.player.crouch && this.player.onGroundId === null) {
-            this.handleCrouchEnd(this.player.jumpHeight);
+        if (this.isPlayerCrouching() && this.player.onGroundId === null) {
+            this.handleCrouchToAirborne();
         }
+    }
+
+    handleWorldGroundLanding() {
+        if (!this.isPlayerCrouching()) {
+            this.handleLandingToStanding();
+        }
+        this.player.y = this.WORLD_SIZE.height - this.player.h;
+        this.player.vy = 0;
+        this.player.jumpPressedByUser = false;
+        this.player.lastGroundedAt = performance.now();
+        this.player.bounceCount = 0;
+
+        this.player.onGroundId = this.WORLD_GROUND_ID;
+        this.player.onGroundType = "solid";
+    }
+
+    handleWorldCeilHit() {
+        this.player.y = 0;
+        this.player.vy = 0;
+    }
+
+    handlePlatformLanding(platform) {
+        if (!this.isPlayerCrouching()) {
+            this.handleLandingToStanding();
+        }
+
+        this.player.y = platform.y - this.player.h;
+
+        if (
+            !this.isPlayerCrouching() &&
+            !this.canStandUp() &&
+            this.canCrouch()
+        ) {
+            this.handleCrouchStart();
+        }
+
+        this.player.onGroundId = platform.id;
+        this.player.onGroundType = platform.type;
+        this.player.lastGroundedAt = performance.now();
+        this.player.jumpPressedByUser = false;
+        this.player.bounceCount =
+            this.player.lastGroundId !== platform.id
+                ? 1
+                : this.player.bounceCount + 1;
+        this.player.lastGroundType = platform.type;
+        this.player.lastGroundId = platform.id;
+    }
+
+    handlePlatformLandingResponse(platform) {
+        if (platform.type === "booster") {
+            this.player.vy = -platform.boostSpeed;
+            return;
+        }
+
+        if (platform.type === "solid") {
+            this.player.vy = 0;
+            this.player.bounceCount = 0;
+            return;
+        }
+
+        if (platform.type === "bouncy") {
+            const impactSpeed = this.player.vy;
+
+            this.player.vy =
+                this.player.bounceCount === 1
+                    ? -impactSpeed * platform.elasticity
+                    : -impactSpeed * platform.elasticity * 0.75;
+
+            if (Math.abs(this.player.vy) < this.PHYSICS.minBounceSpeed) {
+                this.player.vy = 0;
+                this.player.bounceCount = 0;
+            }
+        }
+    }
+
+    handleCeilingHit(platform) {
+        this.player.y = platform.y + platform.h;
+        this.player.vy = 0;
     }
 
     // Move enemies and check player-enemy collisions
@@ -792,7 +905,7 @@ export class LostDaysOfSpring {
                 this.CAMERA.lookAheadYTargetDown * downRatio * downRatio;
         }
 
-        if (this.player.crouch) {
+        if (this.isPlayerCrouching()) {
             desiredLookAheadY += this.CAMERA.lookAheadYTargetDownCrouch;
         }
 

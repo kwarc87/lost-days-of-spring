@@ -69,7 +69,7 @@ function ensureImgs() {
 }
 
 function getAnimKey(player) {
-    if (player.crouch) {
+    if (player.posture === "crouch") {
         return "crouch";
     }
     const airborne = player.onGroundId === null && !player.onGroundType;

@@ -16,7 +16,6 @@ export const GameFactory = {
         airAcceleration: 2,
         airDeceleration: 2,
         speed: 5.8,
-        crouch: false,
         crouchHeight: 45,
         crouchWidth: 72,
         originalHeight: 107,
