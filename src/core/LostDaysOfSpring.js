@@ -396,23 +396,24 @@ export class LostDaysOfSpring {
             return;
         }
 
-        this.handleInput();
+        const now = performance.now();
+        this.handleInput(now);
         this.applyPhysics();
         this.movePlayerX();
-        this.movePlayerY();
-        this.updateEnemies();
-        this.updateBullets();
-        this.updateCollectibles();
+        this.movePlayerY(now);
+        this.updateEnemies(now);
+        this.updateBullets(now);
+        this.updateCollectibles(now);
         this.updateCamera();
-        this.updateDamageCooldown();
+        this.updateDamageCooldown(now);
     }
 
     // Handle keyboard input: movement, crouch, shooting, jump
-    handleInput() {
+    handleInput(now) {
         this.handleHorizontalMovementInput();
         this.handleCrouchInput();
-        this.handleShootingInput();
-        this.handleJumpInput();
+        this.handleShootingInput(now);
+        this.handleJumpInput(now);
     }
 
     handleHorizontalMovementInput() {
@@ -507,12 +508,11 @@ export class LostDaysOfSpring {
         this.applyPlayerWidth(width, "center");
     }
 
-    handleShootingInput() {
+    handleShootingInput(now) {
         const customShootingOffsetY = -4;
         const customShootingOffsetX = 40;
         if (this.keys[this.KEYS.shoot]) {
             this.player.shooting = true;
-            const now = performance.now();
             if (
                 now - this.player.lastShootTime >
                 this.player.weapon.shootFrequency
@@ -544,11 +544,10 @@ export class LostDaysOfSpring {
         }
     }
 
-    handleJumpInput() {
+    handleJumpInput(now) {
         if (this.player.posture === this.PLAYER_POSTURES.CROUCH) {
             return;
         }
-        const now = performance.now();
         const jumpBuffered =
             now - this.player.jumpPressedAt <= this.player.jumpBufferDuration;
 
@@ -626,7 +625,7 @@ export class LostDaysOfSpring {
     }
 
     // Move player along the Y axis, resolve platform collisions, and check fall-off
-    movePlayerY() {
+    movePlayerY(now) {
         const previousY = this.player.y;
         const previousH = this.player.h;
         this.player.y += this.player.vy;
@@ -641,7 +640,7 @@ export class LostDaysOfSpring {
         if (this.player.y < 0) {
             this.handleWorldCeilHit();
         } else if (this.player.y + this.player.h > this.WORLD_SIZE.height) {
-            this.handleWorldGroundLanding();
+            this.handleWorldGroundLanding(now);
         }
 
         for (const p of this.platforms) {
@@ -651,7 +650,7 @@ export class LostDaysOfSpring {
 
                 // Landing on top of platform
                 if (this.player.vy > 0 && wasAbove) {
-                    this.handlePlatformLanding(p);
+                    this.handlePlatformLanding(p, now);
                     this.handlePlatformLandingResponse(p);
                     break;
                 }
@@ -669,18 +668,20 @@ export class LostDaysOfSpring {
         }
     }
 
-    handleWorldGroundLanding() {
+    handleWorldGroundLanding(now) {
         if (!this.isPlayerCrouching()) {
             this.handleLandingToStanding();
         }
         this.player.y = this.WORLD_SIZE.height - this.player.h;
         this.player.vy = 0;
         this.player.jumpPressedByUser = false;
-        this.player.lastGroundedAt = performance.now();
+        this.player.lastGroundedAt = now;
         this.player.bounceCount = 0;
 
         this.player.onGroundId = this.WORLD_GROUND_ID;
         this.player.onGroundType = "solid";
+        this.player.lastGroundId = this.WORLD_GROUND_ID;
+        this.player.lastGroundType = "solid";
     }
 
     handleWorldCeilHit() {
@@ -688,7 +689,7 @@ export class LostDaysOfSpring {
         this.player.vy = 0;
     }
 
-    handlePlatformLanding(platform) {
+    handlePlatformLanding(platform, now) {
         if (!this.isPlayerCrouching()) {
             this.handleLandingToStanding();
         }
@@ -705,7 +706,7 @@ export class LostDaysOfSpring {
 
         this.player.onGroundId = platform.id;
         this.player.onGroundType = platform.type;
-        this.player.lastGroundedAt = performance.now();
+        this.player.lastGroundedAt = now;
         this.player.jumpPressedByUser = false;
         this.player.bounceCount =
             this.player.lastGroundId !== platform.id
@@ -748,8 +749,7 @@ export class LostDaysOfSpring {
     }
 
     // Move enemies and check player-enemy collisions
-    updateEnemies() {
-        const now = performance.now();
+    updateEnemies(now) {
         for (const enemy of this.enemies) {
             // Clear damage flash after 200ms
             if (enemy.isDamaged && now - enemy.damageTime > 200) {
@@ -792,7 +792,11 @@ export class LostDaysOfSpring {
 
                     if (this.player.life <= 0) {
                         this.gameOver = true;
-                        this.gameOverAt = performance.now();
+                        this.gameOverAt = now;
+                        this.player.vx = 0;
+                        this.player.vy = 0;
+                        this.player.shooting = false;
+                        this.player.jumpPressedByUser = false;
                         return;
                     }
                 }
@@ -805,7 +809,7 @@ export class LostDaysOfSpring {
     }
 
     // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions
-    updateBullets() {
+    updateBullets(now) {
         this.bullets = this.bullets.filter((bullet) => {
             bullet.x += bullet.vx;
             bullet.y += bullet.vy;
@@ -829,7 +833,7 @@ export class LostDaysOfSpring {
                         this.enemies.splice(i, 1);
                     } else {
                         enemy.isDamaged = true;
-                        enemy.damageTime = performance.now();
+                        enemy.damageTime = now;
                     }
                     return false; // bullet consumed on hit
                 }
@@ -847,7 +851,7 @@ export class LostDaysOfSpring {
     }
 
     // Check player-collectible collisions and mark collected items
-    updateCollectibles() {
+    updateCollectibles(now) {
         for (const c of this.collectibles) {
             if (!c.collected && this.rectsCollide(this.player, c)) {
                 c.collected = true;
@@ -860,7 +864,11 @@ export class LostDaysOfSpring {
             this.player.collectiblesCount >= this.currentLevelCollectiblesCount
         ) {
             this.levelComplete = true;
-            this.levelCompleteAt = performance.now();
+            this.levelCompleteAt = now;
+            this.player.vx = 0;
+            this.player.vy = 0;
+            this.player.shooting = false;
+            this.player.jumpPressedByUser = false;
         }
     }
 
@@ -939,8 +947,7 @@ export class LostDaysOfSpring {
         );
     }
 
-    updateDamageCooldown() {
-        const now = performance.now();
+    updateDamageCooldown(now) {
         if (
             this.player.isHit &&
             now - this.player.lastHitTime >= this.player.hitCooldown
@@ -1220,6 +1227,9 @@ export class LostDaysOfSpring {
     }
 
     start() {
+        if (this.isRunning) {
+            return;
+        }
         this.isRunning = true;
         this.lastTime = performance.now();
         window.requestAnimationFrame(this.loop);
@@ -1231,6 +1241,9 @@ export class LostDaysOfSpring {
 
     // Toggle pause state
     togglePause() {
+        if (this.levelComplete || this.gameOver) {
+            return;
+        }
         if (this.isRunning) {
             this.stop();
 
