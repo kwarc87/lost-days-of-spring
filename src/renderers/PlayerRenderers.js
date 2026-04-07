@@ -72,8 +72,7 @@ function getAnimKey(player) {
     if (player.posture === "crouch") {
         return "crouch";
     }
-    const airborne = player.onGroundId === null && !player.onGroundType;
-    if (airborne || player.isJumping) {
+    if (player.posture === "airborne") {
         return player.shooting ? "jumpShoot" : "jump";
     }
     if (player.shooting) {

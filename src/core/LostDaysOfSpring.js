@@ -355,26 +355,16 @@ export class LostDaysOfSpring {
         }
     }
 
-    applyPlayerHeight(nextHeight, anchorY = "top") {
-        if (anchorY === "bottom") {
-            const bottom = this.player.y + this.player.h;
-            this.player.h = nextHeight;
-            this.player.y = bottom - nextHeight;
-            return;
-        }
-
+    applyPlayerHeight(nextHeight) {
+        const bottom = this.player.y + this.player.h;
         this.player.h = nextHeight;
+        this.player.y = bottom - nextHeight;
     }
 
-    applyPlayerWidth(nextWidth, anchorX = "center") {
-        if (anchorX === "center") {
-            const centerX = this.player.x + this.player.w / 2;
-            this.player.w = nextWidth;
-            this.player.x = centerX - nextWidth / 2;
-            return;
-        }
-
+    applyPlayerWidth(nextWidth) {
+        const centerX = this.player.x + this.player.w / 2;
         this.player.w = nextWidth;
+        this.player.x = centerX - nextWidth / 2;
     }
 
     resetGame() {
@@ -467,7 +457,6 @@ export class LostDaysOfSpring {
             this.PLAYER_POSTURES.CROUCH,
             this.player.crouchHeight,
             this.player.crouchWidth,
-            "bottom",
         );
     }
 
@@ -476,7 +465,6 @@ export class LostDaysOfSpring {
             this.PLAYER_POSTURES.STANDING,
             this.player.originalHeight,
             this.player.originalWidth,
-            "bottom",
         );
     }
 
@@ -485,7 +473,6 @@ export class LostDaysOfSpring {
             this.PLAYER_POSTURES.STANDING,
             this.player.originalHeight,
             this.player.originalWidth,
-            "bottom",
         );
     }
 
@@ -494,7 +481,6 @@ export class LostDaysOfSpring {
             this.PLAYER_POSTURES.AIRBORNE,
             this.player.jumpHeight,
             this.player.originalWidth,
-            "bottom",
         );
     }
 
@@ -502,10 +488,10 @@ export class LostDaysOfSpring {
         this.handleTransitionToAirborne();
     }
 
-    applyPosture(posture, height, width, anchorY = "bottom") {
+    applyPosture(posture, height, width) {
         this.player.posture = posture;
-        this.applyPlayerHeight(height, anchorY);
-        this.applyPlayerWidth(width, "center");
+        this.applyPlayerHeight(height);
+        this.applyPlayerWidth(width);
     }
 
     handleShootingInput(now) {
@@ -637,12 +623,14 @@ export class LostDaysOfSpring {
             this.handleTransitionToAirborne();
         }
 
+        // Worlds bounds collisions
         if (this.player.y < 0) {
             this.handleWorldCeilHit();
         } else if (this.player.y + this.player.h > this.WORLD_SIZE.height) {
             this.handleWorldGroundLanding(now);
         }
 
+        //Platforms collisions
         for (const p of this.platforms) {
             if (this.rectsCollide(this.player, p)) {
                 const wasAbove = previousY + previousH <= p.y;
@@ -663,6 +651,8 @@ export class LostDaysOfSpring {
             }
         }
 
+        // case 1: when player fall from platform with crouch posture
+        // case 2: when player crouch in booster platform (user demanded to crouch in current frame but player is airborne now)
         if (this.isPlayerCrouching() && this.player.onGroundId === null) {
             this.handleCrouchToAirborne();
         }
@@ -691,11 +681,13 @@ export class LostDaysOfSpring {
 
     handlePlatformLanding(platform, now) {
         if (!this.isPlayerCrouching()) {
+            // we always want to land with standing position (crouch cannot be executed when player is airborne)
             this.handleLandingToStanding();
         }
 
         this.player.y = platform.y - this.player.h;
 
+        // crouch player when there is no enough space between platforms
         if (
             !this.isPlayerCrouching() &&
             !this.canStandUp() &&
@@ -810,20 +802,27 @@ export class LostDaysOfSpring {
 
     // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions
     updateBullets(now) {
-        this.bullets = this.bullets.filter((bullet) => {
+        for (
+            let bulletIndex = this.bullets.length - 1;
+            bulletIndex >= 0;
+            bulletIndex--
+        ) {
+            const bullet = this.bullets[bulletIndex];
             bullet.x += bullet.vx;
             bullet.y += bullet.vy;
 
             // Remove if outside world bounds
             if (
                 bullet.x > this.WORLD_SIZE.width ||
-                bullet.x < 0 ||
+                bullet.x + bullet.w < 0 ||
                 bullet.y > this.WORLD_SIZE.height ||
-                bullet.y < 0
+                bullet.y + bullet.h < 0
             ) {
-                return false;
+                this.bullets.splice(bulletIndex, 1);
+                continue;
             }
 
+            let consumedOnEnemy = false;
             // Bullet-enemy collision
             for (let i = this.enemies.length - 1; i >= 0; i--) {
                 if (this.rectsCollide(bullet, this.enemies[i])) {
@@ -835,19 +834,30 @@ export class LostDaysOfSpring {
                         enemy.isDamaged = true;
                         enemy.damageTime = now;
                     }
-                    return false; // bullet consumed on hit
+                    consumedOnEnemy = true; // bullet consumed on hit
+                    this.bullets.splice(bulletIndex, 1);
+                    break;
                 }
             }
 
-            // Bullet-platform collision
+            if (consumedOnEnemy) {
+                continue;
+            }
+
+            let consumedOnPlatform = false;
+
             for (let i = this.platforms.length - 1; i >= 0; i--) {
                 if (this.rectsCollide(bullet, this.platforms[i])) {
-                    return false; // bullet consumed on hit
+                    this.bullets.splice(bulletIndex, 1);
+                    consumedOnPlatform = true;
+                    break;
                 }
             }
 
-            return true;
-        });
+            if (consumedOnPlatform) {
+                continue;
+            }
+        }
     }
 
     // Check player-collectible collisions and mark collected items
