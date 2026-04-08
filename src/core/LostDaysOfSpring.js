@@ -78,7 +78,7 @@ export class LostDaysOfSpring {
         // ====== PHYSICS ======
         this.PHYSICS = {
             gravity: 0.52,
-            minBounceSpeed: 0.5,
+            minBounceSpeed: 2,
             maxFallSpeed: 18,
             fallGravityMultiplier: 1.45,
             jumpCutGravityMultiplier: 2.8,

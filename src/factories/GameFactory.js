@@ -55,7 +55,7 @@ export const GameFactory = {
         bottomDarkColor: "#1b080f",
         type: "solid",
     }),
-    bouncy: (id, x, y, w, h, elasticity = 0.5) => ({
+    bouncy: (id, x, y, w, h, elasticity = 0.7) => ({
         id,
         x,
         y,
@@ -127,6 +127,10 @@ export const GameFactory = {
     rowOfCollectibles: (startId, count, startX, y, gap) =>
         Array.from({ length: count }, (_, i) =>
             GameFactory.collectible(startId + i, startX + i * gap, y),
+        ),
+    columnOfCollectibles: (startId, count, x, startY, gap) =>
+        Array.from({ length: count }, (_, i) =>
+            GameFactory.collectible(startId + i, x, startY + i * gap),
         ),
     /**
      * Half-pyramid staircase (left-aligned, widens towards the bottom).

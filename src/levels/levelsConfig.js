@@ -11,7 +11,7 @@ export const LEVELS = {
                 // --- GROUND FLOOR ---
                 GameFactory.solid(1, 0, groundY, 6200, 73),
 
-                GameFactory.solid(2, 450, 2400, 200, 50),
+                GameFactory.solid(2, 450, 2410, 200, 50),
 
                 // --- LOWER-LEFT TERRAIN ---
                 GameFactory.solid(3, 800, 2250, 500, 50),
@@ -25,12 +25,11 @@ export const LEVELS = {
                 GameFactory.solid(12, 3200, 1800, 100, 300),
                 GameFactory.solid(13, 3300, 1800, 300, 100),
                 GameFactory.solid(14, 3600, 1800, 100, 300),
-                //GameFactory.bouncy(15, 3700, 2050, 400, 50, 0.6),
-                GameFactory.solid(15, 3700, 2050, 400, 50, 0.6),
+                GameFactory.bouncy(15, 3700, 2050, 400, 50),
                 GameFactory.solid(16, 3700, 1960, 100, 30),
                 GameFactory.solid(17, 3850, 2350, 250, 180),
                 GameFactory.solid(18, 4250, 2200, 150, 25),
-                GameFactory.booster(19, 3900, 1700, 300, 25, 30),
+                GameFactory.booster(19, 3900, 1730, 300, 25, 30),
                 GameFactory.booster(20, 3350, 2497, 200, 30, 22),
 
                 // --- TREASURY ---
@@ -39,17 +38,15 @@ export const LEVELS = {
                 // --- CLOUDS ---
                 GameFactory.solid(22, 2300, 550, 300, 25),
                 GameFactory.solid(23, 2850, 575, 50, 25),
-                GameFactory.solid(24, 3000, 700, 50, 25),
-                GameFactory.solid(25, 2850, 900, 50, 25),
-                GameFactory.solid(26, 2950, 1050, 100, 25),
-                GameFactory.solid(27, 3300, 1150, 300, 25),
-                //GameFactory.bouncy(28, 4150, 900, 400, 150),
-                GameFactory.solid(28, 4150, 900, 400, 150),
+                GameFactory.solid(24, 3000, 800, 50, 25),
+                GameFactory.solid(25, 2850, 1000, 50, 25),
+                GameFactory.solid(26, 2950, 1150, 100, 25),
+                GameFactory.solid(27, 3250, 1250, 450, 25),
+                GameFactory.bouncy(28, 4150, 900, 400, 150),
 
                 // --- RIGHT SIDE BASE ---
                 GameFactory.solid(29, 4550, 2000, 300, 25),
-                GameFactory.solid(30, 5400, 2410, 800, 60, 0.65),
-                //GameFactory.bouncy(30, 5400, 2430, 800, 60, 0.65),
+                GameFactory.bouncy(30, 5400, 2410, 800, 60),
 
                 // --- FIRST ASCENT ---
                 GameFactory.solid(33, 5600, 2250, 115, 20),
@@ -63,19 +60,19 @@ export const LEVELS = {
                 GameFactory.solid(37, 5320, 1400, 270, 20),
 
                 // --- THIRD ASCENT ---
-                GameFactory.solid(38, 5650, 1300, 100, 20),
-                GameFactory.solid(39, 5850, 1220, 80, 20),
-                GameFactory.solid(40, 6000, 1100, 200, 40),
-                // GameFactory.bouncy(40, 6000, 1100, 200, 40),
+                GameFactory.solid(38, 5680, 1360, 100, 20),
+                GameFactory.solid(39, 5880, 1270, 80, 20),
+                GameFactory.bouncy(40, 6000, 1100, 200, 40),
 
                 // --- FOURTH ASCENT ---
-                GameFactory.booster(41, 5690, 920, 140, 20, 21),
-                GameFactory.solid(42, 5350, 750, 150, 20),
-                GameFactory.solid(43, 5300, 350, 150, 20),
-                GameFactory.solid(44, 4900, 550, 250, 40),
+                GameFactory.booster(41, 5620, 980, 210, 20, 22),
+                GameFactory.solid(42, 5250, 720, 150, 20),
+                GameFactory.solid(43, 5430, 350, 200, 20),
+                GameFactory.solid(44, 4900, 500, 300, 40),
 
                 // --- FINAL STEPS ---
                 GameFactory.solid(45, 5750, 350, 450, 40),
+                GameFactory.solid(46, 4250, 300, 450, 250),
             ],
             enemies: [
                 //Lower-left terrain
@@ -241,6 +238,16 @@ export const LEVELS = {
                     1700,
                     collectiblesGap,
                 ),
+                ...GameFactory.rowOfCollectibles(151, 5, 4350, 150, 50),
+                ...GameFactory.rowOfCollectibles(156, 5, 4350, 100, 50),
+                GameFactory.collectible(161, 3737, 1912),
+                ...GameFactory.rowOfCollectibles(162, 8, 3275, 1150, 50),
+                ...GameFactory.rowOfCollectibles(169, 6, 5825, 450, 50),
+                ...GameFactory.rowOfCollectibles(176, 5, 4200, 700, 75),
+                GameFactory.collectible(181, 1810, 2475),
+                ...GameFactory.rowOfCollectibles(182, 9, 4550, 2450, 75),
+                ...GameFactory.columnOfCollectibles(191, 5, 4350, 1150, 75),
+                ...GameFactory.columnOfCollectibles(195, 5, 5075, 1175, 75),
             ],
         };
     },
