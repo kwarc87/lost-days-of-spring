@@ -3,45 +3,73 @@
 const SCALE = 3;
 const FW = 75;
 const FH = 48;
+
 const ANIMS = {
     idle: {
         src: "textures/player/idle.png",
         frames: [0, 1, 2, 3],
         fps: 4,
         offsetY: 4,
+        loop: true,
     },
     walk: {
         src: "textures/player/walk.png",
         frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         fps: 12,
+        loop: true,
     },
     walkShoot: {
         src: "textures/player/walk-shoot.png",
         frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         fps: 12,
+        loop: true,
     },
-    jump: {
+    jumpAsc: {
         src: "textures/player/jump.png",
-        frames: [0, 1, 2],
-        fps: 10,
-        offsetY: 24,
+        frames: [0, 1],
+        fps: 12,
+        offsetY: 4,
+        loop: false,
+    },
+    jumpDesc: {
+        src: "textures/player/jump.png",
+        frames: [3, 4, 5],
+        fps: 12,
+        delay: 400,
+        offsetY: -4,
+        loop: false,
     },
     jumpShoot: {
         src: "textures/player/jump-shoot.png",
-        frames: [3],
-        fps: 10,
+        frames: [0],
+        fps: 12,
         offsetY: 2,
+        loop: false,
     },
-    shoot: { src: "textures/player/walk-shoot.png", frames: [7], fps: 12 },
+    shoot: {
+        src: "textures/player/walk-shoot.png",
+        frames: [7],
+        fps: 12,
+        loop: false,
+    },
+    crouchIdle: {
+        src: "textures/player/crouch.png",
+        frames: [0],
+        fps: 1,
+        offsetX: -10,
+        loop: false,
+    },
     crouch: {
         src: "textures/player/crouch.png",
         frames: [0, 1, 2, 3, 4, 5],
         fps: 10,
+        offsetX: -10,
+        loop: true,
     },
 };
 
 const _imgs = {};
-let _jumpStartTime = null;
+let _animStartTime = 0;
 let _lastAnimKey = null;
 let _offCanvas = null;
 let _offCtx = null;
@@ -51,10 +79,12 @@ function getOffCanvas(w, h) {
         _offCanvas = document.createElement("canvas");
         _offCtx = _offCanvas.getContext("2d");
     }
+
     if (_offCanvas.width !== w || _offCanvas.height !== h) {
         _offCanvas.width = w;
         _offCanvas.height = h;
     }
+
     return { canvas: _offCanvas, ctx: _offCtx };
 }
 
@@ -70,18 +100,52 @@ function ensureImgs() {
 
 function getAnimKey(player) {
     if (player.posture === "crouch") {
-        return "crouch";
+        return Math.abs(player.vx) > 0.5 ? "crouch" : "crouchIdle";
     }
-    if (player.posture === "airborne") {
-        return player.shooting ? "jumpShoot" : "jump";
+
+    if (player.airborne) {
+        if (player.shooting) {
+            return "jumpShoot";
+        }
+        return player.vy < 0 ? "jumpAsc" : "jumpDesc";
     }
+
     if (player.shooting) {
         return Math.abs(player.vx) > 0.5 ? "walkShoot" : "shoot";
     }
+
     if (Math.abs(player.vx) > 0.5) {
         return "walk";
     }
+
     return "idle";
+}
+
+function getCurrentFrame(animKey, anim) {
+    const now = Date.now();
+
+    if (_lastAnimKey !== animKey) {
+        _animStartTime = now;
+        _lastAnimKey = animKey;
+    }
+
+    const elapsed = now - _animStartTime;
+    const delay = anim.delay ?? 0;
+
+    // ⬅️ najpierw obsługa opóźnienia
+    if (elapsed < delay) {
+        return anim.frames[0];
+    }
+
+    const frameDuration = 1000 / anim.fps;
+    const animTime = elapsed - delay;
+    const frameIndex = Math.floor(animTime / frameDuration);
+
+    if (anim.loop) {
+        return anim.frames[frameIndex % anim.frames.length];
+    }
+
+    return anim.frames[Math.min(frameIndex, anim.frames.length - 1)];
 }
 
 export const DefaultPlayerRenderer = {
@@ -91,74 +155,35 @@ export const DefaultPlayerRenderer = {
         const animKey = getAnimKey(player);
         const anim = ANIMS[animKey];
         const img = _imgs[animKey];
+
         if (!img?.complete || !img.naturalWidth) {
             return;
         }
 
-        const isJumpAnim = animKey === "jump" || animKey === "jumpShoot";
-        if (isJumpAnim) {
-            if (_lastAnimKey !== "jump" && _lastAnimKey !== "jumpShoot") {
-                _jumpStartTime = Date.now();
-            }
-        }
-        _lastAnimKey = animKey;
-
-        let fi;
-        if (isJumpAnim) {
-            const elapsed = Date.now() - (_jumpStartTime ?? Date.now());
-            fi = Math.min(
-                Math.floor(elapsed / (1000 / anim.fps)),
-                anim.frames.length - 1,
-            );
-        } else if (animKey === "crouch" && Math.abs(player.vx) <= 0.5) {
-            fi = 0;
-        } else {
-            fi =
-                Math.floor(Date.now() / (1000 / anim.fps)) % anim.frames.length;
-        }
-        fi = anim.frames[fi];
+        const spriteFrame = getCurrentFrame(animKey, anim);
         const dw = FW * SCALE;
         const dh = FH * SCALE;
 
-        const isCrouch = animKey === "crouch";
-        // Sprite is drawn wider than hitbox; shift it forward so it aligns with the front.
-        // facing right → shift left (negative), facing left → shift right (positive).
-        const crouchOffsetX = isCrouch
-            ? player.facing === "left"
-                ? 18
-                : -18
-            : 0;
+        const drawX = -dw / 2 + (anim.offsetX ?? 0);
+        const drawY = -dh + (anim.offsetY ?? 0);
 
         ctx.save();
         ctx.imageSmoothingEnabled = false;
-        ctx.translate(
-            player.x + player.w / 2 + crouchOffsetX,
-            player.y + player.h,
-        );
+        ctx.translate(player.x + player.w / 2, player.y + player.h);
+
         if (player.facing === "left") {
             ctx.scale(-1, 1);
         }
-        ctx.drawImage(
-            img,
-            fi * FW,
-            0,
-            FW,
-            FH,
-            -dw / 2,
-            -dh + (anim.offsetY ?? 0),
-            dw,
-            dh,
-        );
+
+        ctx.drawImage(img, spriteFrame * FW, 0, FW, FH, drawX, drawY, dw, dh);
 
         if (player.isHit) {
             const outlineSize = 3;
-            const drawX = -dw / 2;
-            const drawY = -dh + (anim.offsetY ?? 0);
-
             const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
+
             offCtx.clearRect(0, 0, dw, dh);
             offCtx.imageSmoothingEnabled = false;
-            offCtx.drawImage(img, fi * FW, 0, FW, FH, 0, 0, dw, dh);
+            offCtx.drawImage(img, spriteFrame * FW, 0, FW, FH, 0, 0, dw, dh);
             offCtx.globalCompositeOperation = "source-atop";
             offCtx.fillStyle = "red";
             offCtx.fillRect(0, 0, dw, dh);
@@ -174,13 +199,22 @@ export const DefaultPlayerRenderer = {
                 [-outlineSize, outlineSize],
                 [outlineSize, outlineSize],
             ];
+
             for (const [ox, oy] of offsets) {
                 ctx.drawImage(offCanvas, drawX + ox, drawY + oy);
             }
 
-            // Redraw original sprite on top of the outline
-            ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(img, fi * FW, 0, FW, FH, drawX, drawY, dw, dh);
+            ctx.drawImage(
+                img,
+                spriteFrame * FW,
+                0,
+                FW,
+                FH,
+                drawX,
+                drawY,
+                dw,
+                dh,
+            );
         }
 
         ctx.restore();

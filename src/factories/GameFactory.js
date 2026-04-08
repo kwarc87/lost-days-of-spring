@@ -20,7 +20,7 @@ export const GameFactory = {
         crouchWidth: 72,
         originalHeight: 107,
         originalWidth: 36,
-        jumpHeight: 83,
+        airborne: true,
         jump: 16.4,
         jumpPressedByUser: false,
         jumpPressedAt: 0,
