@@ -11,7 +11,10 @@ import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
 import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
 import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
-import { DebugGridRenderer } from "../renderers/DebugRenderers.js";
+import {
+    DebugGridRenderer,
+    DebugHudRenderer,
+} from "../renderers/DebugRenderers.js";
 import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
@@ -24,7 +27,7 @@ export class LostDaysOfSpring {
 
         // ====== INPUT ======
         this.keys = {};
-        this.KEYS = {
+        this.keysMap = {
             left: "ArrowLeft",
             right: "ArrowRight",
             jump: "ArrowUp",
@@ -43,9 +46,9 @@ export class LostDaysOfSpring {
         this.gameOver = false;
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
-        this.LEVEL_COMPLETE_DELAY = 7000; // ms until auto-restart
-        this.GAME_OVER_DELAY = 7000; // ms until auto-restart after game over
-        this.WORLD_GROUND_ID = "world-ground";
+        this.levelCompleteDelay = 7000; // ms until auto-restart
+        this.gameOverDelay = 7000; // ms until auto-restart after game over
+        this.worldGroundId = "world-ground";
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });
@@ -55,7 +58,7 @@ export class LostDaysOfSpring {
         this.nextBulletId = 0;
 
         // ====== CAMERA ======
-        this.CAMERA = {
+        this.camera = {
             x: 0, // current camera X position in world
             y: 0, // current camera Y position in world
             width: this.canvas.width, // viewport width in pixels
@@ -76,7 +79,7 @@ export class LostDaysOfSpring {
         };
 
         // ====== PHYSICS ======
-        this.PHYSICS = {
+        this.physics = {
             gravity: 0.52,
             minBounceSpeed: 2,
             maxFallSpeed: 18,
@@ -85,19 +88,19 @@ export class LostDaysOfSpring {
         };
 
         // ====== POSTURES ======
-        this.PLAYER_POSTURES = {
+        this.playerPostures = {
             STANDING: "standing",
             CROUCH: "crouch",
         };
 
         // ====== DEBUG ======
-        this.DEBUG = {
+        this.debug = {
             updateInterval: 50, // ms
             lastUpdate: 0,
         };
 
         // ====== GAME LOOP CONFIG ======
-        this.GAME_LOOP = {
+        this.gameLoop = {
             fixedDt: 1 / 60,
             maxFrameTime: 0.25,
         };
@@ -120,18 +123,8 @@ export class LostDaysOfSpring {
         this.isRunning = false;
 
         this.mouse = { worldX: 0, worldY: 0 };
-        this.canvas.addEventListener("mousemove", (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const scaleX = this.canvas.width / rect.width;
-            const scaleY = this.canvas.height / rect.height;
-            this.mouse.worldX = Math.round(
-                (e.clientX - rect.left) * scaleX + this.CAMERA.x,
-            );
-            this.mouse.worldY = Math.round(
-                (e.clientY - rect.top) * scaleY + this.CAMERA.y,
-            );
-        });
 
+        this.initMouseDebug();
         this.initControls();
 
         // Start game by loading level 1
@@ -148,19 +141,45 @@ export class LostDaysOfSpring {
         // Generate a fresh instance of the level data
         const levelData = LEVELS[levelId]();
 
-        this.WORLD_SIZE = levelData.worldSize;
+        this.worldSize = levelData.worldSize;
         this.platforms = levelData.platforms;
         this.enemies = levelData.enemies;
         this.collectibles = levelData.collectibles ?? [];
+        this.bgItems = levelData.bgItems ?? [];
         this.currentLevelCollectiblesCount = this.collectibles.length;
 
-        // Reset dynamic player properties according to level start
+        this.resetPlayerProperties(levelData);
+
+        // Clear held keys to prevent ghost input on level start
+        this.keys = {};
+
+        // Initialize dynamic entity defaults
+        this.initEnemies();
+
+        // Reset bullets
+        this.bullets = [];
+        this.nextBulletId = 0;
+
+        // Reset Camera
+        this.camera.x = 0;
+        this.camera.y = 0;
+        this.camera.lookAheadX = 0;
+        this.camera.lookAheadY = 0;
+
+        // Reset level-complete and game-over state
+        this.levelComplete = false;
+        this.levelCompleteAt = 0;
+        this.gameOver = false;
+        this.gameOverAt = 0;
+    }
+
+    resetPlayerProperties(levelData) {
         Object.assign(this.player, {
-            x: levelData.playerStart.x,
-            y: levelData.playerStart.y,
+            x: levelData?.playerStart?.x ?? 0,
+            y: levelData?.playerStart?.y ?? 0,
             vx: 0,
             vy: 0,
-            posture: this.PLAYER_POSTURES.STANDING,
+            posture: this.playerPostures.STANDING,
             h: this.player.originalHeight,
             w: this.player.originalWidth,
             life: this.player.maxLife,
@@ -180,28 +199,6 @@ export class LostDaysOfSpring {
             jumpPressedAt: 0,
             lastGroundedAt: 0,
         });
-
-        // Clear held keys to prevent ghost input on level start
-        this.keys = {};
-
-        // Initialize dynamic entity defaults
-        this.initEnemies();
-
-        // Reset bullets
-        this.bullets = [];
-        this.nextBulletId = 0;
-
-        // Reset Camera
-        this.CAMERA.x = 0;
-        this.CAMERA.y = 0;
-        this.CAMERA.lookAheadX = 0;
-        this.CAMERA.lookAheadY = 0;
-
-        // Reset level-complete and game-over state
-        this.levelComplete = false;
-        this.levelCompleteAt = 0;
-        this.gameOver = false;
-        this.gameOverAt = 0;
     }
 
     initControls() {
@@ -219,16 +216,20 @@ export class LostDaysOfSpring {
             }
 
             // Toggle pause state
-            if (e.code === this.KEYS.pause && !e.repeat) {
+            if (e.code === this.keysMap.pause && !e.repeat) {
                 this.togglePause();
             }
 
             // Toggle map overview
-            if (e.code === this.KEYS.map && !e.repeat) {
+            if (e.code === this.keysMap.map && !e.repeat) {
                 this.mapView = !this.mapView;
             }
 
-            if (e.code === this.KEYS.jump && !this.keys[e.code] && !e.repeat) {
+            if (
+                e.code === this.keysMap.jump &&
+                !this.keys[e.code] &&
+                !e.repeat
+            ) {
                 this.player.jumpPressedAt = performance.now();
             }
 
@@ -236,7 +237,7 @@ export class LostDaysOfSpring {
 
             if (
                 [
-                    ...Object.values(this.KEYS),
+                    ...Object.values(this.keysMap),
                     "ControlLeft",
                     "ControlRight",
                 ].includes(e.code)
@@ -248,6 +249,20 @@ export class LostDaysOfSpring {
         window.addEventListener("keyup", (e) => {
             e.stopPropagation();
             this.keys[e.code] = false;
+        });
+    }
+
+    initMouseDebug() {
+        this.canvas.addEventListener("mousemove", (e) => {
+            const rect = this.canvas.getBoundingClientRect();
+            const scaleX = this.canvas.width / rect.width;
+            const scaleY = this.canvas.height / rect.height;
+            this.mouse.worldX = Math.round(
+                (e.clientX - rect.left) * scaleX + this.camera.x,
+            );
+            this.mouse.worldY = Math.round(
+                (e.clientY - rect.top) * scaleY + this.camera.y,
+            );
         });
     }
 
@@ -317,11 +332,11 @@ export class LostDaysOfSpring {
     }
 
     isPlayerCrouching() {
-        return this.player.posture === this.PLAYER_POSTURES.CROUCH;
+        return this.player.posture === this.playerPostures.CROUCH;
     }
 
     getPlayerHitboxForPosture(posture) {
-        if (posture === this.PLAYER_POSTURES.CROUCH) {
+        if (posture === this.playerPostures.CROUCH) {
             return {
                 w: this.player.crouchWidth,
                 h: this.player.crouchHeight,
@@ -390,10 +405,13 @@ export class LostDaysOfSpring {
     handleHorizontalMovementInput() {
         let targetVx = 0;
 
-        if (this.keys[this.KEYS.left] && !this.keys[this.KEYS.right]) {
+        if (this.keys[this.keysMap.left] && !this.keys[this.keysMap.right]) {
             targetVx = -this.player.speed;
             this.player.facing = "left";
-        } else if (this.keys[this.KEYS.right] && !this.keys[this.KEYS.left]) {
+        } else if (
+            this.keys[this.keysMap.right] &&
+            !this.keys[this.keysMap.left]
+        ) {
             targetVx = this.player.speed;
             this.player.facing = "right";
         }
@@ -419,14 +437,15 @@ export class LostDaysOfSpring {
 
     handleCrouchInput() {
         if (
-            (this.keys[this.KEYS.crouchAlt] || this.keys[this.KEYS.crouch]) &&
+            (this.keys[this.keysMap.crouchAlt] ||
+                this.keys[this.keysMap.crouch]) &&
             !this.player.airborne
         ) {
             if (!this.isPlayerCrouching() && this.canCrouch()) {
-                this.applyPosture(this.PLAYER_POSTURES.CROUCH);
+                this.applyPosture(this.playerPostures.CROUCH);
             }
         } else if (this.isPlayerCrouching() && this.canStandUp()) {
-            this.applyPosture(this.PLAYER_POSTURES.STANDING);
+            this.applyPosture(this.playerPostures.STANDING);
         }
     }
 
@@ -440,7 +459,7 @@ export class LostDaysOfSpring {
     handleShootingInput(now) {
         const customShootingOffsetY = -4;
         const customShootingOffsetX = 40;
-        if (this.keys[this.KEYS.shoot]) {
+        if (this.keys[this.keysMap.shoot]) {
             this.player.shooting = true;
             if (
                 now - this.player.lastShootTime >
@@ -474,7 +493,7 @@ export class LostDaysOfSpring {
     }
 
     handleJumpInput(now) {
-        if (this.player.posture === this.PLAYER_POSTURES.CROUCH) {
+        if (this.player.posture === this.playerPostures.CROUCH) {
             return;
         }
         const jumpBuffered =
@@ -505,23 +524,23 @@ export class LostDaysOfSpring {
 
     // Apply gravity and enforce terminal velocity
     applyPhysics() {
-        let currentGravity = this.PHYSICS.gravity;
+        let currentGravity = this.physics.gravity;
         const isAscending = this.player.vy < 0;
         const isFalling = this.player.vy > 0;
-        const jumpHeld = this.keys[this.KEYS.jump];
+        const jumpHeld = this.keys[this.keysMap.jump];
 
         // Variable jump height: fall faster if jump key is released while ascending
         if (isAscending && !jumpHeld && this.player.jumpPressedByUser) {
-            currentGravity *= this.PHYSICS.jumpCutGravityMultiplier;
+            currentGravity *= this.physics.jumpCutGravityMultiplier;
         } else if (isFalling) {
-            currentGravity *= this.PHYSICS.fallGravityMultiplier;
+            currentGravity *= this.physics.fallGravityMultiplier;
         }
 
         this.player.vy += currentGravity;
 
         // Terminal velocity cap
-        if (this.player.vy > this.PHYSICS.maxFallSpeed) {
-            this.player.vy = this.PHYSICS.maxFallSpeed;
+        if (this.player.vy > this.physics.maxFallSpeed) {
+            this.player.vy = this.physics.maxFallSpeed;
         }
     }
 
@@ -533,8 +552,8 @@ export class LostDaysOfSpring {
         if (this.player.x < 0) {
             this.player.x = 0;
             this.player.vx = 0;
-        } else if (this.player.x + this.player.w > this.WORLD_SIZE.width) {
-            this.player.x = this.WORLD_SIZE.width - this.player.w;
+        } else if (this.player.x + this.player.w > this.worldSize.width) {
+            this.player.x = this.worldSize.width - this.player.w;
             this.player.vx = 0;
         }
 
@@ -563,7 +582,7 @@ export class LostDaysOfSpring {
         // Worlds bounds collisions
         if (this.player.y < 0) {
             this.handleWorldCeilHit();
-        } else if (this.player.y + this.player.h > this.WORLD_SIZE.height) {
+        } else if (this.player.y + this.player.h > this.worldSize.height) {
             this.handleWorldGroundLanding(now);
         }
 
@@ -594,21 +613,21 @@ export class LostDaysOfSpring {
             this.player.airborne &&
             this.canStandUp()
         ) {
-            this.applyPosture(this.PLAYER_POSTURES.STANDING);
+            this.applyPosture(this.playerPostures.STANDING);
         }
     }
 
     handleWorldGroundLanding(now) {
-        this.player.y = this.WORLD_SIZE.height - this.player.h;
+        this.player.y = this.worldSize.height - this.player.h;
         this.player.vy = 0;
         this.player.jumpPressedByUser = false;
         this.player.lastGroundedAt = now;
         this.player.bounceCount = 0;
 
         this.player.airborne = false;
-        this.player.onGroundId = this.WORLD_GROUND_ID;
+        this.player.onGroundId = this.worldGroundId;
         this.player.onGroundType = "solid";
-        this.player.lastGroundId = this.WORLD_GROUND_ID;
+        this.player.lastGroundId = this.worldGroundId;
         this.player.lastGroundType = "solid";
     }
 
@@ -652,7 +671,7 @@ export class LostDaysOfSpring {
                     ? -impactSpeed * platform.elasticity
                     : -impactSpeed * platform.elasticity * 0.75;
 
-            if (Math.abs(this.player.vy) < this.PHYSICS.minBounceSpeed) {
+            if (Math.abs(this.player.vy) < this.physics.minBounceSpeed) {
                 this.player.vy = 0;
                 this.player.bounceCount = 0;
             }
@@ -737,9 +756,9 @@ export class LostDaysOfSpring {
 
             // Remove if outside world bounds
             if (
-                bullet.x > this.WORLD_SIZE.width ||
+                bullet.x > this.worldSize.width ||
                 bullet.x + bullet.w < 0 ||
-                bullet.y > this.WORLD_SIZE.height ||
+                bullet.y > this.worldSize.height ||
                 bullet.y + bullet.h < 0
             ) {
                 this.bullets.splice(bulletIndex, 1);
@@ -813,20 +832,20 @@ export class LostDaysOfSpring {
         // X
         const desiredLookAheadX =
             this.player.facing === "right"
-                ? this.CAMERA.lookAheadXTarget
-                : -this.CAMERA.lookAheadXTarget;
+                ? this.camera.lookAheadXTarget
+                : -this.camera.lookAheadXTarget;
 
-        this.CAMERA.lookAheadX +=
-            (desiredLookAheadX - this.CAMERA.lookAheadX) *
-            this.CAMERA.lookAheadXSmoothing;
+        this.camera.lookAheadX +=
+            (desiredLookAheadX - this.camera.lookAheadX) *
+            this.camera.lookAheadXSmoothing;
 
         const targetX =
-            this.player.x + this.player.w / 2 - this.CAMERA.width / 2;
+            this.player.x + this.player.w / 2 - this.camera.width / 2;
 
-        const desiredCameraX = targetX + this.CAMERA.lookAheadX;
+        const desiredCameraX = targetX + this.camera.lookAheadX;
 
-        this.CAMERA.x +=
-            (desiredCameraX - this.CAMERA.x) * this.CAMERA.smoothing;
+        this.camera.x +=
+            (desiredCameraX - this.camera.x) * this.camera.smoothing;
 
         // Y
         let desiredLookAheadY = 0;
@@ -837,47 +856,44 @@ export class LostDaysOfSpring {
                 1,
             );
             desiredLookAheadY =
-                -this.CAMERA.lookAheadYTargetUp * upRatio * upRatio;
+                -this.camera.lookAheadYTargetUp * upRatio * upRatio;
         } else if (this.player.vy > 0) {
             const downRatio = Math.min(
-                this.player.vy / this.PHYSICS.maxFallSpeed,
+                this.player.vy / this.physics.maxFallSpeed,
                 1,
             );
             desiredLookAheadY =
-                this.CAMERA.lookAheadYTargetDown * downRatio * downRatio;
+                this.camera.lookAheadYTargetDown * downRatio * downRatio;
         }
 
         if (this.isPlayerCrouching()) {
-            desiredLookAheadY += this.CAMERA.lookAheadYTargetDownCrouch;
+            desiredLookAheadY += this.camera.lookAheadYTargetDownCrouch;
         }
 
-        this.CAMERA.lookAheadY +=
-            (desiredLookAheadY - this.CAMERA.lookAheadY) *
-            this.CAMERA.lookAheadYSmoothing;
+        this.camera.lookAheadY +=
+            (desiredLookAheadY - this.camera.lookAheadY) *
+            this.camera.lookAheadYSmoothing;
 
         const playerFootY = this.player.y + this.player.h;
         const targetY =
             playerFootY -
             this.player.originalHeight / 2 -
-            this.CAMERA.height / 2;
+            this.camera.height / 2;
 
-        const desiredCameraY = targetY + this.CAMERA.lookAheadY;
+        const desiredCameraY = targetY + this.camera.lookAheadY;
 
-        this.CAMERA.y +=
-            (desiredCameraY - this.CAMERA.y) * this.CAMERA.smoothing;
+        this.camera.y +=
+            (desiredCameraY - this.camera.y) * this.camera.smoothing;
 
         // world bound
-        this.CAMERA.x = Math.max(
+        this.camera.x = Math.max(
             0,
-            Math.min(this.CAMERA.x, this.WORLD_SIZE.width - this.CAMERA.width),
+            Math.min(this.camera.x, this.worldSize.width - this.camera.width),
         );
 
-        this.CAMERA.y = Math.max(
+        this.camera.y = Math.max(
             0,
-            Math.min(
-                this.CAMERA.y,
-                this.WORLD_SIZE.height - this.CAMERA.height,
-            ),
+            Math.min(this.camera.y, this.worldSize.height - this.camera.height),
         );
     }
 
@@ -891,12 +907,7 @@ export class LostDaysOfSpring {
     }
 
     drawPlayer() {
-        if (
-            this.playerRenderer &&
-            typeof this.playerRenderer.draw === "function"
-        ) {
-            this.playerRenderer.draw(this.ctx, this.player, this.showDebug);
-        }
+        this.playerRenderer.draw(this.ctx, this.player, this.showDebug);
     }
 
     drawPlatform(p) {
@@ -906,50 +917,29 @@ export class LostDaysOfSpring {
         } else if (p.type === "booster") {
             renderer = BoosterPlatformRenderer;
         }
-        if (renderer && typeof renderer.draw === "function") {
-            renderer.draw(this.ctx, p);
-        }
+
+        renderer.draw(this.ctx, p);
     }
 
     drawEnemy(e) {
-        if (
-            this.enemyRenderer &&
-            typeof this.enemyRenderer.draw === "function"
-        ) {
-            this.enemyRenderer.draw(this.ctx, e, this.showDebug);
-        }
+        this.enemyRenderer.draw(this.ctx, e, this.showDebug);
     }
 
     drawCollectible(p) {
-        if (
-            this.collectibleRenderer &&
-            typeof this.collectibleRenderer.draw === "function"
-        ) {
-            this.collectibleRenderer.draw(this.ctx, p);
-        }
+        this.collectibleRenderer.draw(this.ctx, p);
     }
 
     drawWeapon(w) {
-        if (
-            this.weaponRenderer &&
-            typeof this.weaponRenderer.draw === "function"
-        ) {
-            this.weaponRenderer.draw(this.ctx, w);
-        }
+        this.weaponRenderer.draw(this.ctx, w);
     }
 
     drawWorld() {
-        if (
-            this.worldRenderer &&
-            typeof this.worldRenderer.drawBackground === "function"
-        ) {
-            this.worldRenderer.drawBackground(
-                this.ctx,
-                this.canvas,
-                this.CAMERA,
-                this.WORLD_SIZE,
-            );
-        }
+        this.worldRenderer.drawBackground(
+            this.ctx,
+            this.canvas,
+            this.camera,
+            this.bgItems,
+        );
     }
 
     draw() {
@@ -961,13 +951,13 @@ export class LostDaysOfSpring {
             this.worldRenderer.drawMapBackground(
                 this.ctx,
                 this.canvas,
-                this.WORLD_SIZE,
+                this.worldSize,
             );
         } else {
             this.drawWorld();
             this.ctx.translate(
-                -Math.round(this.CAMERA.x),
-                -Math.round(this.CAMERA.y),
+                -Math.round(this.camera.x),
+                -Math.round(this.camera.y),
             );
         }
 
@@ -992,7 +982,7 @@ export class LostDaysOfSpring {
         this.drawPlayer();
 
         if (this.showDebug) {
-            DebugGridRenderer.draw(this.ctx, this.CAMERA, this.WORLD_SIZE);
+            DebugGridRenderer.draw(this.ctx, this.camera, this.worldSize);
         }
 
         this.ctx.restore();
@@ -1017,111 +1007,41 @@ export class LostDaysOfSpring {
         const elapsed = performance.now() - this.levelCompleteAt;
         const remaining = Math.max(
             0,
-            Math.ceil((this.LEVEL_COMPLETE_DELAY - elapsed) / 1000),
+            Math.ceil((this.levelCompleteDelay - elapsed) / 1000),
         );
 
-        if (
-            this.levelCompleteRenderer &&
-            typeof this.levelCompleteRenderer.drawLevelCompleteScreen ===
-                "function"
-        ) {
-            this.levelCompleteRenderer.drawLevelCompleteScreen(
-                this.ctx,
-                this.canvas,
-                this.player.collectiblesCount,
-                this.currentLevelCollectiblesCount,
-                remaining,
-            );
-        }
+        this.levelCompleteRenderer.drawLevelCompleteScreen(
+            this.ctx,
+            this.canvas,
+            this.player.collectiblesCount,
+            this.currentLevelCollectiblesCount,
+            remaining,
+        );
     }
 
     drawGameOver() {
         const elapsed = performance.now() - this.gameOverAt;
         const remaining = Math.max(
             0,
-            Math.ceil((this.GAME_OVER_DELAY - elapsed) / 1000),
+            Math.ceil((this.gameOverDelay - elapsed) / 1000),
         );
 
-        if (
-            this.gameOverRenderer &&
-            typeof this.gameOverRenderer.drawGameOverScreen === "function"
-        ) {
-            this.gameOverRenderer.drawGameOverScreen(
-                this.ctx,
-                this.canvas,
-                remaining,
-            );
-        }
+        this.gameOverRenderer.drawGameOverScreen(
+            this.ctx,
+            this.canvas,
+            remaining,
+        );
     }
 
     updateDebug(now) {
-        if (!this.showDebug) {
-            const el = document.getElementById("debug");
-            if (el) {
-                el.remove();
-            }
-            const cp = document.getElementById("cursor-pos");
-            if (cp) {
-                cp.remove();
-            }
-            return;
-        }
-
-        // Throttle debug panel updates to a human-readable interval
-        if (now - this.DEBUG.lastUpdate < this.DEBUG.updateInterval) {
-            return;
-        }
-        this.DEBUG.lastUpdate = now;
-
-        let el = document.getElementById("debug");
-        if (!el) {
-            el = document.createElement("div");
-            el.id = "debug";
-            // Game container is the canvas parent element defined in index.html
-            if (this.canvas.parentElement) {
-                this.canvas.parentElement.insertBefore(el, this.canvas);
-            } else {
-                document.body.appendChild(el);
-            }
-        }
-
-        el.textContent = "";
-        for (const [key, value] of Object.entries(this.player)) {
-            const row = document.createElement("div");
-            const label = document.createElement("strong");
-            label.textContent = key;
-            row.appendChild(label);
-            const display =
-                value !== null && typeof value === "object"
-                    ? JSON.stringify(value).replace(/,/g, ", ")
-                    : String(value);
-            row.appendChild(document.createTextNode(" " + display));
-            el.appendChild(row);
-        }
-
-        let cp = document.getElementById("cursor-pos");
-        if (!cp) {
-            cp = document.createElement("div");
-            cp.id = "cursor-pos";
-            if (this.canvas.parentElement) {
-                this.canvas.parentElement.appendChild(cp);
-            } else {
-                document.body.appendChild(cp);
-            }
-        }
-        cp.textContent = "";
-        const rowX = document.createElement("div");
-        const lx = document.createElement("strong");
-        lx.textContent = "x";
-        rowX.appendChild(lx);
-        rowX.appendChild(document.createTextNode(" " + this.mouse.worldX));
-        cp.appendChild(rowX);
-        const rowY = document.createElement("div");
-        const ly = document.createElement("strong");
-        ly.textContent = "y";
-        rowY.appendChild(ly);
-        rowY.appendChild(document.createTextNode(" " + this.mouse.worldY));
-        cp.appendChild(rowY);
+        DebugHudRenderer.update(
+            now,
+            this.canvas,
+            this.showDebug,
+            this.debug,
+            this.player,
+            this.mouse,
+        );
     }
 
     loop(now) {
@@ -1132,15 +1052,15 @@ export class LostDaysOfSpring {
         let frameTime = (now - this.lastTime) / 1000;
         this.lastTime = now;
 
-        if (frameTime > this.GAME_LOOP.maxFrameTime) {
-            frameTime = this.GAME_LOOP.maxFrameTime;
+        if (frameTime > this.gameLoop.maxFrameTime) {
+            frameTime = this.gameLoop.maxFrameTime;
         }
 
         this.accumulator += frameTime;
 
-        while (this.accumulator >= this.GAME_LOOP.fixedDt) {
+        while (this.accumulator >= this.gameLoop.fixedDt) {
             this.update();
-            this.accumulator -= this.GAME_LOOP.fixedDt;
+            this.accumulator -= this.gameLoop.fixedDt;
         }
 
         this.draw();
@@ -1148,12 +1068,12 @@ export class LostDaysOfSpring {
 
         if (
             this.levelComplete &&
-            now - this.levelCompleteAt >= this.LEVEL_COMPLETE_DELAY
+            now - this.levelCompleteAt >= this.levelCompleteDelay
         ) {
             this.resetGame();
         }
 
-        if (this.gameOver && now - this.gameOverAt >= this.GAME_OVER_DELAY) {
+        if (this.gameOver && now - this.gameOverAt >= this.gameOverDelay) {
             this.resetGame();
         }
 
@@ -1182,12 +1102,7 @@ export class LostDaysOfSpring {
             this.stop();
 
             // Draw pause overlay
-            if (
-                this.pauseRenderer &&
-                typeof this.pauseRenderer.drawPauseScreen === "function"
-            ) {
-                this.pauseRenderer.drawPauseScreen(this.ctx, this.canvas);
-            }
+            this.pauseRenderer.drawPauseScreen(this.ctx, this.canvas);
         } else {
             this.start();
         }
