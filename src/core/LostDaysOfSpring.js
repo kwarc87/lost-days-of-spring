@@ -1,11 +1,7 @@
 import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
 import { DefaultPlayerRenderer } from "../renderers/PlayerRenderers.js";
-import {
-    DefaultPlatformRenderer,
-    BouncyPlatformRenderer,
-    BoosterPlatformRenderer,
-} from "../renderers/PlatformRenderers.js";
+import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
 import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
 import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
@@ -81,7 +77,6 @@ export class LostDaysOfSpring {
         // ====== PHYSICS ======
         this.physics = {
             gravity: 0.52,
-            minBounceSpeed: 2,
             maxFallSpeed: 18,
             fallGravityMultiplier: 1.45,
             jumpCutGravityMultiplier: 2.8,
@@ -145,7 +140,8 @@ export class LostDaysOfSpring {
         this.platforms = levelData.platforms;
         this.enemies = levelData.enemies;
         this.collectibles = levelData.collectibles ?? [];
-        this.bgItems = levelData.bgItems ?? [];
+        this.foregroundItems = levelData.foregroundItems ?? [];
+        this.backgroundItems = levelData.backgroundItems ?? [];
         this.currentLevelCollectiblesCount = this.collectibles.length;
 
         this.resetPlayerProperties(levelData);
@@ -190,7 +186,6 @@ export class LostDaysOfSpring {
             onGroundType: null,
             lastGroundId: null,
             lastGroundType: null,
-            bounceCount: 0,
             collectiblesCount: 0,
             facing: "right",
             jumpPressedByUser: false,
@@ -513,7 +508,6 @@ export class LostDaysOfSpring {
             this.player.vy = -this.player.jump;
 
             this.player.airborne = true;
-            this.player.bounceCount = 0;
             this.player.lastGroundedAt = 0;
             this.player.onGroundId = null;
             this.player.onGroundType = null;
@@ -622,7 +616,6 @@ export class LostDaysOfSpring {
         this.player.vy = 0;
         this.player.jumpPressedByUser = false;
         this.player.lastGroundedAt = now;
-        this.player.bounceCount = 0;
 
         this.player.airborne = false;
         this.player.onGroundId = this.worldGroundId;
@@ -643,10 +636,6 @@ export class LostDaysOfSpring {
         this.player.onGroundType = platform.type;
         this.player.lastGroundedAt = now;
         this.player.jumpPressedByUser = false;
-        this.player.bounceCount =
-            this.player.lastGroundId !== platform.id
-                ? 1
-                : this.player.bounceCount + 1;
         this.player.lastGroundType = platform.type;
         this.player.lastGroundId = platform.id;
     }
@@ -659,22 +648,7 @@ export class LostDaysOfSpring {
 
         if (platform.type === "solid") {
             this.player.vy = 0;
-            this.player.bounceCount = 0;
             return;
-        }
-
-        if (platform.type === "bouncy") {
-            const impactSpeed = this.player.vy;
-
-            this.player.vy =
-                this.player.bounceCount === 1
-                    ? -impactSpeed * platform.elasticity
-                    : -impactSpeed * platform.elasticity * 0.75;
-
-            if (Math.abs(this.player.vy) < this.physics.minBounceSpeed) {
-                this.player.vy = 0;
-                this.player.bounceCount = 0;
-            }
         }
     }
 
@@ -911,14 +885,7 @@ export class LostDaysOfSpring {
     }
 
     drawPlatform(p) {
-        let renderer = this.platformRenderer;
-        if (p.type === "bouncy") {
-            renderer = BouncyPlatformRenderer;
-        } else if (p.type === "booster") {
-            renderer = BoosterPlatformRenderer;
-        }
-
-        renderer.draw(this.ctx, p);
+        this.platformRenderer.draw(this.ctx, p, this.showDebug);
     }
 
     drawEnemy(e) {
@@ -933,13 +900,16 @@ export class LostDaysOfSpring {
         this.weaponRenderer.draw(this.ctx, w);
     }
 
+    drawBackground() {
+        this.worldRenderer.drawEnvironment(this.ctx, this.backgroundItems);
+    }
+
     drawWorld() {
-        this.worldRenderer.drawBackground(
-            this.ctx,
-            this.canvas,
-            this.camera,
-            this.bgItems,
-        );
+        this.worldRenderer.drawBackground(this.ctx, this.canvas, this.camera);
+    }
+
+    drawForeground() {
+        this.worldRenderer.drawEnvironment(this.ctx, this.foregroundItems);
     }
 
     draw() {
@@ -965,6 +935,8 @@ export class LostDaysOfSpring {
             this.drawPlatform(p);
         }
 
+        this.drawBackground();
+
         for (const w of this.bullets) {
             this.drawWeapon(w);
         }
@@ -980,6 +952,8 @@ export class LostDaysOfSpring {
         }
 
         this.drawPlayer();
+
+        this.drawForeground();
 
         if (this.showDebug) {
             DebugGridRenderer.draw(this.ctx, this.camera, this.worldSize);

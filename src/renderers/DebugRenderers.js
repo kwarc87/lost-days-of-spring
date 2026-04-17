@@ -1,5 +1,7 @@
+import { GameFactory } from "../factories/GameFactory.js";
+
 export const DebugGridRenderer = {
-    draw(ctx, camera, worldSize, gapX = 50, gapY = 50) {
+    draw(ctx, camera, worldSize, gapX = 48, gapY = 48) {
         ctx.save();
         ctx.strokeStyle = "white";
         ctx.lineWidth = 0.5;
@@ -82,13 +84,21 @@ export const DebugHudRenderer = {
         const lx = document.createElement("strong");
         lx.textContent = "x";
         rowX.appendChild(lx);
-        rowX.appendChild(document.createTextNode(" " + mouse.worldX));
+        rowX.appendChild(
+            document.createTextNode(
+                " " + Math.floor(mouse.worldX / GameFactory.GRID),
+            ),
+        );
         cp.appendChild(rowX);
         const rowY = document.createElement("div");
         const ly = document.createElement("strong");
         ly.textContent = "y";
         rowY.appendChild(ly);
-        rowY.appendChild(document.createTextNode(" " + mouse.worldY));
+        rowY.appendChild(
+            document.createTextNode(
+                " " + Math.floor(mouse.worldY / GameFactory.GRID),
+            ),
+        );
         cp.appendChild(rowY);
     },
 };

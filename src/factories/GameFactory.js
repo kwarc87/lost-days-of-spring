@@ -1,4 +1,6 @@
 export const GameFactory = {
+    GRID: 48,
+    SCALE: 3,
     player: (overrides = {}) => ({
         x: 0,
         y: 0,
@@ -31,47 +33,21 @@ export const GameFactory = {
         onGroundType: null,
         lastGroundId: null,
         lastGroundType: null,
-        bounceCount: 0,
         collectiblesCount: 0,
         facing: "right",
         shooting: false,
         lastShootTime: 0,
         ...overrides,
     }),
-    solid: (id, x, y, w, h) => ({
+    solid: (id, x, y, w, h, layout = "ground") => ({
         id,
         x,
         y,
         w,
         h,
-        color: "#5c2040",
-        secondaryColor: "#3a1528",
-        textureColor: "#2a1020",
-        patternColor: "#1e0c16",
-        mossColor: "#0dfa9d",
-        mossShadowColor: "#07965c",
-        accentColor: "#ff3a3a",
-        bottomLightColor: "#1e0c16",
-        bottomDarkColor: "#1b080f",
+        color: "#3b1158",
         type: "solid",
-    }),
-    bouncy: (id, x, y, w, h, elasticity = 0.7) => ({
-        id,
-        x,
-        y,
-        w,
-        h,
-        color: "#c42040",
-        secondaryColor: "#8c1530",
-        textureColor: "#5a1020",
-        patternColor: "#300c14",
-        mossColor: "#0dfa9d",
-        mossShadowColor: "#07965c",
-        accentColor: "#ff6040",
-        bottomLightColor: "#29040d",
-        bottomDarkColor: "#300c14",
-        elasticity,
-        type: "bouncy",
+        layout,
     }),
     booster: (id, x, y, w, h, boostSpeed = 20) => ({
         id,
@@ -79,13 +55,10 @@ export const GameFactory = {
         y,
         w,
         h,
-        color: "#ffe568",
-        secondaryColor: "#ffc300",
-        mossColor: "#dc562e",
-        textureColor: "#ff8800",
-        patternColor: "#ffa200",
+        color: "#3b1158",
         elasticity: 0,
         type: "booster",
+        layout: "booster",
         boostSpeed,
     }),
     enemy: (id, platformId, speed = 1.5, overrides = {}) => ({
@@ -132,40 +105,147 @@ export const GameFactory = {
         Array.from({ length: count }, (_, i) =>
             GameFactory.collectible(startId + i, x, startY + i * gap),
         ),
-    /**
-     * Half-pyramid staircase (left-aligned, widens towards the bottom).
-     * Row 0 = top (narrowest), row height-1 = bottom (widest).
-     * Each subsequent row is `width` block-units wider than the one above.
-     *
-     * @param {number} startId  - First platform id
-     * @param {number} startX   - Left edge X of all rows
-     * @param {number} startY   - Y of the topmost row
-     * @param {number} blockWidth  - Width of one block unit (default 50)
-     * @param {number} blockHeight - Height of one block unit (default 50)
-     * @param {number} height   - Number of rows/steps
-     * @param {number} width    - How many block-units each row adds relative to the one above
-     */
-    stairs: (
-        startId,
-        startX,
-        startY,
-        blockWidth = 50,
-        blockHeight = 50,
-        width,
-    ) => {
-        const platforms = [];
-        let id = startId;
-        for (let i = 0; i < width; i++) {
-            platforms.push(
-                GameFactory.solid(
-                    id++,
-                    startX + i * blockWidth,
-                    startY - i * blockHeight,
-                    blockWidth * width - i * blockWidth,
-                    blockHeight,
+    environment: {
+        plant001: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 48,
+            cordY: 98,
+            width: 32,
+            height: 30,
+            overrides,
+        }),
+        plant002: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 16,
+            cordY: 100,
+            width: 32,
+            height: 32,
+            overrides,
+        }),
+        plant003: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 96,
+            cordY: 105,
+            width: 16,
+            height: 21,
+            overrides,
+        }),
+        plant004: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 128,
+            cordY: 104,
+            width: 16,
+            height: 22,
+            overrides,
+        }),
+        wallPlant001: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 128,
+            cordY: 48,
+            width: 16,
+            height: 27,
+            overrides,
+        }),
+        plate001: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 160,
+            cordY: 107,
+            width: 32,
+            height: 21,
+            overrides,
+        }),
+    },
+    grid: {
+        solid: (id, gx, gy, gw, gh, layout = "ground") =>
+            GameFactory.solid(
+                id,
+                gx * GameFactory.GRID,
+                gy * GameFactory.GRID,
+                gw * GameFactory.GRID,
+                gh * GameFactory.GRID,
+                layout,
+            ),
+        booster: (id, gx, gy, gw, gh, boostSpeed = 20) =>
+            GameFactory.booster(
+                id,
+                gx * GameFactory.GRID,
+                gy * GameFactory.GRID,
+                gw * GameFactory.GRID,
+                gh * GameFactory.GRID,
+                boostSpeed,
+            ),
+        collectible: (id, gx, gy, overrides = {}) =>
+            GameFactory.collectible(
+                id,
+                gx * GameFactory.GRID + GameFactory.GRID / 4,
+                gy * GameFactory.GRID + GameFactory.GRID / 4,
+                overrides,
+            ),
+        rowOfCollectibles: (startId, count, gStartX, gy, gGap) =>
+            GameFactory.rowOfCollectibles(
+                startId,
+                count,
+                gStartX * GameFactory.GRID + GameFactory.GRID / 4,
+                gy * GameFactory.GRID + GameFactory.GRID / 4,
+                gGap * GameFactory.GRID,
+            ),
+        columnOfCollectibles: (startId, count, gx, gStartY, gGap) =>
+            GameFactory.columnOfCollectibles(
+                startId,
+                count,
+                gx * GameFactory.GRID + GameFactory.GRID / 4,
+                gStartY * GameFactory.GRID + GameFactory.GRID / 4,
+                gGap * GameFactory.GRID,
+            ),
+        environment: {
+            plant001: (gx, gy, overrides = {}) =>
+                GameFactory.environment.plant001(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 14 * GameFactory.SCALE,
+                    overrides,
                 ),
-            );
-        }
-        return platforms;
+            plant002: (gx, gy, overrides = {}) =>
+                GameFactory.environment.plant002(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 12 * GameFactory.SCALE,
+                    overrides,
+                ),
+            plant003: (gx, gy, overrides = {}) =>
+                GameFactory.environment.plant003(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 7 * GameFactory.SCALE,
+                    overrides,
+                ),
+            plant004: (gx, gy, overrides = {}) =>
+                GameFactory.environment.plant004(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 8 * GameFactory.SCALE,
+                    overrides,
+                ),
+            wallPlant001: (gx, gy, overrides = {}) =>
+                GameFactory.environment.wallPlant001(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID,
+                    overrides,
+                ),
+            plate001: (gx, gy, overrides = {}) =>
+                GameFactory.environment.plate001(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 7 * GameFactory.SCALE,
+                    overrides,
+                ),
+        },
     },
 };

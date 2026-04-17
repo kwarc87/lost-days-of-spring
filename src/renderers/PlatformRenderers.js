@@ -1,203 +1,257 @@
-// ─── Ground texture pattern cache ────────────────────────────────────────────
-let _groundImg = null;
-let _groundData = null;
-let _groundDataCtx = null;
+const platformCaves = {
+    ground: {
+        path: "textures/tilesets.png",
+        tileWidthSrc: 16,
+        tileHeightSrc: 16,
+        scale: 3,
+        sprites: {
+            tLeft: { x: 208, y: 112, padLeft: 4, padTop: 5 },
+            tMid: [
+                { x: 224, y: 112, padTop: 5 },
+                { x: 240, y: 112, padTop: 5 },
+            ],
+            tRight: { x: 256, y: 112, padRight: 4, padTop: 5 },
 
-function ensureGroundImg() {
-    if (_groundImg) {
-        return;
+            left: [
+                { x: 208, y: 128, padLeft: 4 },
+                { x: 208, y: 144, padLeft: 4 },
+            ],
+            mid: { x: 224, y: 128 },
+
+            right: [
+                { x: 256, y: 128, padRight: 4 },
+                { x: 256, y: 144, padRight: 4 },
+            ],
+
+            bLeft: { x: 208, y: 162, padLeft: 4, padBottom: 8 },
+            bMid: [
+                { x: 224, y: 162, padBottom: 8 },
+                { x: 240, y: 162, padBottom: 8 },
+            ],
+            bRight: { x: 256, y: 162, padRight: 4, padBottom: 8 },
+        },
+    },
+    board: {
+        path: "textures/tilesets.png",
+        tileWidthSrc: 16,
+        tileHeightSrc: 16,
+        scale: 3,
+        sprites: {
+            tLeft: { x: 32, y: 16 },
+            tMid: { x: 128, y: 16 },
+            tRight: { x: 96, y: 16 },
+            left: { x: 32, y: 16 },
+            mid: { x: 128, y: 16 },
+            right: { x: 96, y: 16 },
+            bLeft: { x: 32, y: 16 },
+            bMid: { x: 128, y: 16 },
+            bRight: { x: 96, y: 16 },
+        },
+    },
+    booster: {
+        path: "textures/tilesets.png",
+        tileWidthSrc: 16,
+        tileHeightSrc: 16,
+        scale: 3,
+        sprites: {
+            tLeft: { x: 208, y: 16, padLeft: 6 },
+            tMid: { x: 176, y: 16 },
+            tRight: { x: 272, y: 16, padRight: 6 },
+            left: { x: 208, y: 16, padLeft: 6 },
+            mid: { x: 176, y: 16 },
+            right: { x: 272, y: 16, padRight: 6 },
+            bLeft: { x: 208, y: 16, padLeft: 6 },
+            bMid: { x: 176, y: 16 },
+            bRight: { x: 272, y: 16, padRight: 6 },
+        },
+    },
+    metal: {
+        path: "textures/tilesets.png",
+        tileWidthSrc: 16,
+        tileHeightSrc: 16,
+        scale: 3,
+        sprites: {
+            tLeft: { x: 336, y: 128 },
+            tMid: [
+                { x: 336, y: 128 },
+                { x: 352, y: 128 },
+            ],
+            tRight: { x: 352, y: 128 },
+
+            left: { x: 336, y: 144 },
+            mid: [
+                { x: 336, y: 144 },
+                { x: 352, y: 144 },
+            ],
+            right: { x: 352, y: 144 },
+
+            bLeft: { x: 336, y: 144 },
+            bMid: [
+                { x: 336, y: 144 },
+                { x: 352, y: 144 },
+            ],
+            bRight: { x: 352, y: 144 },
+        },
+    },
+};
+
+const _imgCache = {};
+
+function getImg(path) {
+    if (!_imgCache[path]) {
+        const img = new Image();
+        img.src = path;
+        _imgCache[path] = img;
     }
-    _groundImg = new Image();
-    _groundImg.src = "textures/ldos_ground.png";
+    return _imgCache[path];
 }
 
-function buildGroundData(ctx) {
-    const img = _groundImg;
-    if (!img || !img.complete || img.naturalWidth === 0) {
+function getTileKey(col, row, cols, rows) {
+    const isLeft = col === 0;
+    const isRight = col === cols - 1;
+    const isTop = row === 0;
+    const isBottom = row === rows - 1;
+
+    if (isTop) {
+        if (isLeft) {
+            return "tLeft";
+        }
+        if (isRight) {
+            return "tRight";
+        }
+        return "tMid";
+    }
+
+    if (isBottom) {
+        if (isLeft) {
+            return "bLeft";
+        }
+        if (isRight) {
+            return "bRight";
+        }
+        return "bMid";
+    }
+
+    if (isLeft) {
+        return "left";
+    }
+    if (isRight) {
+        return "right";
+    }
+    return "mid";
+}
+
+function pickSpriteVariant(spriteDef, key, col, row) {
+    if (!Array.isArray(spriteDef)) {
+        return spriteDef;
+    }
+    if (spriteDef.length === 0) {
         return null;
     }
-    const tw = img.naturalWidth;
-    const th = img.naturalHeight;
-    const off = document.createElement("canvas");
-    off.width = tw;
-    off.height = th;
-    const octx = off.getContext("2d");
-    octx.imageSmoothingEnabled = false;
-    octx.drawImage(img, 0, 0, tw, th);
+    const idx = key === "left" || key === "right" ? row : col;
+    return spriteDef[idx % spriteDef.length];
+}
 
-    // Sample the middle pixel of the last row for the fill colour below the texture.
-    const px = octx.getImageData(Math.floor(tw / 2), th - 1, 1, 1).data;
-    const lastRowColor = `rgb(${px[0]},${px[1]},${px[2]})`;
+function drawSprite(
+    ctx,
+    img,
+    sprite,
+    tileWidthSrc,
+    tileHeightSrc,
+    scale,
+    dxBase,
+    dyBase,
+) {
+    const pT = sprite.padTop ?? 0;
+    const pB = sprite.padBottom ?? 0;
+    const pL = sprite.padLeft ?? 0;
+    const pR = sprite.padRight ?? 0;
 
-    // repeat-x: tiles only horizontally, not vertically.
-    const pattern = ctx.createPattern(off, "repeat-x");
-    return { pattern, lastRowColor, tileH: th };
+    const sx = sprite.x - pL;
+    const sy = sprite.y - pT;
+    const sw = tileWidthSrc + pL + pR;
+    const sh = tileHeightSrc + pT + pB;
+
+    const dx = dxBase - pL * scale;
+    const dy = dyBase - pT * scale;
+    const dw = sw * scale;
+    const dh = sh * scale;
+
+    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+}
+
+function drawTiled(ctx, platform, def, showDebug) {
+    const { x, y, w, h } = platform;
+
+    if (!def || !def.sprites || w <= 0 || h <= 0) {
+        return;
+    }
+
+    const img = getImg(def.path);
+    const tileWidthSrc = def.tileWidthSrc;
+    const tileHeightSrc = def.tileHeightSrc;
+    const scale = def.scale ?? 1;
+
+    const tileWidth = tileWidthSrc * scale;
+    const tileHeight = tileHeightSrc * scale;
+
+    const cols = Math.ceil(w / tileWidth);
+    const rows = Math.ceil(h / tileHeight);
+
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+
+    if (img.complete && img.naturalWidth) {
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const key = getTileKey(col, row, cols, rows);
+                const spriteDef = def.sprites[key];
+
+                if (!spriteDef) {
+                    continue;
+                }
+
+                const sprite = pickSpriteVariant(spriteDef, key, col, row);
+
+                if (!sprite) {
+                    continue;
+                }
+
+                const dxBase = x + col * tileWidth;
+                const dyBase = y + row * tileHeight;
+
+                drawSprite(
+                    ctx,
+                    img,
+                    sprite,
+                    tileWidthSrc,
+                    tileHeightSrc,
+                    scale,
+                    dxBase,
+                    dyBase,
+                );
+            }
+        }
+    }
+
+    ctx.restore();
+
+    if (showDebug) {
+        ctx.save();
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, w, h);
+        ctx.restore();
+    }
 }
 
 export const DefaultPlatformRenderer = {
-    draw: (ctx, platform) => {
-        ensureGroundImg();
-
-        if (!_groundData || _groundDataCtx !== ctx) {
-            _groundData = buildGroundData(ctx);
-            _groundDataCtx = ctx;
-        }
-
-        const { x, y, w, h } = platform;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(x, y, w, h);
-        ctx.clip();
-
-        if (_groundData) {
-            const { pattern, lastRowColor, tileH } = _groundData;
-
-            // Fill area below the texture with the last-row colour.
-            if (h > tileH) {
-                ctx.fillStyle = lastRowColor;
-                ctx.fillRect(x, y + tileH, w, h - tileH);
-            }
-
-            // Draw texture tiled horizontally, anchored to platform top-left.
-            pattern.setTransform(new DOMMatrix([1, 0, 0, 1, x, y]));
-            ctx.fillStyle = pattern;
-            ctx.fillRect(x, y, w, Math.min(tileH, h));
-        } else {
-            ctx.fillStyle = "#1e0c16";
-            ctx.fillRect(x, y, w, h);
-        }
-
-        ctx.restore();
-
-        // Dark outline
-        ctx.save();
-        ctx.strokeStyle = "rgba(0,0,0,0.7)";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
-        ctx.restore();
-    },
-};
-
-/**
- * Shared helper: draws the ground texture tiled on any platform,
- * then overlays a semi-transparent tint colour on top.
- */
-function drawTintedGroundPlatform(ctx, platform, tintColor, compositing) {
-    ensureGroundImg();
-
-    if (!_groundData || _groundDataCtx !== ctx) {
-        _groundData = buildGroundData(ctx);
-        _groundDataCtx = ctx;
-    }
-
-    const { x, y, w, h } = platform;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(x, y, w, h);
-    ctx.clip();
-
-    if (_groundData) {
-        const { pattern, lastRowColor, tileH } = _groundData;
-        if (h > tileH) {
-            ctx.fillStyle = lastRowColor;
-            ctx.fillRect(x, y + tileH, w, h - tileH);
-        }
-        pattern.setTransform(new DOMMatrix([1, 0, 0, 1, x, y]));
-        ctx.fillStyle = pattern;
-        ctx.fillRect(x, y, w, Math.min(tileH, h));
-    } else {
-        ctx.fillStyle = "#1e0c16";
-        ctx.fillRect(x, y, w, h);
-    }
-
-    // Tint overlay
-    ctx.globalCompositeOperation = compositing;
-    ctx.fillStyle = tintColor;
-    ctx.fillRect(x, y, w, h);
-    ctx.globalCompositeOperation = "source-over";
-
-    ctx.restore();
-
-    // Dark outline
-    ctx.save();
-    ctx.strokeStyle = "rgba(0,0,0,0.7)";
-    ctx.lineWidth = 4;
-    ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
-    ctx.restore();
-}
-
-/**
- * Bouncy platform renderer — ground texture with orange tint
- */
-export const BouncyPlatformRenderer = {
-    draw: (ctx, platform) => {
-        drawTintedGroundPlatform(
+    draw(ctx, platform, showDebug) {
+        drawTiled(
             ctx,
             platform,
-            "rgba(137,217,157,0.95)",
-            "color",
+            platformCaves[platform.layout] ?? platformCaves.ground,
+            showDebug,
         );
-    },
-};
-
-/**
- * Booster platform renderer — ground texture with yellow tint + upward arrows
- */
-export const BoosterPlatformRenderer = {
-    draw: (ctx, platform) => {
-        drawTintedGroundPlatform(
-            ctx,
-            platform,
-            "rgb(242, 203, 5, 0.65)",
-            "lighter",
-        );
-
-        const { x, y, w, h } = platform;
-        if (h >= 16) {
-            const arrowW = 12;
-            const arrowH = Math.min(16, h - 8);
-            const arrowCount = Math.max(1, Math.floor((w - 8) / 24));
-            ctx.save();
-            ctx.fillStyle = "rgba(255,255,255,0.7)";
-            for (let i = 0; i < arrowCount; i++) {
-                const ax =
-                    x +
-                    4 +
-                    Math.floor(((w - 8) / arrowCount) * i) +
-                    Math.floor((w - 8) / arrowCount / 2) -
-                    arrowW / 2;
-                const ay = y + Math.floor((h - arrowH) / 2);
-                if (arrowH >= 16) {
-                    ctx.fillRect(ax + 4, ay, 4, 4);
-                    ctx.fillRect(ax + 2, ay + 4, 8, 4);
-                    ctx.fillRect(ax, ay + 8, 12, 4);
-                    ctx.fillRect(ax + 4, ay + 12, 4, 4);
-                } else {
-                    ctx.fillRect(ax + 4, ay, 4, 4);
-                    ctx.fillRect(ax, ay + 4, 12, 4);
-                }
-            }
-            ctx.restore();
-        }
-    },
-};
-
-/**
- * Simplified hitbox rendering mode for platforms
- */
-export const DebugBoxPlatformRenderer = {
-    draw: (ctx, platform) => {
-        ctx.save();
-
-        ctx.fillStyle = "rgba(0, 255, 0, 0.3)";
-        ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
-
-        ctx.strokeStyle = "#00ff00";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(platform.x, platform.y, platform.w, platform.h);
-
-        ctx.restore();
     },
 };

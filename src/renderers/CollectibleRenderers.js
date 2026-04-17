@@ -10,13 +10,13 @@ export const DefaultCollectibleRenderer = {
 
         // Shadow beneath the coin
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-        ctx.fillRect(x + 4, y + 23, 17, 3);
+        ctx.fillRect(x + 4, y + 22, 16, 3);
 
-        // Core Border (Dark Gold / Brown) — 25x25
+        // Core Border (Dark Gold / Brown) — 24x24
         ctx.fillStyle = "#a87b00";
-        ctx.fillRect(x + 8, y + 0, 9, 25); // vertical core
+        ctx.fillRect(x + 8, y + 0, 9, 24); // vertical core
         ctx.fillRect(x + 3, y + 3, 19, 19); // main bulk square
-        ctx.fillRect(x + 0, y + 8, 25, 9); // horizontal core
+        ctx.fillRect(x + 0, y + 8, 24, 9); // horizontal core
 
         // Coin Body (Bright Gold)
         ctx.fillStyle = "#ffd700";
