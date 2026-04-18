@@ -59,8 +59,22 @@ const ANIMS = {
         offsetX: -10,
         loop: false,
     },
+    crouchIdleShoot: {
+        src: "textures/player/pink/crouch-shoot.png",
+        frames: [0],
+        fps: 1,
+        offsetX: -10,
+        loop: false,
+    },
     crouch: {
         src: "textures/player/pink/crouch.png",
+        frames: [0, 1, 2, 3, 4, 5],
+        fps: 10,
+        offsetX: -10,
+        loop: true,
+    },
+    crouchShoot: {
+        src: "textures/player/pink/crouch-shoot.png",
         frames: [0, 1, 2, 3, 4, 5],
         fps: 10,
         offsetX: -10,
@@ -100,7 +114,10 @@ function ensureImgs() {
 
 function getAnimKey(player) {
     if (player.posture === "crouch") {
-        return Math.abs(player.vx) > 0.5 ? "crouch" : "crouchIdle";
+        if (Math.abs(player.vx) > 0.5) {
+            return player.shooting ? "crouchShoot" : "crouch";
+        }
+        return player.shooting ? "crouchIdleShoot" : "crouchIdle";
     }
 
     if (player.airborne) {

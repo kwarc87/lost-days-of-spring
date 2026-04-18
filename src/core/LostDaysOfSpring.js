@@ -400,14 +400,18 @@ export class LostDaysOfSpring {
     handleHorizontalMovementInput() {
         let targetVx = 0;
 
+        const speed = this.isPlayerCrouching()
+            ? this.player.crouchSpeed
+            : this.player.speed;
+
         if (this.keys[this.keysMap.left] && !this.keys[this.keysMap.right]) {
-            targetVx = -this.player.speed;
+            targetVx = -speed;
             this.player.facing = "left";
         } else if (
             this.keys[this.keysMap.right] &&
             !this.keys[this.keysMap.left]
         ) {
-            targetVx = this.player.speed;
+            targetVx = speed;
             this.player.facing = "right";
         }
 

@@ -17,7 +17,7 @@ export const DefaultGameOverRenderer = {
         const titleW = Math.ceil(ctx.measureText("GAME OVER").width);
 
         ctx.font = subFont;
-        const subText = `Restart za ${remaining}s  –  ESC`;
+        const subText = `Restart in ${remaining}s  –  ESC`;
         const subW = Math.ceil(ctx.measureText(subText).width);
 
         const padX = 32;

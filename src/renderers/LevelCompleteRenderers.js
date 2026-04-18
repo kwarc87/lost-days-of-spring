@@ -23,8 +23,8 @@ export const DefaultLevelCompleteRenderer = {
         const titleW = Math.ceil(ctx.measureText("LEVEL COMPLETE!").width);
 
         ctx.font = subFont;
-        const statsText = `Zebrano: ${collectiblesCount} / ${totalCollectibles}`;
-        const subText = `Restart za ${remaining}s  –  ESC`;
+        const statsText = `Collected: ${collectiblesCount} / ${totalCollectibles}`;
+        const subText = `Restart in ${remaining}s  –  ESC`;
         const statsW = Math.ceil(ctx.measureText(statsText).width);
         const subW = Math.ceil(ctx.measureText(subText).width);
 

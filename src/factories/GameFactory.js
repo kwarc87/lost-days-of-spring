@@ -18,6 +18,7 @@ export const GameFactory = {
         airAcceleration: 2,
         airDeceleration: 2,
         speed: 5.8,
+        crouchSpeed: 4,
         crouchHeight: 45,
         crouchWidth: 72,
         originalHeight: 107,
@@ -166,6 +167,26 @@ export const GameFactory = {
             height: 21,
             overrides,
         }),
+        flower001: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/props.png",
+            cordX: 45,
+            cordY: 16,
+            width: 32,
+            height: 46,
+            overrides,
+        }),
+        flower002: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/props.png",
+            cordX: 4,
+            cordY: 32,
+            width: 32,
+            height: 32,
+            overrides,
+        }),
     },
     grid: {
         solid: (id, gx, gy, gw, gh, layout = "ground") =>
@@ -244,6 +265,18 @@ export const GameFactory = {
                 GameFactory.environment.plate001(
                     gx * GameFactory.GRID,
                     gy * GameFactory.GRID - 7 * GameFactory.SCALE,
+                    overrides,
+                ),
+            flower001: (gx, gy, overrides = {}) =>
+                GameFactory.environment.flower001(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 14 * GameFactory.SCALE,
+                    overrides,
+                ),
+            flower002: (gx, gy, overrides = {}) =>
+                GameFactory.environment.flower002(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 14 * GameFactory.SCALE,
                     overrides,
                 ),
         },

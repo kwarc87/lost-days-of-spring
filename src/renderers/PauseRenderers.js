@@ -12,10 +12,10 @@ export const DefaultPauseRenderer = {
         // ── Measure text to size panel ────────────────────────────────────────
         const titleFont = `bold 24px "Silkscreen", monospace`;
         const subFont = `bold 13px "Silkscreen", monospace`;
-        const subText = "P – wznów";
+        const subText = "P – resume";
 
         ctx.font = titleFont;
-        const titleW = Math.ceil(ctx.measureText("PAUZA").width);
+        const titleW = Math.ceil(ctx.measureText("PAUSED").width);
         ctx.font = subFont;
         const subW = Math.ceil(ctx.measureText(subText).width);
 
@@ -43,10 +43,10 @@ export const DefaultPauseRenderer = {
         ctx.font = titleFont;
 
         ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillText("PAUZA", w / 2 + 2, panelY + padY + 2);
+        ctx.fillText("PAUSED", w / 2 + 2, panelY + padY + 2);
 
         ctx.fillStyle = "#f5c542";
-        ctx.fillText("PAUZA", w / 2, panelY + padY);
+        ctx.fillText("PAUSED", w / 2, panelY + padY);
 
         // ── Hint ──────────────────────────────────────────────────────────────
         ctx.font = subFont;
