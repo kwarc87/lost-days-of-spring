@@ -1,3 +1,30 @@
+// Gems spritesheet cache for HUD splinter icon
+let _hudGemsImg = null;
+
+function getHudGemsImg() {
+    if (!_hudGemsImg) {
+        _hudGemsImg = new Image();
+        _hudGemsImg.src = "textures/gems-spritesheet.png";
+    }
+    return _hudGemsImg;
+}
+
+const HUD_SPLINTER_FRAMES = [
+    ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
+];
+const HUD_SPLINTER_FRAME_MS = 150;
+
+function drawHudSplinter(ctx, x, y, scale) {
+    const img = getHudGemsImg();
+    const { sx, sy } =
+        HUD_SPLINTER_FRAMES[
+            Math.floor(performance.now() / HUD_SPLINTER_FRAME_MS) %
+                HUD_SPLINTER_FRAMES.length
+        ];
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, sx, sy, 16, 16, x, y, 16 * scale, 16 * scale);
+}
+
 // 7×6 pixel art heart grid
 const HEART_PIXELS = [
     [0, 1, 1, 0, 1, 1, 0],
@@ -80,8 +107,14 @@ function drawHudCoin(ctx, x, y, scale) {
 }
 
 export const DefaultHubRenderer = {
-    draw(ctx, canvas, player, currentLevelCollectiblesCount) {
-        const collected = player.collectiblesCount;
+    draw(
+        ctx,
+        canvas,
+        player,
+        currentLevelCollectiblesCount,
+        currentLevelSplintersCount,
+    ) {
+        const collected = player.coinsCount;
         const total = currentLevelCollectiblesCount;
         const text = `${collected} / ${total}`;
 
@@ -148,6 +181,52 @@ export const DefaultHubRenderer = {
         ctx.fillStyle = "#ffd84a";
         ctx.textBaseline = "middle";
         ctx.fillText(text, boxX + panelPadX + coinPxW + 8, boxY + boxH / 2);
+        // ────────────────────────────────────────────────────────────────────
+
+        // ── Splinter panel (below coin panel) ────────────────────────────────
+        const splinterScale = 2; // 16×16 sprite at 2px/pixel = 32×32px
+        const splinterPxW = 16 * splinterScale;
+        const splinterPxH = 16 * splinterScale;
+        const splinterPanelPadX = 10;
+        const splinterPanelPadY = 8;
+        const splinterText = `${player.splintersCount ?? 0} / ${currentLevelSplintersCount ?? 0}`;
+
+        ctx.font = `14px "Silkscreen", monospace`;
+        const splinterTextWidth = Math.ceil(
+            ctx.measureText(splinterText).width,
+        );
+        const splinterBoxW = Math.round(
+            splinterPanelPadX * 2 + splinterPxW + 8 + splinterTextWidth,
+        );
+        const splinterBoxH = splinterPanelPadY * 2 + splinterPxH;
+        const splinterBoxX = Math.round(canvas.width - splinterBoxW - 12);
+        const splinterBoxY = boxY + boxH + 6;
+
+        ctx.fillStyle = "rgba(15, 23, 32, 0.82)";
+        ctx.beginPath();
+        ctx.roundRect(
+            splinterBoxX,
+            splinterBoxY,
+            splinterBoxW,
+            splinterBoxH,
+            8,
+        );
+        ctx.fill();
+
+        drawHudSplinter(
+            ctx,
+            splinterBoxX + splinterPanelPadX,
+            splinterBoxY + splinterPanelPadY,
+            splinterScale,
+        );
+
+        ctx.fillStyle = "#a8e8ff";
+        ctx.textBaseline = "middle";
+        ctx.fillText(
+            splinterText,
+            splinterBoxX + splinterPanelPadX + splinterPxW + 8,
+            splinterBoxY + splinterBoxH / 2,
+        );
         // ────────────────────────────────────────────────────────────────────
 
         ctx.restore();

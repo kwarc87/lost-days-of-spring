@@ -245,26 +245,3 @@ export const DefaultPlayerRenderer = {
         }
     },
 };
-
-/**
- * Simplified hitbox rendering mode for physics debugging
- */
-export const DebugBoxPlayerRenderer = {
-    draw: (ctx, player) => {
-        ctx.save();
-
-        ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
-        ctx.fillRect(player.x, player.y, player.w, player.h);
-
-        ctx.strokeStyle = "#ff0000";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(player.x, player.y, player.w, player.h);
-
-        // Direction dot
-        ctx.fillStyle = "yellow";
-        const eyeOff = player.facing === "left" ? 0 : player.w - 4;
-        ctx.fillRect(player.x + eyeOff, player.y + 4, 4, 4);
-
-        ctx.restore();
-    },
-};

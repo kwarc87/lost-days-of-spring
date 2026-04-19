@@ -1,8 +1,27 @@
 /**
  * Default collectible rendering strategy (Pixel Art Golden Coin)
  */
+let _gemsImg = null;
+
+function getGemsImg() {
+    if (!_gemsImg) {
+        _gemsImg = new Image();
+        _gemsImg.src = "textures/gems-spritesheet.png";
+    }
+    return _gemsImg;
+}
+
+const SPLINTER_FRAME_MS = 150;
+const SPLINTER_SW = 16;
+const SPLINTER_SH = 16;
+const SPLINTER_SCALE = 3;
+
+const SPLINTER_FRAMES = [
+    ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
+];
+
 export const DefaultCollectibleRenderer = {
-    draw: (ctx, collectible) => {
+    drawCoin: (ctx, collectible) => {
         ctx.save();
 
         const x = collectible.x;
@@ -41,25 +60,28 @@ export const DefaultCollectibleRenderer = {
 
         ctx.restore();
     },
-};
 
-/**
- * Simplified hitbox rendering mode for physics debugging of collectibles
- */
-export const DebugBoxCollectibleRenderer = {
-    draw: (ctx, collectible) => {
+    drawSplinter: (ctx, collectible) => {
+        const img = getGemsImg();
+        const { sx, sy } =
+            SPLINTER_FRAMES[
+                Math.floor(performance.now() / SPLINTER_FRAME_MS) %
+                    SPLINTER_FRAMES.length
+            ];
+
         ctx.save();
-
-        const w = collectible.w || 30;
-        const h = collectible.h || 30;
-
-        ctx.fillStyle = "rgba(255, 215, 0, 0.5)";
-        ctx.fillRect(collectible.x, collectible.y, w, h);
-
-        ctx.strokeStyle = "#ffd700";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(collectible.x, collectible.y, w, h);
-
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(
+            img,
+            sx,
+            sy,
+            SPLINTER_SW,
+            SPLINTER_SH,
+            collectible.x,
+            collectible.y,
+            SPLINTER_SW * SPLINTER_SCALE,
+            SPLINTER_SH * SPLINTER_SCALE,
+        );
         ctx.restore();
     },
 };

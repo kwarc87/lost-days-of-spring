@@ -34,7 +34,8 @@ export const GameFactory = {
         onGroundType: null,
         lastGroundId: null,
         lastGroundType: null,
-        collectiblesCount: 0,
+        coinsCount: 0,
+        splintersCount: 0,
         facing: "right",
         shooting: false,
         lastShootTime: 0,
@@ -207,12 +208,23 @@ export const GameFactory = {
                 gh * GameFactory.GRID,
                 boostSpeed,
             ),
-        collectible: (id, gx, gy, overrides = {}) =>
+        coins: (id, gx, gy, overrides = {}) =>
             GameFactory.collectible(
                 id,
                 gx * GameFactory.GRID + GameFactory.GRID / 4,
                 gy * GameFactory.GRID + GameFactory.GRID / 4,
                 overrides,
+            ),
+        splinters: (id, gx, gy, overrides = {}) =>
+            GameFactory.collectible(
+                id,
+                gx * GameFactory.GRID,
+                gy * GameFactory.GRID,
+                {
+                    w: 50,
+                    h: 50,
+                    ...overrides,
+                },
             ),
         rowOfCollectibles: (startId, count, gStartX, gy, gGap) =>
             GameFactory.rowOfCollectibles(

@@ -140,10 +140,12 @@ export class LostDaysOfSpring {
         this.worldSize = levelData.worldSize;
         this.platforms = levelData.platforms;
         this.enemies = levelData.enemies;
-        this.collectibles = levelData.collectibles ?? [];
+        this.coins = levelData.collectibles.coins ?? [];
+        this.splinters = levelData.collectibles.splinters ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
-        this.currentLevelCollectiblesCount = this.collectibles.length;
+        this.currentLevelCoinsCount = this.coins.length;
+        this.currentLevelSplintersCount = this.splinters.length;
 
         this.resetPlayerProperties(levelData);
 
@@ -188,7 +190,8 @@ export class LostDaysOfSpring {
             onGroundType: null,
             lastGroundId: null,
             lastGroundType: null,
-            collectiblesCount: 0,
+            coinsCount: 0,
+            splintersCount: 0,
             facing: "right",
             jumpPressedByUser: false,
             shooting: false,
@@ -785,16 +788,23 @@ export class LostDaysOfSpring {
 
     // Check player-collectible collisions and mark collected items
     updateCollectibles(now) {
-        for (const c of this.collectibles) {
+        for (const c of this.coins) {
             if (!c.collected && this.rectsCollide(this.player, c)) {
                 c.collected = true;
-                this.player.collectiblesCount++;
+                this.player.coinsCount++;
+            }
+        }
+
+        for (const s of this.splinters) {
+            if (!s.collected && this.rectsCollide(this.player, s)) {
+                s.collected = true;
+                this.player.splintersCount++;
             }
         }
 
         if (
             !this.levelComplete &&
-            this.player.collectiblesCount >= this.currentLevelCollectiblesCount
+            this.player.coinsCount >= this.currentLevelCoinsCount
         ) {
             this.levelComplete = true;
             this.levelCompleteAt = now;
@@ -898,15 +908,19 @@ export class LostDaysOfSpring {
         this.enemyRenderer.draw(this.ctx, e, this.showDebug);
     }
 
-    drawCollectible(p) {
-        this.collectibleRenderer.draw(this.ctx, p);
+    drawCoins(p) {
+        this.collectibleRenderer.drawCoin(this.ctx, p);
+    }
+
+    drawSplinters(p) {
+        this.collectibleRenderer.drawSplinter(this.ctx, p);
     }
 
     drawWeapon(w) {
         this.weaponRenderer.draw(this.ctx, w);
     }
 
-    drawBackground() {
+    drawEnvBackgroundItems() {
         this.worldRenderer.drawEnvironment(this.ctx, this.backgroundItems);
     }
 
@@ -914,7 +928,7 @@ export class LostDaysOfSpring {
         this.worldRenderer.drawBackground(this.ctx, this.canvas, this.camera);
     }
 
-    drawForeground() {
+    drawEnvForegroundItems() {
         this.worldRenderer.drawEnvironment(this.ctx, this.foregroundItems);
     }
 
@@ -941,15 +955,21 @@ export class LostDaysOfSpring {
             this.drawPlatform(p);
         }
 
-        this.drawBackground();
+        this.drawEnvBackgroundItems();
 
         for (const w of this.bullets) {
             this.drawWeapon(w);
         }
 
-        for (const c of this.collectibles) {
+        for (const c of this.coins) {
             if (!c.collected) {
-                this.drawCollectible(c);
+                this.drawCoins(c);
+            }
+        }
+
+        for (const s of this.splinters) {
+            if (!s.collected) {
+                this.drawSplinters(s);
             }
         }
 
@@ -959,7 +979,7 @@ export class LostDaysOfSpring {
 
         this.drawPlayer();
 
-        this.drawForeground();
+        this.drawEnvForegroundItems();
 
         if (this.showDebug) {
             DebugGridRenderer.draw(this.ctx, this.camera, this.worldSize);
@@ -971,7 +991,8 @@ export class LostDaysOfSpring {
             this.ctx,
             this.canvas,
             this.player,
-            this.currentLevelCollectiblesCount,
+            this.currentLevelCoinsCount,
+            this.currentLevelSplintersCount,
         );
 
         if (this.levelComplete) {
@@ -999,8 +1020,8 @@ export class LostDaysOfSpring {
         this.levelCompleteRenderer.drawLevelCompleteScreen(
             this.ctx,
             this.canvas,
-            this.player.collectiblesCount,
-            this.currentLevelCollectiblesCount,
+            this.player.coinsCount,
+            this.currentLevelCoinsCount,
             remaining,
         );
     }

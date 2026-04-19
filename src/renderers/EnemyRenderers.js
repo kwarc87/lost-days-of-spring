@@ -135,26 +135,3 @@ export const DefaultEnemyRenderer = {
         }
     },
 };
-
-/**
- * Simplified hitbox rendering mode for enemies
- */
-export const DebugBoxEnemyRenderer = {
-    draw: (ctx, enemy) => {
-        ctx.save();
-
-        ctx.fillStyle = "rgba(255, 100, 0, 0.5)";
-        ctx.fillRect(enemy.x, enemy.y, enemy.w, enemy.h);
-
-        ctx.strokeStyle = "#ff6600";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(enemy.x, enemy.y, enemy.w, enemy.h);
-
-        // Draw the looking direction (a dot on the front side of the box)
-        ctx.fillStyle = "yellow";
-        const eyeOffset = enemy.vx > 0 ? enemy.w - 4 : 0;
-        ctx.fillRect(enemy.x + eyeOffset, enemy.y + 4, 4, 4);
-
-        ctx.restore();
-    },
-};
