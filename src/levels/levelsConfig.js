@@ -260,7 +260,7 @@ export const LEVELS = {
                     GameFactory.grid.splinters(10, 54, 30),
                     GameFactory.grid.splinters(11, 39, 84),
                     GameFactory.grid.splinters(12, 149, 108),
-                    GameFactory.grid.splinters(13, 132, 48),
+                    GameFactory.grid.splinters(13, 47, 10),
                     GameFactory.grid.splinters(14, 116.5, 25.5),
                     GameFactory.grid.splinters(15, 110, 48),
                     GameFactory.grid.splinters(16, 73, 109),
