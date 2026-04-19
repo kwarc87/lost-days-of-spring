@@ -160,7 +160,8 @@ export const LEVELS = {
                 ),
                 GameFactory.grid.solid(88, 72, 34, 2, 1, "boardLeftCap"),
                 GameFactory.grid.booster(89, 68, 34, 2, 1, 24),
-                GameFactory.grid.solid(89, 71, 106, 5, 3, "groundRightCap"),
+                GameFactory.grid.solid(90, 71, 106, 5, 3, "groundRightCap"),
+                GameFactory.grid.solid(91, 4, 96, 5, 1, "board"),
             ],
             enemies: [
                 // X: 0–20
@@ -247,7 +248,7 @@ export const LEVELS = {
             ],
             collectibles: {
                 splinters: [
-                    GameFactory.grid.splinters(1, 1.5, 80),
+                    GameFactory.grid.splinters(1, 6, 94),
                     GameFactory.grid.splinters(2, 11, 26),
                     GameFactory.grid.splinters(3, 58, 84),
                     GameFactory.grid.splinters(4, 11, 109),
@@ -257,8 +258,8 @@ export const LEVELS = {
                     GameFactory.grid.splinters(8, 42, 24),
                     GameFactory.grid.splinters(9, 8.5, 4),
                     GameFactory.grid.splinters(10, 54, 30),
-                    GameFactory.grid.splinters(11, 39, 82),
-                    GameFactory.grid.splinters(12, 148, 82),
+                    GameFactory.grid.splinters(11, 39, 84),
+                    GameFactory.grid.splinters(12, 149, 108),
                     GameFactory.grid.splinters(13, 132, 48),
                     GameFactory.grid.splinters(14, 116.5, 25.5),
                     GameFactory.grid.splinters(15, 110, 48),
