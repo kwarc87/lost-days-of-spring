@@ -19,7 +19,9 @@ function drawLayer(ctx, img, cw, ch, cameraX, parallax) {
     }
     const drawH = ch;
     const drawW = Math.round(img.naturalWidth * (ch / img.naturalHeight));
-    const ox = ((((-cameraX * parallax) % drawW) + drawW) % drawW) - drawW;
+    const ox = Math.floor(
+        ((((-cameraX * parallax) % drawW) + drawW) % drawW) - drawW,
+    );
     for (let x = ox; x < cw; x += drawW) {
         ctx.drawImage(img, x, 0, drawW, drawH);
     }
@@ -99,12 +101,9 @@ export const DefaultWorldRenderer = {
     drawBackground(ctx, canvas, camera) {
         const cw = canvas.width;
         const ch = canvas.height;
-        const planet = loadImg(
-            "blueBack",
-            "textures/background/background.png",
-        );
+        const planet = loadImg("planet", "textures/background/background.png");
         const forrest = loadImg(
-            "blueStars",
+            "forrest",
             "textures/background/middleground.png",
         );
 
@@ -115,9 +114,9 @@ export const DefaultWorldRenderer = {
         ctx.imageSmoothingEnabled = false;
 
         // Layer 1 - background
-        drawLayer(ctx, planet, cw, ch, camera.x, 0.005);
+        drawLayer(ctx, planet, cw, ch, camera.x, 0.01);
         // Layer 2 - forrest
-        drawLayer(ctx, forrest, cw, ch, camera.x, 0.02);
+        drawLayer(ctx, forrest, cw, ch, camera.x, 0.04);
 
         ctx.imageSmoothingEnabled = prev;
     },
