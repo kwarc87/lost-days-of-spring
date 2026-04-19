@@ -8,8 +8,8 @@ export const LEVELS = {
                 height: GameFactory.GRID * 112,
             },
             playerStart: {
-                x: GameFactory.GRID * 2,
-                y: GameFactory.GRID * 88,
+                x: GameFactory.GRID * 75,
+                y: GameFactory.GRID * 14,
             },
             platforms: [
                 // GROUND
@@ -158,6 +158,9 @@ export const LEVELS = {
                     5,
                     "groundTopRightEdgeCap",
                 ),
+                GameFactory.grid.solid(88, 72, 34, 2, 1, "boardLeftCap"),
+                GameFactory.grid.booster(89, 68, 34, 2, 1, 24),
+                GameFactory.grid.solid(89, 71, 106, 5, 3, "groundRightCap"),
             ],
             enemies: [
                 // X: 0–20
@@ -247,22 +250,22 @@ export const LEVELS = {
                     GameFactory.grid.splinters(1, 1.5, 80),
                     GameFactory.grid.splinters(2, 11, 26),
                     GameFactory.grid.splinters(3, 58, 84),
-                    GameFactory.grid.splinters(4, 11, 108.8),
+                    GameFactory.grid.splinters(4, 11, 109),
                     GameFactory.grid.splinters(5, 99, 86),
                     GameFactory.grid.splinters(6, 1.5, 41.5),
-                    GameFactory.grid.splinters(7, 6.5, 18.5),
+                    GameFactory.grid.splinters(7, 72.5, 32),
                     GameFactory.grid.splinters(8, 42, 24),
                     GameFactory.grid.splinters(9, 8.5, 4),
-                    GameFactory.grid.splinters(10, 53, 30),
+                    GameFactory.grid.splinters(10, 54, 30),
                     GameFactory.grid.splinters(11, 39, 82),
                     GameFactory.grid.splinters(12, 148, 82),
                     GameFactory.grid.splinters(13, 132, 48),
                     GameFactory.grid.splinters(14, 116.5, 25.5),
                     GameFactory.grid.splinters(15, 110, 48),
-                    GameFactory.grid.splinters(16, 74.5, 50),
+                    GameFactory.grid.splinters(16, 73, 109),
                     GameFactory.grid.splinters(17, 145, 6),
                     GameFactory.grid.splinters(18, 11.5, 70),
-                    GameFactory.grid.splinters(19, 28, 60),
+                    GameFactory.grid.splinters(19, 9, 54),
                     GameFactory.grid.splinters(20, 107, 98),
                 ],
                 coins: [
@@ -452,6 +455,8 @@ export const LEVELS = {
                 GameFactory.grid.environment.flower001(1, 19),
                 GameFactory.grid.environment.plant004(4, 110),
                 GameFactory.grid.environment.flower002(8, 12),
+                GameFactory.grid.environment.plant002(11, 110),
+                GameFactory.grid.environment.wallPlant001(8.5, 3),
 
                 // X: 21–60
                 GameFactory.grid.environment.plant002(22, 110),
@@ -470,7 +475,7 @@ export const LEVELS = {
 
                 // X: 61–100
                 GameFactory.grid.environment.plant002(67, 105),
-                GameFactory.grid.environment.plant001(78, 110),
+                GameFactory.grid.environment.plant001(106, 110),
                 GameFactory.grid.environment.flower002(81, 18),
 
                 // X: 101–150
@@ -486,6 +491,8 @@ export const LEVELS = {
                 GameFactory.grid.environment.flower002(33, 21),
                 GameFactory.grid.environment.flower002(17, 86),
                 GameFactory.grid.environment.flower001(11, 70),
+                GameFactory.grid.environment.plant003(72, 110),
+                GameFactory.grid.environment.plant001(73, 110),
             ],
         };
     },

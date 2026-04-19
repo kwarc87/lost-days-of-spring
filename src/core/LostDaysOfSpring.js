@@ -146,6 +146,7 @@ export class LostDaysOfSpring {
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
+        this.currentLevelEnemiesCount = this.enemies.length;
 
         this.resetPlayerProperties(levelData);
 
@@ -1022,6 +1023,10 @@ export class LostDaysOfSpring {
             this.canvas,
             this.player.coinsCount,
             this.currentLevelCoinsCount,
+            this.player.splintersCount,
+            this.currentLevelSplintersCount,
+            this.currentLevelEnemiesCount - this.enemies.length,
+            this.currentLevelEnemiesCount,
             remaining,
         );
     }
