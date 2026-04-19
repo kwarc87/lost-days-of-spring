@@ -42,6 +42,7 @@ export class LostDaysOfSpring {
         this.gameOver = false;
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
+        this.levelStartAt = 0; // timestamp (ms) when the level was loaded
         this.levelCompleteDelay = 7000; // ms until auto-restart
         this.gameOverDelay = 7000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
@@ -167,6 +168,7 @@ export class LostDaysOfSpring {
         this.levelCompleteAt = 0;
         this.gameOver = false;
         this.gameOverAt = 0;
+        this.levelStartAt = performance.now();
     }
 
     resetPlayerProperties(levelData) {
@@ -979,6 +981,12 @@ export class LostDaysOfSpring {
         if (this.gameOver) {
             this.drawGameOver();
         }
+
+        this.hudRenderer.drawIntro(
+            this.ctx,
+            this.canvas,
+            performance.now() - this.levelStartAt,
+        );
     }
 
     drawLevelComplete() {

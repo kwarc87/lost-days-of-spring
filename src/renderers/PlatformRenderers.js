@@ -1,126 +1,141 @@
+﻿import {
+    repeatHorizontal3x3,
+    repeatAllTiles3x3,
+    topCap3x3,
+    bottomCap3x3,
+    leftCap3x3,
+    rightCap3x3,
+    topLeftEdgeCap3x3,
+    topRightEdgeCap3x3,
+    leftBottomEdgeCap3x3,
+    leftTopEdgeCap3x3,
+    rightBottomEdgeCap3x3,
+    rightTopEdgeCap3x3,
+} from "./PlatformHelpers.js";
+
+const BASE_TILESET = {
+    path: "textures/tilesets.png",
+    tileWidthSrc: 16,
+    tileHeightSrc: 16,
+    scale: 3,
+};
+
+const GROUND_FULL = {
+    tLeft: { x: 208, y: 112, padLeft: 4, padTop: 5 },
+    tMid: [
+        { x: 224, y: 112, padTop: 5 },
+        { x: 240, y: 112, padTop: 5 },
+    ],
+    tRight: { x: 256, y: 112, padRight: 4, padTop: 5 },
+
+    left: [
+        { x: 208, y: 128, padLeft: 4 },
+        { x: 208, y: 144, padLeft: 4 },
+    ],
+    mid: { x: 224, y: 128 },
+
+    right: [
+        { x: 256, y: 128, padRight: 4 },
+        { x: 256, y: 144, padRight: 4 },
+    ],
+
+    bLeft: { x: 208, y: 162, padLeft: 4, padBottom: 8 },
+    bMid: [
+        { x: 224, y: 162, padBottom: 8 },
+        { x: 240, y: 162, padBottom: 8 },
+    ],
+    bRight: { x: 256, y: 162, padRight: 4, padBottom: 8 },
+};
+
 const platformCaves = {
     ground: {
-        path: "textures/tilesets.png",
-        tileWidthSrc: 16,
-        tileHeightSrc: 16,
-        scale: 3,
-        sprites: {
-            tLeft: { x: 208, y: 112, padLeft: 4, padTop: 5 },
-            tMid: [
-                { x: 224, y: 112, padTop: 5 },
-                { x: 240, y: 112, padTop: 5 },
-            ],
-            tRight: { x: 256, y: 112, padRight: 4, padTop: 5 },
-
-            left: [
-                { x: 208, y: 128, padLeft: 4 },
-                { x: 208, y: 144, padLeft: 4 },
-            ],
-            mid: { x: 224, y: 128 },
-
-            right: [
-                { x: 256, y: 128, padRight: 4 },
-                { x: 256, y: 144, padRight: 4 },
-            ],
-
-            bLeft: { x: 208, y: 162, padLeft: 4, padBottom: 8 },
-            bMid: [
-                { x: 224, y: 162, padBottom: 8 },
-                { x: 240, y: 162, padBottom: 8 },
-            ],
-            bRight: { x: 256, y: 162, padRight: 4, padBottom: 8 },
-        },
+        ...BASE_TILESET,
+        sprites: GROUND_FULL,
     },
+
+    groundTopCap: {
+        ...BASE_TILESET,
+        sprites: topCap3x3(GROUND_FULL),
+    },
+    groundBottomCap: {
+        ...BASE_TILESET,
+        sprites: bottomCap3x3(GROUND_FULL),
+    },
+    groundLeftCap: {
+        ...BASE_TILESET,
+        sprites: leftCap3x3(GROUND_FULL),
+    },
+    groundRightCap: {
+        ...BASE_TILESET,
+        sprites: rightCap3x3(GROUND_FULL),
+    },
+
+    groundTopLeftEdgeCap: {
+        ...BASE_TILESET,
+        sprites: topLeftEdgeCap3x3(GROUND_FULL),
+    },
+    groundTopRightEdgeCap: {
+        ...BASE_TILESET,
+        sprites: topRightEdgeCap3x3(GROUND_FULL),
+    },
+
+    groundLeftBottomEdgeCap: {
+        ...BASE_TILESET,
+        sprites: leftBottomEdgeCap3x3(GROUND_FULL),
+    },
+    groundLeftTopEdgeCap: {
+        ...BASE_TILESET,
+        sprites: leftTopEdgeCap3x3(GROUND_FULL),
+    },
+
+    groundRightBottomEdgeCap: {
+        ...BASE_TILESET,
+        sprites: rightBottomEdgeCap3x3(GROUND_FULL),
+    },
+    groundRightTopEdgeCap: {
+        ...BASE_TILESET,
+        sprites: rightTopEdgeCap3x3(GROUND_FULL),
+    },
+
     board: {
-        path: "textures/tilesets.png",
-        tileWidthSrc: 16,
-        tileHeightSrc: 16,
-        scale: 3,
-        sprites: {
-            tLeft: { x: 32, y: 16 },
-            tMid: { x: 128, y: 16 },
-            tRight: { x: 96, y: 16 },
-            left: { x: 32, y: 16 },
-            mid: { x: 128, y: 16 },
-            right: { x: 96, y: 16 },
-            bLeft: { x: 32, y: 16 },
-            bMid: { x: 128, y: 16 },
-            bRight: { x: 96, y: 16 },
-        },
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 32, y: 16 },
+            { x: 128, y: 16 },
+            { x: 96, y: 16 },
+        ),
     },
-    boardLeft: {
-        path: "textures/tilesets.png",
-        tileWidthSrc: 16,
-        tileHeightSrc: 16,
-        scale: 3,
-        sprites: {
-            tLeft: { x: 128, y: 16 },
-            tMid: { x: 128, y: 16 },
-            tRight: { x: 96, y: 16 },
-            left: { x: 128, y: 16 },
-            mid: { x: 128, y: 16 },
-            right: { x: 96, y: 16 },
-            bLeft: { x: 128, y: 16 },
-            bMid: { x: 128, y: 16 },
-            bRight: { x: 96, y: 16 },
-        },
+    boardRightCap: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 128, y: 16 },
+            { x: 128, y: 16 },
+            { x: 96, y: 16 },
+        ),
     },
-    boardRight: {
-        path: "textures/tilesets.png",
-        tileWidthSrc: 16,
-        tileHeightSrc: 16,
-        scale: 3,
-        sprites: {
-            tLeft: { x: 32, y: 16 },
-            tMid: { x: 128, y: 16 },
-            tRight: { x: 128, y: 16 },
-            left: { x: 32, y: 16 },
-            mid: { x: 128, y: 16 },
-            right: { x: 128, y: 16 },
-            bLeft: { x: 32, y: 16 },
-            bMid: { x: 128, y: 16 },
-            bRight: { x: 128, y: 16 },
-        },
+    boardLeftCap: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 32, y: 16 },
+            { x: 128, y: 16 },
+            { x: 128, y: 16 },
+        ),
     },
-    boardMid: {
-        path: "textures/tilesets.png",
-        tileWidthSrc: 16,
-        tileHeightSrc: 16,
-        scale: 3,
-        sprites: {
-            tLeft: { x: 128, y: 16 },
-            tMid: { x: 128, y: 16 },
-            tRight: { x: 128, y: 16 },
-            left: { x: 128, y: 16 },
-            mid: { x: 128, y: 16 },
-            right: { x: 128, y: 16 },
-            bLeft: { x: 128, y: 16 },
-            bMid: { x: 128, y: 16 },
-            bRight: { x: 128, y: 16 },
-        },
+    boardConnector: {
+        ...BASE_TILESET,
+        sprites: repeatAllTiles3x3({ x: 128, y: 16 }),
     },
     booster: {
-        path: "textures/tilesets.png",
-        tileWidthSrc: 16,
-        tileHeightSrc: 16,
-        scale: 3,
-        sprites: {
-            tLeft: { x: 208, y: 16, padLeft: 6 },
-            tMid: { x: 176, y: 16 },
-            tRight: { x: 272, y: 16, padRight: 6 },
-            left: { x: 208, y: 16, padLeft: 6 },
-            mid: { x: 176, y: 16 },
-            right: { x: 272, y: 16, padRight: 6 },
-            bLeft: { x: 208, y: 16, padLeft: 6 },
-            bMid: { x: 176, y: 16 },
-            bRight: { x: 272, y: 16, padRight: 6 },
-        },
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 208, y: 16, padLeft: 6 },
+            { x: 176, y: 16 },
+            { x: 272, y: 16, padRight: 6 },
+        ),
     },
+    // only 2 units height is allowed
     metal: {
-        path: "textures/tilesets.png",
-        tileWidthSrc: 16,
-        tileHeightSrc: 16,
-        scale: 3,
+        ...BASE_TILESET,
         sprites: {
             tLeft: { x: 336, y: 128 },
             tMid: [
@@ -129,12 +144,13 @@ const platformCaves = {
             ],
             tRight: { x: 352, y: 128 },
 
-            left: { x: 336, y: 144 },
+            // mid section is just a solid color placeholder
+            left: { x: 224, y: 128 },
             mid: [
-                { x: 336, y: 144 },
-                { x: 352, y: 144 },
+                { x: 224, y: 128 },
+                { x: 224, y: 128 },
             ],
-            right: { x: 352, y: 144 },
+            right: { x: 224, y: 128 },
 
             bLeft: { x: 336, y: 144 },
             bMid: [

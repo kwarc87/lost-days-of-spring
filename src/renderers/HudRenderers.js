@@ -152,4 +152,44 @@ export const DefaultHubRenderer = {
 
         ctx.restore();
     },
+
+    drawIntro(ctx, canvas, elapsed) {
+        const duration = 5000;
+        const fadeStart = 4500;
+        if (elapsed >= duration) {
+            return;
+        }
+
+        const alpha =
+            elapsed < fadeStart
+                ? 1
+                : 1 - (elapsed - fadeStart) / (duration - fadeStart);
+
+        const text = "Collect all coins to complete the level";
+        const padX = 14;
+        const padY = 8;
+        const y = canvas.height - 56;
+
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.font = `bold 13px "Silkscreen", monospace`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const tw = ctx.measureText(text).width;
+        const boxW = tw + padX * 2;
+        const boxH = 13 + padY * 2;
+        const boxX = canvas.width / 2 - boxW / 2;
+        const boxY = y - boxH / 2;
+
+        ctx.fillStyle = "rgba(15, 23, 32, 0.82)";
+        ctx.beginPath();
+        ctx.roundRect(boxX, boxY, boxW, boxH, 6);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(text, canvas.width / 2, y);
+
+        ctx.restore();
+    },
 };

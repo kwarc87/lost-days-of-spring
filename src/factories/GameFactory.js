@@ -115,7 +115,7 @@ export const GameFactory = {
             cordY: 98,
             width: 32,
             height: 30,
-            overrides,
+            ...overrides,
         }),
         plant002: (x, y, overrides = {}) => ({
             x,
@@ -125,7 +125,7 @@ export const GameFactory = {
             cordY: 100,
             width: 32,
             height: 32,
-            overrides,
+            ...overrides,
         }),
         plant003: (x, y, overrides = {}) => ({
             x,
@@ -135,7 +135,7 @@ export const GameFactory = {
             cordY: 105,
             width: 16,
             height: 21,
-            overrides,
+            ...overrides,
         }),
         plant004: (x, y, overrides = {}) => ({
             x,
@@ -145,7 +145,7 @@ export const GameFactory = {
             cordY: 104,
             width: 16,
             height: 22,
-            overrides,
+            ...overrides,
         }),
         wallPlant001: (x, y, overrides = {}) => ({
             x,
@@ -155,7 +155,7 @@ export const GameFactory = {
             cordY: 48,
             width: 16,
             height: 27,
-            overrides,
+            ...overrides,
         }),
         plate001: (x, y, overrides = {}) => ({
             x,
@@ -165,7 +165,7 @@ export const GameFactory = {
             cordY: 107,
             width: 32,
             height: 21,
-            overrides,
+            ...overrides,
         }),
         flower001: (x, y, overrides = {}) => ({
             x,
@@ -175,7 +175,7 @@ export const GameFactory = {
             cordY: 16,
             width: 32,
             height: 46,
-            overrides,
+            ...overrides,
         }),
         flower002: (x, y, overrides = {}) => ({
             x,
@@ -185,7 +185,7 @@ export const GameFactory = {
             cordY: 32,
             width: 32,
             height: 32,
-            overrides,
+            ...overrides,
         }),
     },
     grid: {
