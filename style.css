@@ -57,6 +57,16 @@ body {
 #controls {
     right: 0;
     left: auto;
+    top: auto;
+    bottom: 0;
+    animation: controls-fadeout 0.5s ease 30s forwards;
+}
+
+@keyframes controls-fadeout {
+    to {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 #cursor-pos {
