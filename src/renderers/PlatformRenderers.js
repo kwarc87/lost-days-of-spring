@@ -133,6 +133,18 @@ const platformCaves = {
             { x: 272, y: 16, padRight: 6 },
         ),
     },
+    brick: {
+        ...BASE_TILESET,
+        path: "textures/tilesets-2.png",
+        sprites: repeatHorizontal3x3(
+            { x: 64, y: 0 },
+            [
+                { x: 64, y: 0 },
+                { x: 80, y: 0 },
+            ],
+            { x: 80, y: 0 },
+        ),
+    },
     // only 2 units height is allowed
     metal: {
         ...BASE_TILESET,

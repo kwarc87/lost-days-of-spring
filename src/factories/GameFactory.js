@@ -4,6 +4,8 @@ export const GameFactory = {
     player: (overrides = {}) => ({
         x: 0,
         y: 0,
+        prevX: 0,
+        prevY: 0,
         w: 36,
         h: 107,
         vx: 0,
@@ -47,7 +49,6 @@ export const GameFactory = {
         y,
         w,
         h,
-        color: "#3b1158",
         type: "solid",
         layout,
     }),
@@ -57,12 +58,53 @@ export const GameFactory = {
         y,
         w,
         h,
-        color: "#3b1158",
         elasticity: 0,
         type: "booster",
         layout: "booster",
         boostSpeed,
     }),
+    elevator: (
+        id,
+        startX,
+        startY,
+        w,
+        h,
+        targetX,
+        targetY,
+        speed,
+        waitTime,
+        layout = "brick",
+    ) => {
+        const dx = targetX - startX;
+        const dy = targetY - startY;
+
+        const length = Math.hypot(dx, dy);
+
+        return {
+            id,
+            x: startX,
+            y: startY,
+            w,
+            h,
+
+            startX,
+            startY,
+            targetX,
+            targetY,
+
+            dirX: dx / length,
+            dirY: dy / length,
+
+            speed,
+            direction: 1,
+
+            waitTime,
+            idleUntil: 0,
+
+            type: "elevator",
+            layout,
+        };
+    },
     enemy: (id, platformId, speed = 1.5, overrides = {}) => ({
         id,
         platformId,
@@ -188,6 +230,16 @@ export const GameFactory = {
             height: 32,
             ...overrides,
         }),
+        elevatorPanel: (x, y, overrides = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets-2.png",
+            cordX: 16,
+            cordY: 0,
+            width: 32,
+            height: 80,
+            ...overrides,
+        }),
     },
     grid: {
         solid: (id, gx, gy, gw, gh, layout = "ground") =>
@@ -208,6 +260,31 @@ export const GameFactory = {
                 gh * GameFactory.GRID,
                 boostSpeed,
             ),
+        elevator: (
+            id,
+            startGX,
+            startGY,
+            gw,
+            gh,
+            targetGX,
+            targetGY,
+            speed,
+            waitTime,
+            layout,
+        ) =>
+            GameFactory.elevator(
+                id,
+                startGX * GameFactory.GRID,
+                startGY * GameFactory.GRID,
+                gw * GameFactory.GRID,
+                gh * GameFactory.GRID,
+                targetGX * GameFactory.GRID,
+                targetGY * GameFactory.GRID,
+                speed,
+                waitTime,
+                layout,
+            ),
+
         coins: (id, gx, gy, overrides = {}) =>
             GameFactory.collectible(
                 id,
@@ -289,6 +366,12 @@ export const GameFactory = {
                 GameFactory.environment.flower002(
                     gx * GameFactory.GRID,
                     gy * GameFactory.GRID - 14 * GameFactory.SCALE,
+                    overrides,
+                ),
+            elevatorPanel: (gx, gy, overrides = {}) =>
+                GameFactory.environment.elevatorPanel(
+                    gx * GameFactory.GRID,
+                    gy * GameFactory.GRID - 16 * GameFactory.SCALE,
                     overrides,
                 ),
         },

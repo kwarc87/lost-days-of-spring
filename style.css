@@ -73,7 +73,7 @@ body {
     right: 0;
     left: auto;
     top: auto;
-    bottom: 0;
+    top: 0;
 }
 
 #debug > div,

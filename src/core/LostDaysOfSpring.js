@@ -139,11 +139,13 @@ export class LostDaysOfSpring {
 
         this.worldSize = levelData.worldSize;
         this.platforms = levelData.platforms;
+        this.elevators = levelData.elevators;
         this.enemies = levelData.enemies;
         this.coins = levelData.collectibles.coins ?? [];
         this.splinters = levelData.collectibles.splinters ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
+        this.preBackgroundItems = levelData.preBackgroundItems ?? [];
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
         this.currentLevelEnemiesCount = this.enemies.length;
@@ -172,12 +174,15 @@ export class LostDaysOfSpring {
         this.gameOver = false;
         this.gameOverAt = 0;
         this.levelStartAt = performance.now();
+        this.mapView = false;
     }
 
     resetPlayerProperties(levelData) {
         Object.assign(this.player, {
             x: levelData?.playerStart?.x ?? 0,
             y: levelData?.playerStart?.y ?? 0,
+            prevX: levelData?.playerStart?.x ?? 0,
+            prevY: levelData?.playerStart?.y ?? 0,
             vx: 0,
             vy: 0,
             posture: this.playerPostures.STANDING,
@@ -309,7 +314,7 @@ export class LostDaysOfSpring {
             h: height,
         };
 
-        for (const p of this.platforms) {
+        for (const p of [...this.platforms, ...this.elevators]) {
             if (this.rectsCollide(futurePlayer, p)) {
                 return false;
             }
@@ -334,6 +339,13 @@ export class LostDaysOfSpring {
 
     isPlayerCrouching() {
         return this.player.posture === this.playerPostures.CROUCH;
+    }
+
+    isPlayerOnElevator(elevator) {
+        return (
+            this.player.onGroundType === "elevator" &&
+            this.player.onGroundId === elevator.id
+        );
     }
 
     getPlayerHitboxForPosture(posture) {
@@ -386,8 +398,15 @@ export class LostDaysOfSpring {
         const now = performance.now();
         this.handleInput(now);
         this.applyPhysics();
+
+        this.player.prevX = this.player.x;
+        this.player.prevY = this.player.y;
+
+        this.updateElevators(now);
+
         this.movePlayerX();
         this.movePlayerY(now);
+
         this.updateEnemies(now);
         this.updateBullets(now);
         this.updateCollectibles(now);
@@ -550,6 +569,8 @@ export class LostDaysOfSpring {
 
     // Move player along the X axis and resolve platform collisions
     movePlayerX() {
+        const prevX = this.player.prevX ?? this.player.x;
+
         this.player.x += this.player.vx;
 
         // World bounds check (X axis)
@@ -561,11 +582,17 @@ export class LostDaysOfSpring {
             this.player.vx = 0;
         }
 
-        for (const p of this.platforms) {
+        const solids = [...this.platforms, ...this.elevators];
+
+        for (const p of solids) {
             if (this.rectsCollide(this.player, p)) {
-                if (this.player.vx > 0) {
+                const platformPrevX = p.previousX ?? p.x;
+                const wasLeft = prevX + this.player.w <= platformPrevX;
+                const wasRight = prevX >= platformPrevX + p.w;
+
+                if (wasLeft) {
                     this.player.x = p.x - this.player.w;
-                } else if (this.player.vx < 0) {
+                } else if (wasRight) {
                     this.player.x = p.x + p.w;
                 }
                 this.player.vx = 0;
@@ -576,8 +603,9 @@ export class LostDaysOfSpring {
 
     // Move player along the Y axis, resolve platform collisions, and check fall-off
     movePlayerY(now) {
-        const previousY = this.player.y;
+        const previousY = this.player.prevY ?? this.player.y;
         const previousH = this.player.h;
+
         this.player.y += this.player.vy;
         this.player.onGroundId = null;
         this.player.onGroundType = null;
@@ -590,20 +618,23 @@ export class LostDaysOfSpring {
             this.handleWorldGroundLanding(now);
         }
 
+        const solids = [...this.platforms, ...this.elevators];
+
         //Platforms collisions
-        for (const p of this.platforms) {
+        for (const p of solids) {
             if (this.rectsCollide(this.player, p)) {
-                const wasAbove = previousY + previousH <= p.y;
-                const wasBelow = previousY >= p.y + p.h;
+                const platformPrevY = p.previousY ?? p.y;
+                const wasAbove = previousY + previousH <= platformPrevY;
+                const wasBelow = previousY >= platformPrevY + p.h;
 
                 // Landing on top of platform
-                if (this.player.vy > 0 && wasAbove) {
+                if (wasAbove) {
                     this.handlePlatformLanding(p, now);
                     this.handlePlatformLandingResponse(p);
                     break;
                 }
 
-                if (this.player.vy < 0 && wasBelow) {
+                if (wasBelow) {
                     // Hit ceiling
                     this.handleCeilingHit(p);
                     break;
@@ -656,7 +687,7 @@ export class LostDaysOfSpring {
             return;
         }
 
-        if (platform.type === "solid") {
+        if (platform.type === "solid" || platform.type === "elevator") {
             this.player.vy = 0;
             return;
         }
@@ -665,6 +696,91 @@ export class LostDaysOfSpring {
     handleCeilingHit(platform) {
         this.player.y = platform.y + platform.h;
         this.player.vy = 0;
+    }
+
+    hasPassedTarget(current, target, directionSign) {
+        if (directionSign > 0) {
+            return current >= target;
+        }
+        if (directionSign < 0) {
+            return current <= target;
+        }
+        return true;
+    }
+
+    updateElevators(now) {
+        for (const e of this.elevators) {
+            e.previousX = e.x;
+            e.previousY = e.y;
+            if (now < e.idleUntil) {
+                continue;
+            }
+
+            const playerIsOnElevator = this.isPlayerOnElevator(e);
+
+            const moveX = e.dirX * e.speed * e.direction;
+            const moveY = e.dirY * e.speed * e.direction;
+
+            const nextX = e.x + moveX;
+            const nextY = e.y + moveY;
+
+            const sweptElevator = {
+                x: Math.min(e.x, nextX),
+                y: Math.min(e.y, nextY),
+                w: e.w + Math.abs(moveX),
+                h: e.h + Math.abs(moveY),
+            };
+
+            const playerBlocksElevator =
+                !playerIsOnElevator &&
+                this.rectsCollide(this.player, sweptElevator);
+
+            if (playerBlocksElevator) {
+                continue;
+            }
+
+            const previousX = e.x;
+            const previousY = e.y;
+
+            e.x += moveX;
+            e.y += moveY;
+
+            const signX = Math.sign(e.dirX);
+            const signY = Math.sign(e.dirY);
+
+            const passedX = this.hasPassedTarget(
+                e.x,
+                e.direction === 1 ? e.targetX : e.startX,
+                e.direction === 1 ? signX : -signX,
+            );
+            const passedY = this.hasPassedTarget(
+                e.y,
+                e.direction === 1 ? e.targetY : e.startY,
+                e.direction === 1 ? signY : -signY,
+            );
+
+            if (passedX && passedY) {
+                if (e.direction === 1) {
+                    e.x = e.targetX;
+                    e.y = e.targetY;
+                    e.direction = -1;
+                } else {
+                    e.x = e.startX;
+                    e.y = e.startY;
+                    e.direction = 1;
+                }
+
+                e.idleUntil = now + e.waitTime;
+            }
+
+            const actualMoveX = e.x - previousX;
+            const actualMoveY = e.y - previousY;
+
+            if (playerIsOnElevator) {
+                this.player.x += actualMoveX;
+                this.player.y += actualMoveY;
+            }
+        }
     }
 
     // Move enemies and check player-enemy collisions
@@ -679,10 +795,10 @@ export class LostDaysOfSpring {
 
             if (enemy.x <= enemy.minX) {
                 enemy.x = enemy.minX;
-                enemy.vx = Math.abs(enemy.speed);
+                enemy.vx = enemy.speed;
             } else if (enemy.x + enemy.w >= enemy.maxX) {
                 enemy.x = enemy.maxX - enemy.w;
-                enemy.vx = -Math.abs(enemy.speed);
+                enemy.vx = -enemy.speed;
             }
 
             if (this.rectsCollide(this.player, enemy)) {
@@ -772,9 +888,10 @@ export class LostDaysOfSpring {
             }
 
             let consumedOnPlatform = false;
+            const bulletSolids = [...this.platforms, ...this.elevators];
 
-            for (let i = this.platforms.length - 1; i >= 0; i--) {
-                if (this.rectsCollide(bullet, this.platforms[i])) {
+            for (let i = bulletSolids.length - 1; i >= 0; i--) {
+                if (this.rectsCollide(bullet, bulletSolids[i])) {
                     this.bullets.splice(bulletIndex, 1);
                     consumedOnPlatform = true;
                     break;
@@ -905,6 +1022,10 @@ export class LostDaysOfSpring {
         this.platformRenderer.draw(this.ctx, p, this.showDebug);
     }
 
+    drawElevator(e) {
+        this.platformRenderer.draw(this.ctx, e, this.showDebug);
+    }
+
     drawEnemy(e) {
         this.enemyRenderer.draw(this.ctx, e, this.showDebug);
     }
@@ -919,6 +1040,10 @@ export class LostDaysOfSpring {
 
     drawWeapon(w) {
         this.weaponRenderer.draw(this.ctx, w);
+    }
+
+    drawEnvPreBackgroundItems() {
+        this.worldRenderer.drawEnvironment(this.ctx, this.preBackgroundItems);
     }
 
     drawEnvBackgroundItems() {
@@ -952,6 +1077,8 @@ export class LostDaysOfSpring {
             );
         }
 
+        this.drawEnvPreBackgroundItems();
+
         for (const p of this.platforms) {
             this.drawPlatform(p);
         }
@@ -972,6 +1099,10 @@ export class LostDaysOfSpring {
             if (!s.collected) {
                 this.drawSplinters(s);
             }
+        }
+
+        for (const e of this.elevators) {
+            this.drawElevator(e);
         }
 
         for (const e of this.enemies) {
