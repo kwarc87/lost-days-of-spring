@@ -1,11 +1,6 @@
-let _lcGemsImg = null;
-function getLCGemsImg() {
-    if (!_lcGemsImg) {
-        _lcGemsImg = new Image();
-        _lcGemsImg.src = "textures/gems-spritesheet.png";
-    }
-    return _lcGemsImg;
-}
+import { getImg } from "../utils/imgCache.js";
+
+const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
 const LC_SPLINTER_FRAMES = Array.from({ length: 7 }, (_, i) => ({
     sx: 64 + i * 16,
@@ -205,7 +200,7 @@ export const DefaultLevelCompleteRenderer = {
         const splinterRowY = enemiesRowY + rowH + gap;
         {
             const rowX = Math.round(w / 2 - splinterRowW / 2);
-            const gemsImg = getLCGemsImg();
+            const gemsImg = getImg(GEMS_IMG_PATH);
             const frame =
                 LC_SPLINTER_FRAMES[
                     Math.floor(performance.now() / LC_SPLINTER_FRAME_MS) %

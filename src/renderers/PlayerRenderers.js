@@ -82,7 +82,8 @@ const ANIMS = {
     },
 };
 
-const _imgs = {};
+import { getImg } from "../utils/imgCache.js";
+
 let _animStartTime = 0;
 let _lastAnimKey = null;
 let _offCanvas = null;
@@ -100,16 +101,6 @@ function getOffCanvas(w, h) {
     }
 
     return { canvas: _offCanvas, ctx: _offCtx };
-}
-
-function ensureImgs() {
-    for (const [key, anim] of Object.entries(ANIMS)) {
-        if (!_imgs[key]) {
-            const img = new Image();
-            img.src = anim.src;
-            _imgs[key] = img;
-        }
-    }
 }
 
 function getAnimKey(player) {
@@ -167,11 +158,9 @@ function getCurrentFrame(animKey, anim) {
 
 export const DefaultPlayerRenderer = {
     draw: (ctx, player, debug = false) => {
-        ensureImgs();
-
         const animKey = getAnimKey(player);
         const anim = ANIMS[animKey];
-        const img = _imgs[animKey];
+        const img = getImg(anim.src);
 
         if (!img?.complete || !img.naturalWidth) {
             return;

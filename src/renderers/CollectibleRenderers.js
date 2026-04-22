@@ -1,15 +1,9 @@
 /**
  * Default collectible rendering strategy (Pixel Art Golden Coin)
  */
-let _gemsImg = null;
+import { getImg } from "../utils/imgCache.js";
 
-function getGemsImg() {
-    if (!_gemsImg) {
-        _gemsImg = new Image();
-        _gemsImg.src = "textures/gems-spritesheet.png";
-    }
-    return _gemsImg;
-}
+const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
 const SPLINTER_FRAME_MS = 150;
 const SPLINTER_SW = 16;
@@ -62,7 +56,7 @@ export const DefaultCollectibleRenderer = {
     },
 
     drawSplinter: (ctx, collectible) => {
-        const img = getGemsImg();
+        const img = getImg(GEMS_IMG_PATH);
         const { sx, sy } =
             SPLINTER_FRAMES[
                 Math.floor(performance.now() / SPLINTER_FRAME_MS) %

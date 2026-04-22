@@ -26,14 +26,44 @@
             </div>
             <div id="cursor-pos"></div>
             <canvas id="game" width="1280" height="720"></canvas>
+            <div id="loading">
+                <span>Loading…</span>
+            </div>
         </div>
         <script type="module">
             import { LostDaysOfSpring } from "./src/core/LostDaysOfSpring.js";
+            import { preloadImages, preloadFonts } from "./src/utils/imgCache.js";
+
+            const ASSETS = [
+                "textures/tilesets.png",
+                "textures/tilesets-2.png",
+                "textures/props.png",
+                "textures/gems-spritesheet.png",
+                "textures/background/background.png",
+                "textures/background/middleground.png",
+                "textures/player/pink/idle.png",
+                "textures/player/pink/walk.png",
+                "textures/player/pink/walk-shoot.png",
+                "textures/player/pink/jump.png",
+                "textures/player/pink/jump-shoot.png",
+                "textures/player/pink/crouch.png",
+                "textures/player/pink/crouch-shoot.png",
+            ];
+
+            const FONTS = [
+                `400 14px "Silkscreen"`,
+                `700 13px "Silkscreen"`,
+            ];
+
             const debug =
                 new URLSearchParams(window.location.search).get("debug") ===
                 "true";
-            const game = new LostDaysOfSpring("game", debug);
-            game.start();
+
+            Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
+                document.getElementById("loading").classList.add("done");
+                const game = new LostDaysOfSpring("game", debug);
+                game.start();
+            });
         </script>
     </body>
 </html>

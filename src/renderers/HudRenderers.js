@@ -1,13 +1,6 @@
-// Gems spritesheet cache for HUD splinter icon
-let _hudGemsImg = null;
+import { getImg } from "../utils/imgCache.js";
 
-function getHudGemsImg() {
-    if (!_hudGemsImg) {
-        _hudGemsImg = new Image();
-        _hudGemsImg.src = "textures/gems-spritesheet.png";
-    }
-    return _hudGemsImg;
-}
+const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
 const HUD_SPLINTER_FRAMES = [
     ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
@@ -15,7 +8,7 @@ const HUD_SPLINTER_FRAMES = [
 const HUD_SPLINTER_FRAME_MS = 150;
 
 function drawHudSplinter(ctx, x, y, scale) {
-    const img = getHudGemsImg();
+    const img = getImg(GEMS_IMG_PATH);
     const { sx, sy } =
         HUD_SPLINTER_FRAMES[
             Math.floor(performance.now() / HUD_SPLINTER_FRAME_MS) %

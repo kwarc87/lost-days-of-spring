@@ -1,16 +1,5 @@
 ﻿import { GameFactory } from "../factories/GameFactory.js";
-
-// --- Background images ---
-const _imgs = {};
-
-function loadImg(key, src) {
-    if (!_imgs[key]) {
-        const img = new Image();
-        img.src = src;
-        _imgs[key] = img;
-    }
-    return _imgs[key];
-}
+import { getImg } from "../utils/imgCache.js";
 
 // Draws an image scaled to canvas height, tiled horizontally with parallax.
 function drawLayer(ctx, img, cw, ch, cameraX, parallax) {
@@ -32,7 +21,7 @@ function drawEnvironmentItem(ctx, item) {
     const prev = ctx.imageSmoothingEnabled;
     ctx.imageSmoothingEnabled = false;
 
-    const img = loadImg(item.url, item.url);
+    const img = getImg(item.url);
     if (!img.complete || img.naturalWidth === 0) {
         ctx.imageSmoothingEnabled = prev;
         return;
@@ -110,11 +99,8 @@ export const DefaultWorldRenderer = {
     drawBackground(ctx, canvas, camera) {
         const cw = canvas.width;
         const ch = canvas.height;
-        const planet = loadImg("planet", "textures/background/background.png");
-        const forrest = loadImg(
-            "forrest",
-            "textures/background/middleground.png",
-        );
+        const planet = getImg("textures/background/background.png");
+        const forrest = getImg("textures/background/middleground.png");
 
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, cw, ch);

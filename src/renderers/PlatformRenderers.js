@@ -12,6 +12,7 @@
     rightBottomEdgeCap3x3,
     rightTopEdgeCap3x3,
 } from "./PlatformHelpers.js";
+import { getImg } from "../utils/imgCache.js";
 
 const BASE_TILESET = {
     path: "textures/tilesets.png",
@@ -173,17 +174,6 @@ const platformCaves = {
         },
     },
 };
-
-const _imgCache = {};
-
-function getImg(path) {
-    if (!_imgCache[path]) {
-        const img = new Image();
-        img.src = path;
-        _imgCache[path] = img;
-    }
-    return _imgCache[path];
-}
 
 function getTileKey(col, row, cols, rows) {
     const isLeft = col === 0;
