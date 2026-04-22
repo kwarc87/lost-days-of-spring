@@ -28,6 +28,28 @@ export const DebugGridRenderer = {
 };
 
 // ─── Debug HUD (player data + cursor position panels) ────────────────────────
+const DEBUG_PLAYER_ENTRIES = [
+    "x",
+    "y",
+    "prevX",
+    "prevY",
+    "w",
+    "h",
+    "vx",
+    "vy",
+    "airborne",
+    "jumpPressedByUser",
+    "jumpPressedAt",
+    "facing",
+    "shooting",
+    "lastShootTime",
+    "posture",
+    "onGroundId",
+    "onGroundType",
+    "lastGroundId",
+    "lastGroundType",
+];
+
 export const DebugHudRenderer = {
     _lastUpdate: 0,
 
@@ -48,14 +70,11 @@ export const DebugHudRenderer = {
         if (!el) {
             el = document.createElement("div");
             el.id = "debug";
-            if (canvas.parentElement) {
-                canvas.parentElement.insertBefore(el, canvas);
-            } else {
-                document.body.appendChild(el);
-            }
+            document.body.insertBefore(el, document.body.firstChild);
         }
         el.textContent = "";
-        for (const [key, value] of Object.entries(player)) {
+        for (const key of DEBUG_PLAYER_ENTRIES) {
+            const value = player[key];
             const row = document.createElement("div");
             const label = document.createElement("strong");
             label.textContent = key;
@@ -73,11 +92,7 @@ export const DebugHudRenderer = {
         if (!cp) {
             cp = document.createElement("div");
             cp.id = "cursor-pos";
-            if (canvas.parentElement) {
-                canvas.parentElement.appendChild(cp);
-            } else {
-                document.body.appendChild(cp);
-            }
+            document.body.appendChild(cp);
         }
         cp.textContent = "";
         const rowX = document.createElement("div");
