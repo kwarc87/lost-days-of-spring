@@ -73,6 +73,9 @@ export class LostDaysOfSpring {
             lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing
 
             lookAheadYTargetDownCrouch: 100,
+
+            // culling
+            margin: GameFactory.GRID * 10,
         };
 
         // ====== PHYSICS ======
@@ -125,6 +128,26 @@ export class LostDaysOfSpring {
 
         // Start game by loading level 1
         this.loadLevel(1);
+
+        this.decorateDrawMethods();
+    }
+
+    decorateDrawMethods() {
+        this.drawPlatform = this.withCameraCulling(this.drawPlatform);
+        this.drawElevator = this.withCameraCulling(this.drawElevator);
+        this.drawEnemy = this.withCameraCulling(this.drawEnemy);
+        this.drawCoins = this.withCameraCulling(this.drawCoins);
+        this.drawSplinters = this.withCameraCulling(this.drawSplinters);
+        this.drawBullet = this.withCameraCulling(this.drawBullet);
+        this.drawEnvPreBackgroundItem = this.withCameraCulling(
+            this.drawEnvPreBackgroundItem,
+        );
+        this.drawEnvBackgroundItem = this.withCameraCulling(
+            this.drawEnvBackgroundItem,
+        );
+        this.drawEnvForegroundItem = this.withCameraCulling(
+            this.drawEnvForegroundItem,
+        );
     }
 
     loadLevel(levelId) {
@@ -933,6 +956,21 @@ export class LostDaysOfSpring {
         }
     }
 
+    withCameraCulling(drawFn, { skipMapView = true } = {}) {
+        return (obj, ...args) => {
+            if (skipMapView && this.mapView) {
+                drawFn.call(this, obj, ...args);
+                return;
+            }
+
+            if (!this.isVisibleInCamera(obj)) {
+                return;
+            }
+
+            drawFn.call(this, obj, ...args);
+        };
+    }
+
     updateCamera() {
         if (this.mapView) {
             return;
@@ -1005,6 +1043,17 @@ export class LostDaysOfSpring {
         );
     }
 
+    isVisibleInCamera(obj) {
+        const w = obj.w ?? 0;
+        const h = obj.h ?? 0;
+        return !(
+            obj.x + w < this.camera.x - this.camera.margin ||
+            obj.x > this.camera.x + this.camera.width + this.camera.margin ||
+            obj.y + h < this.camera.y - this.camera.margin ||
+            obj.y > this.camera.y + this.camera.height + this.camera.margin
+        );
+    }
+
     updateDamageCooldown(now) {
         if (
             this.player.isHit &&
@@ -1038,24 +1087,24 @@ export class LostDaysOfSpring {
         this.collectibleRenderer.drawSplinter(this.ctx, p);
     }
 
-    drawWeapon(w) {
+    drawBullet(w) {
         this.weaponRenderer.draw(this.ctx, w);
     }
 
-    drawEnvPreBackgroundItems() {
-        this.worldRenderer.drawEnvironment(this.ctx, this.preBackgroundItems);
+    drawEnvPreBackgroundItem(i) {
+        this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
-    drawEnvBackgroundItems() {
-        this.worldRenderer.drawEnvironment(this.ctx, this.backgroundItems);
+    drawEnvBackgroundItem(i) {
+        this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
     drawWorld() {
         this.worldRenderer.drawBackground(this.ctx, this.canvas, this.camera);
     }
 
-    drawEnvForegroundItems() {
-        this.worldRenderer.drawEnvironment(this.ctx, this.foregroundItems);
+    drawEnvForegroundItem(i) {
+        this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
     draw() {
@@ -1077,16 +1126,20 @@ export class LostDaysOfSpring {
             );
         }
 
-        this.drawEnvPreBackgroundItems();
+        for (const i of this.preBackgroundItems) {
+            this.drawEnvPreBackgroundItem(i);
+        }
 
         for (const p of this.platforms) {
             this.drawPlatform(p);
         }
 
-        this.drawEnvBackgroundItems();
+        for (const i of this.backgroundItems) {
+            this.drawEnvBackgroundItem(i);
+        }
 
         for (const w of this.bullets) {
-            this.drawWeapon(w);
+            this.drawBullet(w);
         }
 
         for (const c of this.coins) {
@@ -1111,7 +1164,9 @@ export class LostDaysOfSpring {
 
         this.drawPlayer();
 
-        this.drawEnvForegroundItems();
+        for (const i of this.foregroundItems) {
+            this.drawEnvForegroundItem(i);
+        }
 
         if (this.showDebug) {
             DebugGridRenderer.draw(this.ctx, this.camera, this.worldSize);

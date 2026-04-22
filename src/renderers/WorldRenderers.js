@@ -29,15 +29,19 @@ function drawLayer(ctx, img, cw, ch, cameraX, parallax) {
 
 // Draws a single environment item in world space
 function drawEnvironmentItem(ctx, item) {
+    const prev = ctx.imageSmoothingEnabled;
+    ctx.imageSmoothingEnabled = false;
+
     const img = loadImg(item.url, item.url);
     if (!img.complete || img.naturalWidth === 0) {
+        ctx.imageSmoothingEnabled = prev;
         return;
     }
 
     const srcX = item.cordX ?? 0;
     const srcY = item.cordY ?? 0;
-    const srcW = item.width ?? img.naturalWidth;
-    const srcH = item.height ?? img.naturalHeight;
+    const srcW = item.w ?? img.naturalWidth;
+    const srcH = item.h ?? img.naturalHeight;
 
     const drawW = Math.round(srcW * GameFactory.SCALE);
     const drawH = Math.round(srcH * GameFactory.SCALE);
@@ -95,9 +99,14 @@ function drawEnvironmentItem(ctx, item) {
     }
 
     ctx.restore();
+
+    ctx.imageSmoothingEnabled = prev;
 }
 
 export const DefaultWorldRenderer = {
+    drawEnvironmentItem(ctx, item) {
+        return drawEnvironmentItem(ctx, item);
+    },
     drawBackground(ctx, canvas, camera) {
         const cw = canvas.width;
         const ch = canvas.height;
@@ -117,21 +126,6 @@ export const DefaultWorldRenderer = {
         drawLayer(ctx, planet, cw, ch, camera.x, 0.01);
         // Layer 2 - forrest
         drawLayer(ctx, forrest, cw, ch, camera.x, 0.04);
-
-        ctx.imageSmoothingEnabled = prev;
-    },
-
-    drawEnvironment(ctx, foregroundItems = []) {
-        if (foregroundItems.length === 0) {
-            return;
-        }
-
-        const prev = ctx.imageSmoothingEnabled;
-        ctx.imageSmoothingEnabled = false;
-
-        for (const item of foregroundItems) {
-            drawEnvironmentItem(ctx, item);
-        }
 
         ctx.imageSmoothingEnabled = prev;
     },
