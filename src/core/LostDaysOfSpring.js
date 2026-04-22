@@ -1252,6 +1252,12 @@ export class LostDaysOfSpring {
         this.gameOverRenderer.drawGameOverScreen(
             this.ctx,
             this.canvas,
+            this.player.coinsCount,
+            this.currentLevelCoinsCount,
+            this.player.splintersCount,
+            this.currentLevelSplintersCount,
+            this.currentLevelEnemiesCount - this.enemies.length,
+            this.currentLevelEnemiesCount,
             remaining,
         );
     }
