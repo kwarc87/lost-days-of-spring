@@ -14,17 +14,15 @@
         />
     </head>
     <body>
+        <div id="controls">
+            <div><strong>Move</strong> <span>Left / Right Arrows</span></div>
+            <div><strong>Jump</strong> <span>Up Arrow</span></div>
+            <div><strong>Shoot</strong> <span>Space</span></div>
+            <div><strong>Crouch</strong> <span>C / Down Arrow</span></div>
+            <div><strong>Pause</strong> <span>P</span></div>
+        </div>
+        <div id="cursor-pos"></div>
         <div class="container">
-            <div id="controls">
-                <div>
-                    <strong>Move</strong> <span>Left / Right Arrows</span>
-                </div>
-                <div><strong>Jump</strong> <span>Up Arrow</span></div>
-                <div><strong>Shoot</strong> <span>Space</span></div>
-                <div><strong>Crouch</strong> <span>C / Down Arrow</span></div>
-                <div><strong>Pause</strong> <span>P</span></div>
-            </div>
-            <div id="cursor-pos"></div>
             <canvas id="game" width="1280" height="720"></canvas>
             <div id="loading">
                 <span>Loading…</span>
@@ -32,7 +30,10 @@
         </div>
         <script type="module">
             import { LostDaysOfSpring } from "./src/core/LostDaysOfSpring.js";
-            import { preloadImages, preloadFonts } from "./src/utils/imgCache.js";
+            import {
+                preloadImages,
+                preloadFonts,
+            } from "./src/utils/imgCache.js";
 
             const ASSETS = [
                 "textures/tilesets.png",
@@ -50,20 +51,19 @@
                 "textures/player/pink/crouch-shoot.png",
             ];
 
-            const FONTS = [
-                `400 14px "Silkscreen"`,
-                `700 13px "Silkscreen"`,
-            ];
+            const FONTS = [`400 14px "Silkscreen"`, `700 13px "Silkscreen"`];
 
             const debug =
                 new URLSearchParams(window.location.search).get("debug") ===
                 "true";
 
-            Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
-                document.getElementById("loading").classList.add("done");
-                const game = new LostDaysOfSpring("game", debug);
-                game.start();
-            });
+            Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(
+                () => {
+                    document.getElementById("loading").classList.add("done");
+                    const game = new LostDaysOfSpring("game", debug);
+                    game.start();
+                },
+            );
         </script>
     </body>
 </html>

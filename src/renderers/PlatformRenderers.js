@@ -314,6 +314,21 @@ function drawTiled(ctx, platform, def, showDebug) {
     }
 }
 
+const MAP_COLORS = {
+    solid: "#6d5ad9",
+    booster: "#e81c9c",
+    elevator: "#710952",
+};
+
+function drawSimpleTiled(ctx, platform) {
+    const color = MAP_COLORS[platform.type];
+    if (!color) {
+        return;
+    }
+    ctx.fillStyle = color;
+    ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
+}
+
 export const DefaultPlatformRenderer = {
     draw(ctx, platform, showDebug) {
         drawTiled(
@@ -322,5 +337,8 @@ export const DefaultPlatformRenderer = {
             platformCaves[platform.layout] ?? platformCaves.ground,
             showDebug,
         );
+    },
+    drawMap(ctx, platform) {
+        drawSimpleTiled(ctx, platform);
     },
 };

@@ -1068,10 +1068,18 @@ export class LostDaysOfSpring {
     }
 
     drawPlatform(p) {
+        if (this.mapView) {
+            this.platformRenderer.drawMap(this.ctx, p, this.showDebug);
+            return;
+        }
         this.platformRenderer.draw(this.ctx, p, this.showDebug);
     }
 
     drawElevator(e) {
+        if (this.mapView) {
+            this.platformRenderer.drawMap(this.ctx, e, this.showDebug);
+            return;
+        }
         this.platformRenderer.draw(this.ctx, e, this.showDebug);
     }
 
@@ -1079,23 +1087,37 @@ export class LostDaysOfSpring {
         this.enemyRenderer.draw(this.ctx, e, this.showDebug);
     }
 
-    drawCoins(p) {
-        this.collectibleRenderer.drawCoin(this.ctx, p);
+    drawCoins(c) {
+        if (this.mapView) {
+            this.collectibleRenderer.drawMapCoin(this.ctx, c);
+            return;
+        }
+        this.collectibleRenderer.drawCoin(this.ctx, c);
     }
 
-    drawSplinters(p) {
-        this.collectibleRenderer.drawSplinter(this.ctx, p);
+    drawSplinters(s) {
+        if (this.mapView) {
+            this.collectibleRenderer.drawMapSplinter(this.ctx, s);
+            return;
+        }
+        this.collectibleRenderer.drawSplinter(this.ctx, s);
     }
 
-    drawBullet(w) {
-        this.weaponRenderer.draw(this.ctx, w);
+    drawBullet(b) {
+        this.weaponRenderer.draw(this.ctx, b);
     }
 
     drawEnvPreBackgroundItem(i) {
+        if (this.mapView) {
+            return;
+        }
         this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
     drawEnvBackgroundItem(i) {
+        if (this.mapView) {
+            return;
+        }
         this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
@@ -1104,6 +1126,9 @@ export class LostDaysOfSpring {
     }
 
     drawEnvForegroundItem(i) {
+        if (this.mapView) {
+            return;
+        }
         this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 

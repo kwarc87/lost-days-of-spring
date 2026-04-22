@@ -78,4 +78,23 @@ export const DefaultCollectibleRenderer = {
         );
         ctx.restore();
     },
+    drawMapCoin: (ctx, collectible) => {
+        ctx.fillStyle = "#ffd700";
+        ctx.fillRect(
+            collectible.x,
+            collectible.y,
+            collectible.w,
+            collectible.h,
+        );
+    },
+
+    drawMapSplinter: (ctx, collectible) => {
+        ctx.fillStyle = "#51b9db";
+        ctx.fillRect(
+            collectible.x,
+            collectible.y,
+            collectible.w,
+            collectible.h,
+        );
+    },
 };
