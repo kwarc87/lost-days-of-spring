@@ -148,7 +148,7 @@ export const LEVELS = {
                 ),
                 GameFactory.grid.solid(88, 72, 34, 2, 1, "boardLeftCap"),
                 GameFactory.grid.booster(89, 68, 34, 2, 1, 24),
-                GameFactory.grid.solid(90, 71, 106, 5, 3, "groundRightCap"),
+                GameFactory.grid.solid(90, 71, 106, 7, 3, "groundRightCap"),
                 GameFactory.grid.solid(91, 4, 96, 5, 1, "board"),
                 GameFactory.grid.solid(92, 151, 100, 4, 11, "groundTopCap"),
                 GameFactory.grid.solid(
@@ -215,6 +215,10 @@ export const LEVELS = {
                 GameFactory.grid.solid(118, 185, 41, 8, 2),
                 GameFactory.grid.solid(119, 154, 105, 4, 3, "groundRightCap"),
                 GameFactory.grid.booster(120, 186, 55, 3, 1, 30),
+
+                //custom
+                GameFactory.grid.solid(121, 36, 109, 3, 2, "groundTopCap"),
+                GameFactory.grid.solid(122, 41, 109, 2, 2, "groundTopCap"),
             ],
             elevators: [
                 GameFactory.grid.elevator(
@@ -595,7 +599,32 @@ export const LEVELS = {
                     ...GameFactory.grid.rowOfCollectibles(893, 7, 159, 26, 1),
                 ],
             },
+            spikes: [
+                GameFactory.grid.spike(1, 103, 109, 1),
+                GameFactory.grid.spike(2, 104, 109, 2),
+                GameFactory.grid.spike(3, 105, 109, 1),
+                GameFactory.grid.spike(4, 39, 109, 1),
+                GameFactory.grid.spike(5, 40, 109, 2),
+                GameFactory.grid.spike(6, 77, 69, 1),
+                GameFactory.grid.spike(7, 78, 69, 2),
+                GameFactory.grid.spike(8, 38, 10, 1),
+                GameFactory.grid.spike(9, 39, 10, 2),
+                GameFactory.grid.spike(10, 40, 10, 2),
 
+                GameFactory.grid.spike(11, 149, 57, 1),
+                GameFactory.grid.spike(12, 150, 57, 1),
+                GameFactory.grid.spike(13, 151, 57, 2),
+                GameFactory.grid.spike(14, 152, 57, 2),
+
+                GameFactory.grid.spike(15, 190, 109, 1),
+                GameFactory.grid.spike(16, 191, 109, 2),
+
+                ...GameFactory.grid.rowOfSpikes(17, 14, 172, 18),
+                ...GameFactory.grid.rowOfSpikes(31, 4, 72, 105),
+
+                GameFactory.grid.spike(35, 10, 21, 1),
+                GameFactory.grid.spike(36, 11, 21, 2),
+            ],
             preBackgroundItems: [
                 GameFactory.grid.environment.elevatorPanel(164, 107),
                 GameFactory.grid.environment.elevatorPanel(35, 69, 8, 4),
@@ -688,6 +717,21 @@ export const LEVELS = {
                 GameFactory.grid.environment.plant003(190, 41),
                 GameFactory.grid.environment.flower001(190, 68),
                 GameFactory.grid.environment.plant003(191, 41),
+                GameFactory.grid.environment.plant003(176, 25),
+                GameFactory.grid.environment.plant003(177, 25),
+                GameFactory.grid.environment.wallPlant001(176, 26),
+                GameFactory.grid.environment.wallPlant001(188, 21),
+                GameFactory.grid.environment.plant003(186, 30),
+                GameFactory.grid.environment.plant003(187, 30),
+                GameFactory.grid.environment.plant003(188, 30),
+                GameFactory.grid.environment.plant004(182, 30),
+                GameFactory.grid.environment.plant003(183, 30),
+                GameFactory.grid.environment.plant004(173, 30),
+                GameFactory.grid.environment.plant003(174, 30),
+                GameFactory.grid.environment.plant004(175, 56),
+                GameFactory.grid.environment.plant004(176, 56),
+                GameFactory.grid.environment.wallPlant001(175, 42),
+                GameFactory.grid.environment.wallPlant001(182, 42),
             ],
             foregroundItems: [
                 GameFactory.grid.environment.flower001(1, 19),

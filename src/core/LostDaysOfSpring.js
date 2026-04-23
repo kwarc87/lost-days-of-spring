@@ -14,6 +14,7 @@ import {
 import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
+import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -115,6 +116,7 @@ export class LostDaysOfSpring {
         this.hudRenderer = DefaultHubRenderer;
         this.levelCompleteRenderer = DefaultLevelCompleteRenderer;
         this.gameOverRenderer = DefaultGameOverRenderer;
+        this.spikeRenderer = DefaultSpikeRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -148,6 +150,7 @@ export class LostDaysOfSpring {
         this.drawEnvForegroundItem = this.withCameraCulling(
             this.drawEnvForegroundItem,
         );
+        this.drawSpike = this.withCameraCulling(this.drawSpike);
     }
 
     loadLevel(levelId) {
@@ -166,6 +169,7 @@ export class LostDaysOfSpring {
         this.enemies = levelData.enemies;
         this.coins = levelData.collectibles.coins ?? [];
         this.splinters = levelData.collectibles.splinters ?? [];
+        this.spikes = levelData.spikes ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
@@ -214,7 +218,7 @@ export class LostDaysOfSpring {
             life: this.player.maxLife,
             airborne: true,
             isHit: false,
-            lastHitTime: 0,
+            lastHitTime: -Infinity,
             onGroundId: null,
             onGroundType: null,
             lastGroundId: null,
@@ -431,6 +435,8 @@ export class LostDaysOfSpring {
         this.movePlayerY(now);
 
         this.updateEnemies(now);
+        this.updateSpikesDamage(now);
+
         this.updateBullets(now);
         this.updateCollectibles(now);
         this.updateCamera();
@@ -823,44 +829,120 @@ export class LostDaysOfSpring {
                 enemy.x = enemy.maxX - enemy.w;
                 enemy.vx = -enemy.speed;
             }
+        }
 
+        this.resolvePlayerEnemyCollision(now);
+    }
+
+    resolvePlayerEnemyCollision(now) {
+        const cooldownIsActive =
+            now - this.player.lastHitTime < this.player.hitCooldown;
+
+        for (const enemy of this.enemies) {
             if (this.rectsCollide(this.player, enemy)) {
-                const playerCenterX = this.player.x + this.player.w / 2;
-                const enemyCenterX = enemy.x + enemy.w / 2;
-                const playerIsLeft = playerCenterX < enemyCenterX;
-
-                // Block player from staying inside enemy
-                if (playerIsLeft) {
-                    this.player.x = enemy.x - this.player.w;
+                if (cooldownIsActive) {
+                    this.resolveEnemyCollisionX(enemy);
+                    this.resolveEnemyCollisionY(enemy);
                 } else {
-                    this.player.x = enemy.x + enemy.w;
-                }
-
-                if (now - this.player.lastHitTime >= this.player.hitCooldown) {
-                    this.player.life -= 1;
-                    this.player.lastHitTime = now;
-                    this.player.isHit = true;
-
-                    const hitFromLeft =
-                        this.player.x + this.player.w / 2 <
-                        enemy.x + enemy.w / 2;
-
-                    this.player.vx = hitFromLeft ? -18 : 18;
-                    this.player.vy = -6;
-
-                    if (this.player.life <= 0) {
-                        this.gameOver = true;
-                        this.gameOverAt = now;
-                        this.player.vx = 0;
-                        this.player.vy = 0;
-                        this.player.shooting = false;
-                        this.player.jumpPressedByUser = false;
-                        return;
-                    }
+                    this.applyDamageToPlayer(now, enemy, true);
                 }
 
                 // Only resolve one enemy collision per tick to prevent
                 // position thrashing when two enemies are adjacent.
+                break;
+            }
+        }
+    }
+
+    resolveEnemyCollisionX(enemy) {
+        const enemyPrevX = enemy.x - enemy.vx;
+        const enemyPrevY = enemy.y - (enemy.vy ?? 0);
+
+        // Both player and enemy compared at their pre-move Y positions
+        // (analogous to movePlayerX — at X-phase, neither has moved in Y yet)
+        const playerAtPrevY = {
+            x: this.player.x,
+            y: this.player.prevY,
+            w: this.player.w,
+            h: this.player.h,
+        };
+        const enemyAtPrevY = {
+            x: enemy.x,
+            y: enemyPrevY,
+            w: enemy.w,
+            h: enemy.h,
+        };
+
+        if (this.rectsCollide(playerAtPrevY, enemyAtPrevY)) {
+            if (this.player.prevX + this.player.w <= enemyPrevX) {
+                this.player.x = enemy.x - this.player.w;
+            } else if (this.player.prevX >= enemyPrevX + enemy.w) {
+                this.player.x = enemy.x + enemy.w;
+            }
+        }
+    }
+
+    resolveEnemyCollisionY(enemy) {
+        if (this.rectsCollide(this.player, enemy)) {
+            if (this.player.prevY + this.player.h <= enemy.y) {
+                this.player.airborne = false;
+                this.player.jumpPressedByUser = false;
+                this.player.y = enemy.y - this.player.h;
+                this.player.vy = 0;
+            } else if (this.player.prevY >= enemy.y + enemy.h) {
+                this.player.y = enemy.y + enemy.h;
+                this.player.vy = 0;
+            }
+        }
+    }
+
+    applyDamageToPlayer(now, source, extraRecoilIfAbove = false) {
+        this.player.life -= source.damage;
+        this.player.lastHitTime = now;
+        this.player.isHit = true;
+
+        const hitFromAbove = this.player.prevY + this.player.h <= source.y;
+
+        const recoilXForce =
+            extraRecoilIfAbove && hitFromAbove
+                ? source.recoilX / 1.5
+                : source.recoilX;
+        const recoilYForce =
+            extraRecoilIfAbove && hitFromAbove
+                ? source.recoilY * 1.5
+                : source.recoilY;
+
+        this.player.jumpPressedByUser = false;
+        const hitFromLeft =
+            this.player.x + this.player.w / 2 < source.x + source.w / 2;
+        this.player.vx = hitFromLeft ? -recoilXForce : recoilXForce;
+        this.player.vy = -recoilYForce;
+
+        this.checkPlayerIsDead(now);
+    }
+
+    checkPlayerIsDead(now) {
+        if (this.player.life <= 0) {
+            this.gameOver = true;
+            this.gameOverAt = now;
+            this.player.vx = 0;
+            this.player.vy = 0;
+            this.player.shooting = false;
+        }
+    }
+
+    updateSpikesDamage(now) {
+        for (const spike of this.spikes) {
+            if (this.rectsCollide(this.player, spike)) {
+                const cooldownIsActive =
+                    now - this.player.lastHitTime < this.player.hitCooldown;
+
+                if (!cooldownIsActive) {
+                    this.applyDamageToPlayer(now, spike);
+                    if (this.gameOver) {
+                        return;
+                    }
+                }
                 break;
             }
         }
@@ -1107,6 +1189,14 @@ export class LostDaysOfSpring {
         this.weaponRenderer.draw(this.ctx, b);
     }
 
+    drawSpike(spike) {
+        if (this.mapView) {
+            this.spikeRenderer.drawMapSpike(this.ctx, spike);
+            return;
+        }
+        this.spikeRenderer.draw(this.ctx, spike);
+    }
+
     drawEnvPreBackgroundItem(i) {
         if (this.mapView) {
             return;
@@ -1181,6 +1271,10 @@ export class LostDaysOfSpring {
 
         for (const e of this.elevators) {
             this.drawElevator(e);
+        }
+
+        for (const spike of this.spikes) {
+            this.drawSpike(spike);
         }
 
         for (const e of this.enemies) {

@@ -10,11 +10,11 @@ export const GameFactory = {
         h: 107,
         vx: 0,
         vy: 0,
-        life: 6,
-        maxLife: 6,
+        life: 8,
+        maxLife: 8,
         isHit: false,
         lastHitTime: 0,
-        hitCooldown: 800,
+        hitCooldown: 1000,
         acceleration: 0.8,
         deceleration: 1.2,
         airAcceleration: 2,
@@ -112,7 +112,10 @@ export const GameFactory = {
         h: 84,
         speed,
         health: 15,
+        recoilX: 18,
+        recoilY: 6,
         isDamaged: false,
+        damage: 1,
         damageTime: 0,
         mainColor: "#e84855", // vivid coral red
         secondaryColor: "#f7b32b", // warm amber yellow
@@ -149,6 +152,42 @@ export const GameFactory = {
         Array.from({ length: count }, (_, i) =>
             GameFactory.collectible(startId + i, x, startY + i * gap),
         ),
+    rowOfSpikes: (startId, count, startX, y, damage = 1) => {
+        const spikeW = 16 * GameFactory.SCALE;
+        return Array.from({ length: count }, (_, i) =>
+            GameFactory.spike(
+                startId + i,
+                startX + i * spikeW,
+                y,
+                undefined,
+                undefined,
+                damage,
+                (i % 2) + 1,
+            ),
+        );
+    },
+    spike: (
+        id,
+        x,
+        y,
+        w = 16 * GameFactory.SCALE,
+        h = 16 * GameFactory.SCALE,
+        damage = 1,
+        variant = 1,
+        recoilX = 9,
+        recoilY = 9,
+    ) => ({
+        id,
+        x,
+        y,
+        w,
+        h,
+        damage,
+        variant,
+        recoilX,
+        recoilY,
+        type: "spike",
+    }),
     environment: {
         plant001: (x, y, overrides = {}) => ({
             x,
@@ -318,6 +357,24 @@ export const GameFactory = {
                 gx * GameFactory.GRID + GameFactory.GRID / 4,
                 gStartY * GameFactory.GRID + GameFactory.GRID / 4,
                 gGap * GameFactory.GRID,
+            ),
+        rowOfSpikes: (startId, count, gStartX, gy, damage = 1) =>
+            GameFactory.rowOfSpikes(
+                startId,
+                count,
+                gStartX * GameFactory.GRID,
+                gy * GameFactory.GRID,
+                damage,
+            ),
+        spike: (id, gx, gy, variant = 1, damage = 1) =>
+            GameFactory.spike(
+                id,
+                gx * GameFactory.GRID,
+                gy * GameFactory.GRID,
+                16 * GameFactory.SCALE,
+                16 * GameFactory.SCALE,
+                damage,
+                variant,
             ),
         environment: {
             plant001: (gx, gy, overrides = {}) =>
