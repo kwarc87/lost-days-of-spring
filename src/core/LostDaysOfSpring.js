@@ -510,8 +510,12 @@ export class LostDaysOfSpring {
     }
 
     handleShootingInput(now) {
-        const customShootingOffsetY = -4;
-        const customShootingOffsetX = 40;
+        const customShootingOffsetY = this.isPlayerCrouching()
+            ? this.player.shootingCrouchOffsetY
+            : this.player.shootingOffsetY;
+        const customShootingOffsetX = this.isPlayerCrouching()
+            ? this.player.shootingCrouchOffsetX
+            : this.player.shootingOffsetX;
         if (this.keys[this.keysMap.shoot]) {
             this.player.shooting = true;
             if (

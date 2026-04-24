@@ -41,6 +41,10 @@ export const GameFactory = {
         facing: "right",
         shooting: false,
         lastShootTime: 0,
+        shootingOffsetY: -4,
+        shootingCrouchOffsetY: 4,
+        shootingOffsetX: 40,
+        shootingCrouchOffsetX: 44,
         ...overrides,
     }),
     solid: (id, x, y, w, h, layout = "ground") => ({

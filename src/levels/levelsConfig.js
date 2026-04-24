@@ -627,10 +627,11 @@ export const LEVELS = {
             ],
             preBackgroundItems: [
                 GameFactory.grid.environment.elevatorPanel(164, 107),
-                GameFactory.grid.environment.elevatorPanel(35, 69, 8, 4),
-                GameFactory.grid.environment.elevatorPanel(148, 11, 8, 4),
-                GameFactory.grid.environment.elevatorPanel(180, 7, 8, 4),
-                GameFactory.grid.environment.elevatorPanel(43, 38, 8, 4),
+                GameFactory.grid.environment.elevatorPanel(35, 69),
+                GameFactory.grid.environment.elevatorPanel(148, 11),
+                GameFactory.grid.environment.elevatorPanel(180, 7),
+                GameFactory.grid.environment.elevatorPanel(43, 38),
+                GameFactory.grid.environment.elevatorPanel(172, 67),
             ],
             backgroundItems: [
                 GameFactory.grid.environment.wallPlant001(2, 40),
