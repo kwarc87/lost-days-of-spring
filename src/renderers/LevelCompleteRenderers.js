@@ -1,4 +1,5 @@
 import { getImg } from "../utils/imgCache.js";
+import { MessageRenderer } from "./MessageRenderer.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
@@ -112,20 +113,17 @@ export const DefaultLevelCompleteRenderer = {
         const panelX = Math.round((w - panelW) / 2);
         const panelY = Math.round((h - panelH) / 2);
 
-        // Panel bg — same as HUD and game-over
-        ctx.fillStyle = "rgba(15, 23, 32, 0.82)";
-        ctx.beginPath();
-        ctx.roundRect(panelX, panelY, panelW, panelH, 8);
-        ctx.fill();
+        // Panel bg
+        MessageRenderer.drawBackground(ctx, panelX, panelY, panelW, panelH);
 
-        // ── Title ────────────────────────────────────────────────────────────
+        // ── Title ────────────────────────────────────────────────────────────────
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         ctx.font = titleFont;
 
         // shadow
-        ctx.fillStyle = "rgba(0,0,0,0.6)";
-        ctx.fillText("LEVEL COMPLETE!", w / 2 + 2, panelY + padY + 2);
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillText("LEVEL COMPLETE!", w / 2 + 1, panelY + padY + 1);
 
         ctx.fillStyle = "#f5c542";
         ctx.fillText("LEVEL COMPLETE!", w / 2, panelY + padY);

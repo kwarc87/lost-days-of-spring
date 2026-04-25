@@ -43,9 +43,9 @@ const HEART_BOB_AMPLITUDE = 4;
 
 function getHeartBobOffset(collectible) {
     const phase = (collectible.id ?? 0) * 1.1;
-    return (
+    return Math.round(
         Math.sin((performance.now() / HEART_BOB_PERIOD) * Math.PI * 2 + phase) *
-        HEART_BOB_AMPLITUDE
+            HEART_BOB_AMPLITUDE,
     );
 }
 

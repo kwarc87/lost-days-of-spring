@@ -297,7 +297,7 @@ export const LEVELS = {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
                 }),
-                GameFactory.grid.enemy(14, 85, 116, 18, 3, 20, {
+                GameFactory.grid.enemy(14, 86, 116, 18, 3, 20, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3d83b3",
                 }),

@@ -1,4 +1,5 @@
 import { getImg } from "../utils/imgCache.js";
+import { MessageRenderer } from "./MessageRenderer.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
@@ -128,16 +129,13 @@ export const DefaultHubRenderer = {
         const heartsPanelX = 12;
         const heartsPanelY = 12;
 
-        ctx.fillStyle = "rgba(15, 23, 32, 0.82)";
-        ctx.beginPath();
-        ctx.roundRect(
+        MessageRenderer.drawBackground(
+            ctx,
             heartsPanelX,
             heartsPanelY,
             heartsPanelW,
             heartsPanelH,
-            8,
         );
-        ctx.fill();
 
         for (let i = 0; i < maxLife; i++) {
             const hx = heartsPanelX + heartPadX + i * (heartW + heartGap);
@@ -161,11 +159,8 @@ export const DefaultHubRenderer = {
         const boxX = Math.round(canvas.width - boxW - 12);
         const boxY = 12;
 
-        // Panel bg — same style as hearts panel
-        ctx.fillStyle = "rgba(15, 23, 32, 0.82)";
-        ctx.beginPath();
-        ctx.roundRect(boxX, boxY, boxW, boxH, 8);
-        ctx.fill();
+        // Panel bg
+        MessageRenderer.drawBackground(ctx, boxX, boxY, boxW, boxH);
 
         // Coin icon
         drawHudCoin(ctx, boxX + panelPadX, boxY + panelPadY, coinScale);
@@ -195,16 +190,13 @@ export const DefaultHubRenderer = {
         const splinterBoxX = Math.round(canvas.width - splinterBoxW - 12);
         const splinterBoxY = boxY + boxH + 6;
 
-        ctx.fillStyle = "rgba(15, 23, 32, 0.82)";
-        ctx.beginPath();
-        ctx.roundRect(
+        MessageRenderer.drawBackground(
+            ctx,
             splinterBoxX,
             splinterBoxY,
             splinterBoxW,
             splinterBoxH,
-            8,
         );
-        ctx.fill();
 
         drawHudSplinter(
             ctx,
@@ -248,39 +240,18 @@ export const DefaultHubRenderer = {
             { text: ". Go, traveler!", color: "#ffffff" },
         ];
 
-        const padX = 14;
-        const padY = 8;
-        const y = canvas.height - 56;
-        const font = `bold 13px "Silkscreen", monospace`;
+        const anchorX = canvas.width / 2;
+        const anchorY = canvas.height - 56;
 
         ctx.save();
         ctx.globalAlpha = alpha;
-        ctx.font = font;
-        ctx.textBaseline = "middle";
-
-        const totalW = segments.reduce(
-            (sum, s) => sum + ctx.measureText(s.text).width,
-            0,
+        MessageRenderer.drawPanel(
+            ctx,
+            { lines: [{ segments }] },
+            anchorX,
+            anchorY,
+            { padX: 14, padY: 8 },
         );
-
-        const boxW = totalW + padX * 2;
-        const boxH = 13 + padY * 2;
-        const boxX = canvas.width / 2 - boxW / 2;
-        const boxY = y - boxH / 2;
-
-        ctx.fillStyle = "rgba(15, 23, 32, 0.82)";
-        ctx.beginPath();
-        ctx.roundRect(boxX, boxY, boxW, boxH, 6);
-        ctx.fill();
-
-        ctx.textAlign = "left";
-        let cx = boxX + padX;
-        for (const { text, color } of segments) {
-            ctx.fillStyle = color;
-            ctx.fillText(text, cx, y);
-            cx += ctx.measureText(text).width;
-        }
-
         ctx.restore();
     },
 };
