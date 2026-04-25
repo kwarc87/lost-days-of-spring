@@ -65,15 +65,15 @@ export class LostDaysOfSpring {
             smoothing: 0.15, // base interpolation factor for camera position (0–1)
 
             lookAheadX: 0, // current horizontal look-ahead offset (interpolated)
-            lookAheadXTarget: 180, // horizontal look-ahead distance in pixels
+            lookAheadXTarget: 220, // horizontal look-ahead distance in pixels
             lookAheadXSmoothing: 0.02, // interpolation factor for horizontal look-ahead
 
             lookAheadY: 0, // current vertical look-ahead offset (interpolated)
-            lookAheadYTargetUp: 120, // look-ahead distance when ascending (pixels)
-            lookAheadYTargetDown: 220, // look-ahead distance when falling (pixels)
+            lookAheadYTargetUp: 140, // look-ahead distance when ascending (pixels)
+            lookAheadYTargetDown: 320, // look-ahead distance when falling (pixels)
             lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing
 
-            lookAheadYTargetDownCrouch: 100,
+            lookAheadYTargetDownCrouch: 180,
 
             // culling
             margin: GameFactory.GRID * 10,
@@ -155,6 +155,7 @@ export class LostDaysOfSpring {
 
     loadLevel(levelId) {
         if (!LEVELS[levelId]) {
+            // eslint-disable-next-line no-console
             console.error(`[LostDaysOfSpring] Level ${levelId} not found.`);
             return;
         }
@@ -169,6 +170,7 @@ export class LostDaysOfSpring {
         this.enemies = levelData.enemies;
         this.coins = levelData.collectibles.coins ?? [];
         this.splinters = levelData.collectibles.splinters ?? [];
+        this.hearts = levelData.collectibles.hearts ?? [];
         this.spikes = levelData.spikes ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
@@ -1029,6 +1031,17 @@ export class LostDaysOfSpring {
             }
         }
 
+        for (const h of this.hearts) {
+            if (
+                !h.collected &&
+                this.rectsCollide(this.player, h) &&
+                this.player.life < this.player.maxLife
+            ) {
+                h.collected = true;
+                this.player.life++;
+            }
+        }
+
         if (
             !this.levelComplete &&
             this.player.coinsCount >= this.currentLevelCoinsCount
@@ -1178,7 +1191,7 @@ export class LostDaysOfSpring {
             this.collectibleRenderer.drawMapCoin(this.ctx, c);
             return;
         }
-        this.collectibleRenderer.drawCoin(this.ctx, c);
+        this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug);
     }
 
     drawSplinters(s) {
@@ -1186,7 +1199,15 @@ export class LostDaysOfSpring {
             this.collectibleRenderer.drawMapSplinter(this.ctx, s);
             return;
         }
-        this.collectibleRenderer.drawSplinter(this.ctx, s);
+        this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug);
+    }
+
+    drawHearts(s) {
+        if (this.mapView) {
+            this.collectibleRenderer.drawMapHeart(this.ctx, s);
+            return;
+        }
+        this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug);
     }
 
     drawBullet(b) {
@@ -1270,6 +1291,12 @@ export class LostDaysOfSpring {
         for (const s of this.splinters) {
             if (!s.collected) {
                 this.drawSplinters(s);
+            }
+        }
+
+        for (const h of this.hearts) {
+            if (!h.collected) {
+                this.drawHearts(h);
             }
         }
 

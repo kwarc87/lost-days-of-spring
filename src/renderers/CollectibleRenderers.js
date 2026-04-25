@@ -14,8 +14,43 @@ const SPLINTER_FRAMES = [
     ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
 ];
 
+// 8×8 pixel art heart with outline — rendered at scale=3 → 24×24px
+// 0=transparent  1=outline  2=body  3=highlight  4=shadow
+const HEART_PIXELS = [
+    [0, 1, 1, 0, 0, 1, 1, 0],
+    [1, 2, 3, 1, 1, 3, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 2, 2, 2, 2, 4, 1],
+    [0, 1, 2, 2, 2, 4, 1, 0],
+    [0, 0, 1, 2, 2, 1, 0, 0],
+    [0, 0, 0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+];
+
+const HEART_COLORS = [
+    null,
+    "#1a0000", // outline
+    "#e8334a", // body
+    "#ff9ab4", // highlight
+    "#991b2e", // shadow
+];
+
+const HEART_SCALE = 3;
+
+// Floating bob animation: ±4px sine wave, staggered per collectible ID
+const HEART_BOB_PERIOD = 1800; // ms per full cycle
+const HEART_BOB_AMPLITUDE = 4;
+
+function getHeartBobOffset(collectible) {
+    const phase = (collectible.id ?? 0) * 1.1;
+    return (
+        Math.sin((performance.now() / HEART_BOB_PERIOD) * Math.PI * 2 + phase) *
+        HEART_BOB_AMPLITUDE
+    );
+}
+
 export const DefaultCollectibleRenderer = {
-    drawCoin: (ctx, collectible) => {
+    drawCoin: (ctx, collectible, showDebug = false) => {
         ctx.save();
 
         const x = collectible.x;
@@ -53,9 +88,22 @@ export const DefaultCollectibleRenderer = {
         ctx.fillRect(x + 5, y + 8, 2, 5);
 
         ctx.restore();
+
+        if (showDebug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+                collectible.x,
+                collectible.y,
+                collectible.w,
+                collectible.h,
+            );
+            ctx.restore();
+        }
     },
 
-    drawSplinter: (ctx, collectible) => {
+    drawSplinter: (ctx, collectible, showDebug = false) => {
         const img = getImg(GEMS_IMG_PATH);
         const { sx, sy } =
             SPLINTER_FRAMES[
@@ -77,6 +125,19 @@ export const DefaultCollectibleRenderer = {
             SPLINTER_SH * SPLINTER_SCALE,
         );
         ctx.restore();
+
+        if (showDebug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+                collectible.x,
+                collectible.y,
+                collectible.w,
+                collectible.h,
+            );
+            ctx.restore();
+        }
     },
     drawMapCoin: (ctx, collectible) => {
         ctx.fillStyle = "#ffd700";
@@ -96,5 +157,58 @@ export const DefaultCollectibleRenderer = {
             collectible.w,
             collectible.h,
         );
+    },
+
+    drawHeart: (ctx, collectible, showDebug = false) => {
+        ctx.save();
+        const x = collectible.x;
+        const y = collectible.y + getHeartBobOffset(collectible);
+
+        for (let row = 0; row < HEART_PIXELS.length; row++) {
+            for (let col = 0; col < HEART_PIXELS[row].length; col++) {
+                const ci = HEART_PIXELS[row][col];
+                if (!ci) {
+                    continue;
+                }
+                ctx.fillStyle = HEART_COLORS[ci];
+                ctx.fillRect(
+                    x + col * HEART_SCALE,
+                    y + row * HEART_SCALE,
+                    HEART_SCALE,
+                    HEART_SCALE,
+                );
+            }
+        }
+
+        ctx.restore();
+
+        if (showDebug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+                collectible.x,
+                collectible.y,
+                collectible.w,
+                collectible.h,
+            );
+            ctx.restore();
+        }
+    },
+
+    drawMapHeart: (ctx, collectible) => {
+        const x = collectible.x;
+        const y = collectible.y;
+
+        ctx.fillStyle = "#e8334a";
+        // Left lobe
+        ctx.fillRect(x + 2, y, 8, 8);
+        // Right lobe
+        ctx.fillRect(x + 14, y, 8, 8);
+        // Body connecting lobes
+        ctx.fillRect(x + 1, y + 4, 22, 10);
+        // Lower V — narrowing to tip
+        ctx.fillRect(x + 4, y + 14, 16, 6);
+        ctx.fillRect(x + 8, y + 20, 8, 4);
     },
 };

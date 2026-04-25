@@ -10,8 +10,8 @@ export const GameFactory = {
         h: 107,
         vx: 0,
         vy: 0,
-        life: 8,
-        maxLife: 8,
+        life: 6,
+        maxLife: 6,
         isHit: false,
         lastHitTime: 0,
         hitCooldown: 1000,
@@ -129,8 +129,8 @@ export const GameFactory = {
         id,
         x,
         y,
-        w: 25,
-        h: 25,
+        w: 24,
+        h: 24,
         collected: false,
         ...overrides,
     }),
@@ -329,6 +329,13 @@ export const GameFactory = {
             ),
 
         coins: (id, gx, gy, overrides = {}) =>
+            GameFactory.collectible(
+                id,
+                gx * GameFactory.GRID + GameFactory.GRID / 4,
+                gy * GameFactory.GRID + GameFactory.GRID / 4,
+                overrides,
+            ),
+        hearts: (id, gx, gy, overrides = {}) =>
             GameFactory.collectible(
                 id,
                 gx * GameFactory.GRID + GameFactory.GRID / 4,

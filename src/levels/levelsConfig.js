@@ -598,6 +598,13 @@ export const LEVELS = {
                     ...GameFactory.grid.rowOfCollectibles(886, 7, 159, 25, 1),
                     ...GameFactory.grid.rowOfCollectibles(893, 7, 159, 26, 1),
                 ],
+                hearts: [
+                    GameFactory.grid.hearts(1, 124, 63),
+                    GameFactory.grid.hearts(2, 136, 102),
+                    GameFactory.grid.hearts(3, 132, 46),
+                    GameFactory.grid.hearts(4, 16.5, 11),
+                    GameFactory.grid.hearts(5, 158, 9),
+                ],
             },
             spikes: [
                 GameFactory.grid.spike(1, 103, 109, 1),
