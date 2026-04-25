@@ -15,6 +15,7 @@ import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
+import { DefaultExitRenderer } from "../renderers/ExitRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -117,6 +118,7 @@ export class LostDaysOfSpring {
         this.levelCompleteRenderer = DefaultLevelCompleteRenderer;
         this.gameOverRenderer = DefaultGameOverRenderer;
         this.spikeRenderer = DefaultSpikeRenderer;
+        this.exitRenderer = DefaultExitRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -172,6 +174,7 @@ export class LostDaysOfSpring {
         this.splinters = levelData.collectibles.splinters ?? [];
         this.hearts = levelData.collectibles.hearts ?? [];
         this.spikes = levelData.spikes ?? [];
+        this.exits = levelData.exits ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
@@ -201,6 +204,7 @@ export class LostDaysOfSpring {
         this.gameOverAt = 0;
         this.levelStartAt = performance.now();
         this.mapView = false;
+        this.playerAtExit = false;
     }
 
     resetPlayerProperties(levelData) {
@@ -257,6 +261,24 @@ export class LostDaysOfSpring {
                 this.mapView = !this.mapView;
             }
 
+            // Exit level via statue when enough coins and splinters collected
+            if (
+                e.code === "Enter" &&
+                !e.repeat &&
+                this.playerAtExit &&
+                !this.levelComplete &&
+                !this.gameOver
+            ) {
+                if (this.hasEnoughCoins && this.hasEnoughSplinters) {
+                    this.levelComplete = true;
+                    this.levelCompleteAt = performance.now();
+                    this.player.vx = 0;
+                    this.player.vy = 0;
+                    this.player.shooting = false;
+                    this.player.jumpPressedByUser = false;
+                }
+            }
+
             if (
                 e.code === this.keysMap.jump &&
                 !this.keys[e.code] &&
@@ -296,6 +318,16 @@ export class LostDaysOfSpring {
                 (e.clientY - rect.top) * scaleY + this.camera.y,
             );
         });
+    }
+
+    get hasEnoughCoins() {
+        return this.player.coinsCount >= this.currentLevelCoinsCount / 2;
+    }
+
+    get hasEnoughSplinters() {
+        return (
+            this.player.splintersCount >= this.currentLevelSplintersCount / 2
+        );
     }
 
     rectsCollide(a, b) {
@@ -422,6 +454,7 @@ export class LostDaysOfSpring {
 
         this.updateBullets(now);
         this.updateCollectibles(now);
+        this.updateExit();
         this.updateCamera();
         this.updateDamageCooldown(now);
     }
@@ -1022,18 +1055,6 @@ export class LostDaysOfSpring {
                 this.player.life++;
             }
         }
-
-        if (
-            !this.levelComplete &&
-            this.player.coinsCount >= this.currentLevelCoinsCount
-        ) {
-            this.levelComplete = true;
-            this.levelCompleteAt = now;
-            this.player.vx = 0;
-            this.player.vy = 0;
-            this.player.shooting = false;
-            this.player.jumpPressedByUser = false;
-        }
     }
 
     withCameraCulling(drawFn, { skipMapView = true } = {}) {
@@ -1247,6 +1268,10 @@ export class LostDaysOfSpring {
             );
         }
 
+        for (const exit of this.exits) {
+            this.drawExit(exit);
+        }
+
         for (const i of this.preBackgroundItems) {
             this.drawEnvPreBackgroundItem(i);
         }
@@ -1304,6 +1329,10 @@ export class LostDaysOfSpring {
         }
 
         this.ctx.restore();
+
+        if (this.playerAtExit && !this.levelComplete && !this.gameOver) {
+            this.drawExitMessage();
+        }
 
         this.hudRenderer.draw(
             this.ctx,
@@ -1365,6 +1394,52 @@ export class LostDaysOfSpring {
             this.currentLevelEnemiesCount - this.enemies.length,
             this.currentLevelEnemiesCount,
             remaining,
+        );
+    }
+
+    exitHitbox(exit) {
+        const m = exit.triggerMargin;
+        return {
+            x: exit.x - m,
+            y: exit.y - m,
+            w: exit.w * GameFactory.SCALE + m * 2,
+            h: exit.h * GameFactory.SCALE + m,
+        };
+    }
+
+    findActiveExit() {
+        return (
+            this.exits.find((e) =>
+                this.rectsCollide(this.player, this.exitHitbox(e)),
+            ) ?? null
+        );
+    }
+
+    updateExit() {
+        this.playerAtExit = this.exits.some((exit) =>
+            this.rectsCollide(this.player, this.exitHitbox(exit)),
+        );
+    }
+
+    drawExit(exit) {
+        this.exitRenderer.draw(this.ctx, exit, this.showDebug);
+    }
+
+    drawExitMessage() {
+        const exit = this.findActiveExit();
+        const exitScreenY = exit
+            ? exit.y - this.camera.y + (exit.h * GameFactory.SCALE) / 2
+            : null;
+        const exitScreenX = exit
+            ? exit.x - this.camera.x + (exit.w * GameFactory.SCALE) / 2
+            : null;
+        this.exitRenderer.drawMessage(
+            this.ctx,
+            this.canvas,
+            this.hasEnoughCoins,
+            this.hasEnoughSplinters,
+            exitScreenY,
+            exitScreenX,
         );
     }
 

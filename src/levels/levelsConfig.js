@@ -8,8 +8,8 @@ export const LEVELS = {
                 height: GameFactory.GRID * 112,
             },
             playerStart: {
-                x: GameFactory.GRID * 155,
-                y: GameFactory.GRID * 100,
+                x: GameFactory.GRID * 2,
+                y: GameFactory.GRID * 86,
             },
             platforms: [
                 // GROUND
@@ -214,11 +214,10 @@ export const LEVELS = {
                 GameFactory.grid.solid(117, 172, 41, 12, 2, "groundRightCap"),
                 GameFactory.grid.solid(118, 185, 41, 8, 2),
                 GameFactory.grid.solid(119, 154, 105, 4, 3, "groundRightCap"),
-                GameFactory.grid.booster(120, 186, 55, 3, 1, 30),
 
                 //custom
-                GameFactory.grid.solid(121, 36, 109, 3, 2, "groundTopCap"),
-                GameFactory.grid.solid(122, 41, 109, 2, 2, "groundTopCap"),
+                GameFactory.grid.solid(120, 36, 109, 3, 2, "groundTopCap"),
+                GameFactory.grid.solid(121, 41, 109, 2, 2, "groundTopCap"),
             ],
             elevators: [
                 GameFactory.grid.elevator(
@@ -535,22 +534,22 @@ export const LEVELS = {
                     ...GameFactory.grid.columnOfCollectibles(
                         694,
                         6,
-                        186,
-                        44,
+                        174,
+                        48,
                         1,
                     ),
                     ...GameFactory.grid.columnOfCollectibles(
                         700,
                         6,
-                        187,
-                        44,
+                        175,
+                        48,
                         1,
                     ),
                     ...GameFactory.grid.columnOfCollectibles(
                         706,
                         6,
-                        188,
-                        44,
+                        176,
+                        48,
                         1,
                     ),
                     ...GameFactory.grid.columnOfCollectibles(
@@ -825,6 +824,7 @@ export const LEVELS = {
                 GameFactory.grid.environment.flower002(179, 10),
                 GameFactory.grid.environment.plant001(190, 56),
             ],
+            exits: [GameFactory.grid.exit(1, 185, 49)],
         };
     },
 };

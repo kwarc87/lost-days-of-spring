@@ -226,8 +226,8 @@ export const DefaultHubRenderer = {
     },
 
     drawIntro(ctx, canvas, elapsed) {
-        const duration = 5000;
-        const fadeStart = 4500;
+        const duration = 7000;
+        const fadeStart = 6500;
         if (elapsed >= duration) {
             return;
         }
@@ -237,19 +237,33 @@ export const DefaultHubRenderer = {
                 ? 1
                 : 1 - (elapsed - fadeStart) / (duration - fadeStart);
 
-        const text = "Collect all coins to complete the level";
+        const segments = [
+            {
+                text: "Find the exit and collect the appropriate amount of ",
+                color: "#ffffff",
+            },
+            { text: "coins", color: "#f5c542" },
+            { text: " and ", color: "#ffffff" },
+            { text: "splinters", color: "#5ce8d0" },
+            { text: ". Go, traveler!", color: "#ffffff" },
+        ];
+
         const padX = 14;
         const padY = 8;
         const y = canvas.height - 56;
+        const font = `bold 13px "Silkscreen", monospace`;
 
         ctx.save();
         ctx.globalAlpha = alpha;
-        ctx.font = `bold 13px "Silkscreen", monospace`;
-        ctx.textAlign = "center";
+        ctx.font = font;
         ctx.textBaseline = "middle";
 
-        const tw = ctx.measureText(text).width;
-        const boxW = tw + padX * 2;
+        const totalW = segments.reduce(
+            (sum, s) => sum + ctx.measureText(s.text).width,
+            0,
+        );
+
+        const boxW = totalW + padX * 2;
         const boxH = 13 + padY * 2;
         const boxX = canvas.width / 2 - boxW / 2;
         const boxY = y - boxH / 2;
@@ -259,8 +273,13 @@ export const DefaultHubRenderer = {
         ctx.roundRect(boxX, boxY, boxW, boxH, 6);
         ctx.fill();
 
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(text, canvas.width / 2, y);
+        ctx.textAlign = "left";
+        let cx = boxX + padX;
+        for (const { text, color } of segments) {
+            ctx.fillStyle = color;
+            ctx.fillText(text, cx, y);
+            cx += ctx.measureText(text).width;
+        }
 
         ctx.restore();
     },

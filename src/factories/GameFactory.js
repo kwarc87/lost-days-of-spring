@@ -126,8 +126,21 @@ export const GameFactory = {
         damage: 1,
         damageTime: 0,
         type: "pill",
-        mainColor: "#e84855", // vivid coral red
-        secondaryColor: "#f7b32b", // warm amber yellow
+        mainColor: "#e84855",
+        secondaryColor: "#f7b32b",
+        ...overrides,
+    }),
+    exit: (id, x, y, overrides = {}) => ({
+        id,
+        x,
+        y,
+        w: 76,
+        h: 108,
+        cordX: 110,
+        cordY: 36,
+        url: "textures/all-props.png",
+        type: "exit",
+        triggerMargin: GameFactory.GRID * 3,
         ...overrides,
     }),
     scissors: (id, minX, maxX, y, speed = 1.5, overrides = {}) => ({
@@ -136,8 +149,8 @@ export const GameFactory = {
         maxX,
         x: minX,
         y,
-        w: 16 * 3,
-        h: 16 * 3,
+        w: 48,
+        h: 48,
         speed,
         vx: speed,
         health: 10,
@@ -325,6 +338,13 @@ export const GameFactory = {
                 maxX * GameFactory.GRID,
                 y * GameFactory.GRID,
                 speed,
+                overrides,
+            ),
+        exit: (id, gx, gy, overrides = {}) =>
+            GameFactory.exit(
+                id,
+                gx * GameFactory.GRID,
+                gy * GameFactory.GRID + 4 * GameFactory.SCALE,
                 overrides,
             ),
         solid: (id, gx, gy, gw, gh, layout = "ground") =>
