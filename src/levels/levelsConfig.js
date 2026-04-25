@@ -341,26 +341,22 @@ export const LEVELS = {
                     secondaryColor: "#3b1158",
                     health: 50,
                 }),
-                GameFactory.grid.scissors(20, 175, 192, 32, 2, {
-                    health: 15,
-                }),
-                GameFactory.grid.scissors(21, 172, 190, 35, 2, {
-                    health: 15,
-                }),
-                GameFactory.grid.enemy(22, 173, 178, 54, 2, {
+                GameFactory.grid.enemy(20, 173, 178, 54, 2, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
                     health: 15,
                 }),
-                GameFactory.grid.scissors(23, 148, 155, 99, 2, {
+                GameFactory.grid.enemy(21, 148, 155, 98, 2, {
+                    mainColor: "#fa9bdd",
+                    secondaryColor: "#3b1158",
                     health: 15,
                 }),
-                GameFactory.grid.enemy(24, 106, 115, 43, 1.5, {
+                GameFactory.grid.enemy(22, 106, 115, 43, 1.5, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#710952",
                     health: 5,
                 }),
-                GameFactory.grid.enemy(25, 47, 58, 9, 2, {
+                GameFactory.grid.enemy(23, 47, 58, 9, 2, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
                     health: 15,
