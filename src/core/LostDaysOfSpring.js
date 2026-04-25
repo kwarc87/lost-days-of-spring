@@ -65,15 +65,15 @@ export class LostDaysOfSpring {
             smoothing: 0.15, // base interpolation factor for camera position (0–1)
 
             lookAheadX: 0, // current horizontal look-ahead offset (interpolated)
-            lookAheadXTarget: 220, // horizontal look-ahead distance in pixels
+            lookAheadXTarget: 216, // horizontal look-ahead distance in pixels
             lookAheadXSmoothing: 0.02, // interpolation factor for horizontal look-ahead
 
             lookAheadY: 0, // current vertical look-ahead offset (interpolated)
-            lookAheadYTargetUp: 140, // look-ahead distance when ascending (pixels)
-            lookAheadYTargetDown: 320, // look-ahead distance when falling (pixels)
+            lookAheadYTargetUp: 96, // look-ahead distance when ascending (pixels)
+            lookAheadYTargetDown: 312, // look-ahead distance when falling (pixels)
             lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing
 
-            lookAheadYTargetDownCrouch: 180,
+            lookAheadYTargetDownCrouch: 216,
 
             // culling
             margin: GameFactory.GRID * 10,
