@@ -245,121 +245,98 @@ export const LEVELS = {
                 ),
             ],
             enemies: [
-                GameFactory.grid.enemy(1, 17, 29, 102, 1.5, {
+                GameFactory.grid.enemy(1, 17, 29, 102, 1.5, 5, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#710952",
-                    health: 5,
                 }),
-                GameFactory.grid.enemy(2, 43, 55, 108, 1.5, {
+                GameFactory.grid.enemy(2, 43, 55, 108, 1.5, 5, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#710952",
-                    health: 5,
                 }),
-                GameFactory.grid.enemy(3, 66, 72, 103, 1.5, {
+                GameFactory.grid.enemy(3, 66, 72, 103, 1.5, 5, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#710952",
-                    health: 5,
                 }),
-                GameFactory.grid.enemy(4, 79, 91, 97, 2, {
+                GameFactory.grid.enemy(4, 79, 91, 97, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(5, 110, 140, 104.5, 2, {
+                GameFactory.grid.enemy(5, 110, 140, 104.5, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(6, 130, 142, 88, 3, {
+                GameFactory.grid.enemy(6, 130, 142, 88, 3, 20, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3d83b3",
-                    health: 20,
                 }),
-                GameFactory.grid.enemy(7, 170, 188, 68, 3, {
+                GameFactory.grid.enemy(7, 170, 188, 68, 3, 20, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3d83b3",
-                    health: 20,
                 }),
-                GameFactory.grid.enemy(8, 120, 130, 66, 2, {
+                GameFactory.grid.enemy(8, 120, 130, 66, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(9, 20, 28, 88, 2, {
+                GameFactory.grid.enemy(9, 20, 28, 88, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(10, 15, 22, 64, 1.5, {
+                GameFactory.grid.enemy(10, 15, 22, 64, 1.5, 5, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#710952",
-                    health: 5,
                 }),
-                GameFactory.grid.enemy(11, 47, 53, 20, 2, {
+                GameFactory.grid.enemy(11, 47, 53, 20, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(12, 48, 62, 76, 3, {
+                GameFactory.grid.enemy(12, 48, 62, 76, 3, 20, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3d83b3",
-                    health: 20,
                 }),
-                GameFactory.grid.enemy(13, 63, 67, 12, 2, {
+                GameFactory.grid.enemy(13, 63, 67, 12, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(14, 85, 116, 18, 3, {
+                GameFactory.grid.enemy(14, 85, 116, 18, 3, 20, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3d83b3",
-                    health: 20,
                 }),
-                GameFactory.grid.enemy(15, 122, 140, 16, 3, {
+                GameFactory.grid.enemy(15, 122, 140, 16, 3, 20, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3d83b3",
-                    health: 20,
                 }),
-                GameFactory.grid.enemy(16, 140, 150, 12, 4, {
+                GameFactory.grid.enemy(16, 140, 150, 12, 4, 50, {
                     mainColor: "#68eef2",
                     secondaryColor: "#3b1158",
-                    health: 50,
                 }),
-                GameFactory.grid.enemy(17, 156, 168, 26, 2, {
+                GameFactory.grid.enemy(17, 156, 168, 26, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(18, 173, 190, 28, 3, {
+                GameFactory.grid.enemy(18, 173, 190, 28, 3, 20, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3d83b3",
-                    health: 20,
                 }),
 
-                GameFactory.grid.enemy(19, 173, 184, 39, 4, {
+                GameFactory.grid.enemy(19, 173, 184, 39, 4, 50, {
                     mainColor: "#68eef2",
                     secondaryColor: "#3b1158",
-                    health: 50,
                 }),
-                GameFactory.grid.enemy(20, 173, 178, 54, 2, {
+                GameFactory.grid.enemy(20, 173, 178, 54, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(21, 148, 155, 98, 2, {
+                GameFactory.grid.enemy(21, 148, 155, 98, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
-                GameFactory.grid.enemy(22, 106, 115, 43, 1.5, {
+                GameFactory.grid.enemy(22, 106, 115, 43, 1.5, 5, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#710952",
-                    health: 5,
                 }),
-                GameFactory.grid.enemy(23, 47, 58, 9, 2, {
+                GameFactory.grid.enemy(23, 47, 58, 9, 2, 15, {
                     mainColor: "#fa9bdd",
                     secondaryColor: "#3b1158",
-                    health: 15,
                 }),
             ],
             collectibles: {

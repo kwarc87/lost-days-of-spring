@@ -34,6 +34,8 @@ export class LostDaysOfSpring {
             shoot: "Space",
             pause: "KeyP",
             map: "KeyM",
+            escape: "Escape",
+            enter: "Enter",
         };
 
         // ====== GAME STATE ======
@@ -241,16 +243,6 @@ export class LostDaysOfSpring {
         window.addEventListener("keydown", (e) => {
             e.stopPropagation();
 
-            // Dismiss level-complete screen early
-            if (e.code === "Escape" && this.levelComplete && !e.repeat) {
-                this.resetGame();
-            }
-
-            // Dismiss game-over screen early
-            if (e.code === "Escape" && this.gameOver && !e.repeat) {
-                this.resetGame();
-            }
-
             // Toggle pause state
             if (e.code === this.keysMap.pause && !e.repeat) {
                 this.togglePause();
@@ -259,24 +251,6 @@ export class LostDaysOfSpring {
             // Toggle map overview
             if (e.code === this.keysMap.map && !e.repeat) {
                 this.mapView = !this.mapView;
-            }
-
-            // Exit level via statue when enough coins and splinters collected
-            if (
-                e.code === "Enter" &&
-                !e.repeat &&
-                this.playerAtExit &&
-                !this.levelComplete &&
-                !this.gameOver
-            ) {
-                if (this.hasEnoughCoins && this.hasEnoughSplinters) {
-                    this.levelComplete = true;
-                    this.levelCompleteAt = performance.now();
-                    this.player.vx = 0;
-                    this.player.vy = 0;
-                    this.player.shooting = false;
-                    this.player.jumpPressedByUser = false;
-                }
             }
 
             if (
@@ -432,6 +406,14 @@ export class LostDaysOfSpring {
             return;
         }
 
+        // Dismiss level-complete or game-over screen
+        if (this.keys[this.keysMap.escape]) {
+            if (this.levelComplete || this.gameOver) {
+                this.resetGame();
+                return;
+            }
+        }
+
         // Freeze game logic while level-complete or game-over screen is shown
         if (this.levelComplete || this.gameOver) {
             return;
@@ -465,6 +447,7 @@ export class LostDaysOfSpring {
         this.handleCrouchInput();
         this.handleShootingInput(now);
         this.handleJumpInput(now);
+        this.handleEnterInput();
     }
 
     handleHorizontalMovementInput() {
@@ -591,6 +574,23 @@ export class LostDaysOfSpring {
             this.player.onGroundType = null;
             this.player.jumpPressedByUser = true;
             this.player.jumpPressedAt = 0;
+        }
+    }
+
+    handleEnterInput() {
+        if (this.keys[this.keysMap.enter]) {
+            if (
+                this.playerAtExit &&
+                this.hasEnoughCoins &&
+                this.hasEnoughSplinters
+            ) {
+                this.levelComplete = true;
+                this.levelCompleteAt = performance.now();
+                this.player.vx = 0;
+                this.player.vy = 0;
+                this.player.shooting = false;
+                this.player.jumpPressedByUser = false;
+            }
         }
     }
 

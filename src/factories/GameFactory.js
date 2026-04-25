@@ -109,7 +109,7 @@ export const GameFactory = {
             layout,
         };
     },
-    enemy: (id, minX, maxX, y, speed = 1.5, overrides = {}) => ({
+    enemy: (id, minX, maxX, y, speed = 1.5, health = 15, overrides = {}) => ({
         id,
         minX,
         maxX,
@@ -119,7 +119,7 @@ export const GameFactory = {
         h: 84,
         speed,
         vx: speed,
-        health: 15,
+        health,
         recoilX: 18,
         recoilY: 6,
         isDamaged: false,
@@ -303,13 +303,14 @@ export const GameFactory = {
         }),
     },
     grid: {
-        enemy: (id, minX, maxX, y, speed, overrides = {}) =>
+        enemy: (id, minX, maxX, y, speed, health, overrides = {}) =>
             GameFactory.enemy(
                 id,
                 minX * GameFactory.GRID,
                 maxX * GameFactory.GRID,
                 y * GameFactory.GRID + 4 * GameFactory.SCALE,
                 speed,
+                health,
                 overrides,
             ),
         exit: (id, gx, gy, overrides = {}) =>
