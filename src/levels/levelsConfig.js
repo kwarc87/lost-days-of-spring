@@ -8,8 +8,8 @@ export const LEVELS = {
                 height: GameFactory.GRID * 112,
             },
             playerStart: {
-                x: GameFactory.GRID * 2,
-                y: GameFactory.GRID * 86,
+                x: GameFactory.GRID * 140,
+                y: GameFactory.GRID * 9,
             },
             platforms: [
                 // GROUND
@@ -668,12 +668,12 @@ export const LEVELS = {
                 GameFactory.grid.spike(36, 11, 21, 2),
             ],
             preBackgroundItems: [
-                GameFactory.grid.environment.elevatorPanel(164, 107),
-                GameFactory.grid.environment.elevatorPanel(35, 69),
-                GameFactory.grid.environment.elevatorPanel(148, 11),
-                GameFactory.grid.environment.elevatorPanel(180, 7),
-                GameFactory.grid.environment.elevatorPanel(43, 38),
-                GameFactory.grid.environment.elevatorPanel(172, 67),
+                GameFactory.grid.environment.elevatorPanel(165, 108),
+                GameFactory.grid.environment.elevatorPanel(35.5, 70),
+                GameFactory.grid.environment.elevatorPanel(148, 12),
+                GameFactory.grid.environment.elevatorPanel(180, 8),
+                GameFactory.grid.environment.elevatorPanel(43, 38.5),
+                GameFactory.grid.environment.elevatorPanel(171, 68),
             ],
             backgroundItems: [
                 GameFactory.grid.environment.wallPlant001(2, 40),

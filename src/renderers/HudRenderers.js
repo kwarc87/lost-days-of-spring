@@ -226,8 +226,8 @@ export const DefaultHubRenderer = {
     },
 
     drawIntro(ctx, canvas, elapsed) {
-        const duration = 7000;
-        const fadeStart = 6500;
+        const duration = 10000;
+        const fadeStart = 9500;
         if (elapsed >= duration) {
             return;
         }
