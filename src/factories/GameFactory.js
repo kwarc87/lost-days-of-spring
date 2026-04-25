@@ -109,20 +109,44 @@ export const GameFactory = {
             layout,
         };
     },
-    enemy: (id, platformId, speed = 1.5, overrides = {}) => ({
+    enemy: (id, minX, maxX, y, speed = 1.5, overrides = {}) => ({
         id,
-        platformId,
+        minX,
+        maxX,
+        x: minX,
+        y,
         w: 36,
         h: 84,
         speed,
+        vx: speed,
         health: 15,
         recoilX: 18,
         recoilY: 6,
         isDamaged: false,
         damage: 1,
         damageTime: 0,
+        type: "pill",
         mainColor: "#e84855", // vivid coral red
         secondaryColor: "#f7b32b", // warm amber yellow
+        ...overrides,
+    }),
+    scissors: (id, minX, maxX, y, speed = 1.5, overrides = {}) => ({
+        id,
+        minX,
+        maxX,
+        x: minX,
+        y,
+        w: 16 * 3,
+        h: 16 * 3,
+        speed,
+        vx: speed,
+        health: 10,
+        recoilX: 12,
+        recoilY: 6,
+        isDamaged: false,
+        damage: 1,
+        damageTime: 0,
+        type: "scissors",
         ...overrides,
     }),
     collectible: (id, x, y, overrides = {}) => ({
@@ -138,7 +162,7 @@ export const GameFactory = {
         id: null,
         color: "#ffc300",
         speed: 12,
-        shootFrequency: 200,
+        shootFrequency: 125,
         ammo: {
             vx: 0,
             vy: 0,
@@ -285,6 +309,24 @@ export const GameFactory = {
         }),
     },
     grid: {
+        enemy: (id, minX, maxX, y, speed, overrides = {}) =>
+            GameFactory.enemy(
+                id,
+                minX * GameFactory.GRID,
+                maxX * GameFactory.GRID,
+                y * GameFactory.GRID + 4 * GameFactory.SCALE,
+                speed,
+                overrides,
+            ),
+        scissors: (id, minX, maxX, y, speed, overrides = {}) =>
+            GameFactory.scissors(
+                id,
+                minX * GameFactory.GRID,
+                maxX * GameFactory.GRID,
+                y * GameFactory.GRID,
+                speed,
+                overrides,
+            ),
         solid: (id, gx, gy, gw, gh, layout = "ground") =>
             GameFactory.solid(
                 id,

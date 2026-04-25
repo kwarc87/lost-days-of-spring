@@ -184,9 +184,6 @@ export class LostDaysOfSpring {
         // Clear held keys to prevent ghost input on level start
         this.keys = {};
 
-        // Initialize dynamic entity defaults
-        this.initEnemies();
-
         // Reset bullets
         this.bullets = [];
         this.nextBulletId = 0;
@@ -299,22 +296,6 @@ export class LostDaysOfSpring {
                 (e.clientY - rect.top) * scaleY + this.camera.y,
             );
         });
-    }
-
-    initEnemies() {
-        for (const enemy of this.enemies) {
-            const p = this.platforms.find((pl) => pl.id === enemy.platformId);
-            if (p) {
-                enemy.x = p.x + p.w / 2 - enemy.w / 2;
-                enemy.y = p.y - enemy.h;
-                enemy.minX = p.x;
-                enemy.maxX = p.x + p.w;
-                enemy.vx = enemy.speed;
-                enemy.health = enemy.health ?? 15;
-                enemy.isDamaged = false;
-                enemy.damageTime = 0;
-            }
-        }
     }
 
     rectsCollide(a, b) {
