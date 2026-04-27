@@ -643,6 +643,11 @@ export const LEVELS = {
 
                 GameFactory.grid.spike(35, 10, 21, 1),
                 GameFactory.grid.spike(36, 11, 21, 2),
+
+                ...GameFactory.grid.rowOfSpikes(37, 3, 52, 101, "up"),
+                ...GameFactory.grid.rowOfSpikes(40, 3, 61, 101, "up"),
+
+                ...GameFactory.grid.rowOfSpikes(43, 15, 20, 17, "up"),
             ],
             preBackgroundItems: [
                 GameFactory.grid.environment.elevatorPanel(165, 108),
@@ -668,7 +673,6 @@ export const LEVELS = {
                 GameFactory.grid.environment.plant003(23, 21),
                 GameFactory.grid.environment.plant004(25, 21),
                 GameFactory.grid.environment.plate001(25, 90),
-                GameFactory.grid.environment.wallPlant001(28, 16),
                 GameFactory.grid.environment.plant003(31, 21),
                 GameFactory.grid.environment.plant004(32, 21),
                 GameFactory.grid.environment.wallPlant001(33, 3),
@@ -763,6 +767,7 @@ export const LEVELS = {
                 GameFactory.grid.environment.plant002(11, 110),
                 GameFactory.grid.environment.flower002(17, 86),
                 GameFactory.grid.environment.plant002(22, 110),
+                GameFactory.grid.environment.wallPlant001(28, 16),
                 GameFactory.grid.environment.plant004(30, 110),
                 GameFactory.grid.environment.flower002(33, 21),
                 GameFactory.grid.environment.plant003(33, 110),

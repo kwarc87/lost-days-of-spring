@@ -14,20 +14,42 @@ export const DefaultSpikeRenderer = {
     draw: (ctx, spike) => {
         const img = getImg(SPIKE_IMG_PATH);
         const { sx, sy } = SPIKE_VARIANTS[spike.variant] ?? SPIKE_VARIANTS[1];
+        const up = spike.position === "up";
 
         ctx.save();
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(
-            img,
-            sx,
-            sy,
-            SPIKE_SW,
-            SPIKE_SH,
-            spike.x,
-            spike.y,
-            SPIKE_SW * SPIKE_SCALE,
-            SPIKE_SH * SPIKE_SCALE,
-        );
+
+        if (up) {
+            ctx.translate(
+                spike.x + (SPIKE_SW * SPIKE_SCALE) / 2,
+                spike.y + (SPIKE_SH * SPIKE_SCALE) / 2 - 3 * 3,
+            );
+            ctx.rotate(Math.PI);
+            ctx.drawImage(
+                img,
+                sx,
+                sy,
+                SPIKE_SW,
+                SPIKE_SH,
+                (-SPIKE_SW * SPIKE_SCALE) / 2,
+                (-SPIKE_SH * SPIKE_SCALE) / 2,
+                SPIKE_SW * SPIKE_SCALE,
+                SPIKE_SH * SPIKE_SCALE,
+            );
+        } else {
+            ctx.drawImage(
+                img,
+                sx,
+                sy,
+                SPIKE_SW,
+                SPIKE_SH,
+                spike.x,
+                spike.y,
+                SPIKE_SW * SPIKE_SCALE,
+                SPIKE_SH * SPIKE_SCALE,
+            );
+        }
+
         ctx.restore();
     },
     drawMapSpike: (ctx, spike) => {

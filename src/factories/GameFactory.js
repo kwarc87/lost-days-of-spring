@@ -197,17 +197,16 @@ export const GameFactory = {
         Array.from({ length: count }, (_, i) =>
             GameFactory.collectible(startId + i, x, startY + i * gap),
         ),
-    rowOfSpikes: (startId, count, startX, y, damage = 1) => {
+    rowOfSpikes: (startId, count, startX, y, position = "down", damage = 1) => {
         const spikeW = 16 * GameFactory.SCALE;
         return Array.from({ length: count }, (_, i) =>
             GameFactory.spike(
                 startId + i,
                 startX + i * spikeW,
                 y,
-                undefined,
-                undefined,
-                damage,
                 (i % 2) + 1,
+                position,
+                damage,
             ),
         );
     },
@@ -215,22 +214,24 @@ export const GameFactory = {
         id,
         x,
         y,
-        w = 16 * GameFactory.SCALE,
-        h = 16 * GameFactory.SCALE,
-        damage = 1,
         variant = 1,
+        position = "down",
+        damage = 1,
         recoilX = 9,
         recoilY = 9,
+        w = 16 * GameFactory.SCALE,
+        h = 16 * GameFactory.SCALE,
     ) => ({
         id,
         x,
         y,
         w,
         h,
-        damage,
         variant,
+        position,
+        damage,
         recoilX,
-        recoilY,
+        recoilY: position === "down" ? recoilY : 0,
         type: "spike",
     }),
     environment: {
@@ -453,23 +454,30 @@ export const GameFactory = {
                 gStartY * GameFactory.GRID + GameFactory.GRID / 4,
                 gGap * GameFactory.GRID,
             ),
-        rowOfSpikes: (startId, count, gStartX, gy, damage = 1) =>
+        rowOfSpikes: (
+            startId,
+            count,
+            gStartX,
+            gy,
+            position = "down",
+            damage = 1,
+        ) =>
             GameFactory.rowOfSpikes(
                 startId,
                 count,
                 gStartX * GameFactory.GRID,
                 gy * GameFactory.GRID,
+                position,
                 damage,
             ),
-        spike: (id, gx, gy, variant = 1, damage = 1) =>
+        spike: (id, gx, gy, variant = 1, position = "down", damage = 1) =>
             GameFactory.spike(
                 id,
                 gx * GameFactory.GRID,
                 gy * GameFactory.GRID,
-                16 * GameFactory.SCALE,
-                16 * GameFactory.SCALE,
-                damage,
                 variant,
+                position,
+                damage,
             ),
         environment: {
             plant001: (gx, gy, overrides = {}) =>
