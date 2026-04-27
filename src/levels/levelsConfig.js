@@ -514,7 +514,7 @@ export const LEVELS = {
                 GameFactory.grid.exit({ id: 1, x: 185, y: 49, w: 76, h: 108 }),
             ],
             messages: [
-                GameFactory.grid.message({ id: "msg-1", x: 0, y: 100, w: 6, h: 10, offsetX: 0, offsetY: -5, lines: MESSAGES.LEVEL_1.INTRO, relatedTo: "viewPort", strategy: "single" }),
+                GameFactory.grid.message({ id: "msg-1", x: 0, y: 100, w: 5, h: 10, offsetX: 0, offsetY: -5, lines: MESSAGES.LEVEL_1.INTRO, relatedTo: "viewPort", strategy: "single" }),
                 GameFactory.grid.message({ id: "msg-2", x: 6, y: 104, w: 6, h: 6, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.JUMP_HINT, relatedTo: "viewPort", strategy: "single" }),
                 GameFactory.grid.message({ id: "msg-3", x: 17, y: 100, w: 10, h: 5, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.SHOOT_HINT, relatedTo: "viewPort", strategy: "single" }),
                 GameFactory.grid.message({ id: "msg-4", x: 78, y: 106, w: 15, h: 4, offsetX: 0, offsetY: 2, lines: MESSAGES.LEVEL_1.CROUCH_HINT, relatedTo: "viewPort", strategy: "single" }),
