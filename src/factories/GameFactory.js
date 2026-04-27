@@ -1,4 +1,4 @@
-export const GameFactory = {
+﻿export const GameFactory = {
     GRID: 48,
     SCALE: 3,
     player: (overrides = {}) => ({
@@ -47,7 +47,7 @@ export const GameFactory = {
         shootingCrouchOffsetX: 44,
         ...overrides,
     }),
-    solid: (id, x, y, w, h, layout = "ground") => ({
+    solid: ({ id, x, y, w, h, layout = "ground" } = {}) => ({
         id,
         x,
         y,
@@ -56,7 +56,7 @@ export const GameFactory = {
         type: "solid",
         layout,
     }),
-    booster: (id, x, y, w, h, boostSpeed = 20) => ({
+    booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) => ({
         id,
         x,
         y,
@@ -67,7 +67,7 @@ export const GameFactory = {
         layout: "booster",
         boostSpeed,
     }),
-    elevator: (
+    elevator: ({
         id,
         startX,
         startY,
@@ -78,38 +78,31 @@ export const GameFactory = {
         speed,
         waitTime,
         layout = "brick",
-    ) => {
+    } = {}) => {
         const dx = targetX - startX;
         const dy = targetY - startY;
-
         const length = Math.hypot(dx, dy);
-
         return {
             id,
             x: startX,
             y: startY,
             w,
             h,
-
             startX,
             startY,
             targetX,
             targetY,
-
             dirX: dx / length,
             dirY: dy / length,
-
             speed,
             direction: 1,
-
             waitTime,
             idleUntil: 0,
-
             type: "elevator",
             layout,
         };
     },
-    enemy: (id, minX, maxX, y, speed = 1.5, health = 15, overrides = {}) => ({
+    enemy: ({ id, minX, maxX, y, speed = 1.5, health = 15, ...rest } = {}) => ({
         id,
         minX,
         maxX,
@@ -128,9 +121,9 @@ export const GameFactory = {
         type: "pill",
         mainColor: "#e84855",
         secondaryColor: "#f7b32b",
-        ...overrides,
+        ...rest,
     }),
-    exit: (id, x, y, w, h, overrides = {}) => ({
+    exit: ({ id, x, y, w, h, ...rest } = {}) => ({
         id,
         x,
         y,
@@ -140,20 +133,20 @@ export const GameFactory = {
         cordY: 36,
         url: "textures/all-props.png",
         triggerMargin: GameFactory.GRID * 3,
-        ...overrides,
+        ...rest,
     }),
-    message: (
+    message: ({
         id,
         x,
         y,
         w,
         h,
-        offsetX,
-        offsetY,
+        offsetX = 0,
+        offsetY = 0,
         lines,
         relatedTo = "hitbox",
         strategy = "multiple",
-    ) => ({
+    } = {}) => ({
         id,
         x,
         y,
@@ -166,14 +159,14 @@ export const GameFactory = {
         strategy,
         shown: false,
     }),
-    collectible: (id, x, y, overrides = {}) => ({
+    collectible: ({ id, x, y, ...rest } = {}) => ({
         id,
         x,
         y,
         w: 24,
         h: 24,
         collected: false,
-        ...overrides,
+        ...rest,
     }),
     weapon: (overrides = {}) => ({
         id: null,
@@ -189,28 +182,43 @@ export const GameFactory = {
         },
         ...overrides,
     }),
-    rowOfCollectibles: (startId, count, startX, y, gap) =>
+    rowOfCollectibles: ({ startId, count, startX, y, gap } = {}) =>
         Array.from({ length: count }, (_, i) =>
-            GameFactory.collectible(startId + i, startX + i * gap, y),
+            GameFactory.collectible({
+                id: startId + i,
+                x: startX + i * gap,
+                y,
+            }),
         ),
-    columnOfCollectibles: (startId, count, x, startY, gap) =>
+    columnOfCollectibles: ({ startId, count, x, startY, gap } = {}) =>
         Array.from({ length: count }, (_, i) =>
-            GameFactory.collectible(startId + i, x, startY + i * gap),
+            GameFactory.collectible({
+                id: startId + i,
+                x,
+                y: startY + i * gap,
+            }),
         ),
-    rowOfSpikes: (startId, count, startX, y, position = "down", damage = 1) => {
+    rowOfSpikes: ({
+        startId,
+        count,
+        startX,
+        y,
+        position = "down",
+        damage = 1,
+    } = {}) => {
         const spikeW = 16 * GameFactory.SCALE;
         return Array.from({ length: count }, (_, i) =>
-            GameFactory.spike(
-                startId + i,
-                startX + i * spikeW,
+            GameFactory.spike({
+                id: startId + i,
+                x: startX + i * spikeW,
                 y,
-                (i % 2) + 1,
+                variant: (i % 2) + 1,
                 position,
                 damage,
-            ),
+            }),
         );
     },
-    spike: (
+    spike: ({
         id,
         x,
         y,
@@ -221,7 +229,7 @@ export const GameFactory = {
         recoilY = 9,
         w = 16 * GameFactory.SCALE,
         h = 16 * GameFactory.SCALE,
-    ) => ({
+    } = {}) => ({
         id,
         x,
         y,
@@ -235,7 +243,7 @@ export const GameFactory = {
         type: "spike",
     }),
     environment: {
-        plant001: (x, y, overrides = {}) => ({
+        plant001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/tilesets.png",
@@ -243,9 +251,9 @@ export const GameFactory = {
             cordY: 98,
             w: 32,
             h: 30,
-            ...overrides,
+            ...rest,
         }),
-        plant002: (x, y, overrides = {}) => ({
+        plant002: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/tilesets.png",
@@ -253,9 +261,9 @@ export const GameFactory = {
             cordY: 100,
             w: 32,
             h: 32,
-            ...overrides,
+            ...rest,
         }),
-        plant003: (x, y, overrides = {}) => ({
+        plant003: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/tilesets.png",
@@ -263,9 +271,9 @@ export const GameFactory = {
             cordY: 105,
             w: 16,
             h: 21,
-            ...overrides,
+            ...rest,
         }),
-        plant004: (x, y, overrides = {}) => ({
+        plant004: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/tilesets.png",
@@ -273,9 +281,9 @@ export const GameFactory = {
             cordY: 104,
             w: 16,
             h: 22,
-            ...overrides,
+            ...rest,
         }),
-        wallPlant001: (x, y, overrides = {}) => ({
+        wallPlant001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/tilesets.png",
@@ -283,9 +291,9 @@ export const GameFactory = {
             cordY: 48,
             w: 16,
             h: 27,
-            ...overrides,
+            ...rest,
         }),
-        plate001: (x, y, overrides = {}) => ({
+        plate001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/tilesets.png",
@@ -293,9 +301,9 @@ export const GameFactory = {
             cordY: 107,
             w: 32,
             h: 21,
-            ...overrides,
+            ...rest,
         }),
-        flower001: (x, y, overrides = {}) => ({
+        flower001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/props.png",
@@ -303,9 +311,9 @@ export const GameFactory = {
             cordY: 16,
             w: 32,
             h: 46,
-            ...overrides,
+            ...rest,
         }),
-        flower002: (x, y, overrides = {}) => ({
+        flower002: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/props.png",
@@ -313,9 +321,9 @@ export const GameFactory = {
             cordY: 32,
             w: 32,
             h: 32,
-            ...overrides,
+            ...rest,
         }),
-        elevatorPanel: (x, y, overrides = {}) => ({
+        elevatorPanel: ({ x, y, ...rest } = {}) => ({
             x,
             y,
             url: "textures/elevator.png",
@@ -323,217 +331,221 @@ export const GameFactory = {
             cordY: 0,
             w: 16,
             h: 48,
-            ...overrides,
+            ...rest,
         }),
     },
     grid: {
-        enemy: (id, minX, maxX, y, speed, health, overrides = {}) =>
-            GameFactory.enemy(
+        enemy: ({ id, minX, maxX, y, speed, health, ...rest } = {}) =>
+            GameFactory.enemy({
                 id,
-                minX * GameFactory.GRID,
-                maxX * GameFactory.GRID,
-                y * GameFactory.GRID + 4 * GameFactory.SCALE,
+                minX: minX * GameFactory.GRID,
+                maxX: maxX * GameFactory.GRID,
+                y: y * GameFactory.GRID + 4 * GameFactory.SCALE,
                 speed,
                 health,
-                overrides,
-            ),
-        exit: (id, gx, gy, w, h, overrides = {}) =>
-            GameFactory.exit(
+                ...rest,
+            }),
+        exit: ({ id, x, y, w, h, ...rest } = {}) =>
+            GameFactory.exit({
                 id,
-                gx * GameFactory.GRID,
-                gy * GameFactory.GRID + 4 * GameFactory.SCALE,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID + 4 * GameFactory.SCALE,
                 w,
                 h,
-                overrides,
-            ),
-        message: (
+                ...rest,
+            }),
+        message: ({
             id,
-            gx,
-            gy,
-            gw,
-            gh,
-            gOffsetX,
-            gOffsetY,
+            x,
+            y,
+            w,
+            h,
+            offsetX = 0,
+            offsetY = 0,
             lines,
             relatedTo,
             strategy,
-        ) =>
-            GameFactory.message(
+        } = {}) =>
+            GameFactory.message({
                 id,
-                gx * GameFactory.GRID,
-                gy * GameFactory.GRID,
-                gw * GameFactory.GRID,
-                gh * GameFactory.GRID,
-                gOffsetX * GameFactory.GRID,
-                gOffsetY * GameFactory.GRID,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
+                offsetX: offsetX * GameFactory.GRID,
+                offsetY: offsetY * GameFactory.GRID,
                 lines,
                 relatedTo,
                 strategy,
-            ),
-        solid: (id, gx, gy, gw, gh, layout = "ground") =>
-            GameFactory.solid(
+            }),
+        solid: ({ id, x, y, w, h, layout = "ground" } = {}) =>
+            GameFactory.solid({
                 id,
-                gx * GameFactory.GRID,
-                gy * GameFactory.GRID,
-                gw * GameFactory.GRID,
-                gh * GameFactory.GRID,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
                 layout,
-            ),
-        booster: (id, gx, gy, gw, gh, boostSpeed = 20) =>
-            GameFactory.booster(
+            }),
+        booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) =>
+            GameFactory.booster({
                 id,
-                gx * GameFactory.GRID,
-                gy * GameFactory.GRID,
-                gw * GameFactory.GRID,
-                gh * GameFactory.GRID,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
                 boostSpeed,
-            ),
-        elevator: (
+            }),
+        elevator: ({
             id,
-            startGX,
-            startGY,
-            gw,
-            gh,
-            targetGX,
-            targetGY,
+            startX,
+            startY,
+            w,
+            h,
+            targetX,
+            targetY,
             speed,
             waitTime,
             layout,
-        ) =>
-            GameFactory.elevator(
+        } = {}) =>
+            GameFactory.elevator({
                 id,
-                startGX * GameFactory.GRID,
-                startGY * GameFactory.GRID,
-                gw * GameFactory.GRID,
-                gh * GameFactory.GRID,
-                targetGX * GameFactory.GRID,
-                targetGY * GameFactory.GRID,
+                startX: startX * GameFactory.GRID,
+                startY: startY * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
+                targetX: targetX * GameFactory.GRID,
+                targetY: targetY * GameFactory.GRID,
                 speed,
                 waitTime,
                 layout,
-            ),
-
-        coins: (id, gx, gy, overrides = {}) =>
-            GameFactory.collectible(
+            }),
+        coins: ({ id, x, y, ...rest } = {}) =>
+            GameFactory.collectible({
                 id,
-                gx * GameFactory.GRID + GameFactory.GRID / 4,
-                gy * GameFactory.GRID + GameFactory.GRID / 4,
-                overrides,
-            ),
-        hearts: (id, gx, gy, overrides = {}) =>
-            GameFactory.collectible(
+                x: x * GameFactory.GRID + GameFactory.GRID / 4,
+                y: y * GameFactory.GRID + GameFactory.GRID / 4,
+                ...rest,
+            }),
+        hearts: ({ id, x, y, ...rest } = {}) =>
+            GameFactory.collectible({
                 id,
-                gx * GameFactory.GRID + GameFactory.GRID / 4,
-                gy * GameFactory.GRID + GameFactory.GRID / 4,
-                overrides,
-            ),
-        splinters: (id, gx, gy, overrides = {}) =>
-            GameFactory.collectible(
+                x: x * GameFactory.GRID + GameFactory.GRID / 4,
+                y: y * GameFactory.GRID + GameFactory.GRID / 4,
+                ...rest,
+            }),
+        splinters: ({ id, x, y, ...rest } = {}) =>
+            GameFactory.collectible({
                 id,
-                gx * GameFactory.GRID,
-                gy * GameFactory.GRID,
-                {
-                    w: 50,
-                    h: 50,
-                    ...overrides,
-                },
-            ),
-        rowOfCollectibles: (startId, count, gStartX, gy, gGap) =>
-            GameFactory.rowOfCollectibles(
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: 50,
+                h: 50,
+                ...rest,
+            }),
+        rowOfCollectibles: ({ startId, count, x, y, gap } = {}) =>
+            GameFactory.rowOfCollectibles({
                 startId,
                 count,
-                gStartX * GameFactory.GRID + GameFactory.GRID / 4,
-                gy * GameFactory.GRID + GameFactory.GRID / 4,
-                gGap * GameFactory.GRID,
-            ),
-        columnOfCollectibles: (startId, count, gx, gStartY, gGap) =>
-            GameFactory.columnOfCollectibles(
+                startX: x * GameFactory.GRID + GameFactory.GRID / 4,
+                y: y * GameFactory.GRID + GameFactory.GRID / 4,
+                gap: gap * GameFactory.GRID,
+            }),
+        columnOfCollectibles: ({ startId, count, x, y, gap } = {}) =>
+            GameFactory.columnOfCollectibles({
                 startId,
                 count,
-                gx * GameFactory.GRID + GameFactory.GRID / 4,
-                gStartY * GameFactory.GRID + GameFactory.GRID / 4,
-                gGap * GameFactory.GRID,
-            ),
-        rowOfSpikes: (
+                x: x * GameFactory.GRID + GameFactory.GRID / 4,
+                startY: y * GameFactory.GRID + GameFactory.GRID / 4,
+                gap: gap * GameFactory.GRID,
+            }),
+        rowOfSpikes: ({
             startId,
             count,
-            gStartX,
-            gy,
+            x,
+            y,
             position = "down",
             damage = 1,
-        ) =>
-            GameFactory.rowOfSpikes(
+        } = {}) =>
+            GameFactory.rowOfSpikes({
                 startId,
                 count,
-                gStartX * GameFactory.GRID,
-                gy * GameFactory.GRID,
+                startX: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
                 position,
                 damage,
-            ),
-        spike: (id, gx, gy, variant = 1, position = "down", damage = 1) =>
-            GameFactory.spike(
+            }),
+        spike: ({
+            id,
+            x,
+            y,
+            variant = 1,
+            position = "down",
+            damage = 1,
+        } = {}) =>
+            GameFactory.spike({
                 id,
-                gx * GameFactory.GRID,
-                gy * GameFactory.GRID,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
                 variant,
                 position,
                 damage,
-            ),
+            }),
         environment: {
-            plant001: (gx, gy, overrides = {}) =>
-                GameFactory.environment.plant001(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 14 * GameFactory.SCALE,
-                    overrides,
-                ),
-            plant002: (gx, gy, overrides = {}) =>
-                GameFactory.environment.plant002(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 12 * GameFactory.SCALE,
-                    overrides,
-                ),
-            plant003: (gx, gy, overrides = {}) =>
-                GameFactory.environment.plant003(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 7 * GameFactory.SCALE,
-                    overrides,
-                ),
-            plant004: (gx, gy, overrides = {}) =>
-                GameFactory.environment.plant004(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 8 * GameFactory.SCALE,
-                    overrides,
-                ),
-            wallPlant001: (gx, gy, overrides = {}) =>
-                GameFactory.environment.wallPlant001(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID,
-                    overrides,
-                ),
-            plate001: (gx, gy, overrides = {}) =>
-                GameFactory.environment.plate001(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 7 * GameFactory.SCALE,
-                    overrides,
-                ),
-            flower001: (gx, gy, overrides = {}) =>
-                GameFactory.environment.flower001(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 14 * GameFactory.SCALE,
-                    overrides,
-                ),
-            flower002: (gx, gy, overrides = {}) =>
-                GameFactory.environment.flower002(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 14 * GameFactory.SCALE,
-                    overrides,
-                ),
-            elevatorPanel: (gx, gy, overrides = {}) =>
-                GameFactory.environment.elevatorPanel(
-                    gx * GameFactory.GRID,
-                    gy * GameFactory.GRID - 16 * GameFactory.SCALE,
-                    overrides,
-                ),
+            plant001: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.plant001({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 14 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            plant002: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.plant002({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 12 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            plant003: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.plant003({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 7 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            plant004: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.plant004({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 8 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            wallPlant001: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallPlant001({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            plate001: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.plate001({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 7 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            flower001: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.flower001({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 14 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            flower002: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.flower002({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 14 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            elevatorPanel: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.elevatorPanel({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 16 * GameFactory.SCALE,
+                    ...rest,
+                }),
         },
     },
 };

@@ -1,4 +1,5 @@
 ﻿import { MessageRenderer } from "./MessageRenderer.js";
+import { MESSAGES } from "../messages.js";
 
 export const DefaultPauseRenderer = {
     drawPauseScreen: (ctx, canvas) => {
@@ -13,8 +14,8 @@ export const DefaultPauseRenderer = {
         MessageRenderer.drawPanel(
             ctx,
             {
-                title: { text: "PAUSED", color: "#f5c542" },
-                lines: [{ text: "P \u2013 resume", color: "#7a8a99" }],
+                title: MESSAGES.PAUSE.TITLE,
+                lines: [MESSAGES.PAUSE.RESUME],
             },
             w / 2,
             h / 2,

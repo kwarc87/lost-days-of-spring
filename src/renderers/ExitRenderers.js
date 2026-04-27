@@ -34,28 +34,4 @@ export const DefaultExitRenderer = {
             ctx.restore();
         }
     },
-
-    getMessageLines: (hasEnoughCoins, hasEnoughSplinters) => {
-        if (hasEnoughCoins && hasEnoughSplinters) {
-            return [
-                { text: "You are ready to move on.", color: "#3d9f97" },
-                { text: "To exit level press Enter", color: "#ffffff" },
-            ];
-        }
-        const lines = [];
-        if (!hasEnoughCoins) {
-            lines.push({
-                text: "You didn't get enough coins",
-                color: "#f5c542",
-            });
-        }
-        if (!hasEnoughSplinters) {
-            lines.push({
-                text: "You didn't get enough splinters",
-                color: "#5ce8d0",
-            });
-        }
-        lines.push({ text: "to complete the level.", color: "#ffffff" });
-        return lines;
-    },
 };

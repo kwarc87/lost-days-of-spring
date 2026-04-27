@@ -1,5 +1,6 @@
 import { getImg } from "../utils/imgCache.js";
 import { MessageRenderer } from "./MessageRenderer.js";
+import { MESSAGES } from "../messages.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
@@ -48,7 +49,6 @@ export const DefaultLevelCompleteRenderer = {
         totalSplinters,
         enemiesCount,
         totalEnemies,
-        remaining,
     ) => {
         const w = canvas.width;
         const h = canvas.height;
@@ -64,13 +64,23 @@ export const DefaultLevelCompleteRenderer = {
         const subFont = `bold 13px "Silkscreen", monospace`;
 
         ctx.font = titleFont;
-        const titleW = Math.ceil(ctx.measureText("LEVEL COMPLETE!").width);
+        const titleW = Math.ceil(
+            ctx.measureText(MESSAGES.LEVEL_COMPLETE.TITLE).width,
+        );
 
         ctx.font = subFont;
-        const statsCoinsText = `Coins: ${coinsCount} / ${totalCoins}`;
-        const statsEnemiesText = `Enemies defeated: ${enemiesCount} / ${totalEnemies}`;
-        const statsSplintersText = `Splinters: ${splintersCount} / ${totalSplinters}  ✦ hidden`;
-        const subText = `Restart in ${remaining}s  –  ESC`;
+        const statsCoinsText = MESSAGES.STATS.COINS_TEXT(
+            coinsCount,
+            totalCoins,
+        );
+        const statsEnemiesText = MESSAGES.STATS.ENEMIES_TEXT(
+            enemiesCount,
+            totalEnemies,
+        );
+        const statsSplintersText = MESSAGES.STATS.SPLINTERS_TEXT(
+            splintersCount,
+            totalSplinters,
+        );
 
         const padX = 32;
         const padY = 24;
@@ -89,27 +99,15 @@ export const DefaultLevelCompleteRenderer = {
         const splintersTextW = Math.ceil(
             ctx.measureText(statsSplintersText).width,
         );
-        const subW = Math.ceil(ctx.measureText(subText).width);
 
         const coinsRowW = artIconSize + iconGap + coinsTextW;
         const enemiesRowW = artIconSize + iconGap + enemiesTextW;
         const splinterRowW = gemIconSize + iconGap + splintersTextW;
 
         const panelW =
-            Math.max(titleW, coinsRowW, enemiesRowW, splinterRowW, subW) +
-            padX * 2;
+            Math.max(titleW, coinsRowW, enemiesRowW, splinterRowW) + padX * 2;
         const panelH =
-            padY +
-            titleH +
-            gap +
-            rowH +
-            gap +
-            rowH +
-            gap +
-            rowH +
-            gap +
-            lineH +
-            padY;
+            padY + titleH + gap + rowH + gap + rowH + gap + rowH + padY;
         const panelX = Math.round((w - panelW) / 2);
         const panelY = Math.round((h - panelH) / 2);
 
@@ -123,10 +121,14 @@ export const DefaultLevelCompleteRenderer = {
 
         // shadow
         ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillText("LEVEL COMPLETE!", w / 2 + 1, panelY + padY + 1);
+        ctx.fillText(
+            MESSAGES.LEVEL_COMPLETE.TITLE,
+            w / 2 + 1,
+            panelY + padY + 1,
+        );
 
-        ctx.fillStyle = "#f5c542";
-        ctx.fillText("LEVEL COMPLETE!", w / 2, panelY + padY);
+        ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.TITLE_COLOR;
+        ctx.fillText(MESSAGES.LEVEL_COMPLETE.TITLE, w / 2, panelY + padY);
 
         // ── Stats ────────────────────────────────────────────────────────────
         ctx.font = subFont;
@@ -155,7 +157,7 @@ export const DefaultLevelCompleteRenderer = {
                 }
             }
             ctx.textAlign = "left";
-            ctx.fillStyle = "#f5c542";
+            ctx.fillStyle = MESSAGES.STATS.COINS_COLOR;
             ctx.fillText(
                 statsCoinsText,
                 rowX + artIconSize + iconGap,
@@ -185,7 +187,7 @@ export const DefaultLevelCompleteRenderer = {
                 }
             }
             ctx.textAlign = "left";
-            ctx.fillStyle = "#e85454";
+            ctx.fillStyle = MESSAGES.STATS.ENEMIES_COLOR;
             ctx.fillText(
                 statsEnemiesText,
                 rowX + artIconSize + iconGap,
@@ -218,7 +220,7 @@ export const DefaultLevelCompleteRenderer = {
                 );
             }
             ctx.textAlign = "left";
-            ctx.fillStyle = "#5ce8d0";
+            ctx.fillStyle = MESSAGES.STATS.SPLINTERS_COLOR;
             ctx.fillText(
                 statsSplintersText,
                 rowX + gemIconSize + iconGap,
@@ -228,10 +230,6 @@ export const DefaultLevelCompleteRenderer = {
         }
 
         ctx.imageSmoothingEnabled = true;
-
-        // ── Countdown ────────────────────────────────────────────────────────
-        ctx.fillStyle = "#7a8a99";
-        ctx.fillText(subText, w / 2, splinterRowY + rowH + gap);
 
         ctx.restore();
     },

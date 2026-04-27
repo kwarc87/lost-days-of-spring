@@ -1,5 +1,6 @@
 import { getImg } from "../utils/imgCache.js";
 import { MessageRenderer } from "./MessageRenderer.js";
+import { MESSAGES } from "../messages.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
@@ -64,13 +65,24 @@ export const DefaultGameOverRenderer = {
         const subFont = `bold 13px "Silkscreen", monospace`;
 
         ctx.font = titleFont;
-        const titleW = Math.ceil(ctx.measureText("GAME OVER").width);
+        const titleW = Math.ceil(
+            ctx.measureText(MESSAGES.GAME_OVER.TITLE).width,
+        );
 
         ctx.font = subFont;
-        const statsCoinsText = `Coins: ${coinsCount} / ${totalCoins}`;
-        const statsEnemiesText = `Enemies defeated: ${enemiesCount} / ${totalEnemies}`;
-        const statsSplintersText = `Splinters: ${splintersCount} / ${totalSplinters}  ✦ hidden`;
-        const subText = `Restart in ${remaining}s  –  ESC`;
+        const statsCoinsText = MESSAGES.STATS.COINS_TEXT(
+            coinsCount,
+            totalCoins,
+        );
+        const statsEnemiesText = MESSAGES.STATS.ENEMIES_TEXT(
+            enemiesCount,
+            totalEnemies,
+        );
+        const statsSplintersText = MESSAGES.STATS.SPLINTERS_TEXT(
+            splintersCount,
+            totalSplinters,
+        );
+        const subText = MESSAGES.STATS.COUNTDOWN_TEXT(remaining);
 
         const padX = 32;
         const padY = 24;
@@ -122,10 +134,10 @@ export const DefaultGameOverRenderer = {
         ctx.font = titleFont;
 
         ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillText("GAME OVER", w / 2 + 1, panelY + padY + 1);
+        ctx.fillText(MESSAGES.GAME_OVER.TITLE, w / 2 + 1, panelY + padY + 1);
 
-        ctx.fillStyle = "#e8334a";
-        ctx.fillText("GAME OVER", w / 2, panelY + padY);
+        ctx.fillStyle = MESSAGES.GAME_OVER.TITLE_COLOR;
+        ctx.fillText(MESSAGES.GAME_OVER.TITLE, w / 2, panelY + padY);
 
         // ── Stats ────────────────────────────────────────────────────────────
         ctx.font = subFont;
@@ -154,7 +166,7 @@ export const DefaultGameOverRenderer = {
                 }
             }
             ctx.textAlign = "left";
-            ctx.fillStyle = "#f5c542";
+            ctx.fillStyle = MESSAGES.STATS.COINS_COLOR;
             ctx.fillText(
                 statsCoinsText,
                 rowX + artIconSize + iconGap,
@@ -184,7 +196,7 @@ export const DefaultGameOverRenderer = {
                 }
             }
             ctx.textAlign = "left";
-            ctx.fillStyle = "#e85454";
+            ctx.fillStyle = MESSAGES.STATS.ENEMIES_COLOR;
             ctx.fillText(
                 statsEnemiesText,
                 rowX + artIconSize + iconGap,
@@ -217,7 +229,7 @@ export const DefaultGameOverRenderer = {
                 );
             }
             ctx.textAlign = "left";
-            ctx.fillStyle = "#5ce8d0";
+            ctx.fillStyle = MESSAGES.STATS.SPLINTERS_COLOR;
             ctx.fillText(
                 statsSplintersText,
                 rowX + gemIconSize + iconGap,
@@ -229,7 +241,7 @@ export const DefaultGameOverRenderer = {
         ctx.imageSmoothingEnabled = true;
 
         // ── Countdown ────────────────────────────────────────────────────────
-        ctx.fillStyle = "#7a8a99";
+        ctx.fillStyle = MESSAGES.STATS.COUNTDOWN_COLOR;
         ctx.fillText(subText, w / 2, splinterRowY + rowH + gap);
 
         ctx.restore();

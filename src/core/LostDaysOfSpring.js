@@ -17,6 +17,7 @@ import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
 import { DefaultExitRenderer } from "../renderers/ExitRenderers.js";
 import { MessageRenderer } from "../renderers/MessageRenderer.js";
+import { getExitLevelLines } from "../messages.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -1371,12 +1372,6 @@ export class LostDaysOfSpring {
     }
 
     drawLevelComplete() {
-        const elapsed = performance.now() - this.levelCompleteAt;
-        const remaining = Math.max(
-            0,
-            Math.ceil((this.levelCompleteDelay - elapsed) / 1000),
-        );
-
         this.levelCompleteRenderer.drawLevelCompleteScreen(
             this.ctx,
             this.canvas,
@@ -1386,7 +1381,6 @@ export class LostDaysOfSpring {
             this.currentLevelSplintersCount,
             this.currentLevelEnemiesCount - this.enemies.length,
             this.currentLevelEnemiesCount,
-            remaining,
         );
     }
 
@@ -1461,7 +1455,7 @@ export class LostDaysOfSpring {
             exit.x - this.camera.x + (exit.w * GameFactory.SCALE) / 2;
         const anchorY =
             exit.y - this.camera.y + (exit.h * GameFactory.SCALE) / 2;
-        const lines = this.exitRenderer.getMessageLines(
+        const lines = getExitLevelLines(
             this.hasEnoughCoins,
             this.hasEnoughSplinters,
         );
@@ -1500,13 +1494,6 @@ export class LostDaysOfSpring {
 
         this.draw();
         this.updateDebug(now);
-
-        if (
-            this.levelComplete &&
-            now - this.levelCompleteAt >= this.levelCompleteDelay
-        ) {
-            this.resetGame();
-        }
 
         if (this.gameOver && now - this.gameOverAt >= this.gameOverDelay) {
             this.resetGame();

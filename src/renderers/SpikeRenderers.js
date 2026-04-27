@@ -53,12 +53,19 @@ export const DefaultSpikeRenderer = {
         ctx.restore();
     },
     drawMapSpike: (ctx, spike) => {
+        const up = spike.position === "up";
         ctx.save();
         ctx.fillStyle = "#e84855";
         ctx.beginPath();
-        ctx.moveTo(spike.x + spike.w / 2, spike.y);
-        ctx.lineTo(spike.x + spike.w, spike.y + spike.h);
-        ctx.lineTo(spike.x, spike.y + spike.h);
+        if (up) {
+            ctx.moveTo(spike.x + spike.w / 2, spike.y + spike.h);
+            ctx.lineTo(spike.x + spike.w, spike.y);
+            ctx.lineTo(spike.x, spike.y);
+        } else {
+            ctx.moveTo(spike.x + spike.w / 2, spike.y);
+            ctx.lineTo(spike.x + spike.w, spike.y + spike.h);
+            ctx.lineTo(spike.x, spike.y + spike.h);
+        }
         ctx.closePath();
         ctx.fill();
         ctx.restore();
