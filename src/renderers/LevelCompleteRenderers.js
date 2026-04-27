@@ -106,8 +106,23 @@ export const DefaultLevelCompleteRenderer = {
 
         const panelW =
             Math.max(titleW, coinsRowW, enemiesRowW, splinterRowW) + padX * 2;
+        const hintFont = `bold 11px "Silkscreen", monospace`;
+        ctx.font = hintFont;
+        const hintText = MESSAGES.LEVEL_COMPLETE.RESTART_HINT.text;
+        const hintH = 11;
+
         const panelH =
-            padY + titleH + gap + rowH + gap + rowH + gap + rowH + padY;
+            padY +
+            titleH +
+            gap +
+            rowH +
+            gap +
+            rowH +
+            gap +
+            rowH +
+            gap +
+            hintH +
+            padY;
         const panelX = Math.round((w - panelW) / 2);
         const panelY = Math.round((h - panelH) / 2);
 
@@ -228,6 +243,13 @@ export const DefaultLevelCompleteRenderer = {
             );
             ctx.textAlign = "center";
         }
+
+        // ── ESC hint ─────────────────────────────────────────────────────────
+        const hintY = splinterRowY + rowH + gap;
+        ctx.font = hintFont;
+        ctx.textAlign = "center";
+        ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.RESTART_HINT.color;
+        ctx.fillText(hintText, w / 2, hintY);
 
         ctx.imageSmoothingEnabled = true;
 

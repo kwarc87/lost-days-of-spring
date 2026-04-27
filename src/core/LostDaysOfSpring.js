@@ -51,7 +51,6 @@ export class LostDaysOfSpring {
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.levelStartAt = 0; // timestamp (ms) when the level was loaded
-        this.levelCompleteDelay = 7000; // ms until auto-restart
         this.gameOverDelay = 7000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
 
@@ -160,6 +159,7 @@ export class LostDaysOfSpring {
             this.drawEnvForegroundItem,
         );
         this.drawSpike = this.withCameraCulling(this.drawSpike);
+        this.drawHearts = this.withCameraCulling(this.drawHearts);
     }
 
     loadLevel(levelId) {
@@ -247,6 +247,10 @@ export class LostDaysOfSpring {
     }
 
     initControls() {
+        window.addEventListener("blur", () => {
+            this.keys = {};
+        });
+
         window.addEventListener("keydown", (e) => {
             e.stopPropagation();
 
@@ -257,7 +261,7 @@ export class LostDaysOfSpring {
 
             // Toggle map overview
             if (e.code === this.keysMap.map && !e.repeat) {
-                this.mapView = !this.mapView;
+                this.toggleMapView();
             }
 
             if (
@@ -1517,7 +1521,7 @@ export class LostDaysOfSpring {
 
     // Toggle pause state
     togglePause() {
-        if (this.levelComplete || this.gameOver) {
+        if (this.levelComplete || this.gameOver || this.mapView) {
             return;
         }
         if (this.isRunning) {
@@ -1526,6 +1530,21 @@ export class LostDaysOfSpring {
             // Draw pause overlay
             this.pauseRenderer.drawPauseScreen(this.ctx, this.canvas);
         } else {
+            this.start();
+        }
+    }
+
+    toggleMapView() {
+        if (!this.mapView) {
+            // prevent to open minimap when pause is active
+            if (!this.isRunning) {
+                return;
+            }
+            this.mapView = true;
+            this.stop();
+            this.draw();
+        } else {
+            this.mapView = false;
             this.start();
         }
     }

@@ -44,6 +44,7 @@ export const MESSAGES = {
     LEVEL_COMPLETE: {
         TITLE: "LEVEL COMPLETE!",
         TITLE_COLOR: "#f5c542",
+        RESTART_HINT: { text: "ESC \u2013 restart level", color: "#7a8a99" },
     },
 
     // ── Pause ─────────────────────────────────────────────────────────────────
@@ -73,6 +74,16 @@ export const MESSAGES = {
             { text: "To crouch press c or Arrow DOWN", color: "#fff" },
         ],
         PAUSE_HINT: [{ text: "To pause the game press p", color: "#fff" }],
+        MINI_MAP_HINT: [
+            {
+                text: "If you are really lost and don't know what",
+                color: "#fff",
+            },
+            {
+                text: "to do, you can press m to display the minimap",
+                color: "#fff",
+            },
+        ],
     },
 };
 
