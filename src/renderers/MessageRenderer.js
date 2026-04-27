@@ -1,4 +1,3 @@
-// ─── Shared visual constants (reference: exitMessage style) ──────────────────
 const BG_COLOR = "rgba(15, 23, 32, 0.75)";
 const RADIUS = 8;
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
@@ -9,23 +8,28 @@ const FONT_BODY = `bold 13px "Silkscreen", monospace`;
 const TITLE_H = 24;
 const LINE_H = 13;
 
-// Default padding / spacing (match exitMessage)
 const PAD_X = 20;
 const PAD_Y = 14;
 const GAP = 6;
 const GAP_AFTER_TITLE = 16;
 
 export const MessageRenderer = {
-    /**
-     * Draws only the rounded semi-transparent panel background.
-     * Use this when the caller manages content rendering itself.
-     *
-     * @param {CanvasRenderingContext2D} ctx
-     * @param {number} panelX
-     * @param {number} panelY
-     * @param {number} panelW
-     * @param {number} panelH
-     */
+    // "hitbox": panel centred on the message hitbox in world→screen space.
+    // "viewPort": panel centred on the canvas, ignoring world scroll.
+    drawMessagePanel(ctx, canvas, message, camera) {
+        const ox = message.offsetX ?? 0;
+        const oy = message.offsetY ?? 0;
+        const anchorX =
+            message.relatedTo === "viewPort"
+                ? canvas.width / 2 + ox
+                : message.x - camera.x + message.w / 2 + ox;
+        const anchorY =
+            message.relatedTo === "viewPort"
+                ? canvas.height / 2 + oy
+                : message.y - camera.y + message.h / 2 + oy;
+        this.drawPanel(ctx, { lines: message.lines }, anchorX, anchorY);
+    },
+
     drawBackground(ctx, panelX, panelY, panelW, panelH) {
         ctx.fillStyle = BG_COLOR;
         ctx.beginPath();
@@ -33,21 +37,6 @@ export const MessageRenderer = {
         ctx.fill();
     },
 
-    /**
-     * Measures, lays out and draws a complete text panel:
-     * background → optional title → body lines.
-     * The panel is centred on (anchorX, anchorY).
-     *
-     * Each line is either:
-     *   { text: string, color: string }          — single colour with shadow
-     *   { segments: { text: string, color: string }[] } — multi-colour, no shadow
-     *
-     * @param {CanvasRenderingContext2D} ctx
-     * @param {{ title?: {text:string, color:string}, lines?: (SingleLine|SegmentedLine)[] }} content
-     * @param {number} anchorX  horizontal centre of the panel (px)
-     * @param {number} anchorY  vertical centre of the panel (px)
-     * @param {{ padX?:number, padY?:number, gap?:number }} [opts]
-     */
     drawPanel(ctx, { title = null, lines = [] }, anchorX, anchorY, opts = {}) {
         const padX = opts.padX ?? PAD_X;
         const padY = opts.padY ?? PAD_Y;
@@ -55,7 +44,6 @@ export const MessageRenderer = {
 
         ctx.save();
 
-        // ── Measure ───────────────────────────────────────────────────────
         let maxW = 0;
         if (title) {
             ctx.font = FONT_TITLE;
@@ -85,13 +73,11 @@ export const MessageRenderer = {
         const panelX = Math.round(anchorX - panelW / 2);
         const panelY = Math.round(anchorY - panelH / 2);
 
-        // ── Background ────────────────────────────────────────────────────
         this.drawBackground(ctx, panelX, panelY, panelW, panelH);
 
         ctx.textBaseline = "top";
         let curY = panelY + padY;
 
-        // ── Title ─────────────────────────────────────────────────────────
         if (title) {
             ctx.font = FONT_TITLE;
             ctx.textAlign = "center";
@@ -106,12 +92,10 @@ export const MessageRenderer = {
             curY += TITLE_H + GAP_AFTER_TITLE;
         }
 
-        // ── Body lines ────────────────────────────────────────────────────
         ctx.font = FONT_BODY;
         for (let i = 0; i < lines.length; i++) {
             const l = lines[i];
             if (l.segments) {
-                // Multi-colour segmented line — left-aligned from the left edge of the content area
                 const lineW = l.segments.reduce(
                     (s, seg) => s + ctx.measureText(seg.text).width,
                     0,

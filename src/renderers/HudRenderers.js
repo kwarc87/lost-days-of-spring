@@ -216,42 +216,4 @@ export const DefaultHubRenderer = {
 
         ctx.restore();
     },
-
-    drawIntro(ctx, canvas, elapsed) {
-        const duration = 10000;
-        const fadeStart = 9500;
-        if (elapsed >= duration) {
-            return;
-        }
-
-        const alpha =
-            elapsed < fadeStart
-                ? 1
-                : 1 - (elapsed - fadeStart) / (duration - fadeStart);
-
-        const segments = [
-            {
-                text: "Find the exit and collect the appropriate amount of ",
-                color: "#ffffff",
-            },
-            { text: "coins", color: "#f5c542" },
-            { text: " and ", color: "#ffffff" },
-            { text: "splinters", color: "#5ce8d0" },
-            { text: ". Go, traveler!", color: "#ffffff" },
-        ];
-
-        const anchorX = canvas.width / 2;
-        const anchorY = canvas.height - 56;
-
-        ctx.save();
-        ctx.globalAlpha = alpha;
-        MessageRenderer.drawPanel(
-            ctx,
-            { lines: [{ segments }] },
-            anchorX,
-            anchorY,
-            { padX: 14, padY: 8 },
-        );
-        ctx.restore();
-    },
 };

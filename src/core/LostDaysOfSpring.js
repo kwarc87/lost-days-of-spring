@@ -16,6 +16,7 @@ import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderer
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
 import { DefaultExitRenderer } from "../renderers/ExitRenderers.js";
+import { MessageRenderer } from "../renderers/MessageRenderer.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -28,10 +29,12 @@ export class LostDaysOfSpring {
         this.keysMap = {
             left: "ArrowLeft",
             right: "ArrowRight",
-            jump: "ArrowUp",
+            jump: "Space",
+            jumpAlt: "KeyZ",
             crouch: "ArrowDown",
             crouchAlt: "KeyC",
-            shoot: "Space",
+            shoot: "KeyX",
+            shootAlt: "AltRight",
             pause: "KeyP",
             map: "KeyM",
             escape: "Escape",
@@ -121,6 +124,7 @@ export class LostDaysOfSpring {
         this.gameOverRenderer = DefaultGameOverRenderer;
         this.spikeRenderer = DefaultSpikeRenderer;
         this.exitRenderer = DefaultExitRenderer;
+        this.messageRenderer = MessageRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -176,6 +180,8 @@ export class LostDaysOfSpring {
         this.splinters = levelData.collectibles.splinters ?? [];
         this.hearts = levelData.collectibles.hearts ?? [];
         this.spikes = levelData.spikes ?? [];
+        this.messages = levelData.messages ?? [];
+        this.activeMessage = null;
         this.exits = levelData.exits ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
@@ -254,7 +260,8 @@ export class LostDaysOfSpring {
             }
 
             if (
-                e.code === this.keysMap.jump &&
+                (e.code === this.keysMap.jump ||
+                    e.code === this.keysMap.jumpAlt) &&
                 !this.keys[e.code] &&
                 !e.repeat
             ) {
@@ -437,6 +444,8 @@ export class LostDaysOfSpring {
         this.updateBullets(now);
         this.updateCollectibles(now);
         this.updateExit();
+        this.updateMessages();
+
         this.updateCamera();
         this.updateDamageCooldown(now);
     }
@@ -515,7 +524,7 @@ export class LostDaysOfSpring {
         const customShootingOffsetX = this.isPlayerCrouching()
             ? this.player.shootingCrouchOffsetX
             : this.player.shootingOffsetX;
-        if (this.keys[this.keysMap.shoot]) {
+        if (this.keys[this.keysMap.shoot] || this.keys[this.keysMap.shootAlt]) {
             this.player.shooting = true;
             if (
                 now - this.player.lastShootTime >
@@ -599,7 +608,8 @@ export class LostDaysOfSpring {
         let currentGravity = this.physics.gravity;
         const isAscending = this.player.vy < 0;
         const isFalling = this.player.vy > 0;
-        const jumpHeld = this.keys[this.keysMap.jump];
+        const jumpHeld =
+            this.keys[this.keysMap.jump] || this.keys[this.keysMap.jumpAlt];
 
         // Variable jump height: fall faster if jump key is released while ascending
         if (isAscending && !jumpHeld && this.player.jumpPressedByUser) {
@@ -1334,6 +1344,15 @@ export class LostDaysOfSpring {
             this.drawExitMessage();
         }
 
+        if (this.activeMessage && !this.levelComplete && !this.gameOver) {
+            this.messageRenderer.drawMessagePanel(
+                this.ctx,
+                this.canvas,
+                this.activeMessage,
+                this.camera,
+            );
+        }
+
         this.hudRenderer.draw(
             this.ctx,
             this.canvas,
@@ -1349,12 +1368,6 @@ export class LostDaysOfSpring {
         if (this.gameOver) {
             this.drawGameOver();
         }
-
-        this.hudRenderer.drawIntro(
-            this.ctx,
-            this.canvas,
-            performance.now() - this.levelStartAt,
-        );
     }
 
     drawLevelComplete() {
@@ -1421,26 +1434,38 @@ export class LostDaysOfSpring {
         );
     }
 
+    updateMessages() {
+        const hit =
+            this.messages.find((message) => {
+                if (message.strategy === "single" && message.shown) {
+                    return false;
+                }
+                return this.rectsCollide(this.player, message);
+            }) ?? null;
+
+        if (this.activeMessage && !hit) {
+            // player just left the hitbox
+            this.activeMessage.shown = true;
+        }
+
+        this.activeMessage = hit;
+    }
+
     drawExit(exit) {
         this.exitRenderer.draw(this.ctx, exit, this.showDebug);
     }
 
     drawExitMessage() {
         const exit = this.findActiveExit();
-        const exitScreenY = exit
-            ? exit.y - this.camera.y + (exit.h * GameFactory.SCALE) / 2
-            : null;
-        const exitScreenX = exit
-            ? exit.x - this.camera.x + (exit.w * GameFactory.SCALE) / 2
-            : null;
-        this.exitRenderer.drawMessage(
-            this.ctx,
-            this.canvas,
+        const anchorX =
+            exit.x - this.camera.x + (exit.w * GameFactory.SCALE) / 2;
+        const anchorY =
+            exit.y - this.camera.y + (exit.h * GameFactory.SCALE) / 2;
+        const lines = this.exitRenderer.getMessageLines(
             this.hasEnoughCoins,
             this.hasEnoughSplinters,
-            exitScreenY,
-            exitScreenX,
         );
+        MessageRenderer.drawPanel(this.ctx, { lines }, anchorX, anchorY);
     }
 
     updateDebug(now) {
