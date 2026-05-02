@@ -1236,7 +1236,7 @@ export class LostDaysOfSpring {
             this.spikeRenderer.drawMapSpike(this.ctx, spike);
             return;
         }
-        this.spikeRenderer.draw(this.ctx, spike);
+        this.spikeRenderer.draw(this.ctx, spike, this.showDebug);
     }
 
     drawEnvPreBackgroundItem(i) {

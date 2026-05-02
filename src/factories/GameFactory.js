@@ -232,9 +232,9 @@
     } = {}) => ({
         id,
         x,
-        y,
+        y: position === "up" ? y : y + 4,
         w,
-        h,
+        h: position === "up" ? h - 14 : h - 4,
         variant,
         position,
         damage,
@@ -331,6 +331,126 @@
             cordY: 0,
             w: 16,
             h: 48,
+            ...rest,
+        }),
+        wallClean: ({ x, y, w = 16, h = 16, ...rest } = {}) => {
+            const spriteW = 16;
+            const spriteH = 16;
+            const stepW = spriteW;
+            const stepH = spriteH;
+            const cols = Math.ceil(w / stepW);
+            const rows = Math.ceil(h / stepH);
+            const tiles = [];
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    tiles.push({
+                        x: x + col * spriteW * GameFactory.SCALE,
+                        y: y + row * spriteH * GameFactory.SCALE,
+                        url: "textures/walls.png",
+                        cordX: 32,
+                        cordY: 32,
+                        w: spriteW,
+                        h: spriteH,
+                        ...rest,
+                    });
+                }
+            }
+            return tiles;
+        },
+        wallSharpLeftTop: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/walls.png",
+            cordX: 16,
+            cordY: 64,
+            w: 32,
+            h: 16,
+            ...rest,
+        }),
+        wallSharpLeft: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/walls.png",
+            cordX: 16,
+            cordY: 80,
+            w: 32,
+            h: 16,
+            ...rest,
+        }),
+        wallSharpLeftBottom: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/walls.png",
+            cordX: 16,
+            cordY: 96,
+            w: 32,
+            h: 16,
+            ...rest,
+        }),
+        wallSharpLeftCol: ({ x, y, count, ...rest } = {}) =>
+            Array.from({ length: count }, (_, i) =>
+                GameFactory.environment.wallSharpLeft({
+                    x,
+                    y: y + i * 16 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            ),
+        wallSharpRightTop: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/walls.png",
+            cordX: 112,
+            cordY: 64,
+            w: 32,
+            h: 16,
+            ...rest,
+        }),
+        wallSharpRight: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/walls.png",
+            cordX: 112,
+            cordY: 80,
+            w: 32,
+            h: 16,
+            ...rest,
+        }),
+        wallSharpRightBottom: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/walls.png",
+            cordX: 112,
+            cordY: 96,
+            w: 32,
+            h: 16,
+            ...rest,
+        }),
+        wallSharpRightCol: ({ x, y, count, ...rest } = {}) =>
+            Array.from({ length: count }, (_, i) =>
+                GameFactory.environment.wallSharpRight({
+                    x,
+                    y: y + i * 16 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            ),
+        wallSharpHole: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/walls.png",
+            cordX: 64,
+            cordY: 64,
+            w: 32,
+            h: 64,
+            ...rest,
+        }),
+        wallInside: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 222,
+            cordY: 144,
+            w: 16,
+            h: 16,
             ...rest,
         }),
     },
@@ -544,6 +664,76 @@
                 GameFactory.environment.elevatorPanel({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID - 16 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            wallClean: ({ x, y, w = 1, h = 1, ...rest } = {}) =>
+                GameFactory.environment.wallClean({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    w: (w * GameFactory.GRID) / GameFactory.SCALE,
+                    h: (h * GameFactory.GRID) / GameFactory.SCALE,
+                    ...rest,
+                }),
+            wallSharpLeftTop: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallSharpLeftTop({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallSharpLeft: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallSharpLeft({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallSharpLeftBottom: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallSharpLeftBottom({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallSharpLeftCol: ({ x, y, count, ...rest } = {}) =>
+                GameFactory.environment.wallSharpLeftCol({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    count,
+                    ...rest,
+                }),
+            wallSharpRightTop: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallSharpRightTop({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallSharpRight: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallSharpRight({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallSharpRightBottom: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallSharpRightBottom({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallSharpRightCol: ({ x, y, count, ...rest } = {}) =>
+                GameFactory.environment.wallSharpRightCol({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    count,
+                    ...rest,
+                }),
+            wallSharpHole: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallSharpHole({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallInside: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallInside({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
                     ...rest,
                 }),
         },

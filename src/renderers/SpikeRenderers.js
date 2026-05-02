@@ -11,7 +11,7 @@ const SPIKE_VARIANTS = {
 };
 
 export const DefaultSpikeRenderer = {
-    draw: (ctx, spike) => {
+    draw: (ctx, spike, debug = false) => {
         const img = getImg(SPIKE_IMG_PATH);
         const { sx, sy } = SPIKE_VARIANTS[spike.variant] ?? SPIKE_VARIANTS[1];
         const up = spike.position === "up";
@@ -44,13 +44,21 @@ export const DefaultSpikeRenderer = {
                 SPIKE_SW,
                 SPIKE_SH,
                 spike.x,
-                spike.y,
+                spike.y - 4,
                 SPIKE_SW * SPIKE_SCALE,
                 SPIKE_SH * SPIKE_SCALE,
             );
         }
 
         ctx.restore();
+
+        if (debug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(spike.x, spike.y, spike.w, spike.h);
+            ctx.restore();
+        }
     },
     drawMapSpike: (ctx, spike) => {
         const up = spike.position === "up";

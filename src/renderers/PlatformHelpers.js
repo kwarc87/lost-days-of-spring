@@ -172,3 +172,31 @@ export function rightTopEdgeCap3x3({ tMid, tRight, mid, right, bMid, bRight }) {
         bRight,
     };
 }
+
+export function horizontalConnector3x3({ tMid, mid, bMid }) {
+    return {
+        tLeft: tMid,
+        tMid,
+        tRight: tMid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: mid,
+        bMid,
+        bRight: mid,
+    };
+}
+
+export function verticalConnector3x3({ left, mid, right }) {
+    return {
+        tLeft: left,
+        tMid: mid,
+        tRight: right,
+        left,
+        mid,
+        right,
+        bLeft: left,
+        bMid: mid,
+        bRight: right,
+    };
+}

@@ -11,6 +11,8 @@
     leftTopEdgeCap3x3,
     rightBottomEdgeCap3x3,
     rightTopEdgeCap3x3,
+    horizontalConnector3x3,
+    verticalConnector3x3,
 } from "./PlatformHelpers.js";
 import { getImg } from "../utils/imgCache.js";
 
@@ -97,6 +99,14 @@ const platformCaves = {
         ...BASE_TILESET,
         sprites: rightTopEdgeCap3x3(GROUND_FULL),
     },
+    groundHorizontalConnector: {
+        ...BASE_TILESET,
+        sprites: horizontalConnector3x3(GROUND_FULL),
+    },
+    groundVerticalConnector: {
+        ...BASE_TILESET,
+        sprites: verticalConnector3x3(GROUND_FULL),
+    },
 
     board: {
         ...BASE_TILESET,
@@ -146,32 +156,12 @@ const platformCaves = {
             { x: 80, y: 0 },
         ),
     },
-    // only 2 units height is allowed
+    // only 2 units size is allowed
     metal: {
         ...BASE_TILESET,
-        sprites: {
-            tLeft: { x: 336, y: 128 },
-            tMid: [
-                { x: 336, y: 128 },
-                { x: 352, y: 128 },
-            ],
-            tRight: { x: 352, y: 128 },
-
-            // mid section is just a solid color placeholder
-            left: { x: 224, y: 128 },
-            mid: [
-                { x: 224, y: 128 },
-                { x: 224, y: 128 },
-            ],
-            right: { x: 224, y: 128 },
-
-            bLeft: { x: 336, y: 144 },
-            bMid: [
-                { x: 336, y: 144 },
-                { x: 352, y: 144 },
-            ],
-            bRight: { x: 352, y: 144 },
-        },
+        tileWidthSrc: 32,
+        tileHeightSrc: 32,
+        sprites: repeatAllTiles3x3({ x: 336, y: 128 }),
     },
 };
 
