@@ -800,6 +800,9 @@ export class LostDaysOfSpring {
                 this.rectsCollide(this.player, sweptElevator);
 
             if (playerBlocksElevator) {
+                if (!this.player.airborne) {
+                    e.direction = -e.direction;
+                }
                 continue;
             }
 
@@ -855,6 +858,10 @@ export class LostDaysOfSpring {
                 enemy.isDamaged = false;
             }
 
+            enemy.wasCollidingWithPlayer =
+                enemy.collidingWithPlayerThisFrame ?? false;
+            enemy.collidingWithPlayerThisFrame = false;
+
             enemy.x += enemy.vx;
 
             if (enemy.x <= enemy.minX) {
@@ -875,9 +882,16 @@ export class LostDaysOfSpring {
 
         for (const enemy of this.enemies) {
             if (this.rectsCollide(this.player, enemy)) {
+                enemy.collidingWithPlayerThisFrame = true;
                 if (cooldownIsActive) {
                     this.resolveEnemyCollisionX(enemy);
                     this.resolveEnemyCollisionY(enemy);
+                    if (
+                        !enemy.wasCollidingWithPlayer &&
+                        (this.player.vx * enemy.vx < 0 || this.player.vx === 0)
+                    ) {
+                        enemy.vx = -enemy.vx;
+                    }
                 } else {
                     this.applyDamageToPlayer(now, enemy, true);
                 }
