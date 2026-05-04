@@ -930,7 +930,7 @@ export class LostDaysOfSpring {
 
     resolveEnemyCollisionX(enemy) {
         const enemyPrevX = enemy.prevX ?? enemy.x;
-        const enemyPrevY = enemy.y - (enemy.vy ?? 0);
+        const enemyPrevY = enemy.prevY ?? enemy.y;
 
         // Both player and enemy compared at their pre-move Y positions
         // (analogous to movePlayerX — at X-phase, neither has moved in Y yet)
@@ -962,6 +962,8 @@ export class LostDaysOfSpring {
                 this.player.airborne = false;
                 this.player.jumpPressedByUser = false;
                 this.player.lastGroundedAt = now;
+                this.player.lastGroundType = "enemy";
+                this.player.lastGroundId = enemy.id;
                 this.player.y = enemy.y - this.player.h;
                 this.player.vy = 0;
             } else if (this.player.prevY >= enemy.y + enemy.h) {
