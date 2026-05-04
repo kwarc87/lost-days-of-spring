@@ -110,6 +110,8 @@
         y,
         w: 36,
         h: 84,
+        prevX: minX,
+        prevY: y,
         speed,
         vx: speed,
         health,

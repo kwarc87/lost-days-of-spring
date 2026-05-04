@@ -646,7 +646,7 @@ export class LostDaysOfSpring {
             this.player.vx = 0;
         }
 
-        const solids = [...this.platforms, ...this.elevators];
+        const solids = [...this.elevators, ...this.platforms];
 
         for (const p of solids) {
             if (this.rectsCollide(this.player, p)) {
@@ -656,11 +656,12 @@ export class LostDaysOfSpring {
 
                 if (wasLeft) {
                     this.player.x = p.x - this.player.w;
+                    this.player.vx = 0;
                 } else if (wasRight) {
                     this.player.x = p.x + p.w;
+                    this.player.vx = 0;
                 }
-                this.player.vx = 0;
-                break;
+                // no fallback: if direction of entry is unknown, do not freeze player inside platform
             }
         }
     }
@@ -682,7 +683,10 @@ export class LostDaysOfSpring {
             this.handleWorldGroundLanding(now);
         }
 
-        const solids = [...this.platforms, ...this.elevators];
+        // Elevators first: when player straddles an elevator and a same-height platform,
+        // snapping to the elevator causes the platform AABB check to produce no overlap
+        // (touching edges aren't a collision), so onGroundId correctly stays as the elevator.
+        const solids = [...this.elevators, ...this.platforms];
 
         //Platforms collisions
         for (const p of solids) {
@@ -695,14 +699,14 @@ export class LostDaysOfSpring {
                 if (wasAbove) {
                     this.handlePlatformLanding(p, now);
                     this.handlePlatformLandingResponse(p);
-                    break;
+                    continue;
                 }
 
                 if (wasBelow) {
                     // Hit ceiling
                     this.handleCeilingHit(p);
-                    break;
                 }
+                // no fallback: if direction of entry is unknown, do not freeze player inside platform
             }
         }
 
@@ -844,8 +848,27 @@ export class LostDaysOfSpring {
             const actualMoveY = e.y - previousY;
 
             if (playerIsOnElevator) {
-                this.player.x += actualMoveX;
-                this.player.y += actualMoveY;
+                const nextPlayer = {
+                    x: this.player.x + actualMoveX,
+                    y: this.player.y + actualMoveY,
+                    w: this.player.w,
+                    h: this.player.h,
+                };
+                const wouldHitPlatform = this.platforms.some((p) =>
+                    this.rectsCollide(nextPlayer, p),
+                );
+                if (wouldHitPlatform && actualMoveY < 0) {
+                    // Vertical elevator is pushing the player into a ceiling:
+                    // reverse the elevator. movePlayerY cannot fix this because prevY
+                    // was saved before the co-move, so wasAbove/wasBelow tests would fail.
+                    // When moving downward, movePlayerY handles landing normally — no reversal needed.
+                    e.x = previousX;
+                    e.y = previousY;
+                    e.direction = -e.direction;
+                } else {
+                    this.player.x += actualMoveX;
+                    this.player.y += actualMoveY;
+                }
             }
         }
     }
@@ -862,6 +885,8 @@ export class LostDaysOfSpring {
                 enemy.collidingWithPlayerThisFrame ?? false;
             enemy.collidingWithPlayerThisFrame = false;
 
+            enemy.prevX = enemy.x;
+            enemy.prevY = enemy.y;
             enemy.x += enemy.vx;
 
             if (enemy.x <= enemy.minX) {
@@ -885,7 +910,7 @@ export class LostDaysOfSpring {
                 enemy.collidingWithPlayerThisFrame = true;
                 if (cooldownIsActive) {
                     this.resolveEnemyCollisionX(enemy);
-                    this.resolveEnemyCollisionY(enemy);
+                    this.resolveEnemyCollisionY(enemy, now);
                     if (
                         !enemy.wasCollidingWithPlayer &&
                         (this.player.vx * enemy.vx < 0 || this.player.vx === 0)
@@ -904,7 +929,7 @@ export class LostDaysOfSpring {
     }
 
     resolveEnemyCollisionX(enemy) {
-        const enemyPrevX = enemy.x - enemy.vx;
+        const enemyPrevX = enemy.prevX ?? enemy.x;
         const enemyPrevY = enemy.y - (enemy.vy ?? 0);
 
         // Both player and enemy compared at their pre-move Y positions
@@ -931,11 +956,12 @@ export class LostDaysOfSpring {
         }
     }
 
-    resolveEnemyCollisionY(enemy) {
+    resolveEnemyCollisionY(enemy, now) {
         if (this.rectsCollide(this.player, enemy)) {
             if (this.player.prevY + this.player.h <= enemy.y) {
                 this.player.airborne = false;
                 this.player.jumpPressedByUser = false;
+                this.player.lastGroundedAt = now;
                 this.player.y = enemy.y - this.player.h;
                 this.player.vy = 0;
             } else if (this.player.prevY >= enemy.y + enemy.h) {
