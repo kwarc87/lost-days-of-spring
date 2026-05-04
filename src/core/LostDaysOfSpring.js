@@ -881,8 +881,7 @@ export class LostDaysOfSpring {
                 enemy.isDamaged = false;
             }
 
-            enemy.wasCollidingWithPlayer =
-                enemy.collidingWithPlayerThisFrame ?? false;
+            enemy.wasCollidingWithPlayer = enemy.collidingWithPlayerThisFrame;
             enemy.collidingWithPlayerThisFrame = false;
 
             enemy.prevX = enemy.x;
@@ -906,70 +905,81 @@ export class LostDaysOfSpring {
             now - this.player.lastHitTime < this.player.hitCooldown;
 
         for (const enemy of this.enemies) {
-            if (this.rectsCollide(this.player, enemy)) {
-                enemy.collidingWithPlayerThisFrame = true;
-                if (cooldownIsActive) {
-                    this.resolveEnemyCollisionX(enemy);
-                    this.resolveEnemyCollisionY(enemy, now);
-                    if (
-                        !enemy.wasCollidingWithPlayer &&
-                        (this.player.vx * enemy.vx < 0 || this.player.vx === 0)
-                    ) {
-                        enemy.vx = -enemy.vx;
-                    }
-                } else {
-                    this.applyDamageToPlayer(now, enemy, true);
-                }
+            if (!this.rectsCollide(this.player, enemy)) {
+                continue;
+            }
 
-                // Only resolve one enemy collision per tick to prevent
-                // position thrashing when two enemies are adjacent.
+            enemy.collidingWithPlayerThisFrame = true;
+
+            // Record entry side once at first frame of contact — always, regardless of cooldown.
+            // At that moment prevX/prevY are guaranteed to be outside the enemy.
+            if (!enemy.wasCollidingWithPlayer) {
+                enemy.playerEnteredFromLeft =
+                    this.player.prevX + this.player.w <= enemy.prevX;
+                enemy.playerEnteredFromAbove =
+                    this.player.prevY + this.player.h <= enemy.prevY;
+                enemy.playerEnteredFromBelow =
+                    this.player.prevY >= enemy.prevY + enemy.h;
+            }
+
+            if (!cooldownIsActive) {
+                this.applyDamageToPlayer(now, enemy, true);
                 break;
             }
+
+            // Cooldown active: resolve overlap without damage.
+            this.resolveEnemyCollisionX(enemy);
+            this.resolveEnemyCollisionY(enemy, now);
+
+            break;
         }
     }
 
     resolveEnemyCollisionX(enemy) {
-        const enemyPrevX = enemy.prevX ?? enemy.x;
-        const enemyPrevY = enemy.prevY ?? enemy.y;
+        // Vertical entry — Y phase handles it.
+        if (enemy.playerEnteredFromAbove || enemy.playerEnteredFromBelow) {
+            return;
+        }
 
-        // Both player and enemy compared at their pre-move Y positions
-        // (analogous to movePlayerX — at X-phase, neither has moved in Y yet)
-        const playerAtPrevY = {
-            x: this.player.x,
-            y: this.player.prevY,
-            w: this.player.w,
-            h: this.player.h,
-        };
-        const enemyAtPrevY = {
-            x: enemy.x,
-            y: enemyPrevY,
-            w: enemy.w,
-            h: enemy.h,
-        };
+        const targetX = enemy.playerEnteredFromLeft
+            ? enemy.x - this.player.w // came from left → push back left
+            : enemy.x + enemy.w; // came from right → push back right
 
-        if (this.rectsCollide(playerAtPrevY, enemyAtPrevY)) {
-            if (this.player.prevX + this.player.w <= enemyPrevX) {
-                this.player.x = enemy.x - this.player.w;
-            } else if (this.player.prevX >= enemyPrevX + enemy.w) {
-                this.player.x = enemy.x + enemy.w;
-            }
+        const blocked = [...this.platforms, ...this.elevators].some((p) =>
+            this.rectsCollide(
+                {
+                    x: targetX,
+                    y: this.player.y,
+                    w: this.player.w,
+                    h: this.player.h,
+                },
+                p,
+            ),
+        );
+
+        if (!blocked) {
+            this.player.x = targetX;
+        } else {
+            // No room for player — snap enemy clear and reverse.
+            enemy.x = enemy.playerEnteredFromLeft
+                ? this.player.x + this.player.w
+                : this.player.x - enemy.w;
+            enemy.vx = -enemy.vx;
         }
     }
 
     resolveEnemyCollisionY(enemy, now) {
-        if (this.rectsCollide(this.player, enemy)) {
-            if (this.player.prevY + this.player.h <= enemy.y) {
-                this.player.airborne = false;
-                this.player.jumpPressedByUser = false;
-                this.player.lastGroundedAt = now;
-                this.player.lastGroundType = "enemy";
-                this.player.lastGroundId = enemy.id;
-                this.player.y = enemy.y - this.player.h;
-                this.player.vy = 0;
-            } else if (this.player.prevY >= enemy.y + enemy.h) {
-                this.player.y = enemy.y + enemy.h;
-                this.player.vy = 0;
-            }
+        if (enemy.playerEnteredFromAbove) {
+            this.player.airborne = false;
+            this.player.jumpPressedByUser = false;
+            this.player.lastGroundedAt = now;
+            this.player.lastGroundType = "enemy";
+            this.player.lastGroundId = enemy.id;
+            this.player.y = enemy.y - this.player.h;
+            this.player.vy = 0;
+        } else if (enemy.playerEnteredFromBelow) {
+            this.player.y = enemy.y + enemy.h;
+            this.player.vy = 0;
         }
     }
 

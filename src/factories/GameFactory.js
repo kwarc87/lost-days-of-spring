@@ -120,6 +120,8 @@
         isDamaged: false,
         damage: 1,
         damageTime: 0,
+        wasCollidingWithPlayer: false,
+        collidingWithPlayerThisFrame: false,
         type: "pill",
         mainColor: "#e84855",
         secondaryColor: "#f7b32b",
