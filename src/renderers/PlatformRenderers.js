@@ -300,6 +300,11 @@ function drawTiled(ctx, platform, def, showDebug) {
         ctx.strokeStyle = "red";
         ctx.lineWidth = 1;
         ctx.strokeRect(x, y, w, h);
+        if (platform.id != null) {
+            ctx.font = "bold 24px monospace";
+            ctx.fillStyle = "white";
+            ctx.fillText(platform.id, x + 2, y + h - 2);
+        }
         ctx.restore();
     }
 }

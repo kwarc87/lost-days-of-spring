@@ -79,12 +79,37 @@ export const DebugHudRenderer = {
             const label = document.createElement("strong");
             label.textContent = key;
             row.appendChild(label);
-            const display =
-                value !== null && typeof value === "object"
-                    ? JSON.stringify(value).replace(/,/g, ", ")
-                    : String(value);
+
+            const isRounded =
+                key === "x" ||
+                key === "y" ||
+                key === "prevX" ||
+                key === "prevY";
+            const display = isRounded
+                ? String(Math.round(value))
+                : value !== null && typeof value === "object"
+                  ? JSON.stringify(value).replace(/,/g, ", ")
+                  : String(value);
+
             row.appendChild(document.createTextNode(" " + display));
             el.appendChild(row);
+
+            if (key === "y") {
+                const gridX = Math.round(player.x / GameFactory.GRID);
+                const gridY = Math.round(player.y / GameFactory.GRID);
+                for (const [gKey, gVal] of [
+                    ["gridX", gridX],
+                    ["gridY", gridY],
+                ]) {
+                    const gRow = document.createElement("div");
+                    gRow.style.color = "red";
+                    const gLabel = document.createElement("strong");
+                    gLabel.textContent = gKey;
+                    gRow.appendChild(gLabel);
+                    gRow.appendChild(document.createTextNode(" " + gVal));
+                    el.appendChild(gRow);
+                }
+            }
         }
 
         // Cursor panel
