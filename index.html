@@ -46,14 +46,18 @@
 
             const FONTS = [`400 14px "Silkscreen"`, `700 13px "Silkscreen"`];
 
-            const debug =
-                new URLSearchParams(window.location.search).get("debug") ===
-                "true";
+            const params = new URLSearchParams(window.location.search);
+
+            const debug = params.get("debug") === "true";
+
+            const levelParam = parseInt(params.get("level"), 10);
+            const startLevel = levelParam === 2 ? 2 : 1;
 
             Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(
                 () => {
                     document.getElementById("loading").classList.add("done");
                     const game = new LostDaysOfSpring("game", debug);
+                    game.loadLevel(startLevel);
                     game.start();
                 },
             );

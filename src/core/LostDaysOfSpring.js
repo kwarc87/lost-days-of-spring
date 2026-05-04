@@ -136,9 +136,6 @@ export class LostDaysOfSpring {
         this.initMouseDebug();
         this.initControls();
 
-        // Start game by loading level 1
-        this.loadLevel(1);
-
         this.decorateDrawMethods();
     }
 
@@ -785,91 +782,142 @@ export class LostDaysOfSpring {
             }
 
             const playerIsOnElevator = this.isPlayerOnElevator(e);
-
             const moveX = e.dirX * e.speed * e.direction;
             const moveY = e.dirY * e.speed * e.direction;
 
-            const nextX = e.x + moveX;
-            const nextY = e.y + moveY;
-
-            const sweptElevator = {
-                x: Math.min(e.x, nextX),
-                y: Math.min(e.y, nextY),
-                w: e.w + Math.abs(moveX),
-                h: e.h + Math.abs(moveY),
-            };
-
-            const playerBlocksElevator =
-                !playerIsOnElevator &&
-                this.rectsCollide(this.player, sweptElevator);
-
-            if (playerBlocksElevator) {
-                if (!this.player.airborne) {
-                    e.direction = -e.direction;
-                }
+            const { shouldSkip, picksUp } = this.checkElevatorPlayerBlock(
+                e,
+                moveX,
+                moveY,
+                playerIsOnElevator,
+            );
+            if (shouldSkip) {
                 continue;
             }
 
             const previousX = e.x;
             const previousY = e.y;
 
-            e.x += moveX;
-            e.y += moveY;
-
-            const signX = Math.sign(e.dirX);
-            const signY = Math.sign(e.dirY);
-
-            const passedX = this.hasPassedTarget(
-                e.x,
-                e.direction === 1 ? e.targetX : e.startX,
-                e.direction === 1 ? signX : -signX,
+            this.moveElevator(e, moveX, moveY, now);
+            this.applyElevatorToPlayer(
+                e,
+                previousX,
+                previousY,
+                picksUp,
+                playerIsOnElevator,
+                now,
             );
-            const passedY = this.hasPassedTarget(
-                e.y,
-                e.direction === 1 ? e.targetY : e.startY,
-                e.direction === 1 ? signY : -signY,
-            );
+        }
+    }
 
-            if (passedX && passedY) {
-                if (e.direction === 1) {
-                    e.x = e.targetX;
-                    e.y = e.targetY;
-                    e.direction = -1;
-                } else {
-                    e.x = e.startX;
-                    e.y = e.startY;
-                    e.direction = 1;
-                }
+    // Checks whether the player is in the path of the elevator.
+    // Returns shouldSkip=true (and reverses direction) when the elevator must bounce,
+    // or picksUp=true when the elevator should collect a standing player from below.
+    checkElevatorPlayerBlock(e, moveX, moveY, playerIsOnElevator) {
+        const nextX = e.x + moveX;
+        const nextY = e.y + moveY;
 
-                e.idleUntil = now + e.waitTime;
+        const sweptElevator = {
+            x: Math.min(e.x, nextX),
+            y: Math.min(e.y, nextY),
+            w: e.w + Math.abs(moveX),
+            h: e.h + Math.abs(moveY),
+        };
+
+        const playerBlocksElevator =
+            !playerIsOnElevator &&
+            this.rectsCollide(this.player, sweptElevator);
+
+        // Elevator moving upward reaches a player standing just above it —
+        // instead of bouncing, pick the player up.
+        const picksUp =
+            playerBlocksElevator &&
+            moveY < 0 &&
+            !this.player.airborne &&
+            this.player.y + this.player.h <= e.y;
+
+        if (playerBlocksElevator && !picksUp) {
+            if (!this.player.airborne) {
+                e.direction = -e.direction;
+            }
+            return { shouldSkip: true, picksUp: false };
+        }
+
+        return { shouldSkip: false, picksUp };
+    }
+
+    // Moves the elevator by the given delta and snaps it to the endpoint when overshot.
+    moveElevator(e, moveX, moveY, now) {
+        e.x += moveX;
+        e.y += moveY;
+
+        const signX = Math.sign(e.dirX);
+        const signY = Math.sign(e.dirY);
+
+        const passedX = this.hasPassedTarget(
+            e.x,
+            e.direction === 1 ? e.targetX : e.startX,
+            e.direction === 1 ? signX : -signX,
+        );
+        const passedY = this.hasPassedTarget(
+            e.y,
+            e.direction === 1 ? e.targetY : e.startY,
+            e.direction === 1 ? signY : -signY,
+        );
+
+        if (passedX && passedY) {
+            if (e.direction === 1) {
+                e.x = e.targetX;
+                e.y = e.targetY;
+                e.direction = -1;
+            } else {
+                e.x = e.startX;
+                e.y = e.startY;
+                e.direction = 1;
             }
 
-            const actualMoveX = e.x - previousX;
-            const actualMoveY = e.y - previousY;
+            e.idleUntil = now + e.waitTime;
+        }
+    }
 
-            if (playerIsOnElevator) {
-                const nextPlayer = {
-                    x: this.player.x + actualMoveX,
-                    y: this.player.y + actualMoveY,
-                    w: this.player.w,
-                    h: this.player.h,
-                };
-                const wouldHitPlatform = this.platforms.some((p) =>
-                    this.rectsCollide(nextPlayer, p),
-                );
-                if (wouldHitPlatform && actualMoveY < 0) {
-                    // Vertical elevator is pushing the player into a ceiling:
-                    // reverse the elevator. movePlayerY cannot fix this because prevY
-                    // was saved before the co-move, so wasAbove/wasBelow tests would fail.
-                    // When moving downward, movePlayerY handles landing normally — no reversal needed.
-                    e.x = previousX;
-                    e.y = previousY;
-                    e.direction = -e.direction;
-                } else {
-                    this.player.x += actualMoveX;
-                    this.player.y += actualMoveY;
-                }
+    // Carries a riding player along with the elevator, or snaps a picked-up player onto it.
+    applyElevatorToPlayer(
+        e,
+        previousX,
+        previousY,
+        picksUp,
+        playerIsOnElevator,
+        now,
+    ) {
+        const actualMoveX = e.x - previousX;
+        const actualMoveY = e.y - previousY;
+
+        if (playerIsOnElevator) {
+            const nextPlayer = {
+                x: this.player.x + actualMoveX,
+                y: this.player.y + actualMoveY,
+                w: this.player.w,
+                h: this.player.h,
+            };
+            const wouldHitPlatform = this.platforms.some((p) =>
+                this.rectsCollide(nextPlayer, p),
+            );
+            if (wouldHitPlatform && actualMoveY < 0) {
+                // Vertical elevator is pushing the player into a ceiling:
+                // reverse the elevator. movePlayerY cannot fix this because prevY
+                // was saved before the co-move, so wasAbove/wasBelow tests would fail.
+                // When moving downward, movePlayerY handles landing normally — no reversal needed.
+                e.x = previousX;
+                e.y = previousY;
+                e.direction = -e.direction;
+            } else {
+                this.player.x += actualMoveX;
+                this.player.y += actualMoveY;
             }
+        } else if (picksUp) {
+            // Elevator arrived at player's feet from below — snap player onto elevator.
+            this.handlePlatformLanding(e, now);
+            this.handlePlatformLandingResponse(e);
         }
     }
 

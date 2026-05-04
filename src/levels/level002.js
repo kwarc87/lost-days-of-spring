@@ -329,7 +329,7 @@ export const LEVEL_002 = {
     elevators: [
         GameFactory.grid.elevator({ id: 1001, startX: 396, startY: 104, w: 6, h: 2, targetX: 456, targetY: 104, speed: 4, waitTime: 1500 }),
         GameFactory.grid.elevator({ id: 1002, startX: 152, startY: 104, w: 8, h: 1, targetX: 250, targetY: 104, speed: 6.2, waitTime: 1500 }),
-        GameFactory.grid.elevator({ id: 1003, startX: 57, startY: 113, w: 5, h: 1, targetX: 57, targetY: 80, speed: 5.4, waitTime: 1500 }),
+        GameFactory.grid.elevator({ id: 1003, startX: 57, startY: 113, w: 5, h: 1, targetX: 57, targetY: 45, speed: 5.4, waitTime: 1500 }),
     ],
     collectibles: {
         splinters: [
