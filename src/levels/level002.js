@@ -348,7 +348,7 @@ export const LEVEL_002 = {
     elevators: [
         GameFactory.grid.elevator({ id: 1001, startX: 396, startY: 104, w: 6, h: 2, targetX: 456, targetY: 104, speed: 4, waitTime: 1500 }),
         GameFactory.grid.elevator({ id: 1002, startX: 250, startY: 104, w: 8, h: 1, targetX: 152, targetY: 104, speed: 6.2, waitTime: 1500 }),
-        GameFactory.grid.elevator({ id: 1003, startX: 57, startY: 113, w: 5, h: 1, targetX: 57, targetY: 50, speed: 5.4, waitTime: 1500 }),
+        GameFactory.grid.elevator({ id: 1003, startX: 57, startY: 113, w: 5, h: 1, targetX: 57, targetY: 80, speed: 5.4, waitTime: 1500 }),
         // moving rocks
         GameFactory.grid.elevator({ id: 1004, startX: 239, startY: 72, w: 10, h: 4, targetX: 239, targetY: 76, speed: 2, waitTime: 0, layout: "solid", triggered: true, }),
         GameFactory.grid.elevator({ id: 1005, startX: 254, startY: 65, w: 10, h: 4, targetX: 254, targetY: 69, speed: 2.5, waitTime: 0, layout: "solid", triggered: true, }),

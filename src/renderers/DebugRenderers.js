@@ -95,8 +95,8 @@ export const DebugHudRenderer = {
             el.appendChild(row);
 
             if (key === "y") {
-                const gridX = Math.round(player.x / GameFactory.GRID);
-                const gridY = Math.round(player.y / GameFactory.GRID);
+                const gridX = Math.floor(player.x / GameFactory.GRID);
+                const gridY = Math.floor(player.y / GameFactory.GRID);
                 for (const [gKey, gVal] of [
                     ["gridX", gridX],
                     ["gridY", gridY],
