@@ -78,6 +78,7 @@
         speed,
         waitTime,
         layout = "brick",
+        triggered = false,
     } = {}) => {
         const dx = targetX - startX;
         const dy = targetY - startY;
@@ -98,7 +99,7 @@
             direction: 1,
             waitTime,
             idleUntil: 0,
-            triggered: false,
+            triggered,
             type: "elevator",
             layout,
         };
@@ -532,6 +533,7 @@
             speed,
             waitTime,
             layout,
+            triggered,
         } = {}) =>
             GameFactory.elevator({
                 id,
@@ -544,6 +546,7 @@
                 speed,
                 waitTime,
                 layout,
+                triggered,
             }),
         coins: ({ id, x, y, ...rest } = {}) =>
             GameFactory.collectible({

@@ -246,7 +246,9 @@ function drawSprite(
 }
 
 function drawTiled(ctx, platform, def, showDebug) {
-    const { x, y, w, h } = platform;
+    const { w, h } = platform;
+    const x = Math.round(platform.x);
+    const y = Math.round(platform.y);
 
     if (!def || !def.sprites || w <= 0 || h <= 0) {
         return;

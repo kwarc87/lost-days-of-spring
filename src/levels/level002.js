@@ -8,8 +8,8 @@ export const LEVEL_002 = {
         height: GameFactory.GRID * 144,
     },
     playerStart: {
-        x: GameFactory.GRID * 211,
-        y: GameFactory.GRID * 76,
+        x: GameFactory.GRID * 2,
+        y: GameFactory.GRID * 136,
     },
     platforms: [
         // ceil (large)
@@ -334,11 +334,26 @@ export const LEVEL_002 = {
         GameFactory.grid.solid({ id: 267, x: 220, y: 75, w: 3, h: 2, layout: "groundRightBottomEdgeCap" }),
         GameFactory.grid.solid({ id: 268, x: 220, y: 70, w: 2, h: 2, layout: "groundRightBottomEdgeCap" }),
 
+        // moving rocks
+        GameFactory.grid.solid({ id: 276, x: 230, y: 76, w: 9, h: 5, layout: "groundTopCap" }),
+        GameFactory.grid.solid({ id: 277, x: 249, y: 69, w: 5, h: 12, layout: "groundTopCap" }),
+        GameFactory.grid.solid({ id: 278, x: 264, y: 62, w: 5, h: 17 }),
+        GameFactory.grid.solid({ id: 279, x: 279, y: 56, w: 10, h: 23 }),
+        GameFactory.grid.solid({ id: 280, x: 299, y: 52, w: 10, h: 19, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 281, x: 299, y: 75, w: 10, h: 6, layout: "groundTopCap" }),
+        GameFactory.grid.solid({ id: 282, x: 276, y: 75, w: 3, h: 1, layout: "boardLeftCap" }),
+        GameFactory.grid.solid({ id: 283, x: 228, y: 78, w: 2, h: 2, layout: "metal" }),
+
     ],
     elevators: [
         GameFactory.grid.elevator({ id: 1001, startX: 396, startY: 104, w: 6, h: 2, targetX: 456, targetY: 104, speed: 4, waitTime: 1500 }),
         GameFactory.grid.elevator({ id: 1002, startX: 250, startY: 104, w: 8, h: 1, targetX: 152, targetY: 104, speed: 6.2, waitTime: 1500 }),
-        GameFactory.grid.elevator({ id: 1003, startX: 57, startY: 113, w: 5, h: 1, targetX: 57, targetY: 80, speed: 5.4, waitTime: 1500 }),
+        GameFactory.grid.elevator({ id: 1003, startX: 57, startY: 113, w: 5, h: 1, targetX: 57, targetY: 50, speed: 5.4, waitTime: 1500 }),
+        // moving rocks
+        GameFactory.grid.elevator({ id: 1004, startX: 239, startY: 72, w: 10, h: 4, targetX: 239, targetY: 76, speed: 2, waitTime: 0, layout: "solid", triggered: true, }),
+        GameFactory.grid.elevator({ id: 1005, startX: 254, startY: 65, w: 10, h: 4, targetX: 254, targetY: 69, speed: 2.5, waitTime: 0, layout: "solid", triggered: true, }),
+        GameFactory.grid.elevator({ id: 1006, startX: 269, startY: 58, w: 10, h: 4, targetX: 269, targetY: 62, speed: 1.75, waitTime: 0, layout: "solid", triggered: true, }),
+        GameFactory.grid.elevator({ id: 1007, startX: 289, startY: 56, w: 10, h: 4, targetX: 289, targetY: 76, speed: 3.5, waitTime: 0, layout: "solid", triggered: true, }),
     ],
     collectibles: {
         splinters: [
@@ -371,7 +386,9 @@ export const LEVEL_002 = {
             GameFactory.grid.splinters({ id: 27, x: 50, y: 57 }),
             GameFactory.grid.splinters({ id: 28, x: 81.5, y: 54 }),
             GameFactory.grid.splinters({ id: 29, x: 191, y: 79 }),
-            GameFactory.grid.splinters({ id: 30, x: 207, y: 53 }),
+            GameFactory.grid.splinters({ id: 30, x: 88, y: 77 }),
+            GameFactory.grid.splinters({ id: 31, x: 255, y: 78 }),
+            GameFactory.grid.splinters({ id: 31, x: 277, y: 67 }),
         ],
         coins: [
             ...GameFactory.grid.rowOfCollectibles({ startId: 1, count: 10, x: 33, y: 136, gap: 1 }),
@@ -515,7 +532,7 @@ export const LEVEL_002 = {
         GameFactory.grid.enemy({ id: 14, minX: 110, maxX: 170, y: 65, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
         GameFactory.grid.enemy({ id: 15, minX: 110, maxX: 170, y: 65, speed: 4, health: 50, mainColor: "#68eef2", secondaryColor: "#3b1158" }),
         GameFactory.grid.enemy({ id: 16, minX: 110, maxX: 120, y: 58, speed: 4, health: 50, mainColor: "#68eef2", secondaryColor: "#3b1158" }),
-        GameFactory.grid.enemy({ id: 17, minX: 122, maxX: 140, y: 58, speed: 4.9, health: 50, mainColor: "#68eef2", secondaryColor: "#3b1158" }),
+        GameFactory.grid.enemy({ id: 17, minX: 122, maxX: 140, y: 58, speed: 4, health: 50, mainColor: "#68eef2", secondaryColor: "#3b1158" }),
         GameFactory.grid.enemy({ id: 18, minX: 122, maxX: 140, y: 58, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
         GameFactory.grid.enemy({ id: 19, minX: 144, maxX: 170, y: 58, speed: 4, health: 50, mainColor: "#68eef2", secondaryColor: "#3b1158" }),
         GameFactory.grid.enemy({ id: 20, minX: 144, maxX: 170, y: 58, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
@@ -644,7 +661,7 @@ export const LEVEL_002 = {
         ...GameFactory.grid.environment.wallClean({ x: 116, y: 64, w: 11, h: 8 }),
         ...GameFactory.grid.environment.wallClean({ x: 114, y: 71, w: 6, h: 4 }),
         ...GameFactory.grid.environment.wallClean({ x: 122, y: 71, w: 49, h: 4 }),
-        ...GameFactory.grid.environment.wallClean({ x: 173, y: 67, w: 20, h: 28 }),
+        ...GameFactory.grid.environment.wallClean({ x: 173, y: 67, w: 20, h: 18 }),
         ...GameFactory.grid.environment.wallClean({ x: 127, y: 63, w: 18, h: 4 }),
         ...GameFactory.grid.environment.wallClean({ x: 147, y: 63, w: 15, h: 4 }),
         ...GameFactory.grid.environment.wallClean({ x: 132, y: 54, w: 15, h: 12 }),
@@ -827,7 +844,6 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.plant004({ x: 74, y: 80 }),
         GameFactory.grid.environment.plant003({ x: 87, y: 80 }),
         GameFactory.grid.environment.plant003({ x: 88, y: 80 }),
-        GameFactory.grid.environment.flower001({ x: 88, y: 78 }),
         GameFactory.grid.environment.plant003({ x: 89, y: 80 }),
         GameFactory.grid.environment.plant004({ x: 101, y: 80 }),
         GameFactory.grid.environment.plant004({ x: 102, y: 80 }),
@@ -977,6 +993,7 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.wallInside({ x: 81, y: 81 }),
         GameFactory.grid.environment.wallPlant001({ x: 82, y: 69 }),
         GameFactory.grid.environment.wallPlant001({ x: 84, y: 74 }),
+        GameFactory.grid.environment.flower001({ x: 88, y: 78 }),
         GameFactory.grid.environment.plant001({ x: 94, y: 76 }),
         GameFactory.grid.environment.wallPlant001({ x: 84, y: 52 }),
         GameFactory.grid.environment.wallPlant001({ x: 124, y: 54 }),
