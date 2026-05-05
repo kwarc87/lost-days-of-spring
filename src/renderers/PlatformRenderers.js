@@ -163,6 +163,12 @@ const platformCaves = {
         tileHeightSrc: 32,
         sprites: repeatAllTiles3x3({ x: 336, y: 128 }),
     },
+    metalSmall: {
+        ...BASE_TILESET,
+        tileWidthSrc: 16,
+        tileHeightSrc: 16,
+        sprites: repeatAllTiles3x3({ x: 336, y: 96 }),
+    },
 };
 
 function getTileKey(col, row, cols, rows) {

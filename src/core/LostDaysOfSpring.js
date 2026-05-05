@@ -744,6 +744,10 @@ export class LostDaysOfSpring {
         this.player.jumpPressedByUser = false;
         this.player.lastGroundType = platform.type;
         this.player.lastGroundId = platform.id;
+
+        if (platform.type === "elevator" && !platform.triggered) {
+            platform.triggered = true;
+        }
     }
 
     handlePlatformLandingResponse(platform) {
@@ -777,6 +781,9 @@ export class LostDaysOfSpring {
         for (const e of this.elevators) {
             e.previousX = e.x;
             e.previousY = e.y;
+            if (!e.triggered) {
+                continue;
+            }
             if (now < e.idleUntil) {
                 continue;
             }
@@ -952,6 +959,9 @@ export class LostDaysOfSpring {
         const cooldownIsActive =
             now - this.player.lastHitTime < this.player.hitCooldown;
 
+        // Pass 1: mark ALL colliding enemies and record entry side.
+        // Must be separate from resolution so enemies that are reached after
+        // a `break` still get their wasCollidingWithPlayer state updated.
         for (const enemy of this.enemies) {
             if (!this.rectsCollide(this.player, enemy)) {
                 continue;
@@ -959,8 +969,7 @@ export class LostDaysOfSpring {
 
             enemy.collidingWithPlayerThisFrame = true;
 
-            // Record entry side once at first frame of contact — always, regardless of cooldown.
-            // At that moment prevX/prevY are guaranteed to be outside the enemy.
+            // Record entry side once at first frame of contact.
             if (!enemy.wasCollidingWithPlayer) {
                 enemy.playerEnteredFromLeft =
                     this.player.prevX + this.player.w <= enemy.prevX;
@@ -968,6 +977,13 @@ export class LostDaysOfSpring {
                     this.player.prevY + this.player.h <= enemy.prevY;
                 enemy.playerEnteredFromBelow =
                     this.player.prevY >= enemy.prevY + enemy.h;
+            }
+        }
+
+        // Pass 2: resolve against the first colliding enemy only.
+        for (const enemy of this.enemies) {
+            if (!enemy.collidingWithPlayerThisFrame) {
+                continue;
             }
 
             if (!cooldownIsActive) {
@@ -993,17 +1009,31 @@ export class LostDaysOfSpring {
             ? enemy.x - this.player.w // came from left → push back left
             : enemy.x + enemy.w; // came from right → push back right
 
-        const blocked = [...this.platforms, ...this.elevators].some((p) =>
-            this.rectsCollide(
-                {
-                    x: targetX,
-                    y: this.player.y,
-                    w: this.player.w,
-                    h: this.player.h,
-                },
-                p,
-            ),
-        );
+        const blocked =
+            [...this.platforms, ...this.elevators].some((p) =>
+                this.rectsCollide(
+                    {
+                        x: targetX,
+                        y: this.player.y,
+                        w: this.player.w,
+                        h: this.player.h,
+                    },
+                    p,
+                ),
+            ) ||
+            this.enemies.some(
+                (e) =>
+                    e !== enemy &&
+                    this.rectsCollide(
+                        {
+                            x: targetX,
+                            y: this.player.y,
+                            w: this.player.w,
+                            h: this.player.h,
+                        },
+                        e,
+                    ),
+            );
 
         if (!blocked) {
             this.player.x = targetX;
