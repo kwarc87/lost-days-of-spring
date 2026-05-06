@@ -175,7 +175,10 @@ export const DefaultPlayerRenderer = {
 
         ctx.save();
         ctx.imageSmoothingEnabled = false;
-        ctx.translate(player.x + player.w / 2, player.y + player.h);
+        ctx.translate(
+            Math.round(player.x + player.w / 2),
+            Math.round(player.y + player.h),
+        );
 
         if (player.facing === "left") {
             ctx.scale(-1, 1);

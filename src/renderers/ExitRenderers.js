@@ -15,8 +15,8 @@ export const DefaultExitRenderer = {
             exit.cordY,
             exit.w,
             exit.h,
-            exit.x,
-            exit.y,
+            Math.round(exit.x),
+            Math.round(exit.y),
             exit.w * GameFactory.SCALE,
             exit.h * GameFactory.SCALE,
         );

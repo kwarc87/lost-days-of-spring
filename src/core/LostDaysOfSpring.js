@@ -1318,7 +1318,7 @@ export class LostDaysOfSpring {
             this.platformRenderer.drawMap(this.ctx, p, this.showDebug);
             return;
         }
-        this.platformRenderer.draw(this.ctx, p, this.showDebug);
+        this.platformRenderer.draw(this.ctx, p, this.showDebug, this.camera);
     }
 
     drawElevator(e) {
@@ -1326,7 +1326,7 @@ export class LostDaysOfSpring {
             this.platformRenderer.drawMap(this.ctx, e, this.showDebug);
             return;
         }
-        this.platformRenderer.draw(this.ctx, e, this.showDebug);
+        this.platformRenderer.draw(this.ctx, e, this.showDebug, this.camera);
     }
 
     drawEnemy(e) {

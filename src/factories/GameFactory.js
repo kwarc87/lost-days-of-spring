@@ -452,11 +452,9 @@
         wallInside: ({ x, y, ...rest } = {}) => ({
             x,
             y,
-            url: "textures/tilesets.png",
-            cordX: 222,
-            cordY: 144,
             w: 16,
             h: 16,
+            solidFill: "#3b1158",
             ...rest,
         }),
     },

@@ -53,6 +53,7 @@ const GROUND_FULL = {
 const platformCaves = {
     ground: {
         ...BASE_TILESET,
+        midFill: "#3b1158",
         sprites: GROUND_FULL,
     },
 
@@ -217,98 +218,149 @@ function pickSpriteVariant(spriteDef, key, col, row) {
     return spriteDef[idx % spriteDef.length];
 }
 
-function drawSprite(
-    ctx,
-    img,
-    sprite,
-    tileWidthSrc,
-    tileHeightSrc,
-    scale,
-    dxBase,
-    dyBase,
-) {
+function drawSprite(ctx, img, sprite, def, dxBase, dyBase) {
+    const { tileWidthSrc, tileHeightSrc, scale } = def;
     const pT = sprite.padTop ?? 0;
     const pB = sprite.padBottom ?? 0;
     const pL = sprite.padLeft ?? 0;
     const pR = sprite.padRight ?? 0;
-
-    const sx = sprite.x - pL;
-    const sy = sprite.y - pT;
-    const sw = tileWidthSrc + pL + pR;
-    const sh = tileHeightSrc + pT + pB;
-
-    const dx = dxBase - pL * scale;
-    const dy = dyBase - pT * scale;
-    const dw = sw * scale;
-    const dh = sh * scale;
-
-    ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+    ctx.drawImage(
+        img,
+        sprite.x - pL,
+        sprite.y - pT,
+        tileWidthSrc + pL + pR,
+        tileHeightSrc + pT + pB,
+        dxBase - pL * scale,
+        dyBase - pT * scale,
+        (tileWidthSrc + pL + pR) * scale,
+        (tileHeightSrc + pT + pB) * scale,
+    );
 }
 
-function drawTiled(ctx, platform, def, showDebug) {
-    const { w, h } = platform;
-    const x = Math.round(platform.x);
-    const y = Math.round(platform.y);
+// Returns the first and last tile indices (inclusive) visible in the viewport
+// for a given axis. Expands by camera.margin on each side.
+function cullRange(
+    cameraPos,
+    cameraSize,
+    margin,
+    platformPos,
+    tileSize,
+    count,
+) {
+    const viewMin = cameraPos - margin;
+    const viewMax = cameraPos + cameraSize + margin;
+    const start = Math.max(0, Math.floor((viewMin - platformPos) / tileSize));
+    const end = Math.min(
+        count - 1,
+        Math.floor((viewMax - platformPos) / tileSize) + 1,
+    );
+    return { start, end };
+}
 
-    if (!def || !def.sprites || w <= 0 || h <= 0) {
+function drawTiled(ctx, platform, def, showDebug, camera) {
+    const { w, h } = platform;
+    if (!def?.sprites || w <= 0 || h <= 0) {
         return;
     }
 
-    const img = getImg(def.path);
-    const tileWidthSrc = def.tileWidthSrc;
-    const tileHeightSrc = def.tileHeightSrc;
-    const scale = def.scale ?? 1;
-
+    const x = Math.round(platform.x);
+    const y = Math.round(platform.y);
+    const { tileWidthSrc, tileHeightSrc, scale = 1 } = def;
     const tileWidth = tileWidthSrc * scale;
     const tileHeight = tileHeightSrc * scale;
-
     const cols = Math.ceil(w / tileWidth);
     const rows = Math.ceil(h / tileHeight);
 
-    ctx.save();
+    const margin = camera?.margin ?? 0;
+    const camX = camera?.x ?? 0;
+    const camY = camera?.y ?? 0;
+    const camW = camera?.width ?? ctx.canvas.width;
+    const camH = camera?.height ?? ctx.canvas.height;
+
+    const { start: startCol, end: endCol } = cullRange(
+        camX,
+        camW,
+        margin,
+        x,
+        tileWidth,
+        cols,
+    );
+    const { start: startRow, end: endRow } = cullRange(
+        camY,
+        camH,
+        margin,
+        y,
+        tileHeight,
+        rows,
+    );
+
+    const img = getImg(def.path);
+    const imgReady = img.complete && img.naturalWidth > 0;
+    if (!def.midFill && !imgReady) {
+        return;
+    }
+
+    // Avoid ctx.save()/restore() — manually track only what we change.
+    const prevSmoothing = ctx.imageSmoothingEnabled;
     ctx.imageSmoothingEnabled = false;
 
-    if (img.complete && img.naturalWidth) {
-        for (let row = 0; row < rows; row++) {
-            for (let col = 0; col < cols; col++) {
-                const key = getTileKey(col, row, cols, rows);
-                const spriteDef = def.sprites[key];
+    // --- Interior fill (single call instead of N×M per-tile calls) ---
+    if (def.midFill && cols >= 3 && rows >= 3) {
+        const c0 = Math.max(1, startCol);
+        const c1 = Math.min(cols - 2, endCol);
+        const r0 = Math.max(1, startRow);
+        const r1 = Math.min(rows - 2, endRow);
+        if (c0 <= c1 && r0 <= r1) {
+            ctx.fillStyle = def.midFill;
+            ctx.fillRect(
+                x + c0 * tileWidth,
+                y + r0 * tileHeight,
+                (c1 - c0 + 1) * tileWidth,
+                (r1 - r0 + 1) * tileHeight,
+            );
+        }
+    }
 
+    // --- Border tiles ---
+    if (imgReady) {
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startCol; col <= endCol; col++) {
+                const key = getTileKey(col, row, cols, rows);
+                if (key === "mid" && def.midFill) {
+                    continue;
+                }
+
+                const spriteDef = def.sprites[key];
                 if (!spriteDef) {
                     continue;
                 }
 
                 const sprite = pickSpriteVariant(spriteDef, key, col, row);
-
                 if (!sprite) {
                     continue;
                 }
-
-                const dxBase = x + col * tileWidth;
-                const dyBase = y + row * tileHeight;
 
                 drawSprite(
                     ctx,
                     img,
                     sprite,
-                    tileWidthSrc,
-                    tileHeightSrc,
-                    scale,
-                    dxBase,
-                    dyBase,
+                    def,
+                    x + col * tileWidth,
+                    y + row * tileHeight,
                 );
             }
         }
     }
 
-    ctx.restore();
+    ctx.imageSmoothingEnabled = prevSmoothing;
 
+    // --- Debug overlay ---
     if (showDebug) {
         ctx.save();
         ctx.strokeStyle = "red";
         ctx.lineWidth = 1;
         ctx.strokeRect(x, y, w, h);
-        if (platform.id != null) {
+        if (platform.id !== null && platform.id !== undefined) {
             ctx.font = "bold 24px monospace";
             ctx.fillStyle = "white";
             ctx.fillText(platform.id, x + 2, y + h - 2);
@@ -333,12 +385,13 @@ function drawSimpleTiled(ctx, platform) {
 }
 
 export const DefaultPlatformRenderer = {
-    draw(ctx, platform, showDebug) {
+    draw(ctx, platform, showDebug, camera) {
         drawTiled(
             ctx,
             platform,
             platformCaves[platform.layout] ?? platformCaves.ground,
             showDebug,
+            camera,
         );
     },
     drawMap(ctx, platform) {

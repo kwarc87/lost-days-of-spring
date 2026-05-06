@@ -40,8 +40,8 @@ function drawEnvironmentItem(ctx, item) {
     const opacity = item.opacity ?? 1;
     const rotate = item.rotate ?? 0;
 
-    const baseX = item.x;
-    const baseY = item.y;
+    const baseX = Math.round(item.x);
+    const baseY = Math.round(item.y);
 
     ctx.save();
     if (contrast !== 1) {
@@ -93,7 +93,19 @@ function drawEnvironmentItem(ctx, item) {
 }
 
 export const DefaultWorldRenderer = {
+    drawSolidBackground(ctx, item, color) {
+        const drawW = Math.round((item.w ?? 16) * GameFactory.SCALE);
+        const drawH = Math.round((item.h ?? 16) * GameFactory.SCALE);
+        const totalW = drawW * (item.repeatX ?? 1);
+        const totalH = drawH * (item.repeatY ?? 1);
+        ctx.fillStyle = color;
+        ctx.fillRect(item.x, item.y, totalW, totalH);
+    },
     drawEnvironmentItem(ctx, item) {
+        if (item.solidFill) {
+            this.drawSolidBackground(ctx, item, item.solidFill);
+            return;
+        }
         return drawEnvironmentItem(ctx, item);
     },
     drawBackground(ctx, canvas, camera) {

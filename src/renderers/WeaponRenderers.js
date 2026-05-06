@@ -3,7 +3,9 @@ export const DefaultWeaponRenderer = {
         ctx.save();
         ctx.imageSmoothingEnabled = false;
 
-        const { x, y, w, h } = weapon;
+        const x = Math.round(weapon.x);
+        const y = Math.round(weapon.y);
+        const { w, h } = weapon;
 
         // Drop shadow (1px offset, dark amber)
         ctx.fillStyle = "#7a4400";

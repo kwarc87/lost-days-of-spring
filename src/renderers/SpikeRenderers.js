@@ -21,8 +21,8 @@ export const DefaultSpikeRenderer = {
 
         if (up) {
             ctx.translate(
-                spike.x + (SPIKE_SW * SPIKE_SCALE) / 2,
-                spike.y + (SPIKE_SH * SPIKE_SCALE) / 2 - 3 * 3,
+                Math.round(spike.x + (SPIKE_SW * SPIKE_SCALE) / 2),
+                Math.round(spike.y + (SPIKE_SH * SPIKE_SCALE) / 2 - 3 * 3),
             );
             ctx.rotate(Math.PI);
             ctx.drawImage(
@@ -43,8 +43,8 @@ export const DefaultSpikeRenderer = {
                 sy,
                 SPIKE_SW,
                 SPIKE_SH,
-                spike.x,
-                spike.y - 4,
+                Math.round(spike.x),
+                Math.round(spike.y) - 4,
                 SPIKE_SW * SPIKE_SCALE,
                 SPIKE_SH * SPIKE_SCALE,
             );

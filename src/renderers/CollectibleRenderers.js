@@ -53,8 +53,8 @@ export const DefaultCollectibleRenderer = {
     drawCoin: (ctx, collectible, showDebug = false) => {
         ctx.save();
 
-        const x = collectible.x;
-        const y = collectible.y;
+        const x = Math.round(collectible.x);
+        const y = Math.round(collectible.y);
 
         // Shadow beneath the coin
         ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
@@ -119,8 +119,8 @@ export const DefaultCollectibleRenderer = {
             sy,
             SPLINTER_SW,
             SPLINTER_SH,
-            collectible.x,
-            collectible.y,
+            Math.round(collectible.x),
+            Math.round(collectible.y),
             SPLINTER_SW * SPLINTER_SCALE,
             SPLINTER_SH * SPLINTER_SCALE,
         );
@@ -161,8 +161,8 @@ export const DefaultCollectibleRenderer = {
 
     drawHeart: (ctx, collectible, showDebug = false) => {
         ctx.save();
-        const x = collectible.x;
-        const y = collectible.y + getHeartBobOffset(collectible);
+        const x = Math.round(collectible.x);
+        const y = Math.round(collectible.y) + getHeartBobOffset(collectible);
 
         for (let row = 0; row < HEART_PIXELS.length; row++) {
             for (let col = 0; col < HEART_PIXELS[row].length; col++) {
