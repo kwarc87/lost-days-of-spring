@@ -339,30 +339,14 @@
             h: 48,
             ...rest,
         }),
-        wallClean: ({ x, y, w = 16, h = 16, ...rest } = {}) => {
-            const spriteW = 16;
-            const spriteH = 16;
-            const stepW = spriteW;
-            const stepH = spriteH;
-            const cols = Math.ceil(w / stepW);
-            const rows = Math.ceil(h / stepH);
-            const tiles = [];
-            for (let row = 0; row < rows; row++) {
-                for (let col = 0; col < cols; col++) {
-                    tiles.push({
-                        x: x + col * spriteW * GameFactory.SCALE,
-                        y: y + row * spriteH * GameFactory.SCALE,
-                        url: "textures/walls.png",
-                        cordX: 32,
-                        cordY: 32,
-                        w: spriteW,
-                        h: spriteH,
-                        ...rest,
-                    });
-                }
-            }
-            return tiles;
-        },
+        wallClean: ({ x, y, w = 16, h = 16, ...rest } = {}) => ({
+            x,
+            y,
+            w: w * GameFactory.SCALE,
+            h: h * GameFactory.SCALE,
+            solidFill: "#3b1158",
+            ...rest,
+        }),
         wallSharpLeftTop: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -452,9 +436,11 @@
         wallInside: ({ x, y, ...rest } = {}) => ({
             x,
             y,
+            url: "textures/tilesets.png",
+            cordX: 222,
+            cordY: 144,
             w: 16,
             h: 16,
-            solidFill: "#3b1158",
             ...rest,
         }),
     },

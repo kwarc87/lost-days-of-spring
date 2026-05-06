@@ -94,10 +94,8 @@ function drawEnvironmentItem(ctx, item) {
 
 export const DefaultWorldRenderer = {
     drawSolidBackground(ctx, item, color) {
-        const drawW = Math.round((item.w ?? 16) * GameFactory.SCALE);
-        const drawH = Math.round((item.h ?? 16) * GameFactory.SCALE);
-        const totalW = drawW * (item.repeatX ?? 1);
-        const totalH = drawH * (item.repeatY ?? 1);
+        const totalW = Math.round(item.w) * (item.repeatX ?? 1);
+        const totalH = Math.round(item.h) * (item.repeatY ?? 1);
         ctx.fillStyle = color;
         ctx.fillRect(item.x, item.y, totalW, totalH);
     },
