@@ -246,6 +246,12 @@ export class LostDaysOfSpring {
     }
 
     initControls() {
+        this._preventDefaultKeys = new Set([
+            ...Object.values(this.keysMap),
+            "ControlLeft",
+            "ControlRight",
+        ]);
+
         window.addEventListener("blur", () => {
             this.keys = {};
         });
@@ -274,13 +280,7 @@ export class LostDaysOfSpring {
 
             this.keys[e.code] = true;
 
-            if (
-                [
-                    ...Object.values(this.keysMap),
-                    "ControlLeft",
-                    "ControlRight",
-                ].includes(e.code)
-            ) {
+            if (this._preventDefaultKeys.has(e.code)) {
                 e.preventDefault();
             }
         });
@@ -325,18 +325,12 @@ export class LostDaysOfSpring {
     }
 
     canApplyPosture(height, width) {
-        let nextX = this.player.x;
-        let nextY = this.player.y;
-
         const centerX = this.player.x + this.player.w / 2;
-        nextX = centerX - width / 2;
-
         const bottomY = this.player.y + this.player.h;
-        nextY = bottomY - height;
 
         const futurePlayer = {
-            x: nextX,
-            y: nextY,
+            x: centerX - width / 2,
+            y: bottomY - height,
             w: width,
             h: height,
         };
@@ -446,7 +440,7 @@ export class LostDaysOfSpring {
         this.updateSpikesDamage(now);
 
         this.updateBullets(now);
-        this.updateCollectibles(now);
+        this.updateCollectibles();
         this.updateExit();
         this.updateMessages();
 
@@ -1049,6 +1043,8 @@ export class LostDaysOfSpring {
             this.player.airborne = false;
             this.player.jumpPressedByUser = false;
             this.player.lastGroundedAt = now;
+            this.player.onGroundType = "enemy";
+            this.player.onGroundId = enemy.id;
             this.player.lastGroundType = "enemy";
             this.player.lastGroundId = enemy.id;
             this.player.y = enemy.y - this.player.h;
@@ -1171,7 +1167,7 @@ export class LostDaysOfSpring {
     }
 
     // Check player-collectible collisions and mark collected items
-    updateCollectibles(now) {
+    updateCollectibles() {
         for (const c of this.coins) {
             if (!c.collected && this.rectsCollide(this.player, c)) {
                 c.collected = true;
@@ -1198,9 +1194,9 @@ export class LostDaysOfSpring {
         }
     }
 
-    withCameraCulling(drawFn, { skipMapView = true } = {}) {
+    withCameraCulling(drawFn, { noCullingInMapView = true } = {}) {
         return (obj, ...args) => {
-            if (skipMapView && this.mapView) {
+            if (noCullingInMapView && this.mapView) {
                 drawFn.call(this, obj, ...args);
                 return;
             }
@@ -1581,6 +1577,9 @@ export class LostDaysOfSpring {
 
     drawExitMessage() {
         const exit = this.findActiveExit();
+        if (!exit) {
+            return;
+        }
         const anchorX =
             exit.x - this.camera.x + (exit.w * GameFactory.SCALE) / 2;
         const anchorY =
