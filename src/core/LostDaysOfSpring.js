@@ -173,6 +173,8 @@ export class LostDaysOfSpring {
         this.worldSize = levelData.worldSize;
         this.platforms = levelData.platforms;
         this.elevators = levelData.elevators;
+        // Elevators first: same priority order as movePlayerY collision resolution.
+        this.solids = [...this.elevators, ...this.platforms];
         this.enemies = levelData.enemies;
         this.coins = levelData.collectibles.coins ?? [];
         this.splinters = levelData.collectibles.splinters ?? [];
@@ -339,7 +341,7 @@ export class LostDaysOfSpring {
             h: height,
         };
 
-        for (const p of [...this.platforms, ...this.elevators]) {
+        for (const p of this.solids) {
             if (this.rectsCollide(futurePlayer, p)) {
                 return false;
             }
@@ -643,9 +645,7 @@ export class LostDaysOfSpring {
             this.player.vx = 0;
         }
 
-        const solids = [...this.elevators, ...this.platforms];
-
-        for (const p of solids) {
+        for (const p of this.solids) {
             if (this.rectsCollide(this.player, p)) {
                 const platformPrevX = p.previousX ?? p.x;
                 const wasLeft = prevX + this.player.w <= platformPrevX;
@@ -683,10 +683,8 @@ export class LostDaysOfSpring {
         // Elevators first: when player straddles an elevator and a same-height platform,
         // snapping to the elevator causes the platform AABB check to produce no overlap
         // (touching edges aren't a collision), so onGroundId correctly stays as the elevator.
-        const solids = [...this.elevators, ...this.platforms];
-
         //Platforms collisions
-        for (const p of solids) {
+        for (const p of this.solids) {
             if (this.rectsCollide(this.player, p)) {
                 const platformPrevY = p.previousY ?? p.y;
                 const wasAbove = previousY + previousH <= platformPrevY;
@@ -1010,7 +1008,7 @@ export class LostDaysOfSpring {
             : enemy.x + enemy.w; // came from right → push back right
 
         const blocked =
-            [...this.platforms, ...this.elevators].some((p) =>
+            this.solids.some((p) =>
                 this.rectsCollide(
                     {
                         x: targetX,
@@ -1158,10 +1156,8 @@ export class LostDaysOfSpring {
             }
 
             let consumedOnPlatform = false;
-            const bulletSolids = [...this.platforms, ...this.elevators];
-
-            for (let i = bulletSolids.length - 1; i >= 0; i--) {
-                if (this.rectsCollide(bullet, bulletSolids[i])) {
+            for (let i = this.solids.length - 1; i >= 0; i--) {
+                if (this.rectsCollide(bullet, this.solids[i])) {
                     this.bullets.splice(bulletIndex, 1);
                     consumedOnPlatform = true;
                     break;
