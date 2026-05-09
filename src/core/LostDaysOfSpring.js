@@ -1400,12 +1400,20 @@ export class LostDaysOfSpring {
     }
 
     drawEnemy(e) {
+        if (this.mapView) {
+            if (this.showDebug) {
+                this.enemyRenderer.draw(this.ctx, e);
+            }
+            return;
+        }
         this.enemyRenderer.draw(this.ctx, e, this.showDebug);
     }
 
     drawCoins(c) {
         if (this.mapView) {
-            this.collectibleRenderer.drawMapCoin(this.ctx, c);
+            if (this.showDebug) {
+                this.collectibleRenderer.drawMapCoin(this.ctx, c);
+            }
             return;
         }
         this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug);
@@ -1413,7 +1421,9 @@ export class LostDaysOfSpring {
 
     drawSplinters(s) {
         if (this.mapView) {
-            this.collectibleRenderer.drawMapSplinter(this.ctx, s);
+            if (this.showDebug) {
+                this.collectibleRenderer.drawMapSplinter(this.ctx, s);
+            }
             return;
         }
         this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug);
@@ -1421,7 +1431,9 @@ export class LostDaysOfSpring {
 
     drawHearts(s) {
         if (this.mapView) {
-            this.collectibleRenderer.drawMapHeart(this.ctx, s);
+            if (this.showDebug) {
+                this.collectibleRenderer.drawMapHeart(this.ctx, s);
+            }
             return;
         }
         this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug);
