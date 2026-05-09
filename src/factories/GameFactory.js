@@ -43,7 +43,7 @@
         lastShootTime: 0,
         shootingOffsetY: -4,
         shootingCrouchOffsetY: 4,
-        shootingOffsetX: 35,
+        shootingOffsetX: 33,
         shootingCrouchOffsetX: 44,
         ...overrides,
     }),
@@ -95,6 +95,7 @@
             targetY,
             dirX: dx / length,
             dirY: dy / length,
+            //the range that makes sense is 2-8
             speed,
             direction: 1,
             waitTime,

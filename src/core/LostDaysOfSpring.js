@@ -444,7 +444,7 @@ export class LostDaysOfSpring {
         this.updateExit();
         this.updateMessages();
 
-        this.updateCamera();
+        this.updateCamera(now);
         this.updateDamageCooldown(now);
     }
 
@@ -1209,11 +1209,50 @@ export class LostDaysOfSpring {
         };
     }
 
-    updateCamera() {
-        if (this.mapView) {
-            return;
+    calcDesiredLookAheadY(now) {
+        if (this.player.vy < 0) {
+            const upRatio = Math.min(
+                Math.abs(this.player.vy) / this.player.jump,
+                1,
+            );
+            return -this.camera.lookAheadYTargetUp * upRatio * upRatio;
         }
-        // X
+
+        if (this.player.vy > 0) {
+            const downRatio = Math.min(
+                this.player.vy / this.physics.maxFallSpeed,
+                1,
+            );
+            return this.camera.lookAheadYTargetDown * downRatio * downRatio;
+        }
+
+        if (this.player.onGroundType === "elevator") {
+            const elevator = this.elevators.find(
+                (e) => e.id === this.player.onGroundId,
+            );
+            if (!elevator || elevator.dirY === 0 || now < elevator.idleUntil) {
+                return 0;
+            }
+            const elevatorVy =
+                elevator.dirY * elevator.speed * elevator.direction;
+            if (elevatorVy < 0) {
+                const upRatio = Math.min(
+                    Math.abs(elevatorVy) / this.physics.maxFallSpeed,
+                    1,
+                );
+                return -this.camera.lookAheadYTargetUp * upRatio * upRatio;
+            }
+            const downRatio = Math.min(
+                elevatorVy / this.physics.maxFallSpeed,
+                1,
+            );
+            return this.camera.lookAheadYTargetDown * downRatio * downRatio;
+        }
+
+        return 0;
+    }
+
+    updateCameraX() {
         const desiredLookAheadX =
             this.player.facing === "right"
                 ? this.camera.lookAheadXTarget
@@ -1226,29 +1265,13 @@ export class LostDaysOfSpring {
         const targetX =
             this.player.x + this.player.w / 2 - this.camera.width / 2;
 
-        const desiredCameraX = targetX + this.camera.lookAheadX;
-
         this.camera.x +=
-            (desiredCameraX - this.camera.x) * this.camera.smoothing;
+            (targetX + this.camera.lookAheadX - this.camera.x) *
+            this.camera.smoothing;
+    }
 
-        // Y
-        let desiredLookAheadY = 0;
-
-        if (this.player.vy < 0) {
-            const upRatio = Math.min(
-                Math.abs(this.player.vy) / this.player.jump,
-                1,
-            );
-            desiredLookAheadY =
-                -this.camera.lookAheadYTargetUp * upRatio * upRatio;
-        } else if (this.player.vy > 0) {
-            const downRatio = Math.min(
-                this.player.vy / this.physics.maxFallSpeed,
-                1,
-            );
-            desiredLookAheadY =
-                this.camera.lookAheadYTargetDown * downRatio * downRatio;
-        }
+    updateCameraY(now) {
+        let desiredLookAheadY = this.calcDesiredLookAheadY(now);
 
         if (this.isPlayerCrouching()) {
             desiredLookAheadY += this.camera.lookAheadYTargetDownCrouch;
@@ -1264,21 +1287,30 @@ export class LostDaysOfSpring {
             this.player.originalHeight / 2 -
             this.camera.height / 2;
 
-        const desiredCameraY = targetY + this.camera.lookAheadY;
-
         this.camera.y +=
-            (desiredCameraY - this.camera.y) * this.camera.smoothing;
+            (targetY + this.camera.lookAheadY - this.camera.y) *
+            this.camera.smoothing;
+    }
 
-        // world bound
+    clampCameraToWorld() {
         this.camera.x = Math.max(
             0,
             Math.min(this.camera.x, this.worldSize.width - this.camera.width),
         );
-
         this.camera.y = Math.max(
             0,
             Math.min(this.camera.y, this.worldSize.height - this.camera.height),
         );
+    }
+
+    updateCamera(now) {
+        if (this.mapView) {
+            return;
+        }
+
+        this.updateCameraX();
+        this.updateCameraY(now);
+        this.clampCameraToWorld();
     }
 
     isVisibleInCamera(obj) {
