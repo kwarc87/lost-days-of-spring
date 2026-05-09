@@ -157,6 +157,7 @@ export class LostDaysOfSpring {
         );
         this.drawSpike = this.withCameraCulling(this.drawSpike);
         this.drawHearts = this.withCameraCulling(this.drawHearts);
+        this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
     }
 
     loadLevel(levelId) {
@@ -183,6 +184,7 @@ export class LostDaysOfSpring {
         this.messages = levelData.messages ?? [];
         this.activeMessage = null;
         this.exits = levelData.exits ?? [];
+        this.hiddenWalls = levelData.hiddenWalls ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
@@ -462,6 +464,7 @@ export class LostDaysOfSpring {
 
         this.updateBullets(now);
         this.updateCollectibles();
+        this.updateHiddenWalls();
         this.updateExit();
         this.updateMessages();
 
@@ -1218,6 +1221,12 @@ export class LostDaysOfSpring {
         }
     }
 
+    updateHiddenWalls() {
+        for (const wall of this.hiddenWalls) {
+            wall.entered = this.rectsCollide(this.player, wall);
+        }
+    }
+
     withCameraCulling(drawFn, { noCullingInMapView = true } = {}) {
         return (obj, ...args) => {
             if (noCullingInMapView && this.mapView) {
@@ -1377,6 +1386,19 @@ export class LostDaysOfSpring {
         this.platformRenderer.draw(this.ctx, e, this.showDebug, this.camera);
     }
 
+    drawHiddenWall(wall) {
+        if (this.mapView) {
+            this.platformRenderer.drawMap(this.ctx, wall, this.showDebug);
+            return;
+        }
+        this.platformRenderer.drawHiddenWall(
+            this.ctx,
+            wall,
+            this.showDebug,
+            this.camera,
+        );
+    }
+
     drawEnemy(e) {
         this.enemyRenderer.draw(this.ctx, e, this.showDebug);
     }
@@ -1473,6 +1495,10 @@ export class LostDaysOfSpring {
             this.drawPlatform(p);
         }
 
+        for (const wall of this.hiddenWalls) {
+            this.drawHiddenWall(wall);
+        }
+
         for (const i of this.backgroundItems) {
             this.drawEnvBackgroundItem(i);
         }
@@ -1509,6 +1535,10 @@ export class LostDaysOfSpring {
 
         for (const e of this.enemies) {
             this.drawEnemy(e);
+        }
+
+        for (const wall of this.hiddenWalls) {
+            this.drawHiddenWall(wall);
         }
 
         this.drawPlayer();

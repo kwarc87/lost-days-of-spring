@@ -13,6 +13,10 @@
     rightTopEdgeCap3x3,
     horizontalConnector3x3,
     verticalConnector3x3,
+    onlyLeft,
+    onlyRight,
+    onlyBottom,
+    onlyTop,
 } from "./PlatformHelpers.js";
 import { getImg } from "../utils/imgCache.js";
 
@@ -48,6 +52,40 @@ const GROUND_FULL = {
         { x: 240, y: 162, padBottom: 8 },
     ],
     bRight: { x: 256, y: 162, padRight: 4, padBottom: 8 },
+};
+
+const BASE_CRACKS_TILESET = {
+    path: "textures/cracks.png",
+    tileWidthSrc: 16,
+    tileHeightSrc: 16,
+    scale: 3,
+};
+
+const CRACKS_FULL = {
+    tLeft: { x: 9, y: 9, padLeft: 4, padTop: 5 },
+    tMid: [
+        { x: 25, y: 9, padTop: 5 },
+        { x: 41, y: 9, padTop: 5 },
+    ],
+    tRight: { x: 57, y: 9, padRight: 4, padTop: 5 },
+
+    left: [
+        { x: 9, y: 25, padLeft: 4 },
+        { x: 9, y: 41, padLeft: 4 },
+    ],
+    mid: { x: 25, y: 25 },
+
+    right: [
+        { x: 57, y: 25, padRight: 4 },
+        { x: 57, y: 41, padRight: 4 },
+    ],
+
+    bLeft: { x: 9, y: 59, padLeft: 4, padBottom: 8 },
+    bMid: [
+        { x: 25, y: 59, padBottom: 8 },
+        { x: 41, y: 59, padBottom: 8 },
+    ],
+    bRight: { x: 57, y: 59, padRight: 4, padBottom: 8 },
 };
 
 const platformCaves = {
@@ -107,6 +145,76 @@ const platformCaves = {
     groundVerticalConnector: {
         ...BASE_TILESET,
         sprites: verticalConnector3x3(GROUND_FULL),
+    },
+
+    cracks: {
+        ...BASE_CRACKS_TILESET,
+        midFill: "#3b1158",
+        sprites: CRACKS_FULL,
+    },
+    cracksTopCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: topCap3x3(CRACKS_FULL),
+    },
+    cracksBottomCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: bottomCap3x3(CRACKS_FULL),
+    },
+    cracksLeftCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: leftCap3x3(CRACKS_FULL),
+    },
+    cracksRightCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: rightCap3x3(CRACKS_FULL),
+    },
+    cracksTopLeftEdgeCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: topLeftEdgeCap3x3(CRACKS_FULL),
+    },
+    cracksTopRightEdgeCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: topRightEdgeCap3x3(CRACKS_FULL),
+    },
+    cracksLeftBottomEdgeCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: leftBottomEdgeCap3x3(CRACKS_FULL),
+    },
+    cracksLeftTopEdgeCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: leftTopEdgeCap3x3(CRACKS_FULL),
+    },
+    cracksRightBottomEdgeCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: rightBottomEdgeCap3x3(CRACKS_FULL),
+    },
+    cracksRightTopEdgeCap: {
+        ...BASE_CRACKS_TILESET,
+        sprites: rightTopEdgeCap3x3(CRACKS_FULL),
+    },
+    cracksHorizontalConnector: {
+        ...BASE_CRACKS_TILESET,
+        sprites: horizontalConnector3x3(CRACKS_FULL),
+    },
+    cracksVerticalConnector: {
+        ...BASE_CRACKS_TILESET,
+        sprites: verticalConnector3x3(CRACKS_FULL),
+    },
+    cracksOnlyLeft: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyLeft(CRACKS_FULL),
+    },
+    cracksOnlyRight: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyRight(CRACKS_FULL),
+    },
+    cracksOnlyBottom: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyBottom(CRACKS_FULL),
+    },
+    cracksOnlyTop: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyTop(CRACKS_FULL),
     },
 
     board: {
@@ -384,6 +492,10 @@ function drawSimpleTiled(ctx, platform) {
     ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
 }
 
+const HIDDEN_WALL_OPACITY_ENTERED = 0.25;
+const HIDDEN_WALL_OPACITY_DEFAULT = 1;
+const HIDDEN_WALL_TRANSITION_DURATION = 150;
+
 export const DefaultPlatformRenderer = {
     draw(ctx, platform, showDebug, camera) {
         drawTiled(
@@ -393,6 +505,37 @@ export const DefaultPlatformRenderer = {
             showDebug,
             camera,
         );
+    },
+    drawHiddenWall(ctx, wall, showDebug, camera) {
+        const opacityTarget = wall.entered
+            ? HIDDEN_WALL_OPACITY_ENTERED
+            : HIDDEN_WALL_OPACITY_DEFAULT;
+        const prevEntered = wall._prevEntered ?? false;
+        if (wall.entered !== prevEntered) {
+            wall.opacityFrom =
+                wall.opacityCurrent ??
+                (prevEntered
+                    ? HIDDEN_WALL_OPACITY_ENTERED
+                    : HIDDEN_WALL_OPACITY_DEFAULT);
+            wall.opacityTransitionStart = performance.now();
+            wall._prevEntered = wall.entered;
+        }
+        const opacityFrom = wall.opacityFrom ?? opacityTarget;
+        const elapsed = performance.now() - (wall.opacityTransitionStart ?? 0);
+        const t = Math.min(elapsed / HIDDEN_WALL_TRANSITION_DURATION, 1);
+        const opacity = opacityFrom + (opacityTarget - opacityFrom) * t;
+        wall.opacityCurrent = opacity;
+
+        const prev = ctx.globalAlpha;
+        ctx.globalAlpha = prev * opacity;
+        drawTiled(
+            ctx,
+            wall,
+            platformCaves[wall.layout] ?? platformCaves.ground,
+            showDebug,
+            camera,
+        );
+        ctx.globalAlpha = prev;
     },
     drawMap(ctx, platform) {
         drawSimpleTiled(ctx, platform);

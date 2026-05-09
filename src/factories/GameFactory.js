@@ -56,6 +56,15 @@
         type: "solid",
         layout,
     }),
+    cracks: ({ id, x, y, w, h, layout = "cracks" } = {}) => ({
+        id,
+        x,
+        y,
+        w,
+        h,
+        type: "solid",
+        layout,
+    }),
     booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) => ({
         id,
         x,
@@ -491,6 +500,15 @@
             }),
         solid: ({ id, x, y, w, h, layout = "ground" } = {}) =>
             GameFactory.solid({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
+                layout,
+            }),
+        cracks: ({ id, x, y, w, h, layout = "cracks" } = {}) =>
+            GameFactory.cracks({
                 id,
                 x: x * GameFactory.GRID,
                 y: y * GameFactory.GRID,

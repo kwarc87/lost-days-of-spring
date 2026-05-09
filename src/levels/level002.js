@@ -74,7 +74,8 @@ export const LEVEL_002 = {
         GameFactory.grid.solid({ id: 42, x: 263, y: 131, w: 7, h: 2, layout: "groundBottomCap" }),
         GameFactory.grid.solid({ id: 43, x: 265, y: 132, w: 3, h: 2, layout: "groundBottomCap" }),
         GameFactory.grid.solid({ id: 29, x: 270, y: 138, w: 3, h: 1, layout: "board" }),
-        GameFactory.grid.solid({ id: 30, x: 275, y: 136, w: 43, h: 7, layout: "groundTopCap" }),
+        GameFactory.grid.solid({ id: 30, x: 287, y: 136, w: 31, h: 7, layout: "groundTopCap" }),
+        GameFactory.grid.solid({ id: 295, x: 275, y: 136, w: 13, h: 3, layout: "groundLeftTopEdgeCap" }),
         GameFactory.grid.solid({ id: 31, x: 295, y: 131, w: 20, h: 2, layout: "groundBottomCap" }),
         GameFactory.grid.solid({ id: 32, x: 296, y: 132, w: 19, h: 2, layout: "groundBottomCap" }),
         GameFactory.grid.solid({ id: 33, x: 297, y: 133, w: 18, h: 2, layout: "groundBottomCap" }),
@@ -385,6 +386,11 @@ export const LEVEL_002 = {
         GameFactory.grid.elevator({ id: 1016, startX: 359, startY: 65, w: 4, h: 1, targetX: 359, targetY: 59, speed: 5.5, waitTime: 150, triggered: true }),
         GameFactory.grid.elevator({ id: 1017, startX: 365, startY: 61, w: 4, h: 1, targetX: 365, targetY: 57, speed: 2.5, waitTime: 150, triggered: true }),
     ],
+    hiddenWalls: [
+        GameFactory.grid.cracks({ id: 3001, x: 94, y: 131, w: 6, h: 5, layout: "cracksVerticalConnector" }),
+        GameFactory.grid.cracks({ id: 3002, x: 275, y: 138, w: 13, h: 5, layout: "cracksOnlyLeft" }),
+        GameFactory.grid.cracks({ id: 3003, x: 374, y: 127, w: 12, h: 5, layout: "cracksOnlyBottom" }),
+    ],
     collectibles: {
         splinters: [
             GameFactory.grid.splinters({ id: 1, x: 88, y: 133 }),
@@ -421,6 +427,7 @@ export const LEVEL_002 = {
             GameFactory.grid.splinters({ id: 32, x: 277, y: 67 }),
             GameFactory.grid.splinters({ id: 33, x: 339, y: 55 }),
             GameFactory.grid.splinters({ id: 34, x: 468, y: 87.5 }),
+            GameFactory.grid.splinters({ id: 35, x: 285, y: 140 }),
         ],
         coins: [
             ...GameFactory.grid.rowOfCollectibles({ startId: 1, count: 10, x: 33, y: 136, gap: 1 }),
@@ -1066,7 +1073,7 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.plant004({ x: 251, y: 125 }),
         GameFactory.grid.environment.plant003({ x: 252, y: 125 }),
         GameFactory.grid.environment.wallInside({ x: 261, y: 128 }),
-        GameFactory.grid.environment.wallInside({ x: 278, y: 139 }),
+        GameFactory.grid.environment.wallInside({ x: 278, y: 137 }),
         GameFactory.grid.environment.wallInside({ x: 291, y: 129 }),
         GameFactory.grid.environment.wallInside({ x: 301, y: 138 }),
         GameFactory.grid.environment.plant002({ x: 305, y: 136 }),

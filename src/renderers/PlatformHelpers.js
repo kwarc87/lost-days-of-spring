@@ -200,3 +200,59 @@ export function verticalConnector3x3({ left, mid, right }) {
         bRight: right,
     };
 }
+
+export function onlyLeft({ left, mid }) {
+    return {
+        tLeft: left,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right: mid,
+        bLeft: left,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
+export function onlyRight({ mid, right }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: right,
+        left: mid,
+        mid,
+        right,
+        bLeft: mid,
+        bMid: mid,
+        bRight: right,
+    };
+}
+
+export function onlyBottom({ mid, bMid }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: bMid,
+        bMid,
+        bRight: bMid,
+    };
+}
+
+export function onlyTop({ mid, tMid }) {
+    return {
+        tLeft: tMid,
+        tMid,
+        tRight: tMid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: mid,
+        bMid: mid,
+        bRight: mid,
+    };
+}
