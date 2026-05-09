@@ -324,12 +324,19 @@ export class LostDaysOfSpring {
         );
     }
 
-    canApplyPosture(height, width) {
-        const centerX = this.player.x + this.player.w / 2;
+    canApplyPosture(height, width, anchor = "center") {
         const bottomY = this.player.y + this.player.h;
+        let startX;
+        if (anchor === "start") {
+            startX = this.player.x;
+        } else if (anchor === "end") {
+            startX = this.player.x + this.player.w - width;
+        } else {
+            startX = this.player.x + this.player.w / 2 - width / 2;
+        }
 
         const futurePlayer = {
-            x: centerX - width / 2,
+            x: startX,
             y: bottomY - height,
             w: width,
             h: height,
@@ -344,6 +351,17 @@ export class LostDaysOfSpring {
         return true;
     }
 
+    findCrouchAnchor() {
+        const h = this.player.crouchHeight;
+        const w = this.player.crouchWidth;
+        for (const anchor of ["center", "start", "end"]) {
+            if (this.canApplyPosture(h, w, anchor)) {
+                return anchor;
+            }
+        }
+        return null;
+    }
+
     canStandUp() {
         return this.canApplyPosture(
             this.player.originalHeight,
@@ -352,10 +370,7 @@ export class LostDaysOfSpring {
     }
 
     canCrouch() {
-        return this.canApplyPosture(
-            this.player.crouchHeight,
-            this.player.crouchWidth,
-        );
+        return this.findCrouchAnchor() !== null;
     }
 
     isPlayerCrouching() {
@@ -390,11 +405,17 @@ export class LostDaysOfSpring {
         this.player.y = bottom - nextHeight;
     }
 
-    applyPlayerWidth(nextWidth) {
-        // anchor should be always center
-        const centerX = this.player.x + this.player.w / 2;
+    applyPlayerWidth(nextWidth, anchor = "center") {
+        let nextX;
+        if (anchor === "start") {
+            nextX = this.player.x;
+        } else if (anchor === "end") {
+            nextX = this.player.x + this.player.w - nextWidth;
+        } else {
+            nextX = this.player.x + this.player.w / 2 - nextWidth / 2;
+        }
         this.player.w = nextWidth;
-        this.player.x = centerX - nextWidth / 2;
+        this.player.x = nextX;
     }
 
     resetGame() {
@@ -500,19 +521,22 @@ export class LostDaysOfSpring {
                 this.keys[this.keysMap.crouch]) &&
             !this.player.airborne
         ) {
-            if (!this.isPlayerCrouching() && this.canCrouch()) {
-                this.applyPosture(this.playerPostures.CROUCH);
+            if (!this.isPlayerCrouching()) {
+                const anchor = this.findCrouchAnchor();
+                if (anchor !== null) {
+                    this.applyPosture(this.playerPostures.CROUCH, anchor);
+                }
             }
         } else if (this.isPlayerCrouching() && this.canStandUp()) {
             this.applyPosture(this.playerPostures.STANDING);
         }
     }
 
-    applyPosture(posture) {
+    applyPosture(posture, anchor = "center") {
         const hitbox = this.getPlayerHitboxForPosture(posture);
         this.player.posture = posture;
         this.applyPlayerHeight(hitbox.h);
-        this.applyPlayerWidth(hitbox.w);
+        this.applyPlayerWidth(hitbox.w, anchor);
     }
 
     handleShootingInput(now) {
