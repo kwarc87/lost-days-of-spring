@@ -181,9 +181,37 @@ export function horizontalConnector3x3({ tMid, mid, bMid }) {
         left: mid,
         mid,
         right: mid,
-        bLeft: mid,
+        bLeft: bMid,
+        bMid,
+        bRight: bMid,
+    };
+}
+
+export function horizontalConnectorRightClean3x3({ tMid, mid, bMid }) {
+    return {
+        tLeft: tMid,
+        tMid,
+        tRight: mid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: bMid,
         bMid,
         bRight: mid,
+    };
+}
+
+export function horizontalConnectorLeftClean3x3({ tMid, mid, bMid }) {
+    return {
+        tLeft: mid,
+        tMid,
+        tRight: tMid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: mid,
+        bMid,
+        bRight: bMid,
     };
 }
 

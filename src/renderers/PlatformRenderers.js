@@ -12,6 +12,8 @@
     rightBottomEdgeCap3x3,
     rightTopEdgeCap3x3,
     horizontalConnector3x3,
+    horizontalConnectorRightClean3x3,
+    horizontalConnectorLeftClean3x3,
     verticalConnector3x3,
     onlyLeft,
     onlyRight,
@@ -195,6 +197,14 @@ const platformCaves = {
     cracksHorizontalConnector: {
         ...BASE_CRACKS_TILESET,
         sprites: horizontalConnector3x3(CRACKS_FULL),
+    },
+    cracksHorizontalConnectorRightClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: horizontalConnectorRightClean3x3(CRACKS_FULL),
+    },
+    cracksHorizontalConnectorLeftClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: horizontalConnectorLeftClean3x3(CRACKS_FULL),
     },
     cracksVerticalConnector: {
         ...BASE_CRACKS_TILESET,
