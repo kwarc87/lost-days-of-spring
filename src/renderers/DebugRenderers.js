@@ -51,19 +51,12 @@ const DEBUG_PLAYER_ENTRIES = [
 ];
 
 export const DebugHudRenderer = {
-    _lastUpdate: 0,
-
-    update(now, canvas, showDebug, debugConfig, player, mouse) {
+    update(canvas, showDebug, debugConfig, player, mouse) {
         if (!showDebug) {
             document.getElementById("debug")?.remove();
             document.getElementById("cursor-pos")?.remove();
             return;
         }
-
-        if (now - this._lastUpdate < debugConfig.updateInterval) {
-            return;
-        }
-        this._lastUpdate = now;
 
         // Player panel
         let el = document.getElementById("debug");
@@ -85,11 +78,18 @@ export const DebugHudRenderer = {
                 key === "y" ||
                 key === "prevX" ||
                 key === "prevY";
+            const isFixed3 = key === "vx" || key === "vy";
+            const isRoundedMs =
+                key === "jumpPressedAt" || key === "lastShootTime";
             const display = isRounded
                 ? String(Math.round(value))
-                : value !== null && typeof value === "object"
-                  ? JSON.stringify(value).replace(/,/g, ", ")
-                  : String(value);
+                : isFixed3
+                  ? Number(value).toFixed(3)
+                  : isRoundedMs
+                    ? String(Math.round(value))
+                    : value !== null && typeof value === "object"
+                      ? JSON.stringify(value).replace(/,/g, ", ")
+                      : String(value);
 
             row.appendChild(document.createTextNode(" " + display));
             el.appendChild(row);

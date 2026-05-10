@@ -708,7 +708,25 @@ export class LostDaysOfSpring {
         for (const p of this.solids) {
             if (this.rectsCollide(this.player, p)) {
                 const platformPrevY = p.previousY ?? p.y;
-                const wasAbove = previousY + previousH <= platformPrevY;
+                const platformPrevX = p.previousX ?? p.x;
+
+                // If there was no horizontal overlap in the previous frame the player
+                // entered from the side (diagonal approach). Use the highest of the
+                // platform's previous and current Y so that:
+                //   - a descending platform that "caught up" to the player is detected
+                //     (p.y > platformPrevY → use p.y)
+                //   - an ascending platform the player was already above is also detected
+                //     (platformPrevY > p.y → use platformPrevY)
+                const hadXOverlap =
+                    this.player.prevX < platformPrevX + p.w &&
+                    this.player.prevX + this.player.w > platformPrevX;
+
+                const effectivePlatformPrevY = hadXOverlap
+                    ? platformPrevY
+                    : Math.max(platformPrevY, p.y);
+
+                const wasAbove =
+                    previousY + previousH <= effectivePlatformPrevY;
                 const wasBelow = previousY >= platformPrevY + p.h;
 
                 // Landing on top of platform
@@ -1689,9 +1707,8 @@ export class LostDaysOfSpring {
         MessageRenderer.drawPanel(this.ctx, { lines }, anchorX, anchorY);
     }
 
-    updateDebug(now) {
+    updateDebug() {
         DebugHudRenderer.update(
-            now,
             this.canvas,
             this.showDebug,
             this.debug,
@@ -1720,7 +1737,7 @@ export class LostDaysOfSpring {
         }
 
         this.draw();
-        this.updateDebug(now);
+        this.updateDebug();
 
         if (this.gameOver && now - this.gameOverAt >= this.gameOverDelay) {
             this.resetGame();
