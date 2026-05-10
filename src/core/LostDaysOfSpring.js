@@ -669,8 +669,11 @@ export class LostDaysOfSpring {
         for (const p of this.solids) {
             if (this.rectsCollide(this.player, p)) {
                 const platformPrevX = p.previousX ?? p.x;
-                const wasLeft = prevX + this.player.w <= platformPrevX;
-                const wasRight = prevX >= platformPrevX + p.w;
+
+                const wasLeft =
+                    prevX + this.player.w <= Math.max(platformPrevX, p.x);
+                const wasRight =
+                    prevX >= Math.min(platformPrevX + p.w, p.x + p.w);
 
                 if (wasLeft) {
                     this.player.x = p.x - this.player.w;
@@ -708,26 +711,13 @@ export class LostDaysOfSpring {
         for (const p of this.solids) {
             if (this.rectsCollide(this.player, p)) {
                 const platformPrevY = p.previousY ?? p.y;
-                const platformPrevX = p.previousX ?? p.x;
-
-                // If there was no horizontal overlap in the previous frame the player
-                // entered from the side (diagonal approach). Use the highest of the
-                // platform's previous and current Y so that:
-                //   - a descending platform that "caught up" to the player is detected
-                //     (p.y > platformPrevY → use p.y)
-                //   - an ascending platform the player was already above is also detected
-                //     (platformPrevY > p.y → use platformPrevY)
-                const hadXOverlap =
-                    this.player.prevX < platformPrevX + p.w &&
-                    this.player.prevX + this.player.w > platformPrevX;
-
-                const effectivePlatformPrevY = hadXOverlap
-                    ? platformPrevY
-                    : Math.max(platformPrevY, p.y);
 
                 const wasAbove =
-                    previousY + previousH <= effectivePlatformPrevY;
-                const wasBelow = previousY >= platformPrevY + p.h;
+                    previousY + previousH <= Math.max(platformPrevY, p.y);
+                // Use Math.min for the platform bottom (ascending platform moves bottom
+                // upward, creating a dead zone — take the lowest bottom across both frames).
+                const wasBelow =
+                    previousY >= Math.min(platformPrevY, p.y) + p.h;
 
                 // Landing on top of platform
                 if (wasAbove) {
