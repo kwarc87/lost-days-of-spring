@@ -68,20 +68,58 @@ export const MESSAGES = {
             },
             { text: "Go, traveler!", color: "#ffffff" },
         ],
-        JUMP_HINT: [{ text: "To jump press z or space", color: "#fff" }],
-        SHOOT_HINT: [{ text: "To shoot press x or ALT", color: "#fff" }],
-        CROUCH_HINT: [
-            { text: "To crouch press c or Arrow DOWN", color: "#fff" },
+        JUMP_HINT: [
+            {
+                segments: [
+                    { text: "To jump press ", color: "#fff" },
+                    { text: "z ", color: "#f5c542" },
+                    { text: "or ", color: "#fff" },
+                    { text: "space", color: "#f5c542" },
+                ],
+            },
         ],
-        PAUSE_HINT: [{ text: "To pause the game press p", color: "#fff" }],
+        SHOOT_HINT: [
+            {
+                segments: [
+                    { text: "To shoot press ", color: "#fff" },
+                    { text: "x ", color: "#f5c542" },
+                    { text: "or ", color: "#fff" },
+                    { text: "ALT", color: "#f5c542" },
+                ],
+            },
+        ],
+        CROUCH_HINT: [
+            {
+                segments: [
+                    { text: "To crouch press ", color: "#fff" },
+                    { text: "c ", color: "#f5c542" },
+                    { text: "or ", color: "#fff" },
+                    { text: "Arrow DOWN", color: "#f5c542" },
+                ],
+            },
+        ],
+        PAUSE_HINT: [
+            {
+                segments: [
+                    { text: "To pause the game press ", color: "#fff" },
+                    { text: "p", color: "#f5c542" },
+                ],
+            },
+        ],
         MINI_MAP_HINT: [
             {
                 text: "If you are really lost and don't know what",
                 color: "#fff",
             },
             {
-                text: "to do, you can press m to display the minimap",
-                color: "#fff",
+                segments: [
+                    {
+                        text: "to do, you can press ",
+                        color: "#fff",
+                    },
+                    { text: "m ", color: "#f5c542" },
+                    { text: "to display the minimap", color: "#fff" },
+                ],
             },
         ],
     },
