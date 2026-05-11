@@ -304,6 +304,9 @@ export class LostDaysOfSpring {
             this.mouse.worldY = Math.round(
                 (e.clientY - rect.top) * scaleY + this.camera.y,
             );
+            if (!this.isRunning) {
+                this.updateDebug();
+            }
         });
     }
 
@@ -344,7 +347,7 @@ export class LostDaysOfSpring {
             h: height,
         };
 
-        for (const p of this.solids) {
+        for (const p of [...this.solids, ...this.enemies]) {
             if (this.rectsCollide(futurePlayer, p)) {
                 return false;
             }
