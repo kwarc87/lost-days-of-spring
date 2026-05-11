@@ -374,10 +374,6 @@ export class LostDaysOfSpring {
         );
     }
 
-    canCrouch() {
-        return this.findCrouchAnchor() !== null;
-    }
-
     isPlayerCrouching() {
         return this.player.posture === this.playerPostures.CROUCH;
     }
@@ -527,7 +523,10 @@ export class LostDaysOfSpring {
                 this.keys[this.keysMap.crouch]) &&
             !this.player.airborne
         ) {
-            if (!this.isPlayerCrouching()) {
+            if (
+                !this.isPlayerCrouching() &&
+                this.player.onGroundType !== "enemy"
+            ) {
                 const anchor = this.findCrouchAnchor();
                 if (anchor !== null) {
                     this.applyPosture(this.playerPostures.CROUCH, anchor);
