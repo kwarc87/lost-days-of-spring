@@ -682,7 +682,6 @@ export class LostDaysOfSpring {
                     this.player.x = p.x + p.w;
                     this.player.vx = 0;
                 }
-                // no fallback: if direction of entry is unknown, do not freeze player inside platform
             }
         }
     }
@@ -704,9 +703,6 @@ export class LostDaysOfSpring {
             this.handleWorldGroundLanding(now);
         }
 
-        // Elevators first: when player straddles an elevator and a same-height platform,
-        // snapping to the elevator causes the platform AABB check to produce no overlap
-        // (touching edges aren't a collision), so onGroundId correctly stays as the elevator.
         //Platforms collisions
         for (const p of this.solids) {
             if (this.rectsCollide(this.player, p)) {
@@ -714,8 +710,6 @@ export class LostDaysOfSpring {
 
                 const wasAbove =
                     previousY + previousH <= Math.max(platformPrevY, p.y);
-                // Use Math.min for the platform bottom (ascending platform moves bottom
-                // upward, creating a dead zone — take the lowest bottom across both frames).
                 const wasBelow =
                     previousY >= Math.min(platformPrevY, p.y) + p.h;
 
@@ -730,7 +724,6 @@ export class LostDaysOfSpring {
                     // Hit ceiling
                     this.handleCeilingHit(p);
                 }
-                // no fallback: if direction of entry is unknown, do not freeze player inside platform
             }
         }
 
