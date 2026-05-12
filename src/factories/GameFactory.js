@@ -56,6 +56,15 @@
         type: "solid",
         layout,
     }),
+    oneDirection: ({ id, x, y, w, h, layout = "boardOneDirection" } = {}) => ({
+        id,
+        x,
+        y,
+        w,
+        h,
+        type: "oneDirection",
+        layout,
+    }),
     cracks: ({ id, x, y, w, h, layout = "cracks" } = {}) => ({
         id,
         x,
@@ -507,6 +516,15 @@
                 h: h * GameFactory.GRID,
                 layout,
             }),
+        oneDirection: ({ id, x, y, w, h, layout = "boardOneDirection" } = {}) =>
+            GameFactory.oneDirection({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
+                layout,
+            }),
         cracks: ({ id, x, y, w, h, layout = "cracks" } = {}) =>
             GameFactory.cracks({
                 id,
@@ -574,7 +592,7 @@
                 h: 50,
                 ...rest,
             }),
-        rowOfCollectibles: ({ startId, count, x, y, gap } = {}) =>
+        rowOfCollectibles: ({ startId, count, x, y, gap = 1 } = {}) =>
             GameFactory.rowOfCollectibles({
                 startId,
                 count,
@@ -582,7 +600,7 @@
                 y: y * GameFactory.GRID + GameFactory.GRID / 4,
                 gap: gap * GameFactory.GRID,
             }),
-        columnOfCollectibles: ({ startId, count, x, y, gap } = {}) =>
+        columnOfCollectibles: ({ startId, count, x, y, gap = 1 } = {}) =>
             GameFactory.columnOfCollectibles({
                 startId,
                 count,

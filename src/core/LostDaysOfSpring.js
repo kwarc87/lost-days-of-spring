@@ -348,6 +348,9 @@ export class LostDaysOfSpring {
         };
 
         for (const p of [...this.solids, ...this.enemies]) {
+            if (p.type === "oneDirection") {
+                continue;
+            }
             if (this.rectsCollide(futurePlayer, p)) {
                 return false;
             }
@@ -669,6 +672,9 @@ export class LostDaysOfSpring {
         }
 
         for (const p of this.solids) {
+            if (p.type === "oneDirection") {
+                continue;
+            }
             if (this.rectsCollide(this.player, p)) {
                 const platformPrevX = p.previousX ?? p.x;
 
@@ -714,6 +720,11 @@ export class LostDaysOfSpring {
                     previousY + previousH <= Math.max(platformPrevY, p.y);
                 const wasBelow =
                     previousY >= Math.min(platformPrevY, p.y) + p.h;
+
+                // oneDirection platforms: only block when landing from above
+                if (p.type === "oneDirection" && !wasAbove) {
+                    continue;
+                }
 
                 // Landing on top of platform
                 if (wasAbove) {
@@ -778,7 +789,11 @@ export class LostDaysOfSpring {
             return;
         }
 
-        if (platform.type === "solid" || platform.type === "elevator") {
+        if (
+            platform.type === "solid" ||
+            platform.type === "elevator" ||
+            platform.type === "oneDirection"
+        ) {
             this.player.vy = 0;
             return;
         }

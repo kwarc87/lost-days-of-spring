@@ -226,12 +226,22 @@ const platformCaves = {
         ...BASE_CRACKS_TILESET,
         sprites: onlyTop(CRACKS_FULL),
     },
-
     board: {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3(
             { x: 32, y: 16 },
             { x: 128, y: 16 },
+            { x: 96, y: 16 },
+        ),
+    },
+    boardOneDirection: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 32, y: 16 },
+            [
+                { x: 72, y: 16 },
+                { x: 56, y: 16 },
+            ],
             { x: 96, y: 16 },
         ),
     },
@@ -259,9 +269,13 @@ const platformCaves = {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3(
             { x: 208, y: 16, padLeft: 6 },
-            { x: 176, y: 16 },
+            { x: 208, y: 16 },
             { x: 272, y: 16, padRight: 6 },
         ),
+    },
+    pipe: {
+        ...BASE_TILESET,
+        sprites: repeatAllTiles3x3({ x: 176, y: 16 }),
     },
     brick: {
         ...BASE_TILESET,
