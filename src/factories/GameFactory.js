@@ -308,6 +308,26 @@
             h: 22,
             ...rest,
         }),
+        plant005: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/all-props.png",
+            cordX: 366,
+            cordY: 112,
+            w: 32,
+            h: 32,
+            ...rest,
+        }),
+        plant006: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/all-props.png",
+            cordX: 446,
+            cordY: 112,
+            w: 32,
+            h: 32,
+            ...rest,
+        }),
         wallPlant001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -663,6 +683,18 @@
                 GameFactory.environment.plant004({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID - 8 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            plant005: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.plant005({
+                    x: x * GameFactory.GRID + 2 * GameFactory.SCALE,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            plant006: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.plant006({
+                    x: x * GameFactory.GRID - 2 * GameFactory.SCALE,
+                    y: y * GameFactory.GRID,
                     ...rest,
                 }),
             wallPlant001: ({ x, y, ...rest } = {}) =>

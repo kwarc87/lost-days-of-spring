@@ -503,6 +503,7 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
 
 const MAP_COLORS = {
     solid: "#6d5ad9",
+    oneDirection: "#4a3db0",
     booster: "#e81c9c",
     elevator: "#710952",
 };
