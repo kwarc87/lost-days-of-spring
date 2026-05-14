@@ -207,6 +207,29 @@
         },
         ...overrides,
     }),
+    cannon: ({ id, x, y, targetY, ...rest } = {}) => ({
+        id,
+        x,
+        y,
+        w: 96,
+        h: 96,
+        targetY,
+        color: "#35fffd",
+        speed: 8,
+        shootFrequency: 2000,
+        delay: 0,
+        lastShootTime: 0,
+        ammo: {
+            vx: 0,
+            vy: 0,
+            w: 8,
+            h: 8,
+            damage: 1,
+            recoilX: 0,
+            recoilY: 5,
+        },
+        ...rest,
+    }),
     rowOfCollectibles: ({ startId, count, startX, y, gap } = {}) =>
         Array.from({ length: count }, (_, i) =>
             GameFactory.collectible({
@@ -492,6 +515,14 @@
                 y: y * GameFactory.GRID,
                 speed,
                 health,
+                ...rest,
+            }),
+        cannon: ({ id, x, y, targetY, ...rest } = {}) =>
+            GameFactory.cannon({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                targetY: targetY * GameFactory.GRID,
                 ...rest,
             }),
         exit: ({ id, x, y, w, h, ...rest } = {}) =>

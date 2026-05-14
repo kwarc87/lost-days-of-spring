@@ -17,6 +17,10 @@ import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
 import { DefaultExitRenderer } from "../renderers/ExitRenderers.js";
 import { MessageRenderer } from "../renderers/MessageRenderer.js";
+import {
+    CannonRenderer,
+    CannonBulletRenderer,
+} from "../renderers/CannonRenderers.js";
 import { getExitLevelLines } from "../messages.js";
 
 export class LostDaysOfSpring {
@@ -60,6 +64,11 @@ export class LostDaysOfSpring {
         // ====== WEAPON ======
         this.bullets = [];
         this.nextBulletId = 0;
+
+        // ====== CANNONS ======
+        this.cannons = [];
+        this.cannonBullets = [];
+        this.nextCannonBulletId = 0;
 
         // ====== CAMERA ======
         this.camera = {
@@ -125,6 +134,8 @@ export class LostDaysOfSpring {
         this.spikeRenderer = DefaultSpikeRenderer;
         this.exitRenderer = DefaultExitRenderer;
         this.messageRenderer = MessageRenderer;
+        this.cannonRenderer = CannonRenderer;
+        this.cannonBulletRenderer = CannonBulletRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -146,6 +157,8 @@ export class LostDaysOfSpring {
         this.drawCoins = this.withCameraCulling(this.drawCoins);
         this.drawSplinters = this.withCameraCulling(this.drawSplinters);
         this.drawBullet = this.withCameraCulling(this.drawBullet);
+        this.drawCannon = this.withCameraCulling(this.drawCannon);
+        this.drawCannonBullet = this.withCameraCulling(this.drawCannonBullet);
         this.drawEnvPreBackgroundItem = this.withCameraCulling(
             this.drawEnvPreBackgroundItem,
         );
@@ -188,6 +201,7 @@ export class LostDaysOfSpring {
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
+        this.cannons = levelData.cannons ?? [];
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
         this.currentLevelEnemiesCount = this.enemies.length;
@@ -200,6 +214,14 @@ export class LostDaysOfSpring {
         // Reset bullets
         this.bullets = [];
         this.nextBulletId = 0;
+
+        // Reset cannon bullets
+        this.cannonBullets = [];
+        this.nextCannonBulletId = 0;
+        for (const cannon of this.cannons) {
+            cannon.lastShootTime =
+                performance.now() - cannon.shootFrequency + cannon.delay;
+        }
 
         // Reset Camera
         this.camera.x = 0;
@@ -465,6 +487,8 @@ export class LostDaysOfSpring {
         this.updateSpikesDamage(now);
 
         this.updateBullets(now);
+        this.updateCannons(now);
+        this.updateCannonBullets(now);
         this.updateCollectibles();
         this.updateHiddenWalls();
         this.updateExit();
@@ -1211,6 +1235,59 @@ export class LostDaysOfSpring {
         }
     }
 
+    // Trigger cannons to shoot based on shootFrequency
+    updateCannons(now) {
+        for (const cannon of this.cannons) {
+            if (now - cannon.lastShootTime < cannon.shootFrequency) {
+                continue;
+            }
+
+            cannon.lastShootTime = now;
+
+            const bulletW = cannon.ammo.w;
+            const bulletH = cannon.ammo.h;
+
+            this.cannonBullets.push({
+                ...cannon.ammo,
+                id: this.nextCannonBulletId++,
+                x: cannon.x + cannon.w / 2 - bulletW / 2,
+                y: cannon.y + cannon.h,
+                vx: 0,
+                vy: cannon.speed,
+                targetY: cannon.targetY,
+                recoilX: 0,
+                recoilY: 5,
+                color: cannon.color,
+            });
+        }
+    }
+
+    // Move cannon bullets and check collision with player only
+    updateCannonBullets(now) {
+        for (let i = this.cannonBullets.length - 1; i >= 0; i--) {
+            const bullet = this.cannonBullets[i];
+            bullet.x += bullet.vx;
+            bullet.y += bullet.vy;
+
+            if (bullet.y > bullet.targetY) {
+                this.cannonBullets.splice(i, 1);
+                continue;
+            }
+
+            if (this.rectsCollide(bullet, this.player)) {
+                this.cannonBullets.splice(i, 1);
+                const cooldownIsActive =
+                    now - this.player.lastHitTime < this.player.hitCooldown;
+                if (!cooldownIsActive) {
+                    this.applyDamageToPlayer(now, bullet);
+                    if (this.gameOver) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     // Check player-collectible collisions and mark collected items
     updateCollectibles() {
         for (const c of this.coins) {
@@ -1461,6 +1538,14 @@ export class LostDaysOfSpring {
         this.weaponRenderer.draw(this.ctx, b);
     }
 
+    drawCannon(cannon) {
+        this.cannonRenderer.draw(this.ctx, cannon);
+    }
+
+    drawCannonBullet(b) {
+        this.cannonBulletRenderer.draw(this.ctx, b);
+    }
+
     drawSpike(spike) {
         if (this.mapView) {
             this.spikeRenderer.drawMapSpike(this.ctx, spike);
@@ -1537,6 +1622,10 @@ export class LostDaysOfSpring {
             this.drawBullet(w);
         }
 
+        for (const b of this.cannonBullets) {
+            this.drawCannonBullet(b);
+        }
+
         for (const c of this.coins) {
             if (!c.collected) {
                 this.drawCoins(c);
@@ -1565,6 +1654,10 @@ export class LostDaysOfSpring {
 
         for (const e of this.enemies) {
             this.drawEnemy(e);
+        }
+
+        for (const cannon of this.cannons) {
+            this.drawCannon(cannon);
         }
 
         for (const wall of this.hiddenWalls) {
