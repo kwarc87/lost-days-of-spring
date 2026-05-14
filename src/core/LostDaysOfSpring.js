@@ -1238,14 +1238,17 @@ export class LostDaysOfSpring {
     // Trigger cannons to shoot based on shootFrequency
     updateCannons(now) {
         for (const cannon of this.cannons) {
-            if (now - cannon.lastShootTime < cannon.shootFrequency) {
+            const elapsed = now - cannon.lastShootTime;
+            if (elapsed < cannon.shootFrequency) {
                 continue;
             }
 
-            cannon.lastShootTime = now;
+            // Advance by whole multiples of shootFrequency to maintain phase offset
+            cannon.lastShootTime +=
+                Math.floor(elapsed / cannon.shootFrequency) *
+                cannon.shootFrequency;
 
             const bulletW = cannon.ammo.w;
-            const bulletH = cannon.ammo.h;
 
             this.cannonBullets.push({
                 ...cannon.ammo,
