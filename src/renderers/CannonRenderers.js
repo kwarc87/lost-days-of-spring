@@ -9,6 +9,26 @@ const DST_W = 96;
 const DST_H = 96;
 
 export const CannonRenderer = {
+    drawMapCannon: (ctx, cannon) => {
+        const x = Math.round(cannon.x);
+        const y = Math.round(cannon.y);
+        const { w, h } = cannon;
+        const innerPad = Math.round(Math.min(w, h) * 0.2);
+
+        // Outer brown square
+        ctx.fillStyle = "#6b3a1f";
+        ctx.fillRect(x, y, w, h);
+
+        // Inner square in the cannon's custom color
+        ctx.fillStyle = cannon.color ?? "#35fffd";
+        ctx.fillRect(
+            x + innerPad,
+            y + innerPad,
+            w - innerPad * 2,
+            h - innerPad * 2,
+        );
+    },
+
     draw: (ctx, cannon) => {
         const img = getImg(SPRITE_URL);
         if (!img?.complete || !img.naturalWidth) {

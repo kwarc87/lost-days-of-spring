@@ -1542,6 +1542,10 @@ export class LostDaysOfSpring {
     }
 
     drawCannon(cannon) {
+        if (this.mapView) {
+            this.cannonRenderer.drawMapCannon(this.ctx, cannon);
+            return;
+        }
         this.cannonRenderer.draw(this.ctx, cannon);
     }
 

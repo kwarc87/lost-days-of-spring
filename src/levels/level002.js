@@ -8,8 +8,8 @@ export const LEVEL_002 = {
         height: GameFactory.GRID * 144,
     },
     playerStart: {
-        x: GameFactory.GRID * 2,
-        y: GameFactory.GRID * 136,
+        x: GameFactory.GRID * 120,
+        y: GameFactory.GRID * 15,
     },
     platforms: [
         // platforms behind floor 0
@@ -536,7 +536,7 @@ export const LEVEL_002 = {
         GameFactory.grid.solid({ id: 447, x: 72, y: 24, w: 4, h: 2, layout: "metal" }),
         GameFactory.grid.solid({ id: 448, x: 50, y: 46, w: 2, h: 2, layout: "metal" }),
         GameFactory.grid.oneDirection({ id: 449, x: 76, y: 24, w: 4, h: 4 }),
-        GameFactory.grid.solid({ id: 450, x: 115, y: 22, w: 7, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 450, x: 110, y: 22, w: 17, h: 1, layout: "board" }),
         GameFactory.grid.solid({ id: 451, x: 76, y: 32, w: 50, h: 2 }),
         GameFactory.grid.solid({ id: 453, x: 80, y: 24, w: 36, h: 4 }),
         GameFactory.grid.solid({ id: 454, x: 100, y: 27, w: 16, h: 2, layout: "groundBottomCap" }),
@@ -556,7 +556,41 @@ export const LEVEL_002 = {
         GameFactory.grid.solid({ id: 471, x: 104, y: 41, w: 4, h: 3, layout: "groundTopLeftEdgeCap" }),
         GameFactory.grid.solid({ id: 472, x: 85, y: 44, w: 10, h: 5, layout: "groundTopCap" }),
         GameFactory.grid.solid({ id: 473, x: 80, y: 11, w: 12, h: 1, layout: "board" }),
-        GameFactory.grid.solid({ id: 474, x: 80, y: 12, w: 12, h: 3 }),
+        GameFactory.grid.solid({ id: 474, x: 80, y: 12, w: 12, h: 6 }),
+        GameFactory.grid.solid({ id: 475, x: 80, y: 41, w: 2, h: 1, layout: "boardRightCap" }),
+        GameFactory.grid.solid({ id: 476, x: 49, y: 35, w: 3, h: 5, layout: "groundRightCap" }),
+        GameFactory.grid.solid({ id: 477, x: 51, y: 36, w: 2, h: 3, layout: "groundRightCap" }),
+        GameFactory.grid.solid({ id: 478, x: 49, y: 30, w: 2, h: 2, layout: "groundRightCap" }),
+        GameFactory.grid.solid({ id: 479, x: 49, y: 25, w: 2, h: 2, layout: "groundRightCap" }),
+        GameFactory.grid.solid({ id: 480, x: 92, y: 22, w: 2, h: 2, layout: "metal" }),
+        GameFactory.grid.solid({ id: 481, x: 80, y: 23, w: 1, h: 1, layout: "metalSmall" }),
+        GameFactory.grid.solid({ id: 482, x: 55, y: 18, w: 10, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 483, x: 57, y: 19, w: 6, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 484, x: 100, y: 22, w: 2, h: 2, layout: "metal" }),
+        GameFactory.grid.solid({ id: 485, x: 95, y: 7, w: 20, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 486, x: 96, y: 8, w: 18, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 487, x: 97, y: 9, w: 16, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 488, x: 98, y: 10, w: 14, h: 3, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 489, x: 100, y: 12, w: 10, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 490, x: 108, y: 22, w: 2, h: 2, layout: "metal" }),
+        GameFactory.grid.solid({ id: 491, x: 116, y: 20, w: 2, h: 2, layout: "metal" }),
+        GameFactory.grid.solid({ id: 492, x: 119, y: 18, w: 2, h: 4, layout: "metal" }),
+        GameFactory.grid.solid({ id: 493, x: 125, y: 13, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 494, x: 132, y: 16, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 495, x: 132, y: 22, w: 2, h: 2, layout: "metal" }),
+        GameFactory.grid.solid({ id: 496, x: 142, y: 17, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 497, x: 152, y: 18, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 498, x: 161, y: 18, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 499, x: 171, y: 20, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 500, x: 174, y: 15, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 501, x: 181, y: 16, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 502, x: 190, y: 17, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 503, x: 194, y: 13, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 504, x: 198, y: 12, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 505, x: 202, y: 12, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 506, x: 206, y: 12, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 507, x: 210, y: 18, w: 2, h: 1, layout: "board" }),
+
 
         // SECRET AREA
         GameFactory.grid.booster({ id: 467, x: 23, y: 123, w: 10, h: 2, boostSpeed: 74 }),
@@ -587,7 +621,7 @@ export const LEVEL_002 = {
         // floor 3
         GameFactory.grid.elevator({ id: 1018, startX: 482, startY: 46, w: 4, h: 2, targetX: 482, targetY: 34, speed: 4, waitTime: 1500 }),
         GameFactory.grid.elevator({ id: 1019, startX: 474, startY: 34, w: 4, h: 2, targetX: 474, targetY: 46, speed: 4, waitTime: 1500 }),
-        GameFactory.grid.elevator({ id: 1020, startX: 203, startY: 40, w: 4, h: 1, targetX: 154, targetY: 40, speed: 2.5, waitTime: 1500 }),
+        GameFactory.grid.elevator({ id: 1020, startX: 203, startY: 40, w: 4, h: 1, targetX: 154, targetY: 40, speed: 4, waitTime: 1500 }),
 
     ],
     hiddenWalls: [
@@ -614,6 +648,7 @@ export const LEVEL_002 = {
         GameFactory.grid.cracks({ id: 2021, x: 170, y: 29, w: 22, h: 9, layout: "cracksVerticalConnector" }),
         GameFactory.grid.cracks({ id: 2022, x: 115, y: 24, w: 7, h: 5, layout: "cracksHorizontalConnector" }),
         GameFactory.grid.cracks({ id: 2023, x: 406, y: 136, w: 6, h: 4, layout: "cracksTopCap" }),
+        GameFactory.grid.cracks({ id: 2024, x: 80, y: 7, w: 12, h: 6, layout: "cracksVerticalConnector" }),
     ],
     collectibles: {
         splinters: [
@@ -673,6 +708,8 @@ export const LEVEL_002 = {
             GameFactory.grid.splinters({ id: 54, x: 180.5, y: 34.5 }),
             GameFactory.grid.splinters({ id: 55, x: 138.5, y: 30 }),
             GameFactory.grid.splinters({ id: 56, x: 102, y: 47 }),
+            GameFactory.grid.splinters({ id: 57, x: 51, y: 20 }),
+            GameFactory.grid.splinters({ id: 58, x: 90, y: 9 }),
         ],
         coins: [
             ...GameFactory.grid.rowOfCollectibles({ startId: 1, count: 10, x: 33, y: 136 }),
@@ -880,6 +917,37 @@ export const LEVEL_002 = {
             ...GameFactory.grid.columnOfCollectibles({ startId: 1596, count: 8, x: 221, y: 36 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 1604, count: 8, x: 222, y: 36 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 1612, count: 22, x: 170, y: 39 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1634, count: 4, x: 96, y: 44 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1638, count: 4, x: 96, y: 45 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1642, count: 4, x: 96, y: 46 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 1646, count: 7, x: 80, y: 34 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 1653, count: 7, x: 81, y: 34 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1660, count: 2, x: 54, y: 41 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1662, count: 2, x: 54, y: 40 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1664, count: 2, x: 56, y: 39 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1666, count: 2, x: 56, y: 38 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1668, count: 2, x: 58, y: 37 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1670, count: 2, x: 58, y: 36 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1672, count: 2, x: 60, y: 35 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1674, count: 2, x: 60, y: 34 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1676, count: 2, x: 62, y: 33 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1678, count: 2, x: 62, y: 32 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1680, count: 2, x: 64, y: 31 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1682, count: 2, x: 64, y: 30 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1684, count: 2, x: 66, y: 29 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1686, count: 2, x: 66, y: 28 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1688, count: 2, x: 68, y: 27 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1690, count: 2, x: 68, y: 26 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1692, count: 2, x: 70, y: 25 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1694, count: 2, x: 70, y: 24 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1696, count: 34, x: 81, y: 30 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1730, count: 18, x: 81, y: 29 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1748, count: 8, x: 81, y: 9 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1756, count: 6, x: 121, y: 18 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1762, count: 6, x: 121, y: 19 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1768, count: 6, x: 121, y: 20 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 1774, count: 6, x: 121, y: 21 }),
+            
         ],
         hearts: [
             GameFactory.grid.hearts({ id: 1, x: 236, y: 133 }),
@@ -905,6 +973,10 @@ export const LEVEL_002 = {
             GameFactory.grid.hearts({ id: 21, x: 426.5, y: 44.5 }),
             GameFactory.grid.hearts({ id: 22, x: 343, y: 30 }),
             GameFactory.grid.hearts({ id: 23, x: 342, y: 30 }),
+            GameFactory.grid.hearts({ id: 24, x: 89, y: 40 }),
+            GameFactory.grid.hearts({ id: 25, x: 90, y: 40 }),
+            GameFactory.grid.hearts({ id: 26, x: 77.5, y: 13 }),
+            GameFactory.grid.hearts({ id: 27, x: 50, y: 28 }),
         ]
     },
     spikes: [
@@ -977,6 +1049,10 @@ export const LEVEL_002 = {
         ...GameFactory.grid.rowOfSpikes({ startId: 413, count: 2, x: 124, y: 42 }),
         ...GameFactory.grid.rowOfSpikes({ startId: 415, count: 4, x: 116, y: 42 }),
         ...GameFactory.grid.rowOfSpikes({ startId: 419, count: 2, x: 108, y: 42 }),
+
+        // floor 4
+        ...GameFactory.grid.rowOfSpikes({ startId: 421, count: 6, x: 94, y: 23 }),
+        ...GameFactory.grid.rowOfSpikes({ startId: 427, count: 6, x: 102, y: 23 }),
     ],
     enemies: [
         GameFactory.grid.enemy({ id: 1, minX: 186, maxX: 196, y: 136, speed: 1.5, health: 5, mainColor: "#fa9bdd", secondaryColor: "#710952" }),
@@ -1011,6 +1087,10 @@ export const LEVEL_002 = {
         GameFactory.grid.enemy({ id: 30, minX: 491, maxX: 496, y: 70, speed: 2, health: 15, mainColor: "#fa9bdd", secondaryColor: "#3b1158" }),
         GameFactory.grid.enemy({ id: 31, minX: 486, maxX: 492, y: 44, speed: 4, health: 50, mainColor: "#68eef2", secondaryColor: "#3b1158" }),
         GameFactory.grid.enemy({ id: 32, minX: 373, maxX: 417, y: 46, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
+        GameFactory.grid.enemy({ id: 33, minX: 110, maxX: 116, y: 39, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
+        GameFactory.grid.enemy({ id: 34, minX: 146, maxX: 154, y: 38, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
+        GameFactory.grid.enemy({ id: 35, minX: 81, maxX: 92, y: 22, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
+        GameFactory.grid.enemy({ id: 36, minX: 85, maxX: 95, y: 42, speed: 5, health: 75, mainColor: "#d9dbe0", secondaryColor: "#8d121b" }),
     ],
     cannons: [
         GameFactory.grid.cannon({ id: 1, x: 332.5, y: 132, targetY: 142 }),
@@ -1046,6 +1126,14 @@ export const LEVEL_002 = {
         GameFactory.grid.cannon({ id: 27, x: 58, y: 43, targetY: 48, shootFrequency: 1500, color: "#f0cc8b" }),
         GameFactory.grid.cannon({ id: 28, x: 56, y: 43, targetY: 48, shootFrequency: 1500, color: "#f0cc8b", delay: 300 }),
         GameFactory.grid.cannon({ id: 29, x: 54, y: 43, targetY: 48, shootFrequency: 1500, color: "#f0cc8b", delay: 600 }),
+
+        // floor 4
+        GameFactory.grid.cannon({ id: 30, x: 81, y: 17, targetY: 24, shootFrequency: 750, color: "#C1311B", delay: 150 }),
+        GameFactory.grid.cannon({ id: 31, x: 83, y: 17, targetY: 24, shootFrequency: 750, color: "#C1311B", delay: 300 }),
+        GameFactory.grid.cannon({ id: 32, x: 85, y: 17, targetY: 24, shootFrequency: 750, color: "#C1311B", delay: 450 }),
+        GameFactory.grid.cannon({ id: 33, x: 87, y: 17, targetY: 24, shootFrequency: 750, color: "#C1311B", delay: 600 }),
+        GameFactory.grid.cannon({ id: 34, x: 89, y: 17, targetY: 24, shootFrequency: 750, color: "#C1311B" }),
+        GameFactory.grid.cannon({ id: 34, x: 104, y: 13, targetY: 24, shootFrequency: 750, color: "#C1311B" }),
     ],
     preBackgroundItems: [
         // wall 1
@@ -1261,7 +1349,6 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.elevatorPanel({ x: 208, y: 38 }),
         GameFactory.grid.environment.elevatorPanel({ x: 152, y: 38 }),
 
-
         // wall 8
         GameFactory.grid.environment.wallClean({ x: 265, y: 44, w: 15, h: 5 }),
         GameFactory.grid.environment.wallClean({ x: 282, y: 44, w: 16, h: 5 }),
@@ -1271,6 +1358,7 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.wallSharpHole({ x: 298, y: 45 }),
         ...GameFactory.grid.environment.wallSharpLeftCol({ x: 263, y: 44, count: 5 }),
         ...GameFactory.grid.environment.wallSharpRightCol({ x: 322, y: 44, count: 5 }),
+        GameFactory.grid.environment.wallClean({ x: 298, y: 44, w: 2, h: 1 }),
         
     ],
     backgroundItems: [
@@ -1488,7 +1576,6 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.plant004({ x: 464, y: 46 }),
         GameFactory.grid.environment.plate001({ x: 419, y: 37 }),
         GameFactory.grid.environment.plant003({ x: 413, y: 37 }),
-        GameFactory.grid.environment.plant004({ x: 49, y: 37 }),
         GameFactory.grid.environment.plant004({ x: 414, y: 37 }),
         GameFactory.grid.environment.plant004({ x: 415, y: 37 }),
         GameFactory.grid.environment.plant004({ x: 415, y: 37 }),
@@ -1651,6 +1738,21 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.plant003({ x: 61, y: 48 }),
         GameFactory.grid.environment.plant003({ x: 56, y: 48 }),
         GameFactory.grid.environment.plant004({ x: 57, y: 48 }),
+
+        // floor 4
+        GameFactory.grid.environment.plate001({ x: 54, y: 42 }),
+        GameFactory.grid.environment.plant003({ x: 83, y: 24 }),
+        GameFactory.grid.environment.plant003({ x: 86, y: 24 }),
+        GameFactory.grid.environment.plant003({ x: 50, y: 35 }),
+        GameFactory.grid.environment.plant003({ x: 90, y: 24 }),
+        GameFactory.grid.environment.plant004({ x: 91, y: 24 }),
+        GameFactory.grid.environment.plate001({ x: 96, y: 24 }),
+
+        GameFactory.grid.environment.plant003({ x: 110, y: 24 }),
+        GameFactory.grid.environment.plant004({ x: 111, y: 24 }),
+        GameFactory.grid.environment.plant003({ x: 112, y: 24 }),
+        GameFactory.grid.environment.plant004({ x: 113, y: 24 }),
+        GameFactory.grid.environment.plant003({ x: 114, y: 24 }),
 
     ],
     foregroundItems: [
@@ -2000,6 +2102,10 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.wallInside({ x: 98, y: 50 }),
         GameFactory.grid.environment.wallInside({ x: 92, y: 46 }),
         GameFactory.grid.environment.plant002({ x: 102, y: 48 }),
+        GameFactory.grid.environment.wallInside({ x: 301, y: 53 }),
+
+        // floor 4
+        GameFactory.grid.environment.plant001({ x: 130, y: 24 }),
         
     ],
     messages: [
