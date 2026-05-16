@@ -1,6 +1,6 @@
 import { getImg } from "../utils/imgCache.js";
 import { MessageRenderer } from "./MessageRenderer.js";
-import { MESSAGES } from "../messages.js";
+import { MESSAGES, formatPlayTime } from "../messages.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
@@ -49,6 +49,7 @@ export const DefaultLevelCompleteRenderer = {
         totalSplinters,
         enemiesCount,
         totalEnemies,
+        playTime,
     ) => {
         const w = canvas.width;
         const h = canvas.height;
@@ -81,6 +82,9 @@ export const DefaultLevelCompleteRenderer = {
             splintersCount,
             totalSplinters,
         );
+        const statsTimeText = MESSAGES.STATS.TIME_TEXT(
+            formatPlayTime(playTime),
+        );
 
         const padX = 32;
         const padY = 24;
@@ -99,13 +103,15 @@ export const DefaultLevelCompleteRenderer = {
         const splintersTextW = Math.ceil(
             ctx.measureText(statsSplintersText).width,
         );
+        const timeW = Math.ceil(ctx.measureText(statsTimeText).width);
 
         const coinsRowW = artIconSize + iconGap + coinsTextW;
         const enemiesRowW = artIconSize + iconGap + enemiesTextW;
         const splinterRowW = gemIconSize + iconGap + splintersTextW;
 
         const panelW =
-            Math.max(titleW, coinsRowW, enemiesRowW, splinterRowW) + padX * 2;
+            Math.max(titleW, coinsRowW, enemiesRowW, splinterRowW, timeW) +
+            padX * 2;
         const hintFont = `bold 11px "Silkscreen", monospace`;
         ctx.font = hintFont;
         const hintText = MESSAGES.LEVEL_COMPLETE.RESTART_HINT.text;
@@ -120,6 +126,8 @@ export const DefaultLevelCompleteRenderer = {
             rowH +
             gap +
             rowH +
+            gap +
+            lineH +
             gap +
             hintH +
             padY;
@@ -245,7 +253,13 @@ export const DefaultLevelCompleteRenderer = {
         }
 
         // ── ESC hint ─────────────────────────────────────────────────────────
-        const hintY = splinterRowY + rowH + gap;
+        const timeY = splinterRowY + rowH + gap;
+        ctx.font = subFont;
+        ctx.textAlign = "center";
+        ctx.fillStyle = MESSAGES.STATS.TIME_COLOR;
+        ctx.fillText(statsTimeText, w / 2, timeY);
+
+        const hintY = timeY + lineH + gap;
         ctx.font = hintFont;
         ctx.textAlign = "center";
         ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.RESTART_HINT.color;

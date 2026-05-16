@@ -55,6 +55,8 @@ export class LostDaysOfSpring {
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.levelStartAt = 0; // timestamp (ms) when the level was loaded
+        this.totalPausedTime = 0; // accumulated paused time (ms) within current level
+        this.pauseStartAt = 0; // timestamp (ms) when the current pause started
         this.gameOverDelay = 7000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
 
@@ -235,6 +237,8 @@ export class LostDaysOfSpring {
         this.gameOver = false;
         this.gameOverAt = 0;
         this.levelStartAt = performance.now();
+        this.totalPausedTime = 0;
+        this.pauseStartAt = 0;
         this.mapView = false;
         this.playerAtExit = false;
     }
@@ -1714,6 +1718,8 @@ export class LostDaysOfSpring {
     }
 
     drawLevelComplete() {
+        const playTimeMs =
+            this.levelCompleteAt - this.levelStartAt - this.totalPausedTime;
         this.levelCompleteRenderer.drawLevelCompleteScreen(
             this.ctx,
             this.canvas,
@@ -1723,6 +1729,7 @@ export class LostDaysOfSpring {
             this.currentLevelSplintersCount,
             this.currentLevelEnemiesCount - this.enemies.length,
             this.currentLevelEnemiesCount,
+            playTimeMs,
         );
     }
 
@@ -1732,6 +1739,8 @@ export class LostDaysOfSpring {
             0,
             Math.ceil((this.gameOverDelay - elapsed) / 1000),
         );
+        const playTimeMs =
+            this.gameOverAt - this.levelStartAt - this.totalPausedTime;
 
         this.gameOverRenderer.drawGameOverScreen(
             this.ctx,
@@ -1743,6 +1752,7 @@ export class LostDaysOfSpring {
             this.currentLevelEnemiesCount - this.enemies.length,
             this.currentLevelEnemiesCount,
             remaining,
+            playTimeMs,
         );
     }
 
@@ -1866,10 +1876,12 @@ export class LostDaysOfSpring {
         }
         if (this.isRunning) {
             this.stop();
+            this.pauseStartAt = performance.now();
 
             // Draw pause overlay
             this.pauseRenderer.drawPauseScreen(this.ctx, this.canvas);
         } else {
+            this.totalPausedTime += performance.now() - this.pauseStartAt;
             this.start();
         }
     }
@@ -1882,8 +1894,10 @@ export class LostDaysOfSpring {
             }
             this.mapView = true;
             this.stop();
+            this.pauseStartAt = performance.now();
             this.draw();
         } else {
+            this.totalPausedTime += performance.now() - this.pauseStartAt;
             this.mapView = false;
             this.start();
         }

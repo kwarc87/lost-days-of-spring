@@ -1,6 +1,6 @@
 import { getImg } from "../utils/imgCache.js";
 import { MessageRenderer } from "./MessageRenderer.js";
-import { MESSAGES } from "../messages.js";
+import { MESSAGES, formatPlayTime } from "../messages.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 
@@ -50,6 +50,7 @@ export const DefaultGameOverRenderer = {
         enemiesCount,
         totalEnemies,
         remaining,
+        playTime,
     ) {
         const w = canvas.width;
         const h = canvas.height;
@@ -83,6 +84,9 @@ export const DefaultGameOverRenderer = {
             totalSplinters,
         );
         const subText = MESSAGES.STATS.COUNTDOWN_TEXT(remaining);
+        const statsTimeText = MESSAGES.STATS.TIME_TEXT(
+            formatPlayTime(playTime),
+        );
 
         const padX = 32;
         const padY = 24;
@@ -102,13 +106,21 @@ export const DefaultGameOverRenderer = {
             ctx.measureText(statsSplintersText).width,
         );
         const subW = Math.ceil(ctx.measureText(subText).width);
+        const timeW = Math.ceil(ctx.measureText(statsTimeText).width);
 
         const coinsRowW = artIconSize + iconGap + coinsTextW;
         const enemiesRowW = artIconSize + iconGap + enemiesTextW;
         const splinterRowW = gemIconSize + iconGap + splintersTextW;
 
         const panelW =
-            Math.max(titleW, coinsRowW, enemiesRowW, splinterRowW, subW) +
+            Math.max(
+                titleW,
+                coinsRowW,
+                enemiesRowW,
+                splinterRowW,
+                timeW,
+                subW,
+            ) +
             padX * 2;
         const panelH =
             padY +
@@ -119,6 +131,8 @@ export const DefaultGameOverRenderer = {
             rowH +
             gap +
             rowH +
+            gap +
+            lineH +
             gap +
             lineH +
             padY;
@@ -240,9 +254,13 @@ export const DefaultGameOverRenderer = {
 
         ctx.imageSmoothingEnabled = true;
 
+        // ── Time row ─────────────────────────────────────────────────────────
+        ctx.fillStyle = MESSAGES.STATS.TIME_COLOR;
+        ctx.fillText(statsTimeText, w / 2, splinterRowY + rowH + gap);
+
         // ── Countdown ────────────────────────────────────────────────────────
         ctx.fillStyle = MESSAGES.STATS.COUNTDOWN_COLOR;
-        ctx.fillText(subText, w / 2, splinterRowY + rowH + gap);
+        ctx.fillText(subText, w / 2, splinterRowY + rowH + gap + lineH + gap);
 
         ctx.restore();
     },

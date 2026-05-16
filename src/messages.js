@@ -1,5 +1,13 @@
 // ─── Single source of truth for all UI messages ──────────────────────────────
 
+export function formatPlayTime(ms) {
+    const totalSec = Math.floor(Math.max(0, ms) / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 export const MESSAGES = {
     // ── Exit ─────────────────────────────────────────────────────────────────
     EXIT: {
@@ -27,11 +35,13 @@ export const MESSAGES = {
         ENEMIES_COLOR: "#e85454",
         SPLINTERS_COLOR: "#5ce8d0",
         COUNTDOWN_COLOR: "#7a8a99",
+        TIME_COLOR: "#a0c4ff",
         COINS_TEXT: (count, total) => `Coins: ${count} / ${total}`,
         ENEMIES_TEXT: (count, total) => `Enemies defeated: ${count} / ${total}`,
         SPLINTERS_TEXT: (count, total) =>
             `Splinters: ${count} / ${total}  \u2756 hidden`,
         COUNTDOWN_TEXT: (remaining) => `Restart in ${remaining}s  \u2013  ESC`,
+        TIME_TEXT: (formatted) => `Time: ${formatted}`,
     },
 
     // ── Game Over ─────────────────────────────────────────────────────────────
