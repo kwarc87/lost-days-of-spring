@@ -509,7 +509,7 @@ const MAP_COLORS = {
 };
 
 function drawSimpleTiled(ctx, platform) {
-    const color = MAP_COLORS[platform.type];
+    const color = platform.color ?? MAP_COLORS[platform.type];
     if (!color) {
         return;
     }
@@ -523,6 +523,10 @@ const HIDDEN_WALL_TRANSITION_DURATION = 150;
 
 export const DefaultPlatformRenderer = {
     draw(ctx, platform, showDebug, camera) {
+        if (platform.layout === "simple") {
+            drawSimpleTiled(ctx, platform);
+            return;
+        }
         drawTiled(
             ctx,
             platform,

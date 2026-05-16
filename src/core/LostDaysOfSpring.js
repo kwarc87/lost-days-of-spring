@@ -49,6 +49,9 @@ export class LostDaysOfSpring {
         // ====== GAME STATE ======
         this.currentLevelId = null;
         this.pendingReset = false;
+        this.checkpoints = [];
+        this.checkpointRespawn = null;
+        this.deathCount = 0;
         this.mapView = false;
         this.levelComplete = false;
         this.gameOver = false;
@@ -57,7 +60,7 @@ export class LostDaysOfSpring {
         this.levelStartAt = 0; // timestamp (ms) when the level was loaded
         this.totalPausedTime = 0; // accumulated paused time (ms) within current level
         this.pauseStartAt = 0; // timestamp (ms) when the current pause started
-        this.gameOverDelay = 7000; // ms until auto-restart after game over
+        this.gameOverDelay = 15000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
 
         // ====== PLAYER (Base static attributes set by factory) ======
@@ -99,7 +102,7 @@ export class LostDaysOfSpring {
         // ====== PHYSICS ======
         this.physics = {
             gravity: 0.52,
-            maxFallSpeed: 18,
+            maxFallSpeed: 24,
             fallGravityMultiplier: 1.45,
             jumpCutGravityMultiplier: 2.8,
         };
@@ -182,22 +185,36 @@ export class LostDaysOfSpring {
             return;
         }
 
+        const isNewLevel = levelId !== this.currentLevelId;
+
+        // Clear checkpoint state when transitioning to a different level
+        if (isNewLevel || this.levelComplete) {
+            this.checkpointRespawn = null;
+        }
+
+        // Reset death counter on level transition or after completing the level
+        if (isNewLevel || this.levelComplete) {
+            this.deathCount = 0;
+        }
+
         this.currentLevelId = levelId;
+
         // Generate a fresh instance of the level data
         const levelData = LEVELS[levelId]();
 
         this.worldSize = levelData.worldSize;
-        this.platforms = levelData.platforms;
-        this.elevators = levelData.elevators;
+        this.platforms = levelData.platforms ?? [];
+        this.elevators = levelData.elevators ?? [];
         // Elevators first: same priority order as movePlayerY collision resolution.
         this.solids = [...this.elevators, ...this.platforms];
-        this.enemies = levelData.enemies;
-        this.coins = levelData.collectibles.coins ?? [];
-        this.splinters = levelData.collectibles.splinters ?? [];
-        this.hearts = levelData.collectibles.hearts ?? [];
+        this.enemies = levelData.enemies ?? [];
+        this.coins = levelData.collectibles?.coins ?? [];
+        this.splinters = levelData.collectibles?.splinters ?? [];
+        this.hearts = levelData.collectibles?.hearts ?? [];
         this.spikes = levelData.spikes ?? [];
         this.messages = levelData.messages ?? [];
         this.activeMessage = null;
+        this.messageShownAt = null;
         this.exits = levelData.exits ?? [];
         this.hiddenWalls = levelData.hiddenWalls ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
@@ -207,6 +224,13 @@ export class LostDaysOfSpring {
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
         this.currentLevelEnemiesCount = this.enemies.length;
+
+        // Load checkpoints and extract embedded visual layers / messages
+        this.checkpoints = levelData.checkpoints ?? [];
+        this.extractCheckpointItems();
+
+        // Restore checkpoint state (collected items, killed enemies, etc.)
+        this.restoreLevel();
 
         this.resetPlayerProperties(levelData);
 
@@ -232,23 +256,117 @@ export class LostDaysOfSpring {
         this.camera.lookAheadY = 0;
 
         // Reset level-complete and game-over state
+        const wasLevelComplete = this.levelComplete;
+        const wasGameOver = this.gameOver;
+        const gameOverAt = this.gameOverAt;
         this.levelComplete = false;
         this.levelCompleteAt = 0;
         this.gameOver = false;
         this.gameOverAt = 0;
-        this.levelStartAt = performance.now();
-        this.totalPausedTime = 0;
+        // Preserve the timer across deaths — only reset on a new level or after level complete
+        if (isNewLevel || wasLevelComplete) {
+            this.levelStartAt = performance.now();
+            this.totalPausedTime = 0;
+        } else if (wasGameOver) {
+            this.totalPausedTime += performance.now() - gameOverAt;
+        }
         this.pauseStartAt = 0;
         this.mapView = false;
         this.playerAtExit = false;
     }
 
+    extractCheckpointItems() {
+        for (const cp of this.checkpoints) {
+            if (cp.back) {
+                this.preBackgroundItems.push(cp.back);
+            }
+            if (cp.front) {
+                this.foregroundItems.push(cp.front);
+            }
+            if (cp.message) {
+                this.messages.push(cp.message);
+            }
+            if (cp.platform) {
+                this.platforms.push(cp.platform);
+                this.solids.push(cp.platform);
+            }
+        }
+    }
+
+    restoreLevel() {
+        const cr = this.checkpointRespawn;
+        if (!cr) {
+            return;
+        }
+
+        if (cr.collectedCoinIds) {
+            for (const coin of this.coins) {
+                if (cr.collectedCoinIds.has(coin.id)) {
+                    coin.collected = true;
+                }
+            }
+        }
+
+        if (cr.collectedSplinterIds) {
+            for (const splinter of this.splinters) {
+                if (cr.collectedSplinterIds.has(splinter.id)) {
+                    splinter.collected = true;
+                }
+            }
+        }
+
+        if (cr.collectedHeartIds) {
+            for (const heart of this.hearts) {
+                if (cr.collectedHeartIds.has(heart.id)) {
+                    heart.collected = true;
+                }
+            }
+        }
+
+        if (cr.shownMessageIds) {
+            for (const msg of this.messages) {
+                if (cr.shownMessageIds.has(msg.id)) {
+                    msg.shown = true;
+                }
+            }
+        }
+
+        if (cr.aliveEnemyIds) {
+            for (const e of this.enemies) {
+                e.dead = !cr.aliveEnemyIds.has(e.id);
+            }
+        }
+
+        if (cr.triggeredElevatorIds) {
+            for (const elev of this.elevators) {
+                if (cr.triggeredElevatorIds.has(elev.id)) {
+                    elev.triggered = true;
+                }
+            }
+        }
+
+        if (cr.reachedIds) {
+            for (const cp of this.checkpoints) {
+                if (cr.reachedIds.has(cp.id)) {
+                    cp.reached = true;
+                }
+            }
+        }
+    }
+
     resetPlayerProperties(levelData) {
+        const respawnX =
+            this.checkpointRespawn?.x ?? levelData?.playerStart?.x ?? 0;
+        const respawnY =
+            this.checkpointRespawn?.y ?? levelData?.playerStart?.y ?? 0;
+        const coinsCount = this.checkpointRespawn?.coinsCount ?? 0;
+        const splintersCount = this.checkpointRespawn?.splintersCount ?? 0;
+
         Object.assign(this.player, {
-            x: levelData?.playerStart?.x ?? 0,
-            y: levelData?.playerStart?.y ?? 0,
-            prevX: levelData?.playerStart?.x ?? 0,
-            prevY: levelData?.playerStart?.y ?? 0,
+            x: respawnX,
+            y: respawnY,
+            prevX: respawnX,
+            prevY: respawnY,
             vx: 0,
             vy: 0,
             posture: this.playerPostures.STANDING,
@@ -262,8 +380,8 @@ export class LostDaysOfSpring {
             onGroundType: null,
             lastGroundId: null,
             lastGroundType: null,
-            coinsCount: 0,
-            splintersCount: 0,
+            coinsCount,
+            splintersCount,
             facing: "right",
             jumpPressedByUser: false,
             shooting: false,
@@ -374,6 +492,9 @@ export class LostDaysOfSpring {
         };
 
         for (const p of [...this.solids, ...this.enemies]) {
+            if (p.dead) {
+                continue;
+            }
             if (p.type === "oneDirection") {
                 continue;
             }
@@ -494,6 +615,7 @@ export class LostDaysOfSpring {
         this.updateCannons(now);
         this.updateCannonBullets(now);
         this.updateCollectibles();
+        this.updateCheckpoints();
         this.updateHiddenWalls();
         this.updateExit();
         this.updateMessages();
@@ -996,6 +1118,9 @@ export class LostDaysOfSpring {
     // Move enemies and check player-enemy collisions
     updateEnemies(now) {
         for (const enemy of this.enemies) {
+            if (enemy.dead) {
+                continue;
+            }
             // Clear damage flash after 200ms
             if (enemy.isDamaged && now - enemy.damageTime > 200) {
                 enemy.isDamaged = false;
@@ -1028,6 +1153,9 @@ export class LostDaysOfSpring {
         // Must be separate from resolution so enemies that are reached after
         // a `break` still get their wasCollidingWithPlayer state updated.
         for (const enemy of this.enemies) {
+            if (enemy.dead) {
+                continue;
+            }
             if (!this.rectsCollide(this.player, enemy)) {
                 continue;
             }
@@ -1047,6 +1175,9 @@ export class LostDaysOfSpring {
 
         // Pass 2: resolve against the first colliding enemy only.
         for (const enemy of this.enemies) {
+            if (enemy.dead) {
+                continue;
+            }
             if (!enemy.collidingWithPlayerThisFrame) {
                 continue;
             }
@@ -1089,6 +1220,7 @@ export class LostDaysOfSpring {
             this.enemies.some(
                 (e) =>
                     e !== enemy &&
+                    !e.dead &&
                     this.rectsCollide(
                         {
                             x: targetX,
@@ -1128,19 +1260,21 @@ export class LostDaysOfSpring {
         }
     }
 
-    applyDamageToPlayer(now, source, extraRecoilIfAbove = false) {
+    applyDamageToPlayer(now, source, extraRecoilIfVertical = false) {
         this.player.life -= source.damage;
         this.player.lastHitTime = now;
         this.player.isHit = true;
 
-        const hitFromAbove = this.player.prevY + this.player.h <= source.y;
+        const hitFromAboveOrBelow =
+            this.player.prevY + this.player.h <= source.y ||
+            this.player.prevY >= source.y + source.h;
 
         const recoilXForce =
-            extraRecoilIfAbove && hitFromAbove
+            extraRecoilIfVertical && hitFromAboveOrBelow
                 ? source.recoilX / 1.5
                 : source.recoilX;
         const recoilYForce =
-            extraRecoilIfAbove && hitFromAbove
+            extraRecoilIfVertical && hitFromAboveOrBelow
                 ? source.recoilY * 1.5
                 : source.recoilY;
 
@@ -1156,11 +1290,40 @@ export class LostDaysOfSpring {
     checkPlayerIsDead(now) {
         if (this.player.life <= 0) {
             this.gameOver = true;
+            this.deathCount++;
             this.gameOverAt = now;
             this.player.vx = 0;
             this.player.vy = 0;
             this.player.shooting = false;
+
+            this.snapshotCheckpointState();
         }
+    }
+
+    snapshotCheckpointState() {
+        this.checkpointRespawn = {
+            ...this.checkpointRespawn,
+            coinsCount: this.player.coinsCount,
+            splintersCount: this.player.splintersCount,
+            collectedCoinIds: new Set(
+                this.coins.filter((c) => c.collected).map((c) => c.id),
+            ),
+            collectedSplinterIds: new Set(
+                this.splinters.filter((s) => s.collected).map((s) => s.id),
+            ),
+            collectedHeartIds: new Set(
+                this.hearts.filter((h) => h.collected).map((h) => h.id),
+            ),
+            aliveEnemyIds: new Set(
+                this.enemies.filter((e) => !e.dead).map((e) => e.id),
+            ),
+            triggeredElevatorIds: new Set(
+                this.elevators.filter((e) => e.triggered).map((e) => e.id),
+            ),
+            shownMessageIds: new Set(
+                this.messages.filter((m) => m.shown).map((m) => m.id),
+            ),
+        };
     }
 
     updateSpikesDamage(now) {
@@ -1205,11 +1368,14 @@ export class LostDaysOfSpring {
             let consumedOnEnemy = false;
             // Bullet-enemy collision
             for (let i = this.enemies.length - 1; i >= 0; i--) {
+                if (this.enemies[i].dead) {
+                    continue;
+                }
                 if (this.rectsCollide(bullet, this.enemies[i])) {
                     const enemy = this.enemies[i];
                     enemy.health -= bullet.damage;
                     if (enemy.health <= 0) {
-                        this.enemies.splice(i, 1);
+                        enemy.dead = true;
                     } else {
                         enemy.isDamaged = true;
                         enemy.damageTime = now;
@@ -1621,10 +1787,6 @@ export class LostDaysOfSpring {
             this.drawPlatform(p);
         }
 
-        for (const wall of this.hiddenWalls) {
-            this.drawHiddenWall(wall);
-        }
-
         for (const i of this.backgroundItems) {
             this.drawEnvBackgroundItem(i);
         }
@@ -1655,6 +1817,10 @@ export class LostDaysOfSpring {
             }
         }
 
+        for (const wall of this.hiddenWalls) {
+            this.drawHiddenWall(wall);
+        }
+
         for (const e of this.elevators) {
             this.drawElevator(e);
         }
@@ -1664,6 +1830,9 @@ export class LostDaysOfSpring {
         }
 
         for (const e of this.enemies) {
+            if (e.dead) {
+                continue;
+            }
             this.drawEnemy(e);
         }
 
@@ -1671,11 +1840,11 @@ export class LostDaysOfSpring {
             this.drawCannon(cannon);
         }
 
-        for (const wall of this.hiddenWalls) {
-            this.drawHiddenWall(wall);
-        }
-
         this.drawPlayer();
+
+        for (const cp of this.checkpoints) {
+            this.drawCheckpointIndicator(cp);
+        }
 
         for (const i of this.foregroundItems) {
             this.drawEnvForegroundItem(i);
@@ -1727,7 +1896,7 @@ export class LostDaysOfSpring {
             this.currentLevelCoinsCount,
             this.player.splintersCount,
             this.currentLevelSplintersCount,
-            this.currentLevelEnemiesCount - this.enemies.length,
+            this.enemies.filter((e) => e.dead).length,
             this.currentLevelEnemiesCount,
             playTimeMs,
         );
@@ -1749,10 +1918,11 @@ export class LostDaysOfSpring {
             this.currentLevelCoinsCount,
             this.player.splintersCount,
             this.currentLevelSplintersCount,
-            this.currentLevelEnemiesCount - this.enemies.length,
+            this.enemies.filter((e) => e.dead).length,
             this.currentLevelEnemiesCount,
             remaining,
             playTimeMs,
+            this.deathCount,
         );
     }
 
@@ -1781,6 +1951,21 @@ export class LostDaysOfSpring {
     }
 
     updateMessages() {
+        const now = performance.now();
+
+        // displayTime takes priority: keep showing until the timer expires,
+        // regardless of whether the player is still in the hitbox.
+        if (this.activeMessage?.displayTime && this.messageShownAt !== null) {
+            if (now - this.messageShownAt < this.activeMessage.displayTime) {
+                return;
+            }
+            // Timer expired — mark shown and clear.
+            this.activeMessage.shown = true;
+            this.activeMessage = null;
+            this.messageShownAt = null;
+            return;
+        }
+
         const hit =
             this.messages.find((message) => {
                 if (message.strategy === "single" && message.shown) {
@@ -1790,11 +1975,49 @@ export class LostDaysOfSpring {
             }) ?? null;
 
         if (this.activeMessage && !hit) {
-            // player just left the hitbox
+            // player just left the hitbox (no displayTime)
             this.activeMessage.shown = true;
         }
 
         this.activeMessage = hit;
+
+        // Start the displayTime timer when a message with displayTime is activated.
+        if (hit?.displayTime) {
+            this.messageShownAt = now;
+        } else {
+            this.messageShownAt = null;
+        }
+    }
+
+    updateCheckpoints() {
+        for (const cp of this.checkpoints) {
+            if (!cp.reached && this.rectsCollide(this.player, cp)) {
+                cp.reached = true;
+                this.checkpointRespawn = {
+                    x: cp.x,
+                    y: cp.y,
+                    coinsCount: this.player.coinsCount,
+                    splintersCount: this.player.splintersCount,
+                    reachedIds: new Set([
+                        ...(this.checkpointRespawn?.reachedIds ?? []),
+                        cp.id,
+                    ]),
+                    shownMessageIds: new Set([
+                        ...this.messages
+                            .filter((m) => m.shown)
+                            .map((m) => m.id),
+                        ...(cp.message ? [cp.message.id] : []),
+                    ]),
+                };
+            }
+        }
+    }
+
+    drawCheckpointIndicator(cp) {
+        this.ctx.save();
+        this.ctx.fillStyle = cp.reached ? "#68f288" : "#323031";
+        this.ctx.fillRect(cp.x + 32, cp.y + 60, 16, 48);
+        this.ctx.restore();
     }
 
     drawExit(exit) {

@@ -51,6 +51,7 @@ export const DefaultGameOverRenderer = {
         totalEnemies,
         remaining,
         playTime,
+        deathCount,
     ) {
         const w = canvas.width;
         const h = canvas.height;
@@ -71,6 +72,12 @@ export const DefaultGameOverRenderer = {
         );
 
         ctx.font = subFont;
+        const subtitle1W = Math.ceil(
+            ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE).width,
+        );
+        const subtitle2W = Math.ceil(
+            ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE2).width,
+        );
         const statsCoinsText = MESSAGES.STATS.COINS_TEXT(
             coinsCount,
             totalCoins,
@@ -83,6 +90,7 @@ export const DefaultGameOverRenderer = {
             splintersCount,
             totalSplinters,
         );
+        const statsDeathsText = MESSAGES.GAME_OVER.DEATHS_TEXT(deathCount);
         const subText = MESSAGES.STATS.COUNTDOWN_TEXT(remaining);
         const statsTimeText = MESSAGES.STATS.TIME_TEXT(
             formatPlayTime(playTime),
@@ -91,6 +99,7 @@ export const DefaultGameOverRenderer = {
         const padX = 32;
         const padY = 24;
         const gap = 16;
+        const subGap = 6;
         const titleH = 24;
         const lineH = 13;
         const gemScale = 2;
@@ -105,6 +114,7 @@ export const DefaultGameOverRenderer = {
         const splintersTextW = Math.ceil(
             ctx.measureText(statsSplintersText).width,
         );
+        const deathsW = Math.ceil(ctx.measureText(statsDeathsText).width);
         const subW = Math.ceil(ctx.measureText(subText).width);
         const timeW = Math.ceil(ctx.measureText(statsTimeText).width);
 
@@ -115,9 +125,12 @@ export const DefaultGameOverRenderer = {
         const panelW =
             Math.max(
                 titleW,
+                subtitle1W,
+                subtitle2W,
                 coinsRowW,
                 enemiesRowW,
                 splinterRowW,
+                deathsW,
                 timeW,
                 subW,
             ) +
@@ -125,12 +138,18 @@ export const DefaultGameOverRenderer = {
         const panelH =
             padY +
             titleH +
+            subGap +
+            lineH +
+            subGap +
+            lineH +
             gap +
             rowH +
             gap +
             rowH +
             gap +
             rowH +
+            gap +
+            lineH +
             gap +
             lineH +
             gap +
@@ -153,6 +172,21 @@ export const DefaultGameOverRenderer = {
         ctx.fillStyle = MESSAGES.GAME_OVER.TITLE_COLOR;
         ctx.fillText(MESSAGES.GAME_OVER.TITLE, w / 2, panelY + padY);
 
+        // ── Subtitle ─────────────────────────────────────────────────────────
+        ctx.font = subFont;
+        const subtitle1Y = panelY + padY + titleH + subGap;
+        const subtitle2Y = subtitle1Y + lineH + subGap;
+
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE, w / 2 + 1, subtitle1Y + 1);
+        ctx.fillStyle = MESSAGES.GAME_OVER.SUBTITLE_COLOR;
+        ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE, w / 2, subtitle1Y);
+
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE2, w / 2 + 1, subtitle2Y + 1);
+        ctx.fillStyle = MESSAGES.GAME_OVER.SUBTITLE_COLOR;
+        ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE2, w / 2, subtitle2Y);
+
         // ── Stats ────────────────────────────────────────────────────────────
         ctx.font = subFont;
         ctx.imageSmoothingEnabled = false;
@@ -160,7 +194,8 @@ export const DefaultGameOverRenderer = {
         const textOffY = Math.round((rowH - lineH) / 2);
 
         // ── Coins row ────────────────────────────────────────────────────────
-        const coinsRowY = panelY + padY + titleH + gap;
+        const coinsRowY =
+            panelY + padY + titleH + subGap + lineH + subGap + lineH + gap;
         {
             const rowX = Math.round(w / 2 - coinsRowW / 2);
             const iconY = Math.round(coinsRowY + (rowH - artIconSize) / 2);
@@ -254,13 +289,18 @@ export const DefaultGameOverRenderer = {
 
         ctx.imageSmoothingEnabled = true;
 
+        // ── Deaths row ───────────────────────────────────────────────────────
+        const deathsY = splinterRowY + rowH + gap;
+        ctx.fillStyle = MESSAGES.GAME_OVER.DEATHS_COLOR;
+        ctx.fillText(statsDeathsText, w / 2, deathsY);
+
         // ── Time row ─────────────────────────────────────────────────────────
         ctx.fillStyle = MESSAGES.STATS.TIME_COLOR;
-        ctx.fillText(statsTimeText, w / 2, splinterRowY + rowH + gap);
+        ctx.fillText(statsTimeText, w / 2, deathsY + lineH + gap);
 
         // ── Countdown ────────────────────────────────────────────────────────
         ctx.fillStyle = MESSAGES.STATS.COUNTDOWN_COLOR;
-        ctx.fillText(subText, w / 2, splinterRowY + rowH + gap + lineH + gap);
+        ctx.fillText(subText, w / 2, deathsY + lineH + gap + lineH + gap);
 
         ctx.restore();
     },

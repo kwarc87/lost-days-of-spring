@@ -46,8 +46,13 @@ export const MESSAGES = {
 
     // ── Game Over ─────────────────────────────────────────────────────────────
     GAME_OVER: {
-        TITLE: "GAME OVER",
-        TITLE_COLOR: "#e8334a",
+        TITLE: "YOU'VE LOST",
+        TITLE_COLOR: "#a0c4ff",
+        SUBTITLE: "But the journey continues,",
+        SUBTITLE2: "try again, traveler.",
+        SUBTITLE_COLOR: "#c8d6e5",
+        DEATHS_TEXT: (count) => `Deaths: ${count}`,
+        DEATHS_COLOR: "#e85454",
     },
 
     // ── Level Complete ────────────────────────────────────────────────────────
@@ -62,6 +67,7 @@ export const MESSAGES = {
         TITLE: { text: "PAUSED", color: "#f5c542" },
         RESUME: { text: "P \u2013 resume", color: "#7a8a99" },
     },
+    CHECKPOINT: [{ text: "CHECKPOINT", color: "#f5c542" }],
 
     // ── Level 1 ───────────────────────────────────────────────────────────────
     LEVEL_1: {

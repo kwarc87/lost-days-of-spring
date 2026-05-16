@@ -1,4 +1,8 @@
-﻿export const GameFactory = {
+﻿import { MESSAGES } from "../messages.js";
+
+let _nextCheckpointPlatformId = 9001;
+
+export const GameFactory = {
     GRID: 48,
     SCALE: 3,
     player: (overrides = {}) => ({
@@ -10,8 +14,8 @@
         h: 108,
         vx: 0,
         vy: 0,
-        life: 8,
-        maxLife: 8,
+        life: 5,
+        maxLife: 5,
         isHit: false,
         lastHitTime: 0,
         hitCooldown: 1000,
@@ -47,7 +51,7 @@
         shootingCrouchOffsetX: 44,
         ...overrides,
     }),
-    solid: ({ id, x, y, w, h, layout = "ground" } = {}) => ({
+    solid: ({ id, x, y, w, h, layout = "ground", color } = {}) => ({
         id,
         x,
         y,
@@ -55,6 +59,7 @@
         h,
         type: "solid",
         layout,
+        ...(color !== undefined && { color }),
     }),
     oneDirection: ({ id, x, y, w, h, layout = "boardOneDirection" } = {}) => ({
         id,
@@ -139,6 +144,7 @@
         recoilX: 18,
         recoilY: 6,
         isDamaged: false,
+        dead: false,
         damage: 1,
         damageTime: 0,
         wasCollidingWithPlayer: false,
@@ -154,7 +160,7 @@
         y,
         w,
         h,
-        cordX: 110,
+        cordX: 108,
         cordY: 36,
         url: "textures/all-props.png",
         triggerMargin: GameFactory.GRID * 3,
@@ -171,6 +177,7 @@
         lines,
         relatedTo = "hitbox",
         strategy = "multiple",
+        displayTime,
     } = {}) => ({
         id,
         x,
@@ -182,6 +189,7 @@
         lines: lines ?? [],
         relatedTo,
         strategy,
+        ...(displayTime !== undefined && { displayTime }),
         shown: false,
     }),
     collectible: ({ id, x, y, ...rest } = {}) => ({
@@ -291,6 +299,34 @@
         type: "spike",
     }),
     environment: {
+        checkpoint: ({ id, x, y, w, h, reached = false } = {}) => ({
+            id,
+            x,
+            y,
+            w,
+            h,
+            reached,
+        }),
+        checkpointBack: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/checkpoint.png",
+            cordX: 0,
+            cordY: 0,
+            w: 16,
+            h: 49,
+            ...rest,
+        }),
+        checkpointFront: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/checkpoint.png",
+            cordX: 16,
+            cordY: 0,
+            w: 16,
+            h: 49,
+            ...rest,
+        }),
         plant001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -507,12 +543,13 @@
         }),
     },
     grid: {
-        enemy: ({ id, minX, maxX, y, speed, health, ...rest } = {}) =>
+        enemy: ({ id, minX, maxX, x = minX, y, speed, health, ...rest } = {}) =>
             GameFactory.enemy({
                 id,
                 minX: minX * GameFactory.GRID,
                 maxX: maxX * GameFactory.GRID,
                 y: y * GameFactory.GRID,
+                x: x * GameFactory.GRID,
                 speed,
                 health,
                 ...rest,
@@ -525,11 +562,11 @@
                 targetY: targetY * GameFactory.GRID,
                 ...rest,
             }),
-        exit: ({ id, x, y, w, h, ...rest } = {}) =>
+        exit: ({ id, x, y, w = 80, h = 112, ...rest } = {}) =>
             GameFactory.exit({
                 id,
                 x: x * GameFactory.GRID,
-                y: y * GameFactory.GRID + 4 * GameFactory.SCALE,
+                y: y * GameFactory.GRID,
                 w,
                 h,
                 ...rest,
@@ -545,6 +582,7 @@
             lines,
             relatedTo,
             strategy,
+            displayTime,
         } = {}) =>
             GameFactory.message({
                 id,
@@ -557,6 +595,7 @@
                 lines,
                 relatedTo,
                 strategy,
+                displayTime,
             }),
         solid: ({ id, x, y, w, h, layout = "ground" } = {}) =>
             GameFactory.solid({
@@ -691,7 +730,81 @@
                 position,
                 damage,
             }),
+        checkpoint: ({
+            id,
+            x,
+            y,
+            w,
+            h,
+            reached = false,
+            message = {},
+        } = {}) => {
+            const cp = {
+                ...GameFactory.environment.checkpoint({
+                    id,
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    w: w * GameFactory.GRID,
+                    h: h * GameFactory.GRID,
+                    reached,
+                }),
+                back: GameFactory.environment.checkpointBack({
+                    x: x * GameFactory.GRID - 6 * GameFactory.SCALE,
+                    y: y * GameFactory.GRID,
+                }),
+                front: GameFactory.environment.checkpointFront({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                }),
+                platform: {
+                    id: _nextCheckpointPlatformId++,
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    w: 30,
+                    h: 3,
+                    type: "solid",
+                    layout: "simple",
+                    color: "#bd067b",
+                },
+            };
+            if (message !== undefined) {
+                const {
+                    offsetX = 0,
+                    offsetY = -2,
+                    lines = MESSAGES.CHECKPOINT,
+                    relatedTo = "hitBox",
+                    strategy = "single",
+                    displayTime = 3000,
+                } = message;
+                cp.message = GameFactory.message({
+                    id: `checkpoint-${id}-msg`,
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    w: w * GameFactory.GRID,
+                    h: h * GameFactory.GRID,
+                    offsetX: offsetX * GameFactory.GRID,
+                    offsetY: offsetY * GameFactory.GRID,
+                    lines,
+                    relatedTo,
+                    strategy,
+                    displayTime,
+                });
+            }
+            return cp;
+        },
         environment: {
+            checkpointBack: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.checkpointBack({
+                    x: x * GameFactory.GRID - 6 * GameFactory.SCALE,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            checkpointFront: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.checkpointFront({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
             plant001: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.plant001({
                     x: x * GameFactory.GRID,
