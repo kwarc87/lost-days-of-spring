@@ -8,8 +8,8 @@ export const LEVEL_002 = {
         height: GameFactory.GRID * 144,
     },
     playerStart: {
-        x: GameFactory.GRID * 120,
-        y: GameFactory.GRID * 15,
+        x: GameFactory.GRID * 2,
+        y: GameFactory.GRID * 136,
     },
     platforms: [
         // platforms behind floor 0
