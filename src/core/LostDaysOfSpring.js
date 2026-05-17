@@ -389,6 +389,9 @@ export class LostDaysOfSpring {
             lastShootTime: 0,
             jumpPressedAt: 0,
             lastGroundedAt: 0,
+            carryVx: 0,
+            carryVxInitial: 0,
+            carryStartAt: 0,
         });
     }
 
@@ -600,6 +603,7 @@ export class LostDaysOfSpring {
         const now = performance.now();
         this.handleInput(now);
         this.applyPhysics();
+        this.applyCarryDecay(now);
 
         this.player.prevX = this.player.x;
         this.player.prevY = this.player.y;
@@ -758,15 +762,7 @@ export class LostDaysOfSpring {
         if (jumpBuffered && canGroundJump) {
             this.player.vy = -this.player.jump;
 
-            if (this.player.onGroundType === "elevator") {
-                const elev = this.elevators.find(
-                    (e) => e.id === this.player.onGroundId,
-                );
-                if (elev && elev.triggered && now >= elev.idleUntil) {
-                    this.player.vx += elev.dirX * elev.speed * elev.direction;
-                    this.player.vy += elev.dirY * elev.speed * elev.direction;
-                }
-            }
+            this.handleElevatorJump(now);
 
             this.player.airborne = true;
             this.player.lastGroundedAt = 0;
@@ -774,6 +770,29 @@ export class LostDaysOfSpring {
             this.player.onGroundType = null;
             this.player.jumpPressedByUser = true;
             this.player.jumpPressedAt = 0;
+        }
+    }
+
+    handleElevatorJump(now) {
+        if (this.player.onGroundType === "elevator") {
+            const elev = this.elevators.find(
+                (e) => e.id === this.player.onGroundId,
+            );
+            if (elev && elev.triggered && now >= elev.idleUntil) {
+                const elevVx = elev.dirX * elev.speed * elev.direction;
+                const elevVy = elev.dirY * elev.speed * elev.direction;
+                // Upward elevator: subtle boost capped to 25%
+                if (elevVy < 0) {
+                    this.player.vy += elevVy * 0.25;
+                }
+                // Downward elevator: no effect
+                // Sideways elevator: carry velocity
+                if (elevVx !== 0) {
+                    this.player.carryVxInitial = elevVx;
+                    this.player.carryVx = elevVx;
+                    this.player.carryStartAt = now;
+                }
+            }
         }
     }
 
@@ -817,19 +836,39 @@ export class LostDaysOfSpring {
         }
     }
 
+    // Decay the carry velocity inherited from a moving elevator
+    applyCarryDecay(now) {
+        if (this.player.carryVxInitial === 0) {
+            return;
+        }
+        const t = Math.max(
+            0,
+            1 - (now - this.player.carryStartAt) / this.player.carryDuration,
+        );
+        this.player.carryVx = this.player.carryVxInitial * t;
+        if (t <= 0) {
+            this.player.carryVx = 0;
+            this.player.carryVxInitial = 0;
+        }
+    }
+
     // Move player along the X axis and resolve platform collisions
     movePlayerX() {
         const prevX = this.player.prevX ?? this.player.x;
 
-        this.player.x += this.player.vx;
+        this.player.x += this.player.vx + this.player.carryVx;
 
         // World bounds check (X axis)
         if (this.player.x < 0) {
             this.player.x = 0;
             this.player.vx = 0;
+            this.player.carryVx = 0;
+            this.player.carryVxInitial = 0;
         } else if (this.player.x + this.player.w > this.worldSize.width) {
             this.player.x = this.worldSize.width - this.player.w;
             this.player.vx = 0;
+            this.player.carryVx = 0;
+            this.player.carryVxInitial = 0;
         }
 
         for (const p of this.solids) {
@@ -847,9 +886,13 @@ export class LostDaysOfSpring {
                 if (wasLeft) {
                     this.player.x = p.x - this.player.w;
                     this.player.vx = 0;
+                    this.player.carryVx = 0;
+                    this.player.carryVxInitial = 0;
                 } else if (wasRight) {
                     this.player.x = p.x + p.w;
                     this.player.vx = 0;
+                    this.player.carryVx = 0;
+                    this.player.carryVxInitial = 0;
                 }
             }
         }
@@ -922,6 +965,9 @@ export class LostDaysOfSpring {
         this.player.onGroundType = "solid";
         this.player.lastGroundId = this.worldGroundId;
         this.player.lastGroundType = "solid";
+
+        this.player.carryVx = 0;
+        this.player.carryVxInitial = 0;
     }
 
     handleWorldCeilHit() {
@@ -938,6 +984,9 @@ export class LostDaysOfSpring {
         this.player.jumpPressedByUser = false;
         this.player.lastGroundType = platform.type;
         this.player.lastGroundId = platform.id;
+
+        this.player.carryVx = 0;
+        this.player.carryVxInitial = 0;
 
         if (platform.type === "elevator" && !platform.triggered) {
             platform.triggered = true;
