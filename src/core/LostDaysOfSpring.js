@@ -91,7 +91,8 @@ export class LostDaysOfSpring {
             lookAheadY: 0, // current vertical look-ahead offset (interpolated)
             lookAheadYTargetUp: 96, // look-ahead distance when ascending (pixels)
             lookAheadYTargetDown: 312, // look-ahead distance when falling (pixels)
-            lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing
+            lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing (returning to center)
+            lookAheadYSmoothingDown: 0.20, // faster smoothing when building downward look-ahead
 
             lookAheadYTargetDownCrouch: 216,
 
@@ -1579,9 +1580,13 @@ export class LostDaysOfSpring {
             desiredLookAheadY += this.camera.lookAheadYTargetDownCrouch;
         }
 
+        const ySmoothing =
+            desiredLookAheadY > this.camera.lookAheadY
+                ? this.camera.lookAheadYSmoothingDown
+                : this.camera.lookAheadYSmoothing;
+
         this.camera.lookAheadY +=
-            (desiredLookAheadY - this.camera.lookAheadY) *
-            this.camera.lookAheadYSmoothing;
+            (desiredLookAheadY - this.camera.lookAheadY) * ySmoothing;
 
         const playerFootY = this.player.y + this.player.h;
         const targetY =
