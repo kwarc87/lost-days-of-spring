@@ -92,7 +92,7 @@ export class LostDaysOfSpring {
             lookAheadYTargetUp: 96, // look-ahead distance when ascending (pixels)
             lookAheadYTargetDown: 312, // look-ahead distance when falling (pixels)
             lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing (returning to center)
-            lookAheadYSmoothingDown: 0.20, // faster smoothing when building downward look-ahead
+            lookAheadYSmoothingDown: 0.2, // faster smoothing when building downward look-ahead
 
             lookAheadYTargetDownCrouch: 216,
 
@@ -757,6 +757,16 @@ export class LostDaysOfSpring {
 
         if (jumpBuffered && canGroundJump) {
             this.player.vy = -this.player.jump;
+
+            if (this.player.onGroundType === "elevator") {
+                const elev = this.elevators.find(
+                    (e) => e.id === this.player.onGroundId,
+                );
+                if (elev && elev.triggered && now >= elev.idleUntil) {
+                    this.player.vx += elev.dirX * elev.speed * elev.direction;
+                    this.player.vy += elev.dirY * elev.speed * elev.direction;
+                }
+            }
 
             this.player.airborne = true;
             this.player.lastGroundedAt = 0;
