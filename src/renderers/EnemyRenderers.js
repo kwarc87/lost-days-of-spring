@@ -140,6 +140,24 @@ function drawPill(ctx, enemy, debug) {
 
 // ─── Dispatcher ───────────────────────────────────────────────────────────────
 export const DefaultEnemyRenderer = {
+    drawMapEnemy: (ctx, enemy) => {
+        const x = Math.round(enemy.x);
+        const y = Math.round(enemy.y);
+        const { w, h } = enemy;
+        const color = enemy.mainColor ?? "#e84855";
+        const accent = enemy.accentColor ?? "#ffffff";
+
+        const half = Math.floor(h / 2);
+
+        // Bottom square — accent color
+        ctx.fillStyle = accent;
+        ctx.fillRect(x, y + half, w, h - half);
+
+        // Top square — main color
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, w, half);
+    },
+
     draw: (ctx, enemy, debug = false) => {
         drawPill(ctx, enemy, debug);
     },

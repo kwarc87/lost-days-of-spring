@@ -63,7 +63,7 @@ export const DefaultSpikeRenderer = {
     drawMapSpike: (ctx, spike) => {
         const up = spike.position === "up";
         ctx.save();
-        ctx.fillStyle = "#e84855";
+        ctx.fillStyle = "#C1311B";
         ctx.beginPath();
         if (up) {
             ctx.moveTo(spike.x + spike.w / 2, spike.y + spike.h);

@@ -150,7 +150,7 @@ export const DefaultCollectibleRenderer = {
     },
 
     drawMapSplinter: (ctx, collectible) => {
-        ctx.fillStyle = "#51b9db";
+        ctx.fillStyle = "#68eef2";
         ctx.fillRect(
             collectible.x,
             collectible.y,

@@ -236,4 +236,52 @@ export const DefaultPlayerRenderer = {
             ctx.restore();
         }
     },
+
+    drawMapPlayer: (ctx, player) => {
+        const r = player.originalWidth;
+        const cx = player.x + player.w / 2;
+        const bottom = player.y + player.h;
+
+        const headR = r * 1.3;
+        const shoulderRx = r * 2.2;
+        const shoulderRy = r * 1.5;
+        const shoulderCY = bottom - shoulderRy;
+        const headCY = shoulderCY - headR - shoulderRy * 0.5;
+
+        const fill = "#ff9020";
+        const outline = "#b84000";
+        const lw = Math.max(2, r * 0.15);
+
+        ctx.save();
+        ctx.lineWidth = lw;
+        ctx.lineJoin = "round";
+
+        // Shoulders — top half of an ellipse
+        ctx.beginPath();
+        ctx.ellipse(
+            cx,
+            shoulderCY,
+            shoulderRx,
+            shoulderRy,
+            0,
+            Math.PI,
+            0,
+            true,
+        );
+        ctx.closePath();
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.strokeStyle = outline;
+        ctx.stroke();
+
+        // Head
+        ctx.beginPath();
+        ctx.arc(cx, headCY, headR, 0, Math.PI * 2);
+        ctx.fillStyle = fill;
+        ctx.fill();
+        ctx.strokeStyle = outline;
+        ctx.stroke();
+
+        ctx.restore();
+    },
 };

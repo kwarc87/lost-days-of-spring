@@ -1320,9 +1320,10 @@ export class LostDaysOfSpring {
             triggeredElevatorIds: new Set(
                 this.elevators.filter((e) => e.triggered).map((e) => e.id),
             ),
-            shownMessageIds: new Set(
-                this.messages.filter((m) => m.shown).map((m) => m.id),
-            ),
+            shownMessageIds: new Set([
+                ...(this.checkpointRespawn?.shownMessageIds ?? []),
+                ...this.messages.filter((m) => m.shown).map((m) => m.id),
+            ]),
         };
     }
 
@@ -1635,6 +1636,10 @@ export class LostDaysOfSpring {
     }
 
     drawPlayer() {
+        if (this.mapView) {
+            this.playerRenderer.drawMapPlayer(this.ctx, this.player);
+            return;
+        }
         this.playerRenderer.draw(this.ctx, this.player, this.showDebug);
     }
 
@@ -1670,7 +1675,7 @@ export class LostDaysOfSpring {
     drawEnemy(e) {
         if (this.mapView) {
             if (this.showDebug) {
-                this.enemyRenderer.draw(this.ctx, e);
+                this.enemyRenderer.drawMapEnemy(this.ctx, e);
             }
             return;
         }
@@ -1994,21 +1999,19 @@ export class LostDaysOfSpring {
             if (!cp.reached && this.rectsCollide(this.player, cp)) {
                 cp.reached = true;
                 this.checkpointRespawn = {
+                    ...this.checkpointRespawn,
                     x: cp.x,
                     y: cp.y,
-                    coinsCount: this.player.coinsCount,
-                    splintersCount: this.player.splintersCount,
                     reachedIds: new Set([
                         ...(this.checkpointRespawn?.reachedIds ?? []),
                         cp.id,
                     ]),
                     shownMessageIds: new Set([
-                        ...this.messages
-                            .filter((m) => m.shown)
-                            .map((m) => m.id),
+                        ...(this.checkpointRespawn?.shownMessageIds ?? []),
                         ...(cp.message ? [cp.message.id] : []),
                     ]),
                 };
+                this.snapshotCheckpointState();
             }
         }
     }
@@ -2021,6 +2024,10 @@ export class LostDaysOfSpring {
     }
 
     drawExit(exit) {
+        if (this.mapView) {
+            this.exitRenderer.drawMapExit(this.ctx, exit);
+            return;
+        }
         this.exitRenderer.draw(this.ctx, exit, this.showDebug);
     }
 
