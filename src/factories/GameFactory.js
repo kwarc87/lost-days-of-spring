@@ -395,7 +395,7 @@ export const GameFactory = {
             x,
             y,
             url: "textures/tilesets.png",
-            cordX: 128,
+            cordX: 130,
             cordY: 48,
             w: 16,
             h: 27,

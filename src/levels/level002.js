@@ -203,7 +203,7 @@ export const LEVEL_002 = {
         ],
         coins: [
             ...GameFactory.grid.columnOfCollectibles({ startId: 1, count: 4, x: 1, y: 8, gap: 1 }),
-            ...GameFactory.grid.columnOfCollectibles({ startId: 5, count: 4, x: 1, y: 9, gap: 1 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 5, count: 4, x: 2, y: 8, gap: 1 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 9, count: 4, x: 4.5, y: 67.5, gap: 1 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 13, count: 20, x: 4, y: 22, gap: 1 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 33, count: 2, x: 5, y: 21, gap: 1 }),
@@ -294,7 +294,7 @@ export const LEVEL_002 = {
             ...GameFactory.grid.rowOfCollectibles({ startId: 621, count: 10, x: 176, y: 87, gap: 1 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 631, count: 10, x: 176, y: 88, gap: 1 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 641, count: 10, x: 176, y: 89, gap: 1 }),
-            ...GameFactory.grid.rowOfCollectibles({ startId: 650, count: 8, x: 43, y: 38, gap: 1 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 651, count: 7, x: 43, y: 38, gap: 1 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 658, count: 6, x: 160, y: 13, gap: 1 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 664, count: 10, x: 173, y: 38, gap: 1 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 674, count: 10, x: 173, y: 39, gap: 1 }),

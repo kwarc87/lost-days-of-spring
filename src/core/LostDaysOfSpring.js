@@ -62,6 +62,7 @@ export class LostDaysOfSpring {
         this.pauseStartAt = 0; // timestamp (ms) when the current pause started
         this.gameOverDelay = 15000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
+        this.elevatorSpeedOutsideOfTheCamera = 100;
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });
@@ -1035,16 +1036,26 @@ export class LostDaysOfSpring {
                 continue;
             }
 
-            const playerIsOnElevator = this.isPlayerOnElevator(e);
-            const moveX = e.dirX * e.speed * e.direction;
-            const moveY = e.dirY * e.speed * e.direction;
+            const offScreen = !this.isVisibleInCamera(e);
+            const speed = offScreen
+                ? this.elevatorSpeedOutsideOfTheCamera
+                : e.speed;
 
-            const { shouldSkip, picksUp } = this.checkElevatorPlayerBlock(
-                e,
-                moveX,
-                moveY,
-                playerIsOnElevator,
-            );
+            const playerIsOnElevator = offScreen
+                ? false
+                : this.isPlayerOnElevator(e);
+
+            const moveX = e.dirX * speed * e.direction;
+            const moveY = e.dirY * speed * e.direction;
+
+            const { shouldSkip, picksUp } = offScreen
+                ? { shouldSkip: false, picksUp: false }
+                : this.checkElevatorPlayerBlock(
+                      e,
+                      moveX,
+                      moveY,
+                      playerIsOnElevator,
+                  );
             if (shouldSkip) {
                 continue;
             }
