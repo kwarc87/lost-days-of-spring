@@ -224,6 +224,44 @@ export const DefaultPlayerRenderer = {
                 dw,
                 dh,
             );
+        } else if (player.isInTeleport) {
+            const outlineSize = 3;
+            const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
+
+            offCtx.clearRect(0, 0, dw, dh);
+            offCtx.imageSmoothingEnabled = false;
+            offCtx.drawImage(img, spriteFrame * FW, 0, FW, FH, 0, 0, dw, dh);
+            offCtx.globalCompositeOperation = "source-atop";
+            offCtx.fillStyle = "#51b9db";
+            offCtx.fillRect(0, 0, dw, dh);
+            offCtx.globalCompositeOperation = "source-over";
+
+            const offsets = [
+                [-outlineSize, 0],
+                [outlineSize, 0],
+                [0, -outlineSize],
+                [0, outlineSize],
+                [-outlineSize, -outlineSize],
+                [outlineSize, -outlineSize],
+                [-outlineSize, outlineSize],
+                [outlineSize, outlineSize],
+            ];
+
+            for (const [ox, oy] of offsets) {
+                ctx.drawImage(offCanvas, drawX + ox, drawY + oy);
+            }
+
+            ctx.drawImage(
+                img,
+                spriteFrame * FW,
+                0,
+                FW,
+                FH,
+                drawX,
+                drawY,
+                dw,
+                dh,
+            );
         }
 
         ctx.restore();

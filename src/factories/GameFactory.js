@@ -1,6 +1,7 @@
 ﻿import { MESSAGES } from "../messages.js";
 
 let _nextCheckpointPlatformId = 9001;
+let _nextTeleportPlatformId = 8001;
 
 export const GameFactory = {
     GRID: 48,
@@ -14,8 +15,8 @@ export const GameFactory = {
         h: 108,
         vx: 0,
         vy: 0,
-        life: 5,
-        maxLife: 5,
+        life: 6,
+        maxLife: 6,
         isHit: false,
         lastHitTime: 0,
         hitCooldown: 1000,
@@ -302,15 +303,26 @@ export const GameFactory = {
         recoilY: position === "down" ? recoilY : 0,
         type: "spike",
     }),
+    teleport: ({ x, y, delay, ...rest } = {}) => ({
+        x,
+        y,
+        url: "textures/teleport.png",
+        cordX: 0,
+        cordY: 0,
+        w: 32,
+        h: 68,
+        delay,
+        ...rest,
+    }),
+    checkpoint: ({ id, x, y, w, h, reached = false } = {}) => ({
+        id,
+        x,
+        y,
+        w,
+        h,
+        reached,
+    }),
     environment: {
-        checkpoint: ({ id, x, y, w, h, reached = false } = {}) => ({
-            id,
-            x,
-            y,
-            w,
-            h,
-            reached,
-        }),
         checkpointBack: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -547,6 +559,37 @@ export const GameFactory = {
         }),
     },
     grid: {
+        teleport: ({ id, x, y, targetX, targetY, ...rest } = {}) => ({
+            id,
+            x: x * GameFactory.GRID,
+            y: y * GameFactory.GRID,
+            w: 96,
+            h: 192,
+            targetX: targetX * GameFactory.GRID,
+            targetY: targetY * GameFactory.GRID,
+            delay: 1200,
+            platform: {
+                id: _nextTeleportPlatformId++,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: 96,
+                h: 48,
+                type: "solid",
+                layout: "simple",
+                color: "transparent",
+            },
+            targetPlatform: {
+                id: _nextTeleportPlatformId++,
+                x: targetX * GameFactory.GRID,
+                y: targetY * GameFactory.GRID,
+                w: 96,
+                h: 48,
+                type: "solid",
+                layout: "simple",
+                color: "transparent",
+            },
+            ...rest,
+        }),
         enemy: ({ id, minX, maxX, x = minX, y, speed, health, ...rest } = {}) =>
             GameFactory.enemy({
                 id,
@@ -744,7 +787,7 @@ export const GameFactory = {
             message = {},
         } = {}) => {
             const cp = {
-                ...GameFactory.environment.checkpoint({
+                ...GameFactory.checkpoint({
                     id,
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID,
@@ -797,6 +840,12 @@ export const GameFactory = {
             return cp;
         },
         environment: {
+            teleport: ({ x, y, ...rest } = {}) =>
+                GameFactory.teleport({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
             checkpointBack: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.checkpointBack({
                     x: x * GameFactory.GRID - 6 * GameFactory.SCALE,

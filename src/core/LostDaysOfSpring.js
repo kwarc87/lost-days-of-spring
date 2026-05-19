@@ -76,6 +76,9 @@ export class LostDaysOfSpring {
         this.cannonBullets = [];
         this.nextCannonBulletId = 0;
 
+        // ====== TELEPORTS ======
+        this.teleports = [];
+
         // ====== CAMERA ======
         this.camera = {
             x: 0, // current camera X position in world
@@ -223,6 +226,7 @@ export class LostDaysOfSpring {
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
         this.cannons = levelData.cannons ?? [];
+        this.teleports = levelData.teleports ?? [];
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
         this.currentLevelEnemiesCount = this.enemies.length;
@@ -230,6 +234,7 @@ export class LostDaysOfSpring {
         // Load checkpoints and extract embedded visual layers / messages
         this.checkpoints = levelData.checkpoints ?? [];
         this.extractCheckpointItems();
+        this.extractTeleportItems();
 
         // Restore checkpoint state (collected items, killed enemies, etc.)
         this.restoreLevel();
@@ -291,6 +296,31 @@ export class LostDaysOfSpring {
             if (cp.platform) {
                 this.platforms.push(cp.platform);
                 this.solids.push(cp.platform);
+            }
+        }
+    }
+
+    extractTeleportItems() {
+        for (const t of this.teleports) {
+            t.originItem = GameFactory.teleport({
+                x: t.x,
+                y: t.y,
+            });
+            t.targetItem = GameFactory.teleport({
+                x: t.targetX,
+                y: t.targetY,
+            });
+            t.playerEnteredAt = null;
+            t.justTeleported = false;
+            this.foregroundItems.push(t.originItem);
+            this.foregroundItems.push(t.targetItem);
+            if (t.platform) {
+                this.platforms.push(t.platform);
+                this.solids.push(t.platform);
+            }
+            if (t.targetPlatform) {
+                this.platforms.push(t.targetPlatform);
+                this.solids.push(t.targetPlatform);
             }
         }
     }
@@ -622,6 +652,7 @@ export class LostDaysOfSpring {
         this.updateCannonBullets(now);
         this.updateCollectibles();
         this.updateCheckpoints();
+        this.updateTeleports(now);
         this.updateHiddenWalls();
         this.updateExit();
         this.updateMessages();
@@ -2087,6 +2118,63 @@ export class LostDaysOfSpring {
                     ]),
                 };
                 this.snapshotCheckpointState();
+            }
+        }
+    }
+
+    updateTeleports(now) {
+        this.player.isInTeleport = false;
+        for (const t of this.teleports) {
+            const originZone = { x: t.x, y: t.y, w: t.w, h: t.h };
+            const targetZone = {
+                x: t.targetX,
+                y: t.targetY,
+                w: t.w,
+                h: t.h,
+            };
+
+            const inOrigin = this.rectsCollide(this.player, originZone);
+            const inTarget = this.rectsCollide(this.player, targetZone);
+
+            if (!inOrigin && !inTarget) {
+                if (t.playerEnteredAt !== null) {
+                    t.originItem.cordX = 0;
+                    t.targetItem.cordX = 0;
+                    t.playerEnteredAt = null;
+                }
+                t.justTeleported = false;
+                continue;
+            }
+
+            this.player.isInTeleport = true;
+
+            if (t.playerEnteredAt === null && !t.justTeleported) {
+                t.playerEnteredAt = now;
+                t.enteredOrigin = inOrigin;
+                if (inOrigin) {
+                    t.originItem.cordX = 32;
+                } else {
+                    t.targetItem.cordX = 32;
+                }
+            }
+
+            if (
+                t.playerEnteredAt !== null &&
+                now - t.playerEnteredAt >= t.delay
+            ) {
+                if (t.enteredOrigin) {
+                    this.player.x = t.targetX + t.w / 2 - this.player.w / 2;
+                    this.player.y = t.targetY + t.h - this.player.h;
+                } else {
+                    this.player.x = t.x + t.w / 2 - this.player.w / 2;
+                    this.player.y = t.y + t.h - this.player.h;
+                }
+                this.player.vx = 0;
+                this.player.vy = 0;
+                t.originItem.cordX = 0;
+                t.targetItem.cordX = 0;
+                t.playerEnteredAt = null;
+                t.justTeleported = true;
             }
         }
     }
