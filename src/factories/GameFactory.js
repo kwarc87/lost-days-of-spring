@@ -303,7 +303,7 @@ export const GameFactory = {
         recoilY: position === "down" ? recoilY : 0,
         type: "spike",
     }),
-    teleport: ({ x, y, delay, ...rest } = {}) => ({
+    teleport: ({ x, y, delay, frozenDelay, ...rest } = {}) => ({
         x,
         y,
         url: "textures/teleport.png",
@@ -312,6 +312,7 @@ export const GameFactory = {
         w: 32,
         h: 68,
         delay,
+        frozenDelay,
         ...rest,
     }),
     checkpoint: ({ id, x, y, w, h, reached = false } = {}) => ({
@@ -567,7 +568,8 @@ export const GameFactory = {
             h: 192,
             targetX: targetX * GameFactory.GRID,
             targetY: targetY * GameFactory.GRID,
-            delay: 1200,
+            delay: 200,
+            frozenDelay: 650,
             platform: {
                 id: _nextTeleportPlatformId++,
                 x: x * GameFactory.GRID,

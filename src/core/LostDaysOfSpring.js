@@ -311,6 +311,7 @@ export class LostDaysOfSpring {
                 y: t.targetY,
             });
             t.playerEnteredAt = null;
+            t.frozenAt = null;
             t.justTeleported = false;
             this.foregroundItems.push(t.originItem);
             this.foregroundItems.push(t.targetItem);
@@ -423,6 +424,7 @@ export class LostDaysOfSpring {
             carryVx: 0,
             carryVxInitial: 0,
             carryStartAt: 0,
+            frozenForTeleport: false,
         });
     }
 
@@ -663,6 +665,9 @@ export class LostDaysOfSpring {
 
     // Handle keyboard input: movement, crouch, shooting, jump
     handleInput(now) {
+        if (this.player.frozenForTeleport) {
+            return;
+        }
         this.handleHorizontalMovementInput();
         this.handleCrouchInput();
         this.handleShootingInput(now);
@@ -2125,55 +2130,60 @@ export class LostDaysOfSpring {
     updateTeleports(now) {
         this.player.isInTeleport = false;
         for (const t of this.teleports) {
-            const originZone = { x: t.x, y: t.y, w: t.w, h: t.h };
-            const targetZone = {
-                x: t.targetX,
-                y: t.targetY,
-                w: t.w,
-                h: t.h,
-            };
-
-            const inOrigin = this.rectsCollide(this.player, originZone);
+            const targetZone = { x: t.targetX, y: t.targetY, w: t.w, h: t.h };
+            const inOrigin = this.rectsCollide(this.player, t);
             const inTarget = this.rectsCollide(this.player, targetZone);
 
             if (!inOrigin && !inTarget) {
-                if (t.playerEnteredAt !== null) {
-                    t.originItem.cordX = 0;
-                    t.targetItem.cordX = 0;
-                    t.playerEnteredAt = null;
-                }
+                t.originItem.cordX = 0;
+                t.targetItem.cordX = 0;
+                t.playerEnteredAt = null;
                 t.justTeleported = false;
+                // this condition is for enemy recoil
+                if (t.frozenAt !== null) {
+                    t.frozenAt = null;
+                    this.player.frozenForTeleport = false;
+                }
                 continue;
             }
 
             this.player.isInTeleport = true;
+            (inOrigin ? t.originItem : t.targetItem).cordX = 32;
 
-            if (t.playerEnteredAt === null && !t.justTeleported) {
+            if (
+                t.playerEnteredAt === null &&
+                !t.justTeleported &&
+                t.frozenAt === null
+            ) {
                 t.playerEnteredAt = now;
                 t.enteredOrigin = inOrigin;
-                if (inOrigin) {
-                    t.originItem.cordX = 32;
-                } else {
-                    t.targetItem.cordX = 32;
-                }
             }
 
             if (
                 t.playerEnteredAt !== null &&
                 now - t.playerEnteredAt >= t.delay
             ) {
-                if (t.enteredOrigin) {
-                    this.player.x = t.targetX + t.w / 2 - this.player.w / 2;
-                    this.player.y = t.targetY + t.h - this.player.h;
-                } else {
-                    this.player.x = t.x + t.w / 2 - this.player.w / 2;
-                    this.player.y = t.y + t.h - this.player.h;
-                }
+                t.frozenAt = now;
+                t.playerEnteredAt = null;
                 this.player.vx = 0;
                 this.player.vy = 0;
+                this.player.carryVx = 0;
+                this.player.carryVxInitial = 0;
+                this.player.frozenForTeleport = true;
+            }
+
+            if (t.frozenAt !== null && now - t.frozenAt >= t.frozenDelay) {
+                const [dx, dy] = t.enteredOrigin
+                    ? [t.targetX, t.targetY]
+                    : [t.x, t.y];
+                this.player.x = dx + t.w / 2 - this.player.w / 2;
+                this.player.y = dy + t.h - this.player.h;
+                this.player.vx = 0;
+                this.player.vy = 0;
+                this.player.frozenForTeleport = false;
                 t.originItem.cordX = 0;
                 t.targetItem.cordX = 0;
-                t.playerEnteredAt = null;
+                t.frozenAt = null;
                 t.justTeleported = true;
             }
         }

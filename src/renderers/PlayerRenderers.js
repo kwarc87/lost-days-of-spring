@@ -224,7 +224,7 @@ export const DefaultPlayerRenderer = {
                 dw,
                 dh,
             );
-        } else if (player.isInTeleport) {
+        } else if (player.frozenForTeleport) {
             const outlineSize = 3;
             const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
 
