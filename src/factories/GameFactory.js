@@ -267,17 +267,25 @@ export const GameFactory = {
         position = "down",
         damage = 1,
     } = {}) => {
-        const spikeW = 16 * GameFactory.SCALE;
-        return Array.from({ length: count }, (_, i) =>
-            GameFactory.spike({
+        return Array.from({ length: count }, (_, i) => {
+            const firstItemAdditionalMargin = i === 0 ? 9 : 0;
+            const lastItemAdditionalMargin =
+                i === count - 1 && position === "down" ? 9 : 0;
+            const spikeW = 16 * GameFactory.SCALE;
+            return GameFactory.spike({
                 id: startId + i,
-                x: startX + i * spikeW,
+                x: startX + i * spikeW + firstItemAdditionalMargin,
                 y,
                 variant: (i % 2) + 1,
                 position,
                 damage,
-            }),
-        );
+                w:
+                    spikeW -
+                    firstItemAdditionalMargin -
+                    lastItemAdditionalMargin,
+                offsetX: -firstItemAdditionalMargin,
+            });
+        });
     },
     spike: ({
         id,
@@ -290,18 +298,22 @@ export const GameFactory = {
         recoilY = 9,
         w = 16 * GameFactory.SCALE,
         h = 16 * GameFactory.SCALE,
+        offsetX = 0,
+        offsetY = -3,
     } = {}) => ({
         id,
         x,
-        y: position === "up" ? y : y + 4,
+        y: position === "up" ? y : y + 9,
         w,
-        h: position === "up" ? h - 14 : h - 4,
+        h: position === "up" ? h - 18 : h - 9,
         variant,
         position,
         damage,
         recoilX,
         recoilY: position === "down" ? recoilY : 0,
         type: "spike",
+        offsetX,
+        offsetY,
     }),
     teleport: ({ x, y, delay, frozenDelay, ...rest } = {}) => ({
         x,
@@ -770,6 +782,8 @@ export const GameFactory = {
             variant = 1,
             position = "down",
             damage = 1,
+            offsetX = 0,
+            offsetY = 0,
         } = {}) =>
             GameFactory.spike({
                 id,
@@ -778,6 +792,8 @@ export const GameFactory = {
                 variant,
                 position,
                 damage,
+                offsetX,
+                offsetY,
             }),
         checkpoint: ({
             id,

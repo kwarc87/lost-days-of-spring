@@ -15,14 +15,16 @@ export const DefaultSpikeRenderer = {
         const img = getImg(SPIKE_IMG_PATH);
         const { sx, sy } = SPIKE_VARIANTS[spike.variant] ?? SPIKE_VARIANTS[1];
         const up = spike.position === "up";
+        const ox = spike.offsetX ?? 0;
+        const oy = spike.offsetY ?? 0;
 
         ctx.save();
         ctx.imageSmoothingEnabled = false;
 
         if (up) {
             ctx.translate(
-                Math.round(spike.x + (SPIKE_SW * SPIKE_SCALE) / 2),
-                Math.round(spike.y + (SPIKE_SH * SPIKE_SCALE) / 2 - 3 * 3),
+                Math.round(spike.x + (SPIKE_SW * SPIKE_SCALE) / 2 + ox),
+                Math.round(spike.y + (SPIKE_SH * SPIKE_SCALE) / 2 - 3 * 3 + oy),
             );
             ctx.rotate(Math.PI);
             ctx.drawImage(
@@ -43,8 +45,8 @@ export const DefaultSpikeRenderer = {
                 sy,
                 SPIKE_SW,
                 SPIKE_SH,
-                Math.round(spike.x),
-                Math.round(spike.y) - 4,
+                Math.round(spike.x + ox),
+                Math.round(spike.y + oy) - 4,
                 SPIKE_SW * SPIKE_SCALE,
                 SPIKE_SH * SPIKE_SCALE,
             );
