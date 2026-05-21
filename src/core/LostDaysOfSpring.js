@@ -164,8 +164,11 @@ export class LostDaysOfSpring {
         this.drawPlatform = this.withCameraCulling(this.drawPlatform);
         this.drawElevator = this.withCameraCulling(this.drawElevator);
         this.drawEnemy = this.withCameraCulling(this.drawEnemy);
-        this.drawCoins = this.withCameraCulling(this.drawCoins);
-        this.drawSplinters = this.withCameraCulling(this.drawSplinters);
+        this.drawCoins = this.withCameraCulling(this.drawCoin);
+        this.drawSplinters = this.withCameraCulling(this.drawSplinter);
+        this.drawWeaponUpgrades = this.withCameraCulling(
+            this.drawWeaponUpgrade,
+        );
         this.drawBullet = this.withCameraCulling(this.drawBullet);
         this.drawCannon = this.withCameraCulling(this.drawCannon);
         this.drawCannonBullet = this.withCameraCulling(this.drawCannonBullet);
@@ -179,7 +182,7 @@ export class LostDaysOfSpring {
             this.drawEnvForegroundItem,
         );
         this.drawSpike = this.withCameraCulling(this.drawSpike);
-        this.drawHearts = this.withCameraCulling(this.drawHearts);
+        this.drawHearts = this.withCameraCulling(this.drawHeart);
         this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
     }
 
@@ -216,6 +219,7 @@ export class LostDaysOfSpring {
         this.coins = levelData.collectibles?.coins ?? [];
         this.splinters = levelData.collectibles?.splinters ?? [];
         this.hearts = levelData.collectibles?.hearts ?? [];
+        this.weaponUpgrades = levelData?.collectibles?.weaponUpgrades ?? [];
         this.spikes = levelData.spikes ?? [];
         this.messages = levelData.messages ?? [];
         this.activeMessage = null;
@@ -378,6 +382,14 @@ export class LostDaysOfSpring {
             }
         }
 
+        if (cr.collectedWeaponUpgradeIds) {
+            for (const u of this.weaponUpgrades) {
+                if (cr.collectedWeaponUpgradeIds.has(u.id)) {
+                    u.collected = true;
+                }
+            }
+        }
+
         if (cr.reachedIds) {
             for (const cp of this.checkpoints) {
                 if (cr.reachedIds.has(cp.id)) {
@@ -415,6 +427,7 @@ export class LostDaysOfSpring {
             lastGroundType: null,
             coinsCount,
             splintersCount,
+            weapon: this.checkpointRespawn?.weapon ?? GameFactory.weapon(),
             facing: "right",
             jumpPressedByUser: false,
             shooting: false,
@@ -758,6 +771,7 @@ export class LostDaysOfSpring {
                         : this.player.weapon.speed;
                 this.bullets.push({
                     ...this.player.weapon.ammo,
+                    color: this.player.weapon.color,
                     id: this.nextBulletId++,
                     x:
                         this.player.facing === "left"
@@ -1412,6 +1426,7 @@ export class LostDaysOfSpring {
             ...this.checkpointRespawn,
             coinsCount: this.player.coinsCount,
             splintersCount: this.player.splintersCount,
+            weapon: this.player.weapon,
             collectedCoinIds: new Set(
                 this.coins.filter((c) => c.collected).map((c) => c.id),
             ),
@@ -1420,6 +1435,9 @@ export class LostDaysOfSpring {
             ),
             collectedHeartIds: new Set(
                 this.hearts.filter((h) => h.collected).map((h) => h.id),
+            ),
+            collectedWeaponUpgradeIds: new Set(
+                this.weaponUpgrades.filter((u) => u.collected).map((u) => u.id),
             ),
             aliveEnemyIds: new Set(
                 this.enemies.filter((e) => !e.dead).map((e) => e.id),
@@ -1582,6 +1600,17 @@ export class LostDaysOfSpring {
             if (!s.collected && this.rectsCollide(this.player, s)) {
                 s.collected = true;
                 this.player.splintersCount++;
+            }
+        }
+
+        for (const u of this.weaponUpgrades) {
+            if (!u.collected && this.rectsCollide(this.player, u)) {
+                u.collected = true;
+                this.player.weapon = u?.weapon ?? this.player.weapon;
+                if (u.message) {
+                    this.activeMessage = u.message;
+                    this.messageShownAt = performance.now();
+                }
             }
         }
 
@@ -1793,7 +1822,7 @@ export class LostDaysOfSpring {
         this.enemyRenderer.draw(this.ctx, e, this.showDebug);
     }
 
-    drawCoins(c) {
+    drawCoin(c) {
         if (this.mapView) {
             if (this.showDebug) {
                 this.collectibleRenderer.drawMapCoin(this.ctx, c);
@@ -1803,7 +1832,7 @@ export class LostDaysOfSpring {
         this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug);
     }
 
-    drawSplinters(s) {
+    drawSplinter(s) {
         if (this.mapView) {
             if (this.showDebug) {
                 this.collectibleRenderer.drawMapSplinter(this.ctx, s);
@@ -1813,7 +1842,7 @@ export class LostDaysOfSpring {
         this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug);
     }
 
-    drawHearts(s) {
+    drawHeart(s) {
         if (this.mapView) {
             if (this.showDebug) {
                 this.collectibleRenderer.drawMapHeart(this.ctx, s);
@@ -1821,6 +1850,13 @@ export class LostDaysOfSpring {
             return;
         }
         this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug);
+    }
+
+    drawWeaponUpgrade(s) {
+        if (this.mapView) {
+            return;
+        }
+        this.collectibleRenderer.drawWeaponUpgrade(this.ctx, s);
     }
 
     drawBullet(b) {
@@ -1917,19 +1953,25 @@ export class LostDaysOfSpring {
 
         for (const c of this.coins) {
             if (!c.collected) {
-                this.drawCoins(c);
+                this.drawCoin(c);
             }
         }
 
         for (const s of this.splinters) {
             if (!s.collected) {
-                this.drawSplinters(s);
+                this.drawSplinter(s);
             }
         }
 
         for (const h of this.hearts) {
             if (!h.collected) {
-                this.drawHearts(h);
+                this.drawHeart(h);
+            }
+        }
+
+        for (const u of this.weaponUpgrades) {
+            if (!u.collected) {
+                this.drawWeaponUpgrade(u);
             }
         }
 

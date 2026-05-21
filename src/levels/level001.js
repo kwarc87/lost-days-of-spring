@@ -1126,7 +1126,22 @@ export const LEVEL_001 = {
             GameFactory.grid.hearts({ id: 17, x: 265.5, y: 19 }),
             GameFactory.grid.hearts({ id: 18, x: 415.5, y: 89 }),
             GameFactory.grid.hearts({ id: 19, x: 415.5, y: 90 }),
-        ]
+        ],
+        weaponUpgrades: [
+            GameFactory.grid.weaponUpgrades({ id: 1, x: 95, y: 75, weapon: {
+                id: 2,
+                color: "#C1311B",
+                speed: 18,
+                shootFrequency: 125,
+                ammo: {
+                    vx: 0,
+                    vy: 0,
+                    w: 10,
+                    h: 10,
+                damage: 8,
+                },
+            } }),
+        ],
     },
     spikes: [
         //floor 0
@@ -1636,6 +1651,7 @@ export const LEVEL_001 = {
         GameFactory.grid.environment.wallClean({ x: 255, y: 20, w: 9, h: 3 }),
         GameFactory.grid.environment.wallClean({ x: 267, y: 20, w: 12, h: 3 }),
         GameFactory.grid.environment.wallClean({ x: 267, y: 16, w: 22, h: 3 }),
+        GameFactory.grid.environment.wallClean({ x: 268, y: 7, w: 2, h: 1 }),
         GameFactory.grid.environment.wallClean({ x: 281, y: 20, w: 8, h: 3 }),
         GameFactory.grid.environment.wallClean({ x: 285, y: 12, w: 4, h: 4 }),
         GameFactory.grid.environment.wallClean({ x: 264, y: 16, w: 2, h: 2 }),
@@ -2747,10 +2763,11 @@ export const LEVEL_001 = {
     ],
     checkpoints: [
         GameFactory.grid.checkpoint({ id: 1, x: 473, y: 122, w: 1, h: 3, reached: false }),
-        GameFactory.grid.checkpoint({ id: 2, x: 66, y: 77, w: 1, h: 3, reached: false }),
-        GameFactory.grid.checkpoint({ id: 3, x: 232, y: 73, w: 1, h: 3, reached: false }),
-        GameFactory.grid.checkpoint({ id: 4, x: 460, y: 43, w: 1, h: 3, reached: false }),
-        GameFactory.grid.checkpoint({ id: 5, x: 89.75, y: 41, w: 1, h: 3, reached: false }),
+        GameFactory.grid.checkpoint({ id: 2, x: 263, y: 101, w: 1, h: 3, reached: false }),
+        GameFactory.grid.checkpoint({ id: 3, x: 66, y: 77, w: 1, h: 3, reached: false }),
+        GameFactory.grid.checkpoint({ id: 4, x: 232, y: 73, w: 1, h: 3, reached: false }),
+        GameFactory.grid.checkpoint({ id: 5, x: 460, y: 43, w: 1, h: 3, reached: false }),
+        GameFactory.grid.checkpoint({ id: 6, x: 89.75, y: 41, w: 1, h: 3, reached: false }),
     ],
     exits: [
         GameFactory.grid.exit({ id: 1, x: 505.5, y: 10 }),

@@ -207,7 +207,7 @@ export const GameFactory = {
         ...rest,
     }),
     weapon: (overrides = {}) => ({
-        id: null,
+        id: 1,
         color: "#ffc300",
         speed: 12,
         shootFrequency: 125,
@@ -739,8 +739,22 @@ export const GameFactory = {
                 id,
                 x: x * GameFactory.GRID,
                 y: y * GameFactory.GRID,
-                w: 50,
-                h: 50,
+                w: 48,
+                h: 48,
+                ...rest,
+            }),
+        weaponUpgrades: ({ id, x, y, ...rest } = {}) =>
+            GameFactory.collectible({
+                id,
+                x: x * GameFactory.GRID + 8,
+                y: y * GameFactory.GRID + 8,
+                w: 32,
+                h: 32,
+                message: {
+                    lines: MESSAGES.WEAPON_UPGRADED,
+                    relatedTo: "viewPort",
+                    displayTime: 3000,
+                },
                 ...rest,
             }),
         rowOfCollectibles: ({ startId, count, x, y, gap = 1 } = {}) =>

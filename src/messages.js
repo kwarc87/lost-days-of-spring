@@ -68,6 +68,7 @@ export const MESSAGES = {
         RESUME: { text: "P \u2013 resume", color: "#7a8a99" },
     },
     CHECKPOINT: [{ text: "CHECKPOINT", color: "#f5c542" }],
+    WEAPON_UPGRADED: [{ text: "Weapon has been upgraded", color: "#ffffff" }],
 
     // ── Level 1 ───────────────────────────────────────────────────────────────
     LEVEL_1: {

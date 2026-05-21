@@ -4,7 +4,6 @@
 import { getImg } from "../utils/imgCache.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
-
 const SPLINTER_FRAME_MS = 150;
 const SPLINTER_SW = 16;
 const SPLINTER_SH = 16;
@@ -12,6 +11,16 @@ const SPLINTER_SCALE = 3;
 
 const SPLINTER_FRAMES = [
     ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
+];
+
+const WEAPON_IMG_PATH = "textures/ball.png";
+const WEAPON_FRAME_MS = 250;
+const WEAPON_SW = 16;
+const WEAPON_SH = 16;
+const WEAPON_SCALE = 2;
+
+const WEAPON_FRAMES = [
+    ...Array.from({ length: 5 }, (_, i) => ({ sx: 32 + i * 80, sy: 48 })),
 ];
 
 // 8×8 pixel art heart with outline — rendered at scale=3 → 24×24px
@@ -102,7 +111,6 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-
     drawSplinter: (ctx, collectible, showDebug = false) => {
         const img = getImg(GEMS_IMG_PATH);
         const { sx, sy } =
@@ -138,6 +146,29 @@ export const DefaultCollectibleRenderer = {
             );
             ctx.restore();
         }
+    },
+    drawWeaponUpgrade: (ctx, collectible) => {
+        const img = getImg(WEAPON_IMG_PATH);
+        const { sx, sy } =
+            WEAPON_FRAMES[
+                Math.floor(performance.now() / WEAPON_FRAME_MS) %
+                    WEAPON_FRAMES.length
+            ];
+
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(
+            img,
+            sx,
+            sy,
+            WEAPON_SW,
+            WEAPON_SH,
+            Math.round(collectible.x),
+            Math.round(collectible.y),
+            WEAPON_SW * WEAPON_SCALE,
+            WEAPON_SH * WEAPON_SCALE,
+        );
+        ctx.restore();
     },
     drawMapCoin: (ctx, collectible) => {
         ctx.fillStyle = "#ffd700";
