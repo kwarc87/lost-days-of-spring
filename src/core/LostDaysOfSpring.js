@@ -438,6 +438,7 @@ export class LostDaysOfSpring {
             carryVxInitial: 0,
             carryStartAt: 0,
             frozenForTeleport: false,
+            knockbackUntil: 0,
         });
     }
 
@@ -681,14 +682,18 @@ export class LostDaysOfSpring {
         if (this.player.frozenForTeleport) {
             return;
         }
-        this.handleHorizontalMovementInput();
+        this.handleHorizontalMovementInput(now);
         this.handleCrouchInput();
         this.handleShootingInput(now);
         this.handleJumpInput(now);
         this.handleEnterInput();
     }
 
-    handleHorizontalMovementInput() {
+    handleHorizontalMovementInput(now) {
+        if (now < this.player.knockbackUntil) {
+            return;
+        }
+
         let targetVx = 0;
 
         const speed = this.isPlayerCrouching()
@@ -915,11 +920,13 @@ export class LostDaysOfSpring {
             this.player.vx = 0;
             this.player.carryVx = 0;
             this.player.carryVxInitial = 0;
+            this.player.knockbackUntil = 0;
         } else if (this.player.x + this.player.w > this.worldSize.width) {
             this.player.x = this.worldSize.width - this.player.w;
             this.player.vx = 0;
             this.player.carryVx = 0;
             this.player.carryVxInitial = 0;
+            this.player.knockbackUntil = 0;
         }
 
         for (const p of this.solids) {
@@ -939,11 +946,13 @@ export class LostDaysOfSpring {
                     this.player.vx = 0;
                     this.player.carryVx = 0;
                     this.player.carryVxInitial = 0;
+                    this.player.knockbackUntil = 0;
                 } else if (wasRight) {
                     this.player.x = p.x + p.w;
                     this.player.vx = 0;
                     this.player.carryVx = 0;
                     this.player.carryVxInitial = 0;
+                    this.player.knockbackUntil = 0;
                 }
             }
         }
@@ -1385,6 +1394,7 @@ export class LostDaysOfSpring {
         this.player.life -= source.damage;
         this.player.lastHitTime = now;
         this.player.isHit = true;
+        this.player.knockbackUntil = now + source.knockbackControlLock;
 
         const hitFromAboveOrBelow =
             this.player.prevY + this.player.h <= source.y ||
