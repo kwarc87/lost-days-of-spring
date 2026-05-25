@@ -1,131 +1,135 @@
-// ─── Pill enemy ───────────────────────────────────────────────────────────────
-function drawPill(ctx, enemy, debug) {
+import { getImg } from "../utils/imgCache.js";
+
+const SCALE = 3;
+const SRC = "textures/enemy001.png";
+const FW = 48;
+const FH = 48;
+const SRC_Y = 11;
+const FPS = 8;
+
+let _offCanvas = null;
+let _offCtx = null;
+
+function getOffCanvas(w, h) {
+    if (!_offCanvas) {
+        _offCanvas = document.createElement("canvas");
+        _offCtx = _offCanvas.getContext("2d");
+    }
+    if (_offCanvas.width !== w || _offCanvas.height !== h) {
+        _offCanvas.width = w;
+        _offCanvas.height = h;
+    }
+    return { canvas: _offCanvas, ctx: _offCtx };
+}
+
+function getCurrentFrame() {
+    return Math.floor(Date.now() / (1000 / FPS)) % 3;
+}
+
+// per-frame eye anchor (sprite pixel coords, top-left of eye shape)
+const EYE_DATA = [
+    { x: 10, y: 38 }, // frame 0
+    { x: 10, y: 37 }, // frame 1
+    { x: 9, y: 36 }, // frame 2
+];
+
+// per-frame mouth anchor
+const MOUTH_DATA = [
+    { x: 9, y: 45 }, // frame 0
+    { x: 9, y: 44 }, // frame 1
+    { x: 8, y: 43 }, // frame 2
+];
+
+function drawEyes(ctx, drawX, drawY, frame, eyeColor) {
+    const { x: ex, y: ey } = EYE_DATA[frame] ?? EYE_DATA[0];
+    const bx = drawX + ex * SCALE;
+    const by = drawY + ey * SCALE;
+    const S = SCALE;
+
+    for (const ox of [0, 5 * S]) {
+        ctx.fillStyle = eyeColor;
+        ctx.fillRect(bx + ox + 1 * S, by, 2 * S, S);
+        ctx.fillRect(bx + ox, by + S, 4 * S, 2 * S);
+        ctx.fillRect(bx + ox + S, by + 3 * S, 2 * S, S);
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.fillRect(bx + ox + S, by + 3 * S, 2 * S, S);
+    }
+}
+
+function drawMouth(ctx, drawX, drawY, frame, secondaryColor) {
+    const { x: mx, y: my } = MOUTH_DATA[frame] ?? MOUTH_DATA[0];
+    const bx = drawX + mx * SCALE;
+    const by = drawY + my * SCALE;
+    const S = SCALE;
+
+    // top lip line
+    ctx.fillStyle = secondaryColor;
+    ctx.fillRect(bx + 6, by, 5 * S, S);
+    // bottom lip line (slightly darker)
+    ctx.fillRect(bx + 3, by + S, 7 * S, S);
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.fillRect(bx + 3, by + S, 7 * S, S);
+}
+
+function drawEnemy001(ctx, enemy, debug) {
+    const img = getImg(SRC);
+
+    if (!img?.complete || !img.naturalWidth) {
+        return;
+    }
+
+    const frame = getCurrentFrame();
+    const dw = FW * SCALE;
+    const dh = FH * SCALE;
+    const drawX = -dw / 2 + (enemy.offsetX ?? 0);
+    const drawY = -dh + (enemy.offsetY ?? 0);
+
     ctx.save();
     ctx.imageSmoothingEnabled = false;
+    ctx.translate(
+        Math.round(enemy.x + enemy.w / 2),
+        Math.round(enemy.y + enemy.h),
+    );
 
-    const cx = Math.round(enemy.x + enemy.w / 2);
-    const cy = Math.round(enemy.y + enemy.h);
-
-    ctx.translate(cx, cy);
-    if (enemy.vx < 0) {
+    // sprite faces left by default; flip for right-facing
+    if (enemy.vx > 0) {
         ctx.scale(-1, 1);
     }
 
-    const pw = 40; // pill width
-    const ph = 88; // pill height
-    const legH = 8; // leg area below pill
-    const px = -pw / 2; // -22 (left edge)
-    const py = -(ph + legH); // top of pill
-
-    // --- Legs ---
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(-12, -legH, 6, legH - 4); // left leg
-    ctx.fillRect(6, -legH, 6, legH - 4); // right leg
-    ctx.fillStyle = "#cccccc";
-    ctx.fillRect(-15, -4, 12, 4); // left foot
-    ctx.fillRect(3, -4, 12, 4); // right foot
-
-    // --- Pill shape builder: 3-step 4px caps for nicely rounded ends ---
-    const drawPillShape = (color) => {
-        ctx.fillStyle = color;
-        ctx.fillRect(px + 12, py, pw - 24, 4); // top cap step 1
-        ctx.fillRect(px + 8, py + 4, pw - 16, 4); // top cap step 2
-        ctx.fillRect(px + 4, py + 8, pw - 8, 4); // top cap step 3
-        ctx.fillRect(px, py + 12, pw, ph - 24); // main body
-        ctx.fillRect(px + 4, py + ph - 12, pw - 8, 4); // bottom cap step 3
-        ctx.fillRect(px + 8, py + ph - 8, pw - 16, 4); // bottom cap step 2
-        ctx.fillRect(px + 12, py + ph - 4, pw - 24, 4); // bottom cap step 1
-    };
-
-    // --- Pill outline path (matches 3-step caps) ---
-    const pillPath = () => {
-        ctx.beginPath();
-        ctx.moveTo(px + 12, py);
-        ctx.lineTo(px + pw - 12, py);
-        ctx.lineTo(px + pw - 12, py + 4);
-        ctx.lineTo(px + pw - 8, py + 4);
-        ctx.lineTo(px + pw - 8, py + 8);
-        ctx.lineTo(px + pw - 4, py + 8);
-        ctx.lineTo(px + pw - 4, py + 12);
-        ctx.lineTo(px + pw, py + 12);
-        ctx.lineTo(px + pw, py + ph - 12);
-        ctx.lineTo(px + pw - 4, py + ph - 12);
-        ctx.lineTo(px + pw - 4, py + ph - 8);
-        ctx.lineTo(px + pw - 8, py + ph - 8);
-        ctx.lineTo(px + pw - 8, py + ph - 4);
-        ctx.lineTo(px + pw - 12, py + ph - 4);
-        ctx.lineTo(px + pw - 12, py + ph);
-        ctx.lineTo(px + 12, py + ph);
-        ctx.lineTo(px + 12, py + ph - 4);
-        ctx.lineTo(px + 8, py + ph - 4);
-        ctx.lineTo(px + 8, py + ph - 8);
-        ctx.lineTo(px + 4, py + ph - 8);
-        ctx.lineTo(px + 4, py + ph - 12);
-        ctx.lineTo(px, py + ph - 12);
-        ctx.lineTo(px, py + 12);
-        ctx.lineTo(px + 4, py + 12);
-        ctx.lineTo(px + 4, py + 8);
-        ctx.lineTo(px + 8, py + 8);
-        ctx.lineTo(px + 8, py + 4);
-        ctx.lineTo(px + 12, py + 4);
-        ctx.closePath();
-    };
-
-    // Top half — mainColor
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(px, py, pw, ph / 2);
-    ctx.clip();
-    drawPillShape(enemy.mainColor);
-    ctx.restore();
-
-    // Bottom half — secondaryColor
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(px, py + ph / 2, pw, ph / 2);
-    ctx.clip();
-    drawPillShape(enemy.secondaryColor);
-    ctx.restore();
-
-    // Horizontal seam — 4px dark line across full pill width
-    ctx.fillStyle = "rgba(0,0,0,0.45)";
-    ctx.fillRect(px + 4, py + ph / 2 - 2, pw - 8, 4);
-
-    // --- Color shadows: pixel-art right-edge shadow + left-edge highlight ---
-    ctx.save();
-    pillPath();
-    ctx.clip();
-    ctx.fillStyle = "rgba(0,0,0,0.22)"; // right-edge shadow
-    ctx.fillRect(px + pw - 16, py, 16, ph);
-    ctx.fillStyle = "rgba(255,255,255,0.09)"; // left-edge highlight
-    ctx.fillRect(px, py, 16, ph);
-    ctx.restore();
-
-    // --- Eyes: 12×12 white blocks, 6×6 dark pupils ---
-    const eyeY = py + 14;
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(-16, eyeY, 12, 12); // left eye
-    ctx.fillRect(4, eyeY, 12, 12); // right eye
-    ctx.fillStyle = "#1a1a2e";
-    ctx.fillRect(-14, eyeY + 3, 6, 6); // left pupil
-    ctx.fillRect(8, eyeY + 3, 6, 6); // right pupil
-
-    // --- Menacing brows: inner end lower than outer (angry V angle) ---
-    ctx.fillStyle = "#1a1a2e";
-    ctx.fillRect(-20, eyeY - 8, 12, 4); // outer left
-    ctx.fillRect(-8, eyeY - 4, 6, 4); // inner left (drops toward center)
-    ctx.fillRect(2, eyeY - 4, 6, 4); // inner right
-    ctx.fillRect(8, eyeY - 8, 12, 4); // outer right
-
-    // --- Damage flash: red overlay clipped to pill silhouette ---
     if (enemy.isDamaged) {
-        ctx.save();
-        pillPath();
-        ctx.clip();
-        ctx.fillStyle = "rgba(255, 40, 40, 0.45)";
-        ctx.fillRect(px, py, pw, ph);
-        ctx.restore();
+        const outlineSize = 3;
+        const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
+
+        offCtx.clearRect(0, 0, dw, dh);
+        offCtx.imageSmoothingEnabled = false;
+        offCtx.drawImage(img, frame * FW, SRC_Y, FW, FH, 0, 0, dw, dh);
+        offCtx.globalCompositeOperation = "source-atop";
+        offCtx.fillStyle = "red";
+        offCtx.fillRect(0, 0, dw, dh);
+        offCtx.globalCompositeOperation = "source-over";
+
+        const offsets = [
+            [-outlineSize, 0],
+            [outlineSize, 0],
+            [0, -outlineSize],
+            [0, outlineSize],
+            [-outlineSize, -outlineSize],
+            [outlineSize, -outlineSize],
+            [-outlineSize, outlineSize],
+            [outlineSize, outlineSize],
+        ];
+
+        for (const [ox, oy] of offsets) {
+            ctx.drawImage(offCanvas, drawX + ox, drawY + oy);
+        }
+
+        ctx.drawImage(img, frame * FW, SRC_Y, FW, FH, drawX, drawY, dw, dh);
+    } else {
+        ctx.drawImage(img, frame * FW, SRC_Y, FW, FH, drawX, drawY, dw, dh);
     }
+
+    drawEyes(ctx, drawX, drawY, frame, enemy.mainColor);
+    drawMouth(ctx, drawX, drawY, frame, enemy.secondaryColor);
 
     ctx.restore();
 
@@ -141,24 +145,10 @@ function drawPill(ctx, enemy, debug) {
 // ─── Dispatcher ───────────────────────────────────────────────────────────────
 export const DefaultEnemyRenderer = {
     drawMapEnemy: (ctx, enemy) => {
-        const x = Math.round(enemy.x);
-        const y = Math.round(enemy.y);
-        const { w, h } = enemy;
-        const color = enemy.mainColor ?? "#e84855";
-        const accent = enemy.accentColor ?? "#ffffff";
-
-        const half = Math.floor(h / 2);
-
-        // Bottom square — accent color
-        ctx.fillStyle = accent;
-        ctx.fillRect(x, y + half, w, h - half);
-
-        // Top square — main color
-        ctx.fillStyle = color;
-        ctx.fillRect(x, y, w, half);
+        drawEnemy001(ctx, enemy, true);
     },
 
     draw: (ctx, enemy, debug = false) => {
-        drawPill(ctx, enemy, debug);
+        drawEnemy001(ctx, enemy, debug);
     },
 };

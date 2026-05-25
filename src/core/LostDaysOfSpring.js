@@ -542,7 +542,7 @@ export class LostDaysOfSpring {
             h: height,
         };
 
-        for (const p of [...this.solids, ...this.enemies]) {
+        for (const p of this.solids) {
             if (p.dead) {
                 continue;
             }
@@ -736,10 +736,7 @@ export class LostDaysOfSpring {
                 this.keys[this.keysMap.crouch]) &&
             !this.player.airborne
         ) {
-            if (
-                !this.isPlayerCrouching() &&
-                this.player.onGroundType !== "enemy"
-            ) {
+            if (!this.isPlayerCrouching()) {
                 const anchor = this.findCrouchAnchor();
                 if (anchor !== null) {
                     this.applyPosture(this.playerPostures.CROUCH, anchor);
@@ -800,6 +797,9 @@ export class LostDaysOfSpring {
 
     handleJumpInput(now) {
         if (this.player.posture === this.playerPostures.CROUCH) {
+            return;
+        }
+        if (now < this.player.knockbackUntil) {
             return;
         }
         const jumpBuffered =
@@ -1313,13 +1313,17 @@ export class LostDaysOfSpring {
             }
 
             if (!cooldownIsActive) {
-                this.applyDamageToPlayer(now, enemy, true);
+                this.applyDamageToPlayer(
+                    now,
+                    enemy,
+                    enemy.playerEnteredFromAbove,
+                );
                 break;
             }
 
             // Cooldown active: resolve overlap without damage.
             this.resolveEnemyCollisionX(enemy);
-            this.resolveEnemyCollisionY(enemy, now);
+            this.resolveEnemyCollisionY(enemy);
 
             break;
         }
@@ -1373,41 +1377,30 @@ export class LostDaysOfSpring {
         }
     }
 
-    resolveEnemyCollisionY(enemy, now) {
+    resolveEnemyCollisionY(enemy) {
         if (enemy.playerEnteredFromAbove) {
-            this.player.airborne = false;
-            this.player.jumpPressedByUser = false;
-            this.player.lastGroundedAt = now;
-            this.player.onGroundType = "enemy";
-            this.player.onGroundId = enemy.id;
-            this.player.lastGroundType = "enemy";
-            this.player.lastGroundId = enemy.id;
             this.player.y = enemy.y - this.player.h;
-            this.player.vy = 0;
+            this.player.vy = -enemy.recoilY;
+            this.player.airborne = true;
+            this.player.jumpPressedByUser = false;
         } else if (enemy.playerEnteredFromBelow) {
             this.player.y = enemy.y + enemy.h;
             this.player.vy = 0;
         }
     }
 
-    applyDamageToPlayer(now, source, extraRecoilIfVertical = false) {
+    applyDamageToPlayer(now, source, hitFromAbove = false) {
         this.player.life -= source.damage;
         this.player.lastHitTime = now;
         this.player.isHit = true;
-        this.player.knockbackUntil = now + source.knockbackControlLock;
+        this.player.knockbackUntil = now + this.player.knockbackControlLock;
 
-        const hitFromAboveOrBelow =
-            this.player.prevY + this.player.h <= source.y ||
-            this.player.prevY >= source.y + source.h;
-
-        const recoilXForce =
-            extraRecoilIfVertical && hitFromAboveOrBelow
-                ? source.recoilX / 1.5
-                : source.recoilX;
-        const recoilYForce =
-            extraRecoilIfVertical && hitFromAboveOrBelow
-                ? source.recoilY * 1.5
-                : source.recoilY;
+        const recoilXForce = hitFromAbove
+            ? source.recoilX / 1.5
+            : source.recoilX;
+        const recoilYForce = hitFromAbove
+            ? source.recoilY * 1.5
+            : source.recoilY;
 
         this.player.jumpPressedByUser = false;
         const hitFromLeft =
@@ -1469,7 +1462,9 @@ export class LostDaysOfSpring {
                     now - this.player.lastHitTime < this.player.hitCooldown;
 
                 if (!cooldownIsActive) {
-                    this.applyDamageToPlayer(now, spike);
+                    const hitFromAbove =
+                        this.player.prevY + this.player.h <= spike.y;
+                    this.applyDamageToPlayer(now, spike, hitFromAbove);
                     if (this.gameOver) {
                         return;
                     }
@@ -1564,8 +1559,6 @@ export class LostDaysOfSpring {
                 vx: 0,
                 vy: cannon.speed,
                 targetY: cannon.targetY,
-                recoilX: 0,
-                recoilY: 5,
                 color: cannon.color,
             });
         }
