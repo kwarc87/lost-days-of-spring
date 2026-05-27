@@ -69,6 +69,7 @@ export class LostDaysOfSpring {
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.levelStartAt = 0; // timestamp (ms) when the level was loaded
         this.totalPausedTime = 0; // accumulated paused time (ms) within current level
+        this.accumulatedPlayTime = 0; // play time (ms) carried over from previous sessions via checkpoint
         this.pauseStartAt = 0; // timestamp (ms) when the current pause started
         this.gameOverDelay = 15000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
@@ -303,6 +304,7 @@ export class LostDaysOfSpring {
         if (isNewLevel || wasLevelComplete) {
             this.levelStartAt = performance.now();
             this.totalPausedTime = 0;
+            this.accumulatedPlayTime = this.checkpointRespawn?.playTimeMs ?? 0;
         } else if (wasGameOver) {
             this.totalPausedTime += performance.now() - gameOverAt;
         }
@@ -892,6 +894,8 @@ export class LostDaysOfSpring {
                 this.player.vy = 0;
                 this.player.shooting = false;
                 this.player.jumpPressedByUser = false;
+                this.checkpointRespawn = null;
+                CheckpointStorage.clear();
             }
         }
     }
@@ -1482,6 +1486,11 @@ export class LostDaysOfSpring {
                 ...(this.checkpointRespawn?.shownMessageIds ?? []),
                 ...this.messages.filter((m) => m.shown).map((m) => m.id),
             ]),
+            playTimeMs:
+                performance.now() -
+                this.levelStartAt -
+                this.totalPausedTime +
+                this.accumulatedPlayTime,
         };
         CheckpointStorage.save(this.checkpointRespawn);
     }
@@ -2080,7 +2089,10 @@ export class LostDaysOfSpring {
 
     drawLevelComplete() {
         const playTimeMs =
-            this.levelCompleteAt - this.levelStartAt - this.totalPausedTime;
+            this.levelCompleteAt -
+            this.levelStartAt -
+            this.totalPausedTime +
+            this.accumulatedPlayTime;
         this.levelCompleteRenderer.drawLevelCompleteScreen(
             this.ctx,
             this.canvas,
@@ -2101,7 +2113,10 @@ export class LostDaysOfSpring {
             Math.ceil((this.gameOverDelay - elapsed) / 1000),
         );
         const playTimeMs =
-            this.gameOverAt - this.levelStartAt - this.totalPausedTime;
+            this.gameOverAt -
+            this.levelStartAt -
+            this.totalPausedTime +
+            this.accumulatedPlayTime;
 
         this.gameOverRenderer.drawGameOverScreen(
             this.ctx,
