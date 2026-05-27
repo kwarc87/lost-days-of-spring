@@ -1,8 +1,8 @@
 import { getImg } from "../utils/imgCache.js";
 
-const SPRITE_URL = "textures/cannon.png";
-const SRC_X = 32;
-const SRC_Y = 0;
+const SPRITE_URL = "textures/tilesets.png";
+const SRC_X = 29;
+const SRC_Y = 190;
 const SRC_W = 32;
 const SRC_H = 32;
 const DST_W = 96;

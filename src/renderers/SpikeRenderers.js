@@ -1,13 +1,13 @@
 import { getImg } from "../utils/imgCache.js";
 
-const SPIKE_IMG_PATH = "textures/spike.png";
+const SPIKE_IMG_PATH = "textures/tilesets.png";
 const SPIKE_SW = 16;
 const SPIKE_SH = 16;
 const SPIKE_SCALE = 3;
 
 const SPIKE_VARIANTS = {
-    1: { sx: 0, sy: 0 },
-    2: { sx: 16, sy: 0 },
+    1: { sx: 0, sy: 240 },
+    2: { sx: 16, sy: 240 },
 };
 
 export const DefaultSpikeRenderer = {

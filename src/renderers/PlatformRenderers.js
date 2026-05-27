@@ -57,37 +57,37 @@ const GROUND_FULL = {
 };
 
 const BASE_CRACKS_TILESET = {
-    path: "textures/cracks.png",
+    path: "textures/tilesets.png",
     tileWidthSrc: 16,
     tileHeightSrc: 16,
     scale: 3,
 };
 
 const CRACKS_FULL = {
-    tLeft: { x: 9, y: 8, padLeft: 4, padTop: 5 },
+    tLeft: { x: 208, y: 192, padLeft: 4, padTop: 5 },
     tMid: [
-        { x: 25, y: 8, padTop: 5 },
-        { x: 41, y: 8, padTop: 5 },
+        { x: 224, y: 192, padTop: 5 },
+        { x: 240, y: 192, padTop: 5 },
     ],
-    tRight: { x: 57, y: 8, padRight: 4, padTop: 5 },
+    tRight: { x: 256, y: 192, padRight: 4, padTop: 5 },
 
     left: [
-        { x: 9, y: 24, padLeft: 4 },
-        { x: 9, y: 40, padLeft: 4 },
+        { x: 208, y: 208, padLeft: 4 },
+        { x: 208, y: 224, padLeft: 4 },
     ],
-    mid: { x: 25, y: 25 },
+    mid: { x: 224, y: 208 },
 
     right: [
-        { x: 57, y: 24, padRight: 4 },
-        { x: 57, y: 40, padRight: 4 },
+        { x: 256, y: 208, padRight: 4 },
+        { x: 256, y: 224, padRight: 4 },
     ],
 
-    bLeft: { x: 9, y: 58, padLeft: 4, padBottom: 8 },
+    bLeft: { x: 208, y: 242, padLeft: 4, padBottom: 8 },
     bMid: [
-        { x: 25, y: 58, padBottom: 8 },
-        { x: 41, y: 58, padBottom: 8 },
+        { x: 224, y: 242, padBottom: 8 },
+        { x: 240, y: 242, padBottom: 8 },
     ],
-    bRight: { x: 57, y: 58, padRight: 4, padBottom: 8 },
+    bRight: { x: 256, y: 242, padRight: 4, padBottom: 8 },
 };
 
 const platformCaves = {

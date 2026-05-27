@@ -1430,7 +1430,9 @@ export class LostDaysOfSpring {
             this.player.vy = 0;
             this.player.shooting = false;
 
-            this.snapshotCheckpointState();
+            if (this.checkpointRespawn !== null) {
+                this.snapshotCheckpointState();
+            }
         }
     }
 
@@ -2190,8 +2192,8 @@ export class LostDaysOfSpring {
             const inTarget = this.rectsCollide(this.player, targetZone);
 
             if (!inOrigin && !inTarget) {
-                t.originItem.cordX = 0;
-                t.targetItem.cordX = 0;
+                t.originItem.cordX = 64;
+                t.targetItem.cordX = 64;
                 t.playerEnteredAt = null;
                 t.justTeleported = false;
                 // this condition is for enemy recoil
@@ -2203,7 +2205,7 @@ export class LostDaysOfSpring {
             }
 
             this.player.isInTeleport = true;
-            (inOrigin ? t.originItem : t.targetItem).cordX = 32;
+            (inOrigin ? t.originItem : t.targetItem).cordX = 96;
 
             if (
                 t.playerEnteredAt === null &&
@@ -2236,8 +2238,8 @@ export class LostDaysOfSpring {
                 this.player.vx = 0;
                 this.player.vy = 0;
                 this.player.frozenForTeleport = false;
-                t.originItem.cordX = 0;
-                t.targetItem.cordX = 0;
+                t.originItem.cordX = 64;
+                t.targetItem.cordX = 64;
                 t.frozenAt = null;
                 t.justTeleported = true;
             }

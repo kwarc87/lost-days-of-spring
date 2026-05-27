@@ -1128,19 +1128,24 @@ export const LEVEL_001 = {
             GameFactory.grid.hearts({ id: 19, x: 415.5, y: 90 }),
         ],
         weaponUpgrades: [
-            GameFactory.grid.weaponUpgrades({ id: 1, x: 95, y: 75, weapon: {
-                id: 2,
-                color: "#C1311B",
-                speed: 18,
-                shootFrequency: 125,
-                ammo: {
-                    vx: 0,
-                    vy: 0,
-                    w: 10,
-                    h: 10,
-                damage: 8,
-                },
-            } }),
+            GameFactory.grid.weaponUpgrades({
+                id: 1,
+                x: 95,
+                y: 75.5,
+                weapon: {
+                    id: 2,  
+                    color: "#C1311B",
+                    speed: 18,
+                    shootFrequency: 125,
+                    ammo: {
+                        vx: 0,
+                        vy: 0,
+                        w: 10,
+                        h: 10,
+                        damage: 8,
+                    },
+                }
+            }),
         ],
     },
     spikes: [
@@ -2760,6 +2765,7 @@ export const LEVEL_001 = {
         GameFactory.grid.message({ id: "msg-2", x: 24, y: 133, w: 18, h: 10, offsetX: 0, offsetY: 0, lines: MESSAGES.LEVEL_1.JUMP_HINT, relatedTo: "viewPort", strategy: "single" }),
         GameFactory.grid.message({ id: "msg-3", x: 89, y: 138, w: 15, h: 4, offsetX: 0, offsetY: 2, lines: MESSAGES.LEVEL_1.CROUCH_HINT, relatedTo: "viewPort", strategy: "single" }),
         GameFactory.grid.message({ id: "msg-4", x: 177, y: 132, w: 19, h: 10, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.SHOOT_HINT, relatedTo: "viewPort", strategy: "single" }),
+        GameFactory.grid.message({ id: "msg-5", x: 275, y: 132, w: 22, h: 4, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.PAUSE_HINT, relatedTo: "viewPort", strategy: "single" }),
     ],
     checkpoints: [
         GameFactory.grid.checkpoint({ id: 1, x: 473, y: 122, w: 1, h: 3, reached: false }),

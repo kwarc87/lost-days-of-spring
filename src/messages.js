@@ -106,6 +106,16 @@ export const MESSAGES = {
                 ],
             },
         ],
+        PAUSE_HINT: [
+            {
+                segments: [
+                    { text: "To pause the game press ", color: "#fff" },
+                    { text: "p ", color: "#f5c542" },
+                    { text: "or ", color: "#fff" },
+                    { text: "ESC", color: "#f5c542" },
+                ],
+            },
+        ],
         CROUCH_HINT: [
             {
                 segments: [
@@ -113,14 +123,6 @@ export const MESSAGES = {
                     { text: "c ", color: "#f5c542" },
                     { text: "or ", color: "#fff" },
                     { text: "Arrow DOWN", color: "#f5c542" },
-                ],
-            },
-        ],
-        PAUSE_HINT: [
-            {
-                segments: [
-                    { text: "To pause the game press ", color: "#fff" },
-                    { text: "p", color: "#f5c542" },
                 ],
             },
         ],

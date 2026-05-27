@@ -13,14 +13,14 @@ const SPLINTER_FRAMES = [
     ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
 ];
 
-const WEAPON_IMG_PATH = "textures/ball.png";
+const WEAPON_IMG_PATH = "textures/tilesets.png";
 const WEAPON_FRAME_MS = 250;
 const WEAPON_SW = 16;
 const WEAPON_SH = 16;
 const WEAPON_SCALE = 2;
 
 const WEAPON_FRAMES = [
-    ...Array.from({ length: 5 }, (_, i) => ({ sx: 32 + i * 80, sy: 48 })),
+    ...Array.from({ length: 5 }, (_, i) => ({ sx: i * 80, sy: 324 })),
 ];
 
 // 8×8 pixel art heart with outline — rendered at scale=3 → 24×24px
