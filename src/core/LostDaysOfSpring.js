@@ -15,6 +15,7 @@ import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
+import { CheckpointRenderer } from "../renderers/CheckpointRenderer.js";
 import { DefaultExitRenderer } from "../renderers/ExitRenderers.js";
 import { MessageRenderer } from "../renderers/MessageRenderer.js";
 import {
@@ -22,6 +23,7 @@ import {
     CannonBulletRenderer,
 } from "../renderers/CannonRenderers.js";
 import { getExitLevelLines } from "../messages.js";
+import { CheckpointStorage } from "../services/CheckpointStorage.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -150,6 +152,7 @@ export class LostDaysOfSpring {
         this.levelCompleteRenderer = DefaultLevelCompleteRenderer;
         this.gameOverRenderer = DefaultGameOverRenderer;
         this.spikeRenderer = DefaultSpikeRenderer;
+        this.checkpointRenderer = CheckpointRenderer;
         this.exitRenderer = DefaultExitRenderer;
         this.messageRenderer = MessageRenderer;
         this.cannonRenderer = CannonRenderer;
@@ -203,9 +206,23 @@ export class LostDaysOfSpring {
 
         const isNewLevel = levelId !== this.currentLevelId;
 
+        const isRealLevelTransition =
+            this.currentLevelId !== null && isNewLevel;
+
         // Clear checkpoint state when transitioning to a different level
         if (isNewLevel || this.levelComplete) {
             this.checkpointRespawn = null;
+            if (isRealLevelTransition || this.levelComplete) {
+                CheckpointStorage.clear();
+            }
+        }
+
+        // On first load or page reload, restore checkpoint from localStorage
+        if (this.checkpointRespawn === null) {
+            const saved = CheckpointStorage.load();
+            if (saved?.levelId === levelId) {
+                this.checkpointRespawn = saved;
+            }
         }
 
         // Reset death counter on level transition or after completing the level
@@ -1439,6 +1456,7 @@ export class LostDaysOfSpring {
     snapshotCheckpointState() {
         this.checkpointRespawn = {
             ...this.checkpointRespawn,
+            levelId: this.currentLevelId,
             coinsCount: this.player.coinsCount,
             splintersCount: this.player.splintersCount,
             weapon: this.player.weapon,
@@ -1465,6 +1483,7 @@ export class LostDaysOfSpring {
                 ...this.messages.filter((m) => m.shown).map((m) => m.id),
             ]),
         };
+        CheckpointStorage.save(this.checkpointRespawn);
     }
 
     updateSpikesDamage(now) {
@@ -2247,10 +2266,7 @@ export class LostDaysOfSpring {
     }
 
     drawCheckpointIndicator(cp) {
-        this.ctx.save();
-        this.ctx.fillStyle = cp.reached ? "#68f288" : "#323031";
-        this.ctx.fillRect(cp.x + 32, cp.y + 60, 16, 48);
-        this.ctx.restore();
+        this.checkpointRenderer.draw(this.ctx, cp);
     }
 
     drawExit(exit) {
@@ -2436,6 +2452,7 @@ export class LostDaysOfSpring {
             this.isPaused = false;
             this.totalPausedTime = 0;
             this.checkpointRespawn = null;
+            CheckpointStorage.clear();
             for (const cp of this.checkpoints) {
                 cp.activated = false;
             }

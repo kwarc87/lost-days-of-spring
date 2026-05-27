@@ -1,7 +1,7 @@
 import { getImg } from "../utils/imgCache.js";
 
 const SCALE = 3;
-const SRC = "textures/enemy001.png";
+const SRC = "textures/enemies/enemy001.png";
 const FW = 48;
 const FH = 48;
 const SRC_Y = 11;
