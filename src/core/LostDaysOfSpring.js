@@ -31,6 +31,7 @@ export class LostDaysOfSpring {
 
         // ====== INPUT ======
         this.keys = {};
+
         this.keysMap = {
             left: "ArrowLeft",
             right: "ArrowRight",
@@ -44,6 +45,11 @@ export class LostDaysOfSpring {
             map: "KeyM",
             escape: "Escape",
             enter: "Enter",
+            // Menu navigation
+            menuUp: "ArrowUp",
+            menuDown: "ArrowDown",
+            menuConfirm: "Enter",
+            menuConfirmAlt: "Space",
         };
 
         // ====== GAME STATE ======
@@ -53,6 +59,8 @@ export class LostDaysOfSpring {
         this.checkpointRespawn = null;
         this.deathCount = 0;
         this.mapView = false;
+        this.isPaused = false;
+        this.pauseMenuIndex = 0; // 0 = Resume, 1 = Restart
         this.levelComplete = false;
         this.gameOver = false;
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
@@ -283,6 +291,8 @@ export class LostDaysOfSpring {
         }
         this.pauseStartAt = 0;
         this.mapView = false;
+        this.isPaused = false;
+        this.pauseMenuIndex = 0;
         this.playerAtExit = false;
     }
 
@@ -456,9 +466,14 @@ export class LostDaysOfSpring {
         window.addEventListener("keydown", (e) => {
             e.stopPropagation();
 
-            // Toggle pause state
-            if (e.code === this.keysMap.pause && !e.repeat) {
-                this.togglePause();
+            if (this._preventDefaultKeys.has(e.code)) {
+                e.preventDefault();
+            }
+
+            const wasPaused = this.isPaused;
+            this.handlePauseMenuInput(e);
+            if (wasPaused || this.isPaused) {
+                return;
             }
 
             // Toggle map overview
@@ -469,17 +484,12 @@ export class LostDaysOfSpring {
             if (
                 (e.code === this.keysMap.jump ||
                     e.code === this.keysMap.jumpAlt) &&
-                !this.keys[e.code] &&
                 !e.repeat
             ) {
                 this.player.jumpPressedAt = performance.now();
             }
 
             this.keys[e.code] = true;
-
-            if (this._preventDefaultKeys.has(e.code)) {
-                e.preventDefault();
-            }
         });
 
         window.addEventListener("keyup", (e) => {
@@ -2317,35 +2327,129 @@ export class LostDaysOfSpring {
         this.isRunning = false;
     }
 
-    // Toggle pause state
-    togglePause() {
-        if (this.levelComplete || this.gameOver || this.mapView) {
+    handlePauseMenuInput(e) {
+        if (this.isPaused) {
+            if (!e.repeat) {
+                this.handlePauseMenuKey(e.code);
+            }
             return;
         }
-        if (this.isRunning) {
-            this.stop();
-            this.pauseStartAt = performance.now();
 
-            // Draw pause overlay
-            this.pauseRenderer.drawPauseScreen(this.ctx, this.canvas);
+        if (
+            (e.code === this.keysMap.escape || e.code === this.keysMap.pause) &&
+            !e.repeat &&
+            !this.levelComplete &&
+            !this.gameOver &&
+            !this.mapView &&
+            this.isRunning
+        ) {
+            this.openPauseMenu();
+        }
+    }
+
+    handlePauseMenuKey(code) {
+        switch (code) {
+            case this.keysMap.menuUp:
+            case this.keysMap.menuDown: {
+                const count = this.pauseRenderer.menuItemCount;
+                const dir = code === this.keysMap.menuUp ? -1 : 1;
+                this.pauseMenuIndex =
+                    (this.pauseMenuIndex + dir + count) % count;
+                this.pauseRenderer.drawPausePanel(
+                    this.ctx,
+                    this.canvas,
+                    this.pauseMenuIndex,
+                );
+                break;
+            }
+            case this.keysMap.menuConfirm:
+            case this.keysMap.menuConfirmAlt:
+                this.confirmPauseMenuItem();
+                break;
+            case this.keysMap.escape:
+            case this.keysMap.pause:
+                this.closePauseMenu();
+                break;
+        }
+    }
+
+    openPauseMenu() {
+        this.stop();
+        this.isPaused = true;
+        this.pauseMenuIndex = 0;
+        this.pauseStartAt = performance.now();
+        this.pauseRenderer.drawPauseScreen(
+            this.ctx,
+            this.canvas,
+            this.pauseMenuIndex,
+        );
+    }
+
+    _resumeFromPause() {
+        const pauseDuration = performance.now() - this.pauseStartAt;
+        this.totalPausedTime += pauseDuration;
+
+        if (this.player.lastHitTime) {
+            this.player.lastHitTime += pauseDuration;
+        }
+        if (this.player.lastShootTime) {
+            this.player.lastShootTime += pauseDuration;
+        }
+        if (this.player.lastGroundedAt) {
+            this.player.lastGroundedAt += pauseDuration;
+        }
+        if (this.player.carryStartAt) {
+            this.player.carryStartAt += pauseDuration;
+        }
+        if (this.messageShownAt) {
+            this.messageShownAt += pauseDuration;
+        }
+        this.player.knockbackUntil += pauseDuration;
+
+        for (const cannon of this.cannons) {
+            cannon.lastShootTime += pauseDuration;
+        }
+        for (const t of this.teleports) {
+            if (t.playerEnteredAt) {
+                t.playerEnteredAt += pauseDuration;
+            }
+            if (t.frozenAt) {
+                t.frozenAt += pauseDuration;
+            }
+        }
+    }
+
+    closePauseMenu() {
+        this.isPaused = false;
+        this._resumeFromPause();
+        this.start();
+    }
+
+    confirmPauseMenuItem() {
+        if (this.pauseMenuIndex === 0) {
+            // Resume
+            this.closePauseMenu();
         } else {
-            this.totalPausedTime += performance.now() - this.pauseStartAt;
+            // Restart – clear checkpoints and reload level from scratch
+            this.isPaused = false;
+            this.totalPausedTime = 0;
+            this.checkpointRespawn = null;
+            for (const cp of this.checkpoints) {
+                cp.activated = false;
+            }
             this.start();
+            this.resetGame();
         }
     }
 
     toggleMapView() {
         if (!this.mapView) {
-            // prevent to open minimap when pause is active
-            if (!this.isRunning) {
-                return;
-            }
             this.mapView = true;
             this.stop();
             this.pauseStartAt = performance.now();
             this.draw();
         } else {
-            this.totalPausedTime += performance.now() - this.pauseStartAt;
+            this._resumeFromPause();
             this.mapView = false;
             this.start();
         }

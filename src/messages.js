@@ -65,7 +65,8 @@ export const MESSAGES = {
     // ── Pause ─────────────────────────────────────────────────────────────────
     PAUSE: {
         TITLE: { text: "PAUSED", color: "#f5c542" },
-        RESUME: { text: "P \u2013 resume", color: "#7a8a99" },
+        RESUME: { text: "Resume", color: "#ffffff" },
+        RESTART: { text: "Restart", color: "#ffffff" },
     },
     CHECKPOINT: [{ text: "CHECKPOINT", color: "#f5c542" }],
     WEAPON_UPGRADED: [{ text: "Weapon has been upgraded", color: "#ffffff" }],
