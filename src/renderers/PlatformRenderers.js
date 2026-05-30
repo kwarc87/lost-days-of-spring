@@ -265,6 +265,25 @@ const platformCaves = {
         ...BASE_TILESET,
         sprites: repeatAllTiles3x3({ x: 128, y: 16 }),
     },
+    ice: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 208, y: 356 },
+            { x: 304, y: 356 },
+            { x: 272, y: 356 },
+        ),
+    },
+    iceOneDirection: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 208, y: 356 },
+            [
+                { x: 248, y: 356 },
+                { x: 232, y: 356 },
+            ],
+            { x: 272, y: 356 },
+        ),
+    },
     booster: {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3(

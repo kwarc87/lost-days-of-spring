@@ -740,14 +740,29 @@ export class LostDaysOfSpring {
             this.player.facing = "right";
         }
 
+        const acceleration =
+            this.platforms.find((p) => p.id === this.player.onGroundId)
+                ?.acceleration ?? this.player.acceleration;
+
+        const deceleration =
+            this.platforms.find((p) => p.id === this.player.onGroundId)
+                ?.deceleration ?? this.player.deceleration;
+
+        const lastGroundPlatform = this.platforms.find(
+            (p) => p.id === this.player.lastGroundId,
+        );
+
+        const lastGroundAcceleration = lastGroundPlatform?.airAcceleration;
+        const lastGroundDeceleration = lastGroundPlatform?.airDeceleration;
+
         const delta =
             targetVx === 0
                 ? this.player.airborne
-                    ? this.player.airDeceleration
-                    : this.player.deceleration
+                    ? (lastGroundDeceleration ?? this.player.airDeceleration)
+                    : deceleration
                 : this.player.airborne
-                  ? this.player.airAcceleration
-                  : this.player.acceleration;
+                  ? (lastGroundAcceleration ?? this.player.airAcceleration)
+                  : acceleration;
 
         if (this.player.vx < targetVx) {
             this.player.vx = Math.min(this.player.vx + delta, targetVx);

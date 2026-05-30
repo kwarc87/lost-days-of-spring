@@ -134,7 +134,7 @@ export const LEVEL_001 = {
         GameFactory.grid.solid({ id: 77, x: 501, y: 111, w: 17, h: 1, layout: "boardRightCap" }),
         GameFactory.grid.solid({ id: 78, x: 500, y: 112, w: 18, h: 2, layout: "groundRightCap" }),
         GameFactory.grid.solid({ id: 79, x: 503, y: 107, w: 15, h: 1, layout: "board" }),
-        GameFactory.grid.solid({ id: 81, x: 507, y: 99, w: 7, h: 1, layout: "board" }),
+        GameFactory.grid.ice({ id: 81, x: 507, y: 99, w: 7, h: 1 }),
         GameFactory.grid.solid({ id: 82, x: 507, y: 100, w: 7, h: 2 }),
         GameFactory.grid.solid({ id: 84, x: 497, y: 94, w: 2, h: 8, layout: "groundLeftCap" }),
         GameFactory.grid.solid({ id: 85, x: 496, y: 97, w: 2, h: 4, layout: "groundLeftCap" }),
@@ -399,7 +399,7 @@ export const LEVEL_001 = {
         // --- FLOOR 2: x 400-500 (boosters) ---
         GameFactory.grid.solid({ id: 301, x: 385, y: 52, w: 4, h: 8, layout: "groundBottomCap" }),
         GameFactory.grid.oneDirection({ id: 302, x: 432, y: 60, w: 16, h: 1 }),
-        GameFactory.grid.solid({ id: 331, x: 432, y: 69, w: 16, h: 1, layout: "board" }),
+        GameFactory.grid.ice({ id: 331, x: 432, y: 69, w: 16, h: 1 }),
         GameFactory.grid.booster({ id: 305, x: 395, y: 67, w: 4, h: 1, boostSpeed: 24 }),
         GameFactory.grid.booster({ id: 306, x: 405, y: 72, w: 4, h: 2, boostSpeed: 24 }),
         GameFactory.grid.booster({ id: 308, x: 437, y: 65, w: 6, h: 1, boostSpeed: 20 }),
@@ -605,10 +605,10 @@ export const LEVEL_001 = {
         GameFactory.grid.solid({ id: 515, x: 216, y: 8, w: 16, h: 2, layout: "groundBottomCap" }),
         GameFactory.grid.solid({ id: 516, x: 239, y: 23, w: 100, h: 1, layout: "board" }),
         GameFactory.grid.oneDirection({ id: 517, x: 239, y: 19, w: 26, h: 1 }),
-        GameFactory.grid.oneDirection({ id: 518, x: 267, y: 19, w: 40, h: 1 }),
+        GameFactory.grid.oneDirectionIce({ id: 518, x: 267, y: 19, w: 40, h: 1 }),
         GameFactory.grid.oneDirection({ id: 519, x: 309, y: 19, w: 30, h: 1 }),
         GameFactory.grid.oneDirection({ id: 520, x: 239, y: 15, w: 50, h: 1 }),
-        GameFactory.grid.oneDirection({ id: 521, x: 291, y: 15, w: 48, h: 1 }),
+        GameFactory.grid.oneDirectionIce({ id: 521, x: 291, y: 15, w: 48, h: 1 }),
         GameFactory.grid.oneDirection({ id: 522, x: 239, y: 11, w: 20, h: 1 }),
         GameFactory.grid.oneDirection({ id: 523, x: 261, y: 11, w: 60, h: 1 }),
 
@@ -667,6 +667,12 @@ export const LEVEL_001 = {
         // SECRET AREA 3
         GameFactory.grid.solid({ id: 585, x: 414, y: 92, w: 40, h: 4 }),
         GameFactory.grid.solid({ id: 586, x: 294, y: 120, w: 2, h: 1, layout: "board" }),
+
+        //ADDITIONAL ICE
+        GameFactory.grid.ice({ id: 587, x: 438, y: 114, w: 10, h: 1 }),
+        GameFactory.grid.ice({ id: 588, x: 68, y: 63, w: 9, h: 1 }),
+        GameFactory.grid.solid({ id: 589, x: 64, y: 58, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.ice({ id: 590, x: 453, y: 77, w: 6, h: 1 }),
 
     ],
     elevators: [
@@ -827,6 +833,9 @@ export const LEVEL_001 = {
             GameFactory.grid.splinters({ id: 88, x: 426.5, y: 89 }),
             GameFactory.grid.splinters({ id: 89, x: 439.5, y: 89 }),
             GameFactory.grid.splinters({ id: 90, x: 452.5, y: 89 }),
+            GameFactory.grid.splinters({ id: 91, x: 442.5, y: 112 }),
+            GameFactory.grid.splinters({ id: 92, x: 64.5, y: 56.5 }),
+            GameFactory.grid.splinters({ id: 93, x: 458, y: 75 }),
         ],
         coins: [
             ...GameFactory.grid.rowOfCollectibles({ startId: 1, count: 10, x: 33, y: 136 }),
