@@ -71,14 +71,14 @@ function drawMouth(ctx, drawX, drawY, frame, secondaryColor) {
     ctx.fillRect(bx + 3, by + S, 7 * S, S);
 }
 
-function drawEnemy001(ctx, enemy, debug) {
+function drawEnemy001(ctx, enemy, debug, nowMs = performance.now()) {
     const img = getImg(SRC);
 
     if (!img?.complete || !img.naturalWidth) {
         return;
     }
 
-    const frame = getCurrentFrame();
+    const frame = enemy.dying ? 0 : getCurrentFrame();
     const dw = FW * SCALE;
     const dh = FH * SCALE;
     const drawX = -dw / 2 + (enemy.offsetX ?? 0);
@@ -91,12 +91,18 @@ function drawEnemy001(ctx, enemy, debug) {
         Math.round(enemy.y + enemy.h),
     );
 
+    if (enemy.dying) {
+        const elapsed = nowMs - enemy.dyingStartedAtMs;
+        const alpha = Math.max(0, 1 - elapsed / enemy.dyingDurationMs);
+        ctx.globalAlpha = alpha;
+    }
+
     // sprite faces left by default; flip for right-facing
     if (enemy.vx > 0) {
         ctx.scale(-1, 1);
     }
 
-    if (enemy.isDamaged) {
+    if (enemy.isDamaged || enemy.dying) {
         const outlineSize = 3;
         const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
 
@@ -148,7 +154,7 @@ export const DefaultEnemyRenderer = {
         drawEnemy001(ctx, enemy, true);
     },
 
-    draw: (ctx, enemy, debug = false) => {
-        drawEnemy001(ctx, enemy, debug);
+    draw: (ctx, enemy, debug = false, nowMs = performance.now()) => {
+        drawEnemy001(ctx, enemy, debug, nowMs);
     },
 };

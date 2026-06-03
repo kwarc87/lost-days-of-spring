@@ -139,4 +139,23 @@ export const DefaultWorldRenderer = {
         ctx.translate(offsetX, offsetY);
         ctx.scale(scale, scale);
     },
+
+    drawMapUndiscoveredMask(ctx, worldSize, mapDiscovery) {
+        if (!mapDiscovery) {
+            return;
+        }
+
+        ctx.save();
+        const t = ctx.getTransform();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.fillStyle = "#000";
+        mapDiscovery.forEachUndiscoveredCell((x, y, w, h) => {
+            const sx1 = Math.round(t.e + x * t.a);
+            const sy1 = Math.round(t.f + y * t.d);
+            const sx2 = Math.round(t.e + (x + w) * t.a);
+            const sy2 = Math.round(t.f + (y + h) * t.d);
+            ctx.fillRect(sx1, sy1, sx2 - sx1, sy2 - sy1);
+        });
+        ctx.restore();
+    },
 };

@@ -128,17 +128,16 @@ export const MESSAGES = {
         ],
         MINI_MAP_HINT: [
             {
-                text: "If you are really lost and don't know what",
-                color: "#fff",
-            },
-            {
                 segments: [
                     {
-                        text: "to do, you can press ",
+                        text: "Press ",
                         color: "#fff",
                     },
                     { text: "m ", color: "#f5c542" },
-                    { text: "to display the minimap", color: "#fff" },
+                    {
+                        text: "to display the minimap and track yout progress",
+                        color: "#fff",
+                    },
                 ],
             },
         ],

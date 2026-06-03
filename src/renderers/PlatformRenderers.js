@@ -11,14 +11,26 @@
     leftTopEdgeCap3x3,
     rightBottomEdgeCap3x3,
     rightTopEdgeCap3x3,
+    bottomLeftEdgeCap3x3,
+    bottomRightEdgeCap3x3,
     horizontalConnector3x3,
     horizontalConnectorRightClean3x3,
     horizontalConnectorLeftClean3x3,
+    horizontalConnectorBothClean3x3,
     verticalConnector3x3,
+    verticalConnector3x3TopClean,
+    verticalConnector3x3BottomClean,
+    verticalConnector3x3BothClean,
     onlyLeft,
     onlyRight,
     onlyBottom,
     onlyTop,
+    onlyBottomClean,
+    onlyTopClean,
+    onlyLeftClean,
+    onlyRightClean,
+    verticalConnector3x3RightClean,
+    verticalConnector3x3LeftClean,
 } from "./PlatformHelpers.js";
 import { getImg } from "../utils/imgCache.js";
 
@@ -123,6 +135,15 @@ const platformCaves = {
         sprites: topRightEdgeCap3x3(GROUND_FULL),
     },
 
+    groundBottomLeftEdgeCap: {
+        ...BASE_TILESET,
+        sprites: bottomLeftEdgeCap3x3(GROUND_FULL),
+    },
+    groundBottomRightEdgeCap: {
+        ...BASE_TILESET,
+        sprites: bottomRightEdgeCap3x3(GROUND_FULL),
+    },
+
     groundLeftBottomEdgeCap: {
         ...BASE_TILESET,
         sprites: leftBottomEdgeCap3x3(GROUND_FULL),
@@ -140,13 +161,68 @@ const platformCaves = {
         ...BASE_TILESET,
         sprites: rightTopEdgeCap3x3(GROUND_FULL),
     },
+
     groundHorizontalConnector: {
         ...BASE_TILESET,
         sprites: horizontalConnector3x3(GROUND_FULL),
     },
+    groundHorizontalConnectorBothClean: {
+        ...BASE_TILESET,
+        sprites: horizontalConnectorBothClean3x3(GROUND_FULL),
+    },
     groundVerticalConnector: {
         ...BASE_TILESET,
         sprites: verticalConnector3x3(GROUND_FULL),
+    },
+    groundVerticalConnectorBottomClean: {
+        ...BASE_TILESET,
+        sprites: verticalConnector3x3BottomClean(GROUND_FULL),
+    },
+    groundVerticalConnectorTopClean: {
+        ...BASE_TILESET,
+        sprites: verticalConnector3x3TopClean(GROUND_FULL),
+    },
+    groundVerticalConnectorLeftClean: {
+        ...BASE_TILESET,
+        sprites: verticalConnector3x3LeftClean(GROUND_FULL),
+    },
+    groundVerticalConnectorRightClean: {
+        ...BASE_TILESET,
+        sprites: verticalConnector3x3RightClean(GROUND_FULL),
+    },
+    groundVerticalConnectorBothClean: {
+        ...BASE_TILESET,
+        sprites: verticalConnector3x3BothClean(GROUND_FULL),
+    },
+
+    groundOnlyBottom: {
+        ...BASE_TILESET,
+        sprites: onlyBottom(GROUND_FULL),
+    },
+    groundOnlyBottomClean: {
+        ...BASE_TILESET,
+        sprites: onlyBottomClean(GROUND_FULL),
+    },
+    groundOnlyTop: {
+        ...BASE_TILESET,
+        sprites: onlyTop(GROUND_FULL),
+    },
+    groundOnlyTopClean: {
+        ...BASE_TILESET,
+        sprites: onlyTopClean(GROUND_FULL),
+    },
+
+    groundOnlyLeft: {
+        ...BASE_TILESET,
+        sprites: onlyLeft(GROUND_FULL),
+    },
+    groundOnlyLeftClean: {
+        ...BASE_TILESET,
+        sprites: onlyLeftClean(GROUND_FULL),
+    },
+    groundOnlyRightClean: {
+        ...BASE_TILESET,
+        sprites: onlyRightClean(GROUND_FULL),
     },
 
     cracks: {
@@ -209,6 +285,26 @@ const platformCaves = {
     cracksVerticalConnector: {
         ...BASE_CRACKS_TILESET,
         sprites: verticalConnector3x3(CRACKS_FULL),
+    },
+    cracksVerticalConnectorTopClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: verticalConnector3x3TopClean(CRACKS_FULL),
+    },
+    cracksVerticalConnectorBottomClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: verticalConnector3x3BottomClean(CRACKS_FULL),
+    },
+    cracksVerticalConnectorRightClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: verticalConnector3x3RightClean(CRACKS_FULL),
+    },
+    cracksVerticalConnectorLeftClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: verticalConnector3x3LeftClean(CRACKS_FULL),
+    },
+    cracksVerticalConnectorBothClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: verticalConnector3x3BothClean(CRACKS_FULL),
     },
     cracksOnlyLeft: {
         ...BASE_CRACKS_TILESET,

@@ -42,9 +42,9 @@ export function topCap3x3({ tLeft, tMid, tRight, left, mid, right }) {
 
 export function bottomCap3x3({ left, mid, right, bLeft, bMid, bRight }) {
     return {
-        tLeft: left,
+        tLeft: mid,
         tMid: mid,
-        tRight: right,
+        tRight: mid,
         left,
         mid,
         right,
@@ -107,6 +107,48 @@ export function topRightEdgeCap3x3({ tLeft, tMid, tRight, left, mid, right }) {
         bLeft: mid,
         bMid: mid,
         bRight: right,
+    };
+}
+
+export function bottomLeftEdgeCap3x3({
+    left,
+    mid,
+    right,
+    bLeft,
+    bMid,
+    bRight,
+}) {
+    return {
+        tLeft: left,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right,
+        bLeft,
+        bMid,
+        bRight,
+    };
+}
+
+export function bottomRightEdgeCap3x3({
+    left,
+    mid,
+    right,
+    bLeft,
+    bMid,
+    bRight,
+}) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: right,
+        left,
+        mid,
+        right,
+        bLeft,
+        bMid,
+        bRight,
     };
 }
 
@@ -215,6 +257,20 @@ export function horizontalConnectorLeftClean3x3({ tMid, mid, bMid }) {
     };
 }
 
+export function horizontalConnectorBothClean3x3({ tMid, mid, bMid }) {
+    return {
+        tLeft: mid,
+        tMid,
+        tRight: mid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: mid,
+        bMid,
+        bRight: mid,
+    };
+}
+
 export function verticalConnector3x3({ left, mid, right }) {
     return {
         tLeft: left,
@@ -229,6 +285,76 @@ export function verticalConnector3x3({ left, mid, right }) {
     };
 }
 
+export function verticalConnector3x3TopClean({ left, mid, right }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right,
+        bLeft: left,
+        bMid: mid,
+        bRight: right,
+    };
+}
+
+export function verticalConnector3x3BottomClean({ left, mid, right }) {
+    return {
+        tLeft: left,
+        tMid: mid,
+        tRight: right,
+        left,
+        mid,
+        right,
+        bLeft: mid,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
+export function verticalConnector3x3LeftClean({ left, mid, right }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: right,
+        left,
+        mid,
+        right,
+        bLeft: mid,
+        bMid: mid,
+        bRight: right,
+    };
+}
+
+export function verticalConnector3x3RightClean({ left, mid, right }) {
+    return {
+        tLeft: left,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right,
+        bLeft: left,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
+export function verticalConnector3x3BothClean({ left, mid, right }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right,
+        bLeft: mid,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
 export function onlyLeft({ left, mid }) {
     return {
         tLeft: left,
@@ -238,6 +364,20 @@ export function onlyLeft({ left, mid }) {
         mid,
         right: mid,
         bLeft: left,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
+export function onlyLeftClean({ left, mid }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right: mid,
+        bLeft: mid,
         bMid: mid,
         bRight: mid,
     };
@@ -257,6 +397,20 @@ export function onlyRight({ mid, right }) {
     };
 }
 
+export function onlyRightClean({ mid, right }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left: mid,
+        mid,
+        right,
+        bLeft: mid,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
 export function onlyBottom({ mid, bMid }) {
     return {
         tLeft: mid,
@@ -271,11 +425,39 @@ export function onlyBottom({ mid, bMid }) {
     };
 }
 
+export function onlyBottomClean({ mid, bMid }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: mid,
+        bMid,
+        bRight: mid,
+    };
+}
+
 export function onlyTop({ mid, tMid }) {
     return {
         tLeft: tMid,
         tMid,
         tRight: tMid,
+        left: mid,
+        mid,
+        right: mid,
+        bLeft: mid,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
+export function onlyTopClean({ mid, tMid }) {
+    return {
+        tLeft: mid,
+        tMid,
+        tRight: mid,
         left: mid,
         mid,
         right: mid,

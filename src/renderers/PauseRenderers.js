@@ -1,17 +1,22 @@
-﻿const FONT_TITLE = `bold 24px "Silkscreen", monospace`;
+﻿import { formatPlayTime } from "../messages.js";
+
+const FONT_TITLE = `bold 24px "Silkscreen", monospace`;
 const FONT_BODY = `bold 13px "Silkscreen", monospace`;
 const TITLE_COLOR = "#f5c542";
 const ITEM_COLOR = "#ffffff";
 const ITEM_DIMMED_COLOR = "#7a8a99";
+const TIME_COLOR = "#a0c4ff";
 const TRIANGLE_COLOR = "#f5c542";
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
 const SHADOW_OFFSET = 1;
 
-const MENU_ITEMS = ["Resume", "Restart"];
+const MENU_ITEMS = ["Resume game", "Reset progress"];
 
 const PAD_X = 36;
 const PAD_Y = 20;
 const TITLE_H = 24;
+const TIME_GAP = 8;
+const TIME_H = 13;
 const TITLE_GAP = 18;
 const ITEM_H = 18;
 const ITEM_GAP = 10;
@@ -22,9 +27,9 @@ export const DefaultPauseRenderer = {
     menuItemCount: MENU_ITEMS.length,
 
     // Full pause screen: dark overlay + panel. Call once when pausing.
-    drawPauseScreen(ctx, canvas, selectedIndex = 0) {
+    drawPauseScreen(ctx, canvas, selectedIndex = 0, playTimeMs = 0) {
         this.drawPauseBackground(ctx, canvas);
-        this.drawPausePanel(ctx, canvas, selectedIndex);
+        this.drawPausePanel(ctx, canvas, selectedIndex, playTimeMs);
     },
 
     // Full-screen dark overlay only.
@@ -37,9 +42,10 @@ export const DefaultPauseRenderer = {
 
     // Panel + items only. Background is fully opaque so redrawing cleanly
     // replaces the previous panel without blending issues — no snapshot needed.
-    drawPausePanel(ctx, canvas, selectedIndex = 0) {
+    drawPausePanel(ctx, canvas, selectedIndex = 0, playTimeMs = 0) {
         const w = canvas.width;
         const h = canvas.height;
+        const timeText = `Time: ${formatPlayTime(playTimeMs)}`;
 
         ctx.save();
 
@@ -52,10 +58,14 @@ export const DefaultPauseRenderer = {
         const contentW = TRIANGLE_W + TRIANGLE_PAD + maxItemW;
         ctx.font = FONT_TITLE;
         const titleW = ctx.measureText("PAUSED").width;
+        ctx.font = FONT_BODY;
+        const timeW = ctx.measureText(timeText).width;
         const panelW = Math.ceil(Math.max(contentW, titleW)) + PAD_X * 2;
         const panelH =
             PAD_Y +
             TITLE_H +
+            TIME_GAP +
+            TIME_H +
             TITLE_GAP +
             MENU_ITEMS.length * ITEM_H +
             (MENU_ITEMS.length - 1) * ITEM_GAP +
@@ -83,12 +93,21 @@ export const DefaultPauseRenderer = {
         ctx.fillStyle = TITLE_COLOR;
         ctx.fillText("PAUSED", w / 2, panelY + PAD_Y);
 
+        // Play time
+        const timeY = panelY + PAD_Y + TITLE_H + TIME_GAP;
+        ctx.font = FONT_BODY;
+        ctx.fillStyle = SHADOW_COLOR;
+        ctx.fillText(timeText, w / 2 + SHADOW_OFFSET, timeY + SHADOW_OFFSET);
+        ctx.fillStyle = TIME_COLOR;
+        ctx.fillText(timeText, w / 2, timeY);
+
         // Menu items
         ctx.font = FONT_BODY;
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
 
-        const itemsStartY = panelY + PAD_Y + TITLE_H + TITLE_GAP;
+        const itemsStartY =
+            panelY + PAD_Y + TITLE_H + TIME_GAP + TIME_H + TITLE_GAP;
 
         for (let i = 0; i < MENU_ITEMS.length; i++) {
             const itemCenterY =
