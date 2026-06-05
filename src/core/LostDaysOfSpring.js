@@ -2549,6 +2549,10 @@ export class LostDaysOfSpring {
             // Restart – clear checkpoints and reload level from scratch
             this.isPaused = false;
             this.totalPausedTime = 0;
+            this.accumulatedPlayTime = 0;
+            this.pauseStartAt = 0;
+            this.levelStartAt = performance.now();
+
             this.checkpointRespawn = null;
             CheckpointStorage.clear();
             for (const cp of this.checkpoints) {
