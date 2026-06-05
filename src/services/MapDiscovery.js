@@ -1,3 +1,8 @@
+import { GameFactory } from "../factories/GameFactory";
+
+const HORIZONTAL_MARGIN = 14;
+const VERTICAL_MARGIN = 7;
+
 export class MapDiscovery {
     constructor(worldSize, cellSize) {
         this.cellSize = Math.max(1, Math.floor(cellSize));
@@ -11,11 +16,20 @@ export class MapDiscovery {
         this.visited = new Uint8Array(this.cols * this.rows);
     }
 
-    markFromCamera(camera) {
-        const minX = Math.max(0, camera.x);
-        const minY = Math.max(0, camera.y);
-        const maxX = Math.min(this.worldSize.width, camera.x + camera.width);
-        const maxY = Math.min(this.worldSize.height, camera.y + camera.height);
+    markFromPlayer(player) {
+        const minX = Math.max(
+            0,
+            player.x - GameFactory.GRID * HORIZONTAL_MARGIN,
+        );
+        const minY = Math.max(0, player.y - GameFactory.GRID * VERTICAL_MARGIN);
+        const maxX = Math.min(
+            this.worldSize.width,
+            player.x + player.w + GameFactory.GRID * HORIZONTAL_MARGIN,
+        );
+        const maxY = Math.min(
+            this.worldSize.height,
+            player.y + player.h + GameFactory.GRID * VERTICAL_MARGIN,
+        );
 
         this.markRect(minX, minY, maxX, maxY);
     }

@@ -294,7 +294,7 @@ export class LostDaysOfSpring {
         this.resetCameraToPlayerStart();
         this.camera.lookAheadX = 0;
         this.camera.lookAheadY = 0;
-        this.mapDiscovery?.markFromCamera(this.camera);
+        this.mapDiscovery?.markFromPlayer(this.player);
 
         // Reset level-complete and game-over state
         const wasLevelComplete = this.levelComplete;
@@ -710,6 +710,7 @@ export class LostDaysOfSpring {
         this.updateHiddenWalls();
         this.updateExit();
         this.updateMessages();
+        this.mapDiscovery?.markFromPlayer(this.player);
 
         this.updateCamera(now);
         this.updateDamageCooldown(now);
@@ -1852,7 +1853,6 @@ export class LostDaysOfSpring {
         this.updateCameraX();
         this.updateCameraY(now);
         this.clampCameraToWorld();
-        this.mapDiscovery?.markFromCamera(this.camera);
     }
 
     isVisibleInCamera(obj) {
