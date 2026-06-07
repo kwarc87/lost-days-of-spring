@@ -1,43 +1,17 @@
-import { getImg } from "../utils/imgCache.js";
+import { DefaultCollectibleRenderer } from "./CollectibleRenderers.js";
 import { MessageRenderer } from "./MessageRenderer.js";
 import { MESSAGES, formatPlayTime } from "../messages.js";
 
-const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
-
-const GO_SPLINTER_FRAMES = Array.from({ length: 7 }, (_, i) => ({
-    sx: 64 + i * 16,
-    sy: 32,
-}));
-const GO_SPLINTER_FRAME_MS = 150;
-
-const GO_COIN_PIX = [
-    [0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 2, 3, 2, 1, 0],
-    [1, 2, 3, 4, 2, 2, 1],
-    [1, 2, 3, 4, 2, 2, 1],
-    [1, 2, 2, 2, 5, 2, 1],
-    [0, 1, 2, 5, 5, 1, 0],
-    [0, 0, 1, 1, 1, 0, 0],
-];
-const GO_COIN_COLORS = [
-    null,
-    "#7a5200",
-    "#ffd700",
-    "#ffe580",
-    "#cc9500",
-    "#a87b00",
-];
-
-const GO_SKULL_PIX = [
-    [0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 1, 1, 1, 1, 0],
-    [1, 2, 1, 1, 1, 2, 1],
-    [1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1],
-    [0, 1, 0, 1, 0, 1, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-];
-const GO_SKULL_COLORS = [null, "#c8c8aa", "#1a1a2e"];
+const ICON_SIZE = 24;
+const ICON_GAP = 8;
+const PAD_X = 32;
+const PAD_Y = 24;
+const GAP = 16;
+const SUB_GAP = 6;
+const TITLE_H = 24;
+const LINE_H = 13;
+const TITLE_FONT = `normal 24px "Silkscreen", monospace`;
+const SUB_FONT = `normal 14px "Silkscreen", monospace`;
 
 export const DefaultGameOverRenderer = {
     drawGameOverScreen(
@@ -56,252 +30,157 @@ export const DefaultGameOverRenderer = {
         const w = canvas.width;
         const h = canvas.height;
 
+        const coinCountText = `${coinsCount} / ${totalCoins}`;
+        const splinterCountText = `${splintersCount} / ${totalSplinters}`;
+        const enemiesText = MESSAGES.STATS.ENEMIES_TEXT(
+            enemiesCount,
+            totalEnemies,
+        );
+        const deathsText = MESSAGES.GAME_OVER.DEATHS_TEXT(deathCount);
+        const timeText = MESSAGES.STATS.TIME_TEXT(formatPlayTime(playTime));
+        const countdownText = MESSAGES.STATS.COUNTDOWN_TEXT(remaining);
+
         ctx.save();
 
-        // ── Overlay ──────────────────────────────────────────────────────────
-        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
-        ctx.fillRect(0, 0, w, h);
-
-        // ── Measure text to size panel ───────────────────────────────────────
-        const titleFont = `bold 24px "Silkscreen", monospace`;
-        const subFont = `bold 13px "Silkscreen", monospace`;
-
-        ctx.font = titleFont;
+        ctx.font = TITLE_FONT;
         const titleW = Math.ceil(
             ctx.measureText(MESSAGES.GAME_OVER.TITLE).width,
         );
 
-        ctx.font = subFont;
+        ctx.font = SUB_FONT;
         const subtitle1W = Math.ceil(
             ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE).width,
         );
         const subtitle2W = Math.ceil(
             ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE2).width,
         );
-        const statsCoinsText = MESSAGES.STATS.COINS_TEXT(
-            coinsCount,
-            totalCoins,
-        );
-        const statsEnemiesText = MESSAGES.STATS.ENEMIES_TEXT(
-            enemiesCount,
-            totalEnemies,
-        );
-        const statsSplintersText = MESSAGES.STATS.SPLINTERS_TEXT(
-            splintersCount,
-            totalSplinters,
-        );
-        const statsDeathsText = MESSAGES.GAME_OVER.DEATHS_TEXT(deathCount);
-        const subText = MESSAGES.STATS.COUNTDOWN_TEXT(remaining);
-        const statsTimeText = MESSAGES.STATS.TIME_TEXT(
-            formatPlayTime(playTime),
-        );
-
-        const padX = 32;
-        const padY = 24;
-        const gap = 16;
-        const subGap = 6;
-        const titleH = 24;
-        const lineH = 13;
-        const gemScale = 2;
-        const pixScale = 2;
-        const gemIconSize = 16 * gemScale;
-        const artIconSize = 7 * pixScale;
-        const iconGap = 8;
-        const rowH = gemIconSize;
-
-        const coinsTextW = Math.ceil(ctx.measureText(statsCoinsText).width);
-        const enemiesTextW = Math.ceil(ctx.measureText(statsEnemiesText).width);
-        const splintersTextW = Math.ceil(
-            ctx.measureText(statsSplintersText).width,
-        );
-        const deathsW = Math.ceil(ctx.measureText(statsDeathsText).width);
-        const subW = Math.ceil(ctx.measureText(subText).width);
-        const timeW = Math.ceil(ctx.measureText(statsTimeText).width);
-
-        const coinsRowW = artIconSize + iconGap + coinsTextW;
-        const enemiesRowW = artIconSize + iconGap + enemiesTextW;
-        const splinterRowW = gemIconSize + iconGap + splintersTextW;
+        const coinRowW =
+            ICON_SIZE +
+            ICON_GAP +
+            Math.ceil(ctx.measureText(coinCountText).width);
+        const splinterRowW =
+            ICON_SIZE +
+            ICON_GAP +
+            Math.ceil(ctx.measureText(splinterCountText).width);
 
         const panelW =
             Math.max(
                 titleW,
                 subtitle1W,
                 subtitle2W,
-                coinsRowW,
-                enemiesRowW,
+                coinRowW,
                 splinterRowW,
-                deathsW,
-                timeW,
-                subW,
+                Math.ceil(ctx.measureText(enemiesText).width),
+                Math.ceil(ctx.measureText(deathsText).width),
+                Math.ceil(ctx.measureText(timeText).width),
+                Math.ceil(ctx.measureText(countdownText).width),
             ) +
-            padX * 2;
+            PAD_X * 2;
+
         const panelH =
-            padY +
-            titleH +
-            subGap +
-            lineH +
-            subGap +
-            lineH +
-            gap +
-            rowH +
-            gap +
-            rowH +
-            gap +
-            rowH +
-            gap +
-            lineH +
-            gap +
-            lineH +
-            gap +
-            lineH +
-            padY;
+            PAD_Y +
+            TITLE_H +
+            SUB_GAP +
+            LINE_H +
+            SUB_GAP +
+            LINE_H +
+            GAP +
+            ICON_SIZE +
+            GAP +
+            ICON_SIZE +
+            GAP +
+            LINE_H +
+            GAP +
+            LINE_H +
+            GAP +
+            LINE_H +
+            GAP +
+            LINE_H +
+            PAD_Y;
+
         const panelX = Math.round((w - panelW) / 2);
         const panelY = Math.round((h - panelH) / 2);
 
-        // Panel bg
+        ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
+        ctx.fillRect(0, 0, w, h);
+
         MessageRenderer.drawBackground(ctx, panelX, panelY, panelW, panelH);
 
-        // ── Title ────────────────────────────────────────────────────────────────
+        // ── Title ────────────────────────────────────────────────────────────
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
-        ctx.font = titleFont;
-
+        ctx.font = TITLE_FONT;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillText(MESSAGES.GAME_OVER.TITLE, w / 2 + 1, panelY + padY + 1);
-
+        ctx.fillText(MESSAGES.GAME_OVER.TITLE, w / 2 + 1, panelY + PAD_Y + 1);
         ctx.fillStyle = MESSAGES.GAME_OVER.TITLE_COLOR;
-        ctx.fillText(MESSAGES.GAME_OVER.TITLE, w / 2, panelY + padY);
+        ctx.fillText(MESSAGES.GAME_OVER.TITLE, w / 2, panelY + PAD_Y);
 
         // ── Subtitle ─────────────────────────────────────────────────────────
-        ctx.font = subFont;
-        const subtitle1Y = panelY + padY + titleH + subGap;
-        const subtitle2Y = subtitle1Y + lineH + subGap;
-
+        ctx.font = SUB_FONT;
+        const subtitle1Y = panelY + PAD_Y + TITLE_H + SUB_GAP;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE, w / 2 + 1, subtitle1Y + 1);
         ctx.fillStyle = MESSAGES.GAME_OVER.SUBTITLE_COLOR;
         ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE, w / 2, subtitle1Y);
 
+        const subtitle2Y = subtitle1Y + LINE_H + SUB_GAP;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
         ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE2, w / 2 + 1, subtitle2Y + 1);
         ctx.fillStyle = MESSAGES.GAME_OVER.SUBTITLE_COLOR;
         ctx.fillText(MESSAGES.GAME_OVER.SUBTITLE2, w / 2, subtitle2Y);
 
         // ── Stats ────────────────────────────────────────────────────────────
-        ctx.font = subFont;
         ctx.imageSmoothingEnabled = false;
+        const textOffY = Math.round((ICON_SIZE - LINE_H) / 2);
 
-        const textOffY = Math.round((rowH - lineH) / 2);
+        const coinsRowY = subtitle2Y + LINE_H + GAP;
+        const coinsRowX = Math.round(w / 2 - coinRowW / 2);
+        DefaultCollectibleRenderer.drawCoin(ctx, {
+            x: coinsRowX,
+            y: coinsRowY,
+        });
+        ctx.textAlign = "left";
+        ctx.fillStyle = MESSAGES.STATS.COINS_COLOR;
+        ctx.fillText(
+            coinCountText,
+            coinsRowX + ICON_SIZE + ICON_GAP,
+            coinsRowY + textOffY,
+        );
 
-        // ── Coins row ────────────────────────────────────────────────────────
-        const coinsRowY =
-            panelY + padY + titleH + subGap + lineH + subGap + lineH + gap;
-        {
-            const rowX = Math.round(w / 2 - coinsRowW / 2);
-            const iconY = Math.round(coinsRowY + (rowH - artIconSize) / 2);
-            for (let r = 0; r < GO_COIN_PIX.length; r++) {
-                for (let c = 0; c < GO_COIN_PIX[r].length; c++) {
-                    const ci = GO_COIN_PIX[r][c];
-                    if (!ci) {
-                        continue;
-                    }
-                    ctx.fillStyle = GO_COIN_COLORS[ci];
-                    ctx.fillRect(
-                        rowX + c * pixScale,
-                        iconY + r * pixScale,
-                        pixScale,
-                        pixScale,
-                    );
-                }
-            }
-            ctx.textAlign = "left";
-            ctx.fillStyle = MESSAGES.STATS.COINS_COLOR;
-            ctx.fillText(
-                statsCoinsText,
-                rowX + artIconSize + iconGap,
-                coinsRowY + textOffY,
-            );
-            ctx.textAlign = "center";
-        }
+        const splinterRowY = coinsRowY + ICON_SIZE + GAP;
+        const splinterRowX = Math.round(w / 2 - splinterRowW / 2);
+        DefaultCollectibleRenderer.drawSplinter(ctx, {
+            x: splinterRowX,
+            y: splinterRowY,
+            w: ICON_SIZE,
+            h: ICON_SIZE,
+        });
+        ctx.fillStyle = MESSAGES.STATS.SPLINTERS_COLOR;
+        ctx.fillText(
+            splinterCountText,
+            splinterRowX + ICON_SIZE + ICON_GAP,
+            splinterRowY + textOffY,
+        );
 
-        // ── Enemies row ──────────────────────────────────────────────────────
-        const enemiesRowY = coinsRowY + rowH + gap;
-        {
-            const rowX = Math.round(w / 2 - enemiesRowW / 2);
-            const iconY = Math.round(enemiesRowY + (rowH - artIconSize) / 2);
-            for (let r = 0; r < GO_SKULL_PIX.length; r++) {
-                for (let c = 0; c < GO_SKULL_PIX[r].length; c++) {
-                    const ci = GO_SKULL_PIX[r][c];
-                    if (!ci) {
-                        continue;
-                    }
-                    ctx.fillStyle = GO_SKULL_COLORS[ci];
-                    ctx.fillRect(
-                        rowX + c * pixScale,
-                        iconY + r * pixScale,
-                        pixScale,
-                        pixScale,
-                    );
-                }
-            }
-            ctx.textAlign = "left";
-            ctx.fillStyle = MESSAGES.STATS.ENEMIES_COLOR;
-            ctx.fillText(
-                statsEnemiesText,
-                rowX + artIconSize + iconGap,
-                enemiesRowY + textOffY,
-            );
-            ctx.textAlign = "center";
-        }
+        ctx.textAlign = "center";
 
-        // ── Splinters row ────────────────────────────────────────────────────
-        const splinterRowY = enemiesRowY + rowH + gap;
-        {
-            const rowX = Math.round(w / 2 - splinterRowW / 2);
-            const gemsImg = getImg(GEMS_IMG_PATH);
-            const frame =
-                GO_SPLINTER_FRAMES[
-                    Math.floor(performance.now() / GO_SPLINTER_FRAME_MS) %
-                        GO_SPLINTER_FRAMES.length
-                ];
-            if (gemsImg.complete && gemsImg.naturalWidth > 0) {
-                ctx.drawImage(
-                    gemsImg,
-                    frame.sx,
-                    frame.sy,
-                    16,
-                    16,
-                    rowX,
-                    splinterRowY,
-                    gemIconSize,
-                    gemIconSize,
-                );
-            }
-            ctx.textAlign = "left";
-            ctx.fillStyle = MESSAGES.STATS.SPLINTERS_COLOR;
-            ctx.fillText(
-                statsSplintersText,
-                rowX + gemIconSize + iconGap,
-                splinterRowY + textOffY,
-            );
-            ctx.textAlign = "center";
-        }
+        const enemiesRowY = splinterRowY + ICON_SIZE + GAP;
+        ctx.fillStyle = MESSAGES.STATS.ENEMIES_COLOR;
+        ctx.fillText(enemiesText, w / 2, enemiesRowY);
+
+        const deathsY = enemiesRowY + LINE_H + GAP;
+        ctx.fillStyle = MESSAGES.GAME_OVER.DEATHS_COLOR;
+        ctx.fillText(deathsText, w / 2, deathsY);
+
+        const timeY = deathsY + LINE_H + GAP;
+        ctx.fillStyle = MESSAGES.STATS.TIME_COLOR;
+        ctx.fillText(timeText, w / 2, timeY);
+
+        const countdownY = timeY + LINE_H + GAP;
+        ctx.fillStyle = MESSAGES.STATS.COUNTDOWN_COLOR;
+        ctx.fillText(countdownText, w / 2, countdownY);
 
         ctx.imageSmoothingEnabled = true;
-
-        // ── Deaths row ───────────────────────────────────────────────────────
-        const deathsY = splinterRowY + rowH + gap;
-        ctx.fillStyle = MESSAGES.GAME_OVER.DEATHS_COLOR;
-        ctx.fillText(statsDeathsText, w / 2, deathsY);
-
-        // ── Time row ─────────────────────────────────────────────────────────
-        ctx.fillStyle = MESSAGES.STATS.TIME_COLOR;
-        ctx.fillText(statsTimeText, w / 2, deathsY + lineH + gap);
-
-        // ── Countdown ────────────────────────────────────────────────────────
-        ctx.fillStyle = MESSAGES.STATS.COUNTDOWN_COLOR;
-        ctx.fillText(subText, w / 2, deathsY + lineH + gap + lineH + gap);
-
         ctx.restore();
     },
 };

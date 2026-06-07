@@ -1,7 +1,7 @@
 ﻿import { formatPlayTime } from "../messages.js";
 
-const FONT_TITLE = `bold 24px "Silkscreen", monospace`;
-const FONT_BODY = `bold 13px "Silkscreen", monospace`;
+const FONT_TITLE = `normal 24px "Silkscreen", monospace`;
+const FONT_BODY = `normal 14px "Silkscreen", monospace`;
 const TITLE_COLOR = "#f5c542";
 const ITEM_COLOR = "#ffffff";
 const ITEM_DIMMED_COLOR = "#7a8a99";

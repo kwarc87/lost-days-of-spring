@@ -1,10 +1,10 @@
 const BG_COLOR = "rgba(15, 23, 32, 0.75)";
-const RADIUS = 8;
+const RADIUS = 6;
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
 const SHADOW_OFFSET = 1;
 
-const FONT_TITLE = `bold 24px "Silkscreen", monospace`;
-const FONT_BODY = `bold 13px "Silkscreen", monospace`;
+const FONT_TITLE = `normal 24px "Silkscreen", monospace`;
+const FONT_BODY = `normal 14px "Silkscreen", monospace`;
 const TITLE_H = 24;
 const LINE_H = 13;
 

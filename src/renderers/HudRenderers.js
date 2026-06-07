@@ -1,23 +1,5 @@
-import { getImg } from "../utils/imgCache.js";
+import { DefaultCollectibleRenderer } from "./CollectibleRenderers.js";
 import { MessageRenderer } from "./MessageRenderer.js";
-
-const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
-
-const HUD_SPLINTER_FRAMES = [
-    ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
-];
-const HUD_SPLINTER_FRAME_MS = 150;
-
-function drawHudSplinter(ctx, x, y, scale) {
-    const img = getImg(GEMS_IMG_PATH);
-    const { sx, sy } =
-        HUD_SPLINTER_FRAMES[
-            Math.floor(performance.now() / HUD_SPLINTER_FRAME_MS) %
-                HUD_SPLINTER_FRAMES.length
-        ];
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, sx, sy, 16, 16, x, y, 16 * scale, 16 * scale);
-}
 
 // 7×6 pixel art heart grid
 const HEART_PIXELS = [
@@ -67,39 +49,6 @@ function drawPixelHeart(ctx, x, y, scale, full) {
     }
 }
 
-// 7×7 pixel art coin, drawn natively at (scale) px/pixel — no ctx.scale
-// 0=transparent  1=dark border  2=gold body  3=highlight  4=engraving  5=shadow
-const COIN_PIX = [
-    [0, 0, 1, 1, 1, 0, 0],
-    [0, 1, 2, 3, 2, 1, 0],
-    [1, 2, 3, 4, 2, 2, 1],
-    [1, 2, 3, 4, 2, 2, 1],
-    [1, 2, 2, 2, 5, 2, 1],
-    [0, 1, 2, 5, 5, 1, 0],
-    [0, 0, 1, 1, 1, 0, 0],
-];
-const COIN_PIX_COLORS = [
-    null,
-    "#7a5200",
-    "#ffd700",
-    "#ffe580",
-    "#cc9500",
-    "#a87b00",
-];
-
-function drawHudCoin(ctx, x, y, scale) {
-    for (let row = 0; row < COIN_PIX.length; row++) {
-        for (let col = 0; col < COIN_PIX[row].length; col++) {
-            const ci = COIN_PIX[row][col];
-            if (!ci) {
-                continue;
-            }
-            ctx.fillStyle = COIN_PIX_COLORS[ci];
-            ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
-        }
-    }
-}
-
 export const DefaultHubRenderer = {
     draw(
         ctx,
@@ -144,74 +93,55 @@ export const DefaultHubRenderer = {
         }
         // ────────────────────────────────────────────────────────────────────
 
-        // ── Coin panel (top-right) ───────────────────────────────────────────
-        const coinScale = 3; // 7×7 grid at 3px/pixel = 21×21px
-        const coinPxW = 7 * coinScale; // 21px
-        const coinPxH = 7 * coinScale; // 21px
+        // ── Coin + splinter panel (top-right) ────────────────────────────────
+        const ICON_SIZE = 24;
         const panelPadX = 10;
         const panelPadY = 8;
 
-        ctx.font = `14px "Silkscreen", monospace`;
+        ctx.font = `16px "Silkscreen", monospace`;
 
-        const textWidth = Math.ceil(ctx.measureText(text).width);
-        const boxW = Math.round(panelPadX * 2 + coinPxW + 8 + textWidth);
-        const boxH = panelPadY * 2 + coinPxH;
+        const coinTextW = Math.ceil(
+            ctx.measureText(`${total} / ${total}`).width,
+        );
+        const splinterText = `${player.splintersCount ?? 0} / ${currentLevelSplintersCount ?? 0}`;
+        const splinterTextW = Math.ceil(
+            ctx.measureText(
+                `${currentLevelSplintersCount} / ${currentLevelSplintersCount}`,
+            ).width,
+        );
+        const rowW = Math.max(
+            ICON_SIZE + 8 + coinTextW,
+            ICON_SIZE + 8 + splinterTextW,
+        );
+        const rowGap = 8;
+        const boxW = panelPadX * 2 + rowW;
+        const boxH = panelPadY * 2 + ICON_SIZE + rowGap + ICON_SIZE;
         const boxX = Math.round(canvas.width - boxW - 12);
         const boxY = 12;
 
-        // Panel bg
         MessageRenderer.drawBackground(ctx, boxX, boxY, boxW, boxH);
 
-        // Coin icon
-        drawHudCoin(ctx, boxX + panelPadX, boxY + panelPadY, coinScale);
+        ctx.textBaseline = "middle";
+        const textRightX = boxX + boxW - panelPadX;
+        const iconX = boxX + panelPadX;
 
-        // Text
+        // Coin row
+        const coinIconY = boxY + panelPadY;
+        DefaultCollectibleRenderer.drawCoin(ctx, { x: iconX, y: coinIconY });
         ctx.fillStyle = "#ffd84a";
-        ctx.textBaseline = "middle";
-        ctx.fillText(text, boxX + panelPadX + coinPxW + 8, boxY + boxH / 2);
-        // ────────────────────────────────────────────────────────────────────
+        ctx.textAlign = "right";
+        ctx.fillText(text, textRightX, coinIconY + ICON_SIZE / 2);
 
-        // ── Splinter panel (below coin panel) ────────────────────────────────
-        const splinterScale = 2; // 16×16 sprite at 2px/pixel = 32×32px
-        const splinterPxW = 16 * splinterScale;
-        const splinterPxH = 16 * splinterScale;
-        const splinterPanelPadX = 10;
-        const splinterPanelPadY = 8;
-        const splinterText = `${player.splintersCount ?? 0} / ${currentLevelSplintersCount ?? 0}`;
-
-        ctx.font = `14px "Silkscreen", monospace`;
-        const splinterTextWidth = Math.ceil(
-            ctx.measureText(splinterText).width,
-        );
-        const splinterBoxW = Math.round(
-            splinterPanelPadX * 2 + splinterPxW + 8 + splinterTextWidth,
-        );
-        const splinterBoxH = splinterPanelPadY * 2 + splinterPxH;
-        const splinterBoxX = Math.round(canvas.width - splinterBoxW - 12);
-        const splinterBoxY = boxY + boxH + 6;
-
-        MessageRenderer.drawBackground(
-            ctx,
-            splinterBoxX,
-            splinterBoxY,
-            splinterBoxW,
-            splinterBoxH,
-        );
-
-        drawHudSplinter(
-            ctx,
-            splinterBoxX + splinterPanelPadX,
-            splinterBoxY + splinterPanelPadY,
-            splinterScale,
-        );
-
+        // Splinter row
+        const splinterIconY = coinIconY + ICON_SIZE + rowGap;
+        DefaultCollectibleRenderer.drawSplinter(ctx, {
+            x: iconX,
+            y: splinterIconY,
+            w: ICON_SIZE,
+            h: ICON_SIZE,
+        });
         ctx.fillStyle = "#a8e8ff";
-        ctx.textBaseline = "middle";
-        ctx.fillText(
-            splinterText,
-            splinterBoxX + splinterPanelPadX + splinterPxW + 8,
-            splinterBoxY + splinterBoxH / 2,
-        );
+        ctx.fillText(splinterText, textRightX, splinterIconY + ICON_SIZE / 2);
         // ────────────────────────────────────────────────────────────────────
 
         ctx.restore();

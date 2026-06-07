@@ -37,7 +37,7 @@ export const MESSAGES = {
         COUNTDOWN_COLOR: "#7a8a99",
         TIME_COLOR: "#a0c4ff",
         COINS_TEXT: (count, total) => `Coins: ${count} / ${total}`,
-        ENEMIES_TEXT: (count, total) => `Enemies defeated: ${count} / ${total}`,
+        ENEMIES_TEXT: (count, total) => `Enemies: ${count} / ${total}`,
         SPLINTERS_TEXT: (count, total) =>
             `Splinters: ${count} / ${total}  \u2756 hidden`,
         COUNTDOWN_TEXT: (remaining) => `Restart in ${remaining}s  \u2013  ESC`,
@@ -60,6 +60,8 @@ export const MESSAGES = {
         TITLE: "LEVEL COMPLETE!",
         TITLE_COLOR: "#f5c542",
         RESTART_HINT: { text: "ESC \u2013 restart level", color: "#7a8a99" },
+        DEATHS_TEXT: (count) => `Deaths: ${count}`,
+        DEATHS_COLOR: "#e85454",
     },
 
     // ── Pause ─────────────────────────────────────────────────────────────────

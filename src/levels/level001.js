@@ -36,8 +36,6 @@ export const LEVEL_001 = {
         GameFactory.grid.solid({ id: 4, x: 150, y: 125, w: 225, h: 7 }),
         GameFactory.grid.solid({ id: 5, x: 385, y: 125, w: 100, h: 7 }),
         GameFactory.grid.solid({ id: 6, x: 143, y: 126, w: 8, h: 3, layout: "groundOnlyBottomClean" }),
-
-        
         GameFactory.grid.solid({ id: 7, x: 374, y: 126, w: 12, h: 2, layout: "groundOnlyBottomClean" }),
         GameFactory.grid.solid({ id: 592, x: 374, y: 125, w: 12, h: 2, layout: "groundOnlyTop" }),
         GameFactory.grid.solid({ id: 67, x: 98, y: 80, w: 423, h: 7 }),
@@ -125,7 +123,6 @@ export const LEVEL_001 = {
         GameFactory.grid.solid({ id: 59, x: 493, y: 134, w: 24, h: 2, layout: "metal" }),
         GameFactory.grid.solid({ id: 60, x: 495, y: 132, w: 22, h: 2, layout: "metal" }),
         GameFactory.grid.solid({ id: 61, x: 497, y: 130, w: 20, h: 2, layout: "metal" }),
-        GameFactory.grid.solid({ id: 62, x: 499, y: 128, w: 18, h: 2, layout: "metal" }),
         GameFactory.grid.solid({ id: 63, x: 501, y: 130, w: 16, h: 2, layout: "metal" }),
         GameFactory.grid.booster({ id: 66, x: 517, y: 141, w: 3, h: 1, boostSpeed: 26 }),
 
@@ -680,8 +677,8 @@ export const LEVEL_001 = {
         GameFactory.grid.solid({ id: 589, x: 64, y: 58, w: 2, h: 1, layout: "board" }),
         GameFactory.grid.ice({ id: 590, x: 453, y: 77, w: 6, h: 1 }),
         GameFactory.grid.ice({ id: 594, x: 116, y: 99, w: 16, h: 1 }),
-
-        // next id 594
+        GameFactory.grid.ice({ id: 595, x: 497, y: 129, w: 20, h: 1 }),
+        GameFactory.grid.ice({ id: 596, x: 73, y: 116, w: 14, h: 1 }),
     ],
     elevators: [
         GameFactory.grid.elevator({ id: 1001, startX: 396, startY: 104, w: 6, h: 2, targetX: 456, targetY: 104, speed: 4, waitTime: 1500 }),
@@ -748,6 +745,9 @@ export const LEVEL_001 = {
         GameFactory.grid.cracks({ id: 2024, x: 60, y: 7, w: 16, h: 6, layout: "cracksVerticalConnectorTopClean" }),
         GameFactory.grid.cracks({ id: 2025, x: 21, y: 54, w: 9, h: 9, layout: "cracksOnlyRight" }),
         GameFactory.grid.cracks({ id: 2026, x: 396, y: 10, w: 5, h: 7, layout: "cracksVerticalConnector" }),
+        GameFactory.grid.cracks({ id: 2027, x: 440, y: 131, w: 5, h: 3, layout: "cracksBottomCap" }),
+        GameFactory.grid.cracks({ id: 2028, x: 509, y: 122, w: 7, h: 3, layout: "cracksBottomCap" }),
+        GameFactory.grid.cracks({ id: 2029, x: 305, y: 117, w: 2, h: 4, layout: "cracksRightCap" }),
     ],
     collectibles: {
         splinters: [
@@ -772,7 +772,7 @@ export const LEVEL_001 = {
             GameFactory.grid.splinters({ id: 19, x: 251.5, y: 124 }),
             GameFactory.grid.splinters({ id: 20, x: 188, y: 88 }),
             GameFactory.grid.splinters({ id: 21, x: 154, y: 124 }),
-            GameFactory.grid.splinters({ id: 22, x: 149.5, y: 93 }),
+            GameFactory.grid.splinters({ id: 22, x: 149.5, y: 95 }),
             GameFactory.grid.splinters({ id: 23, x: 140, y: 124 }),
             GameFactory.grid.splinters({ id: 24, x: 53, y: 123.5 }),
             GameFactory.grid.splinters({ id: 25, x: 177, y: 88 }),
@@ -847,6 +847,10 @@ export const LEVEL_001 = {
             GameFactory.grid.splinters({ id: 94, x: 293, y: 108 }),
             GameFactory.grid.splinters({ id: 95, x: 233, y: 22 }),
             GameFactory.grid.splinters({ id: 96, x: 112, y: 108 }),
+            GameFactory.grid.splinters({ id: 97, x: 442, y: 132.5 }),
+            GameFactory.grid.splinters({ id: 98, x: 512, y: 123.5 }),
+            GameFactory.grid.splinters({ id: 99, x: 306, y: 118.5 }),
+            GameFactory.grid.splinters({ id: 100, x: 132.5, y: 106.5 }),
         ],
         coins: [
             ...GameFactory.grid.rowOfCollectibles({ startId: 1, count: 10, x: 33, y: 136 }),
@@ -886,7 +890,7 @@ export const LEVEL_001 = {
             GameFactory.grid.coins({ id: 210, x: 491.5, y: 134.5 }),
             GameFactory.grid.coins({ id: 211, x: 493.5, y: 132.5 }),
             GameFactory.grid.coins({ id: 212, x: 495.5, y: 130.5 }),
-            GameFactory.grid.coins({ id: 213, x: 497.5, y: 128.5 }),
+            GameFactory.grid.coins({ id: 213, x: 487, y: 102 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 214, count: 7, x: 507, y: 94 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 221, count: 7, x: 507, y: 95 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 228, count: 7, x: 507, y: 96 }),
@@ -1130,7 +1134,7 @@ export const LEVEL_001 = {
             ...GameFactory.grid.rowOfCollectibles({ startId: 2623, count: 12, x: 362, y: 20 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 2635, count: 12, x: 362, y: 21 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 2647, count: 12, x: 362, y: 22 }),
-            ...GameFactory.grid.columnOfCollectibles({ startId: 2659, count: 11, x: 518, y: 128 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 2659, count: 11, x: 518, y: 129 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 2670, count: 6, x: 473, y: 109 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 2676, count: 3, x: 396, y: 108 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 2679, count: 3, x: 397, y: 108 }),
@@ -1148,6 +1152,28 @@ export const LEVEL_001 = {
             ...GameFactory.grid.columnOfCollectibles({ startId: 2744, count: 3, x: 91, y: 116 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 2747, count: 3, x: 92, y: 116 }),
             ...GameFactory.grid.columnOfCollectibles({ startId: 2750, count: 21, x: 62, y: 58 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 2771, count: 20, x: 387.5, y: 104 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 2791, count: 4, x: 386, y: 90 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2795, count: 7, x: 203, y: 113 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2802, count: 7, x: 203, y: 114 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2809, count: 5, x: 172, y: 114 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2814, count: 5, x: 172, y: 115 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2819, count: 5, x: 172, y: 116 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2824, count: 4, x: 67, y: 117 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2828, count: 4, x: 67, y: 118 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2832, count: 4, x: 67, y: 119 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2836, count: 14, x: 73, y: 110 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2850, count: 14, x: 73, y: 111 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2864, count: 14, x: 73, y: 112 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2878, count: 14, x: 73, y: 118 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2892, count: 14, x: 73, y: 119 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2906, count: 7, x: 55, y: 123.5 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 2913, count: 9, x: 68, y: 61 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 2922, count: 26, x: 94, y: 80 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 2948, count: 26, x: 95, y: 80 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 2974, count: 26, x: 96, y: 80 }),
+            GameFactory.grid.coins({ id: 3000, x: 81.5, y: 65 }),
+
 
         ],
         hearts: [

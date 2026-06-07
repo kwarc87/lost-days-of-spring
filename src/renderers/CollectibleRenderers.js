@@ -5,12 +5,12 @@ import { getImg } from "../utils/imgCache.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 const SPLINTER_FRAME_MS = 150;
-const SPLINTER_SW = 16;
-const SPLINTER_SH = 16;
+const SPLINTER_SW = 12;
+const SPLINTER_SH = 12;
 const SPLINTER_SCALE = 3;
 
 const SPLINTER_FRAMES = [
-    ...Array.from({ length: 7 }, (_, i) => ({ sx: 64 + i * 16, sy: 32 })),
+    ...Array.from({ length: 7 }, (_, i) => ({ sx: 66 + i * 16, sy: 34 })),
 ];
 
 const WEAPON_IMG_PATH = "textures/tilesets.png";
@@ -119,6 +119,9 @@ export const DefaultCollectibleRenderer = {
                     SPLINTER_FRAMES.length
             ];
 
+        const dw = collectible.w ?? SPLINTER_SW * SPLINTER_SCALE;
+        const dh = collectible.h ?? SPLINTER_SH * SPLINTER_SCALE;
+
         ctx.save();
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(
@@ -129,8 +132,8 @@ export const DefaultCollectibleRenderer = {
             SPLINTER_SH,
             Math.round(collectible.x),
             Math.round(collectible.y),
-            SPLINTER_SW * SPLINTER_SCALE,
-            SPLINTER_SH * SPLINTER_SCALE,
+            dw,
+            dh,
         );
         ctx.restore();
 

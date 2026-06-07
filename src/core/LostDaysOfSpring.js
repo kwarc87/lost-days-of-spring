@@ -227,8 +227,9 @@ export class LostDaysOfSpring {
         }
 
         // Reset death counter on level transition or after completing the level
+        // On same-level reload, restore from checkpoint (survives page refresh)
         if (isNewLevel || this.levelComplete) {
-            this.deathCount = 0;
+            this.deathCount = this.checkpointRespawn?.deathCount ?? 0;
         }
 
         this.currentLevelId = levelId;
@@ -1531,6 +1532,7 @@ export class LostDaysOfSpring {
                 this.levelStartAt -
                 this.totalPausedTime +
                 this.accumulatedPlayTime,
+            deathCount: this.deathCount,
         };
         CheckpointStorage.save(this.checkpointRespawn);
     }
@@ -2174,6 +2176,7 @@ export class LostDaysOfSpring {
             this.enemies.filter((e) => e.dead || e.dying).length,
             this.currentLevelEnemiesCount,
             playTimeMs,
+            this.deathCount,
         );
     }
 

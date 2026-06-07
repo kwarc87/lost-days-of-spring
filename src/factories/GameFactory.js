@@ -861,10 +861,10 @@ export const GameFactory = {
         splinters: ({ id, x, y, ...rest } = {}) =>
             GameFactory.collectible({
                 id,
-                x: x * GameFactory.GRID,
-                y: y * GameFactory.GRID,
-                w: 48,
-                h: 48,
+                x: x * GameFactory.GRID + 6,
+                y: y * GameFactory.GRID + 6,
+                w: 36,
+                h: 36,
                 ...rest,
             }),
         weaponUpgrades: ({ id, x, y, ...rest } = {}) =>
