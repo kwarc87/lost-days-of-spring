@@ -25,6 +25,7 @@ import {
 import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
+import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -66,6 +67,7 @@ export class LostDaysOfSpring {
         this.pauseMenuIndex = 0; // 0 = Resume, 1 = Restart
         this.levelComplete = false;
         this.gameOver = false;
+        this.isTitleScreen = true;
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.levelStartAt = 0; // timestamp (ms) when the level was loaded
@@ -160,6 +162,7 @@ export class LostDaysOfSpring {
         this.messageRenderer = MessageRenderer;
         this.cannonRenderer = CannonRenderer;
         this.cannonBulletRenderer = CannonBulletRenderer;
+        this.titleScreenRenderer = TitleScreenRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -497,6 +500,15 @@ export class LostDaysOfSpring {
 
             if (this._preventDefaultKeys.has(e.code)) {
                 e.preventDefault();
+            }
+
+            if (this.isTitleScreen) {
+                if (e.code === this.keysMap.enter && !e.repeat) {
+                    this.isTitleScreen = false;
+                    this.lastTime = performance.now();
+                    this.keys = {};
+                }
+                return;
             }
 
             const wasPaused = this.isPaused;
@@ -1999,6 +2011,11 @@ export class LostDaysOfSpring {
         this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
+    drawTitleScreen() {
+        const hasSave = CheckpointStorage.load() !== null;
+        this.titleScreenRenderer.draw(this.ctx, this.canvas, hasSave);
+    }
+
     drawWorld() {
         this.worldRenderer.drawBackground(this.ctx, this.canvas, this.camera);
     }
@@ -2407,6 +2424,12 @@ export class LostDaysOfSpring {
             return;
         }
 
+        if (this.isTitleScreen) {
+            this.drawTitleScreen();
+            window.requestAnimationFrame(this.loop);
+            return;
+        }
+
         let frameTime = (now - this.lastTime) / 1000;
         this.lastTime = now;
 
@@ -2546,24 +2569,30 @@ export class LostDaysOfSpring {
 
     confirmPauseMenuItem() {
         if (this.pauseMenuIndex === 0) {
-            // Resume
             this.closePauseMenu();
-        } else {
-            // Restart – clear checkpoints and reload level from scratch
-            this.isPaused = false;
-            this.totalPausedTime = 0;
-            this.accumulatedPlayTime = 0;
-            this.pauseStartAt = 0;
-            this.levelStartAt = performance.now();
+            return;
+        }
 
+        this.isPaused = false;
+        this.totalPausedTime = 0;
+        this.accumulatedPlayTime = 0;
+        this.pauseStartAt = 0;
+        this.levelStartAt = performance.now();
+
+        if (this.pauseMenuIndex === 1) {
+            // Reset progress — clear all saves
             this.checkpointRespawn = null;
             CheckpointStorage.clear();
             for (const cp of this.checkpoints) {
                 cp.activated = false;
             }
-            this.start();
-            this.resetGame();
+        } else {
+            // Return to main screen — keep saves
+            this.isTitleScreen = true;
         }
+
+        this.loadLevel(this.currentLevelId);
+        this.start();
     }
 
     toggleMapView() {

@@ -220,6 +220,10 @@ const platformCaves = {
         ...BASE_TILESET,
         sprites: onlyLeftClean(GROUND_FULL),
     },
+    groundOnlyRight: {
+        ...BASE_TILESET,
+        sprites: onlyRight(GROUND_FULL),
+    },
     groundOnlyRightClean: {
         ...BASE_TILESET,
         sprites: onlyRightClean(GROUND_FULL),

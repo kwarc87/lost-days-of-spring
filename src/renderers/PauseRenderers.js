@@ -10,7 +10,7 @@ const TRIANGLE_COLOR = "#f5c542";
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
 const SHADOW_OFFSET = 1;
 
-const MENU_ITEMS = ["Resume game", "Reset progress"];
+const MENU_ITEMS = ["Resume game", "Reset progress", "Return to main screen"];
 
 const PAD_X = 36;
 const PAD_Y = 20;
