@@ -1929,11 +1929,11 @@ export class LostDaysOfSpring {
     drawEnemy(e, nowMs) {
         if (this.mapView) {
             if (this.showDebug) {
-                this.enemyRenderer.drawMapEnemy(this.ctx, e);
+                this.enemyRenderer.drawMapEnemy(this.ctx, e, e.sprite);
             }
             return;
         }
-        this.enemyRenderer.draw(this.ctx, e, this.showDebug, nowMs);
+        this.enemyRenderer.draw(this.ctx, e, e.sprite, this.showDebug, nowMs);
     }
 
     drawCoin(c) {

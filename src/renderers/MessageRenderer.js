@@ -1,17 +1,46 @@
-const BG_COLOR = "rgba(15, 23, 32, 0.75)";
-const RADIUS = 6;
+const BG_COLOR = "#3b1158";
+const BORDER_COLOR = "#fff";
+const BORDER_WIDTH = 2;
+const CORNER_STEPS = 3;
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
 const SHADOW_OFFSET = 1;
 
-const FONT_TITLE = `normal 24px "Silkscreen", monospace`;
+const FONT_TITLE = `normal 20px "Silkscreen", monospace`;
 const FONT_BODY = `normal 14px "Silkscreen", monospace`;
 const TITLE_H = 24;
-const LINE_H = 13;
+const LINE_H = 14;
 
 const PAD_X = 20;
 const PAD_Y = 14;
 const GAP = 6;
-const GAP_AFTER_TITLE = 16;
+const GAP_AFTER_TITLE = 6;
+
+function pixelRoundRectPath(ctx, x, y, w, h, step, steps) {
+    const r = step * steps;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    for (let i = 0; i < steps; i++) {
+        ctx.lineTo(x + w - r + (i + 1) * step, y + i * step);
+        ctx.lineTo(x + w - r + (i + 1) * step, y + (i + 1) * step);
+    }
+    ctx.lineTo(x + w, y + h - r);
+    for (let i = 0; i < steps; i++) {
+        ctx.lineTo(x + w - i * step, y + h - r + (i + 1) * step);
+        ctx.lineTo(x + w - (i + 1) * step, y + h - r + (i + 1) * step);
+    }
+    ctx.lineTo(x + r, y + h);
+    for (let i = 0; i < steps; i++) {
+        ctx.lineTo(x + r - (i + 1) * step, y + h - i * step);
+        ctx.lineTo(x + r - (i + 1) * step, y + h - (i + 1) * step);
+    }
+    ctx.lineTo(x, y + r);
+    for (let i = 0; i < steps; i++) {
+        ctx.lineTo(x + i * step, y + r - (i + 1) * step);
+        ctx.lineTo(x + (i + 1) * step, y + r - (i + 1) * step);
+    }
+    ctx.closePath();
+}
 
 export const MessageRenderer = {
     // "hitbox": panel centred on the message hitbox in world→screen space.
@@ -27,14 +56,45 @@ export const MessageRenderer = {
             message.relatedTo === "viewPort"
                 ? canvas.height / 2 + oy
                 : message.y - camera.y + message.h / 2 + oy;
-        this.drawPanel(ctx, { lines: message.lines }, anchorX, anchorY);
+        this.drawPanel(
+            ctx,
+            { title: message.title ?? null, lines: message.lines },
+            anchorX,
+            anchorY,
+        );
     },
 
-    drawBackground(ctx, panelX, panelY, panelW, panelH) {
-        ctx.fillStyle = BG_COLOR;
-        ctx.beginPath();
-        ctx.roundRect(panelX, panelY, panelW, panelH, RADIUS);
-        ctx.fill();
+    drawBackground(
+        ctx,
+        panelX,
+        panelY,
+        panelW,
+        panelH,
+        border = null,
+        bg = BG_COLOR,
+    ) {
+        if (border) {
+            const { color, width: b, steps: s } = border;
+            pixelRoundRectPath(ctx, panelX, panelY, panelW, panelH, b, s);
+            ctx.fillStyle = color;
+            ctx.fill();
+            if (bg !== null) {
+                pixelRoundRectPath(
+                    ctx,
+                    panelX + b,
+                    panelY + b,
+                    panelW - b * 2,
+                    panelH - b * 2,
+                    b,
+                    s,
+                );
+                ctx.fillStyle = bg;
+                ctx.fill();
+            }
+        } else if (bg !== null) {
+            ctx.fillStyle = bg;
+            ctx.fillRect(panelX, panelY, panelW, panelH);
+        }
     },
 
     drawPanel(ctx, { title = null, lines = [] }, anchorX, anchorY, opts = {}) {
@@ -73,7 +133,18 @@ export const MessageRenderer = {
         const panelX = Math.round(anchorX - panelW / 2);
         const panelY = Math.round(anchorY - panelH / 2);
 
-        this.drawBackground(ctx, panelX, panelY, panelW, panelH);
+        this.drawBackground(
+            ctx,
+            panelX,
+            panelY,
+            panelW,
+            panelH,
+            opts.border ?? {
+                color: BORDER_COLOR,
+                width: BORDER_WIDTH,
+                steps: CORNER_STEPS,
+            },
+        );
 
         ctx.textBaseline = "top";
         let curY = panelY + padY;

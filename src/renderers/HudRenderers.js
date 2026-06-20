@@ -84,6 +84,8 @@ export const DefaultHubRenderer = {
             heartsPanelY,
             heartsPanelW,
             heartsPanelH,
+            { color: "#3b1158", width: 2, steps: 3 },
+            "#3b1158",
         );
 
         for (let i = 0; i < maxLife; i++) {
@@ -91,6 +93,19 @@ export const DefaultHubRenderer = {
             const hy = heartsPanelY + heartPadY;
             drawPixelHeart(ctx, hx, hy, heartScale, i < life);
         }
+
+        // ── Player name ───────────────────────────────────────────────────────
+        ctx.font = `500 20px "Silkscreen", monospace`;
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        const nameX = heartsPanelX + heartsPanelW + 12;
+        const nameY = Math.round(heartsPanelY + heartsPanelH / 2);
+        ctx.strokeStyle = "#000";
+        ctx.lineWidth = 4;
+        ctx.lineJoin = "miter";
+        ctx.strokeText("COLIN LA MEHR", nameX, nameY);
+        ctx.fillStyle = "#f0cc8b";
+        ctx.fillText("COLIN LA MEHR", nameX, nameY);
         // ────────────────────────────────────────────────────────────────────
 
         // ── Coin + splinter panel (top-right) ────────────────────────────────
@@ -119,7 +134,15 @@ export const DefaultHubRenderer = {
         const boxX = Math.round(canvas.width - boxW - 12);
         const boxY = 12;
 
-        MessageRenderer.drawBackground(ctx, boxX, boxY, boxW, boxH);
+        MessageRenderer.drawBackground(
+            ctx,
+            boxX,
+            boxY,
+            boxW,
+            boxH,
+            { color: "#3b1158", width: 2, steps: 3 },
+            "#3b1158",
+        );
 
         ctx.textBaseline = "middle";
         const textRightX = boxX + boxW - panelPadX;

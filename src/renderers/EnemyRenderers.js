@@ -1,86 +1,90 @@
 import { getImg } from "../utils/imgCache.js";
 
 const SCALE = 3;
-const SRC = "textures/enemies/enemy001.png";
-const FW = 48;
-const FH = 48;
-const SRC_Y = 11;
+const S = SCALE;
 const FPS = 8;
+const OUTLINE = 3;
 
-let _offCanvas = null;
-let _offCtx = null;
+const CFG1 = {
+    src: "textures/enemies/enemy001.png",
+    fw: 48,
+    sx: 0,
+    sy: 11,
+    sw: 48,
+    sh: 48,
+    frames: 3,
+};
+const CFG2 = {
+    src: "textures/enemies/enemy002.png",
+    fw: 48,
+    sx: 11,
+    sy: 12,
+    sw: 37,
+    sh: 36,
+    frames: 4,
+};
 
-function getOffCanvas(w, h) {
-    if (!_offCanvas) {
-        _offCanvas = document.createElement("canvas");
-        _offCtx = _offCanvas.getContext("2d");
-    }
-    if (_offCanvas.width !== w || _offCanvas.height !== h) {
-        _offCanvas.width = w;
-        _offCanvas.height = h;
-    }
-    return { canvas: _offCanvas, ctx: _offCtx };
-}
-
-function getCurrentFrame() {
-    return Math.floor(Date.now() / (1000 / FPS)) % 3;
-}
-
-// per-frame eye anchor (sprite pixel coords, top-left of eye shape)
-const EYE_DATA = [
-    { x: 10, y: 38 }, // frame 0
-    { x: 10, y: 37 }, // frame 1
-    { x: 9, y: 36 }, // frame 2
+const OUTLINE_OFFSETS = [
+    [-OUTLINE, 0],
+    [OUTLINE, 0],
+    [0, -OUTLINE],
+    [0, OUTLINE],
+    [-OUTLINE, -OUTLINE],
+    [OUTLINE, -OUTLINE],
+    [-OUTLINE, OUTLINE],
+    [OUTLINE, OUTLINE],
 ];
 
-// per-frame mouth anchor
-const MOUTH_DATA = [
-    { x: 9, y: 45 }, // frame 0
-    { x: 9, y: 44 }, // frame 1
-    { x: 8, y: 43 }, // frame 2
-];
+let _oc = null,
+    _octx = null;
 
-function drawEyes(ctx, drawX, drawY, frame, eyeColor) {
-    const { x: ex, y: ey } = EYE_DATA[frame] ?? EYE_DATA[0];
-    const bx = drawX + ex * SCALE;
-    const by = drawY + ey * SCALE;
-    const S = SCALE;
-
-    for (const ox of [0, 5 * S]) {
-        ctx.fillStyle = eyeColor;
-        ctx.fillRect(bx + ox + 1 * S, by, 2 * S, S);
-        ctx.fillRect(bx + ox, by + S, 4 * S, 2 * S);
-        ctx.fillRect(bx + ox + S, by + 3 * S, 2 * S, S);
-        ctx.fillStyle = "rgba(0,0,0,0.4)";
-        ctx.fillRect(bx + ox + S, by + 3 * S, 2 * S, S);
+function offCanvas(w, h) {
+    if (!_oc) {
+        _oc = document.createElement("canvas");
+        _octx = _oc.getContext("2d");
     }
+    if (_oc.width !== w || _oc.height !== h) {
+        _oc.width = w;
+        _oc.height = h;
+    }
+    return [_oc, _octx];
 }
 
-function drawMouth(ctx, drawX, drawY, frame, secondaryColor) {
-    const { x: mx, y: my } = MOUTH_DATA[frame] ?? MOUTH_DATA[0];
-    const bx = drawX + mx * SCALE;
-    const by = drawY + my * SCALE;
-    const S = SCALE;
-
-    // top lip line
-    ctx.fillStyle = secondaryColor;
-    ctx.fillRect(bx + 6, by, 5 * S, S);
-    // bottom lip line (slightly darker)
-    ctx.fillRect(bx + 3, by + S, 7 * S, S);
-    ctx.fillStyle = "rgba(0,0,0,0.4)";
-    ctx.fillRect(bx + 3, by + S, 7 * S, S);
+function getFrame(frames, dying) {
+    return dying ? 0 : Math.floor(Date.now() / (1000 / FPS)) % frames;
 }
 
-function drawEnemy001(ctx, enemy, debug, nowMs = performance.now()) {
-    const img = getImg(SRC);
+function blit(ctx, img, cfg, f, dx, dy) {
+    const { fw, sx, sy, sw, sh } = cfg;
+    ctx.drawImage(img, f * fw + sx, sy, sw, sh, dx, dy, sw * S, sh * S);
+}
 
+function drawDamaged(ctx, img, cfg, f, drawX, drawY) {
+    const dw = cfg.sw * S,
+        dh = cfg.sh * S;
+    const [oc, octx] = offCanvas(dw, dh);
+    octx.clearRect(0, 0, dw, dh);
+    octx.imageSmoothingEnabled = false;
+    blit(octx, img, cfg, f, 0, 0);
+    octx.globalCompositeOperation = "source-atop";
+    octx.fillStyle = "red";
+    octx.fillRect(0, 0, dw, dh);
+    octx.globalCompositeOperation = "source-over";
+    for (const [ox, oy] of OUTLINE_OFFSETS) {
+        ctx.drawImage(oc, drawX + ox, drawY + oy);
+    }
+    blit(ctx, img, cfg, f, drawX, drawY);
+}
+
+function drawEnemy(ctx, enemy, cfg, debug, nowMs, onAfterDraw) {
+    const img = getImg(cfg.src);
     if (!img?.complete || !img.naturalWidth) {
         return;
     }
 
-    const frame = enemy.dying ? 0 : getCurrentFrame();
-    const dw = FW * SCALE;
-    const dh = FH * SCALE;
+    const f = getFrame(cfg.frames, enemy.dying);
+    const dw = cfg.sw * S,
+        dh = cfg.sh * S;
     const drawX = -dw / 2 + (enemy.offsetX ?? 0);
     const drawY = -dh + (enemy.offsetY ?? 0);
 
@@ -92,50 +96,22 @@ function drawEnemy001(ctx, enemy, debug, nowMs = performance.now()) {
     );
 
     if (enemy.dying) {
-        const elapsed = nowMs - enemy.dyingStartedAtMs;
-        const alpha = Math.max(0, 1 - elapsed / enemy.dyingDurationMs);
-        ctx.globalAlpha = alpha;
+        ctx.globalAlpha = Math.max(
+            0,
+            1 - (nowMs - enemy.dyingStartedAtMs) / enemy.dyingDurationMs,
+        );
     }
-
-    // sprite faces left by default; flip for right-facing
     if (enemy.vx > 0) {
         ctx.scale(-1, 1);
     }
 
     if (enemy.isDamaged || enemy.dying) {
-        const outlineSize = 3;
-        const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
-
-        offCtx.clearRect(0, 0, dw, dh);
-        offCtx.imageSmoothingEnabled = false;
-        offCtx.drawImage(img, frame * FW, SRC_Y, FW, FH, 0, 0, dw, dh);
-        offCtx.globalCompositeOperation = "source-atop";
-        offCtx.fillStyle = "red";
-        offCtx.fillRect(0, 0, dw, dh);
-        offCtx.globalCompositeOperation = "source-over";
-
-        const offsets = [
-            [-outlineSize, 0],
-            [outlineSize, 0],
-            [0, -outlineSize],
-            [0, outlineSize],
-            [-outlineSize, -outlineSize],
-            [outlineSize, -outlineSize],
-            [-outlineSize, outlineSize],
-            [outlineSize, outlineSize],
-        ];
-
-        for (const [ox, oy] of offsets) {
-            ctx.drawImage(offCanvas, drawX + ox, drawY + oy);
-        }
-
-        ctx.drawImage(img, frame * FW, SRC_Y, FW, FH, drawX, drawY, dw, dh);
+        drawDamaged(ctx, img, cfg, f, drawX, drawY);
     } else {
-        ctx.drawImage(img, frame * FW, SRC_Y, FW, FH, drawX, drawY, dw, dh);
+        blit(ctx, img, cfg, f, drawX, drawY);
     }
 
-    drawEyes(ctx, drawX, drawY, frame, enemy.mainColor);
-    drawMouth(ctx, drawX, drawY, frame, enemy.secondaryColor);
+    onAfterDraw?.(ctx, drawX, drawY, f);
 
     ctx.restore();
 
@@ -148,13 +124,93 @@ function drawEnemy001(ctx, enemy, debug, nowMs = performance.now()) {
     }
 }
 
-// ─── Dispatcher ───────────────────────────────────────────────────────────────
-export const DefaultEnemyRenderer = {
-    drawMapEnemy: (ctx, enemy) => {
-        drawEnemy001(ctx, enemy, true);
-    },
+// slime — eye & mouth pixel anchors per frame
+const SLIME_EYE_DATA = [
+    { x: 10, y: 38 },
+    { x: 10, y: 37 },
+    { x: 9, y: 36 },
+];
+const SLIME_MOUTH_DATA = [
+    { x: 9, y: 45 },
+    { x: 9, y: 44 },
+    { x: 8, y: 43 },
+];
 
-    draw: (ctx, enemy, debug = false, nowMs = performance.now()) => {
-        drawEnemy001(ctx, enemy, debug, nowMs);
+function drawSlimeEyes(ctx, drawX, drawY, f, eyeColor) {
+    const { x: ex, y: ey } = SLIME_EYE_DATA[f];
+    const bx = drawX + ex * S,
+        by = drawY + ey * S;
+    for (const ox of [0, 5 * S]) {
+        ctx.fillStyle = eyeColor;
+        ctx.fillRect(bx + ox + S, by, 2 * S, S);
+        ctx.fillRect(bx + ox, by + S, 4 * S, 2 * S);
+        ctx.fillRect(bx + ox + S, by + 3 * S, 2 * S, S);
+        ctx.fillStyle = "rgba(0,0,0,0.4)";
+        ctx.fillRect(bx + ox + S, by + 3 * S, 2 * S, S);
+    }
+}
+
+function drawSlimeMouth(ctx, drawX, drawY, f, secondaryColor) {
+    const { x: mx, y: my } = SLIME_MOUTH_DATA[f];
+    const bx = drawX + mx * S,
+        by = drawY + my * S;
+    ctx.fillStyle = secondaryColor;
+    ctx.fillRect(bx + 6, by, 5 * S, S);
+    ctx.fillRect(bx + 3, by + S, 7 * S, S);
+    ctx.fillStyle = "rgba(0,0,0,0.4)";
+    ctx.fillRect(bx + 3, by + S, 7 * S, S);
+}
+
+function drawSlimeEnemy(ctx, enemy, debug, nowMs) {
+    drawEnemy(ctx, enemy, CFG1, debug, nowMs, (ctx, drawX, drawY, f) => {
+        drawSlimeEyes(ctx, drawX, drawY, f, enemy.mainColor);
+        drawSlimeMouth(ctx, drawX, drawY, f, enemy.secondaryColor);
+    });
+}
+
+// slime — eye & mouth pixel anchors per frame
+const EVIL_EYE_EYE_DATA = [
+    { x: 30, y: 54, w: 7, h: 6 },
+    { x: 30, y: 42, w: 8, h: 9 },
+    { x: 30, y: 26, w: 7, h: 7 },
+    { x: 29, y: 30, w: 8, h: 9 },
+];
+
+function drawEvilEyeEye(ctx, drawX, drawY, f, eyeColor) {
+    const { x: ex, y: ey, w, h } = EVIL_EYE_EYE_DATA[f];
+    const bx = drawX + ex;
+    const by = drawY + ey;
+    ctx.fillStyle = eyeColor;
+    ctx.fillRect(bx, by, w, h);
+}
+
+function drawEvilEyeEnemy(ctx, enemy, debug, nowMs) {
+    drawEnemy(ctx, enemy, CFG2, debug, nowMs, (ctx, drawX, drawY, f) => {
+        drawEvilEyeEye(ctx, drawX, drawY, f, enemy.mainColor);
+    });
+}
+
+export const DefaultEnemyRenderer = {
+    drawMapEnemy: (ctx, enemy, type = "slime") => {
+        if (type === "evilEye") {
+            drawEvilEyeEnemy(ctx, enemy, true);
+        } else {
+            drawSlimeEnemy(ctx, enemy, true);
+        }
+    },
+    draw: (
+        ctx,
+        enemy,
+        type = "slime",
+        debug = false,
+        nowMs = performance.now(),
+    ) => {
+        switch (type) {
+            case "evilEye":
+                drawEvilEyeEnemy(ctx, enemy, debug, nowMs);
+                break;
+            default:
+                drawSlimeEnemy(ctx, enemy, debug, nowMs);
+        }
     },
 };

@@ -75,19 +75,26 @@ export const MESSAGES = {
 
     // ── Level 1 ───────────────────────────────────────────────────────────────
     LEVEL_1: {
-        INTRO: [
-            { text: "Find the exit and collect", color: "#ffffff" },
-            { text: "the appropriate amount of", color: "#ffffff" },
-            {
-                segments: [
-                    { text: "coins", color: "#f5c542" },
-                    { text: " and ", color: "#ffffff" },
-                    { text: "splinters", color: "#5ce8d0" },
-                    { text: ".", color: "#ffffff" },
-                ],
+        INTRO: {
+            title: {
+                text: "Welcome Colin to the planet SPRING",
+                color: "#ffffff",
             },
-            { text: "Go, traveler!", color: "#ffffff" },
-        ],
+            lines: [
+                {
+                    text: "Find the exit and collect the appropriate amount of ",
+                    color: "#ffffff",
+                },
+                {
+                    segments: [
+                        { text: "coins", color: "#f5c542" },
+                        { text: " and ", color: "#ffffff" },
+                        { text: "splinters", color: "#5ce8d0" },
+                        { text: ". Go, traveler!", color: "#ffffff" },
+                    ],
+                },
+            ],
+        },
         JUMP_HINT: [
             {
                 segments: [

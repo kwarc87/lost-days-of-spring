@@ -1,4 +1,5 @@
 ﻿import { formatPlayTime } from "../messages.js";
+import { MessageRenderer } from "./MessageRenderer.js";
 
 const FONT_TITLE = `normal 24px "Silkscreen", monospace`;
 const FONT_BODY = `normal 14px "Silkscreen", monospace`;
@@ -74,11 +75,15 @@ export const DefaultPauseRenderer = {
         const panelX = Math.round(w / 2 - panelW / 2);
         const panelY = Math.round(h / 2 - panelH / 2);
 
-        // Fully opaque panel background — overwrites previous panel cleanly
-        ctx.fillStyle = "rgb(15, 23, 32)";
-        ctx.beginPath();
-        ctx.roundRect(panelX, panelY, panelW, panelH, 8);
-        ctx.fill();
+        MessageRenderer.drawBackground(
+            ctx,
+            panelX,
+            panelY,
+            panelW,
+            panelH,
+            { color: "#fff", width: 2, steps: 3 },
+            "#3b1158",
+        );
 
         // Title
         ctx.font = FONT_TITLE;

@@ -104,7 +104,15 @@ export const DefaultGameOverRenderer = {
         ctx.fillStyle = "rgba(0, 0, 0, 0.72)";
         ctx.fillRect(0, 0, w, h);
 
-        MessageRenderer.drawBackground(ctx, panelX, panelY, panelW, panelH);
+        MessageRenderer.drawBackground(
+            ctx,
+            panelX,
+            panelY,
+            panelW,
+            panelH,
+            { color: "#fff", width: 2, steps: 3 },
+            "#3b1158",
+        );
 
         // ── Title ────────────────────────────────────────────────────────────
         ctx.textAlign = "center";
