@@ -9,7 +9,7 @@ export const LEVEL_001 = {
     },
     playerStart: {
         x: GameFactory.GRID * 2,
-        y: GameFactory.GRID * 136,
+        y: GameFactory.GRID * 139.75,
     },
     platforms: [
         // platforms behind floor 0
@@ -2865,12 +2865,14 @@ export const LEVEL_001 = {
         GameFactory.grid.environment.wallInside({ x: 46, y: 42 }),
     ],
     messages: [
-        GameFactory.grid.message({ id: "msg-1", x: 0, y: 132, w: 14, h: 10, offsetX: 0, offsetY: -1, title: MESSAGES.LEVEL_1.INTRO.title, lines: MESSAGES.LEVEL_1.INTRO.lines, relatedTo: "viewPort", strategy: "single" }),
-        GameFactory.grid.message({ id: "msg-2", x: 24, y: 133, w: 18, h: 10, offsetX: 0, offsetY: 0, lines: MESSAGES.LEVEL_1.JUMP_HINT, relatedTo: "viewPort", strategy: "single" }),
-        GameFactory.grid.message({ id: "msg-3", x: 89, y: 138, w: 15, h: 4, offsetX: 0, offsetY: 2, lines: MESSAGES.LEVEL_1.CROUCH_HINT, relatedTo: "viewPort", strategy: "single" }),
-        GameFactory.grid.message({ id: "msg-4", x: 177, y: 132, w: 19, h: 10, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.SHOOT_HINT, relatedTo: "viewPort", strategy: "single" }),
-        GameFactory.grid.message({ id: "msg-5", x: 275, y: 132, w: 22, h: 4, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.PAUSE_HINT, relatedTo: "viewPort", strategy: "single" }),
-        GameFactory.grid.message({ id: "msg-6", x: 436, y: 132, w: 17, h: 7, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.MINI_MAP_HINT, relatedTo: "viewPort", strategy: "single" }),
+        GameFactory.grid.message({ id: "msg-0", x: 0, y: 132, w: 19, h: 10, offsetX: 0, offsetY: -1, lines: MESSAGES.LEVEL_1.WALK_HINT, delay: 1000 }),
+        GameFactory.grid.message({ id: "msg-1", x: 28, y: 133, w: 14, h: 10, offsetX: 0, offsetY: 0, lines: MESSAGES.LEVEL_1.JUMP_HINT }),
+        GameFactory.grid.message({ id: "msg-2", x: 89, y: 138, w: 15, h: 4, offsetX: 0, offsetY: 2, lines: MESSAGES.LEVEL_1.CROUCH_HINT }),
+        GameFactory.grid.message({ id: "msg-3", x: 177, y: 132, w: 19, h: 10, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.SHOOT_HINT }),
+        GameFactory.grid.message({ id: "msg-4", x: 133, y: 132, w: 11, h: 10, offsetX: 0, offsetY: -1, lines: MESSAGES.LEVEL_1.WELCOME, displayTime: 7000 }),
+        GameFactory.grid.message({ id: "msg-5", x: 210, y: 132, w: 11, h: 10, offsetX: 0, offsetY: -2, title: MESSAGES.LEVEL_1.INTRO.title, lines: MESSAGES.LEVEL_1.INTRO.lines, displayTime: 7000 }),
+        GameFactory.grid.message({ id: "msg-6", x: 275, y: 132, w: 22, h: 4, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.PAUSE_HINT }),
+        GameFactory.grid.message({ id: "msg-7", x: 436, y: 132, w: 17, h: 7, offsetX: 0, offsetY: -2, lines: MESSAGES.LEVEL_1.MINI_MAP_HINT }),
     ],
     checkpoints: [
         GameFactory.grid.checkpoint({ id: 1, x: 473, y: 122, w: 1, h: 3, reached: false }),

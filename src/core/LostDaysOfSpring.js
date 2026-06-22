@@ -26,6 +26,7 @@ import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
+import { TransitionRenderer } from "../renderers/TransitionRenderer.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true) {
@@ -68,6 +69,8 @@ export class LostDaysOfSpring {
         this.levelComplete = false;
         this.gameOver = false;
         this.isTitleScreen = true;
+        this.titleFadeOut = { active: false, startTime: 0, duration: 750 };
+        this.gameFadeIn = { active: false, startTime: 0, duration: 750 };
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.levelStartAt = 0; // timestamp (ms) when the level was loaded
@@ -163,6 +166,7 @@ export class LostDaysOfSpring {
         this.cannonRenderer = CannonRenderer;
         this.cannonBulletRenderer = CannonBulletRenderer;
         this.titleScreenRenderer = TitleScreenRenderer;
+        this.transitionRenderer = TransitionRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -258,6 +262,8 @@ export class LostDaysOfSpring {
         this.messages = levelData.messages ?? [];
         this.activeMessage = null;
         this.messageShownAt = null;
+        this.messagePending = null;
+        this.messagePendingAt = null;
         this.exits = levelData.exits ?? [];
         this.hiddenWalls = levelData.hiddenWalls ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
@@ -503,9 +509,13 @@ export class LostDaysOfSpring {
             }
 
             if (this.isTitleScreen) {
-                if (e.code === this.keysMap.enter && !e.repeat) {
-                    this.isTitleScreen = false;
-                    this.lastTime = performance.now();
+                if (
+                    e.code === this.keysMap.enter &&
+                    !e.repeat &&
+                    !this.titleFadeOut.active
+                ) {
+                    this.titleFadeOut.active = true;
+                    this.titleFadeOut.startTime = performance.now();
                     this.keys = {};
                 }
                 return;
@@ -677,7 +687,7 @@ export class LostDaysOfSpring {
         this.pendingReset = true;
     }
 
-    update() {
+    update(now) {
         // Process deferred reset at the top of the tick before any logic runs
         if (this.pendingReset) {
             this.pendingReset = false;
@@ -698,7 +708,6 @@ export class LostDaysOfSpring {
             return;
         }
 
-        const now = performance.now();
         this.handleInput(now);
         this.applyPhysics();
         this.applyCarryDecay(now);
@@ -717,12 +726,12 @@ export class LostDaysOfSpring {
         this.updateBullets(now);
         this.updateCannons(now);
         this.updateCannonBullets(now);
-        this.updateCollectibles();
-        this.updateCheckpoints();
+        this.updateCollectibles(now);
+        this.updateCheckpoints(now);
         this.updateTeleports(now);
         this.updateHiddenWalls();
         this.updateExit();
-        this.updateMessages();
+        this.updateMessages(now);
         this.mapDiscovery?.markFromPlayer(this.player);
 
         this.updateCamera(now);
@@ -738,7 +747,7 @@ export class LostDaysOfSpring {
         this.handleCrouchInput();
         this.handleShootingInput(now);
         this.handleJumpInput(now);
-        this.handleEnterInput();
+        this.handleEnterInput(now);
     }
 
     handleHorizontalMovementInput(now) {
@@ -919,7 +928,7 @@ export class LostDaysOfSpring {
         }
     }
 
-    handleEnterInput() {
+    handleEnterInput(now) {
         if (this.keys[this.keysMap.enter]) {
             if (
                 this.playerAtExit &&
@@ -927,7 +936,7 @@ export class LostDaysOfSpring {
                 this.hasEnoughSplinters
             ) {
                 this.levelComplete = true;
-                this.levelCompleteAt = performance.now();
+                this.levelCompleteAt = now;
                 this.player.vx = 0;
                 this.player.vy = 0;
                 this.player.shooting = false;
@@ -1502,12 +1511,12 @@ export class LostDaysOfSpring {
             this.player.shooting = false;
 
             if (this.checkpointRespawn !== null) {
-                this.snapshotCheckpointState();
+                this.snapshotCheckpointState(now);
             }
         }
     }
 
-    snapshotCheckpointState() {
+    snapshotCheckpointState(now) {
         this.checkpointRespawn = {
             ...this.checkpointRespawn,
             levelId: this.currentLevelId,
@@ -1540,7 +1549,7 @@ export class LostDaysOfSpring {
                 ...this.messages.filter((m) => m.shown).map((m) => m.id),
             ]),
             playTimeMs:
-                performance.now() -
+                now -
                 this.levelStartAt -
                 this.totalPausedTime +
                 this.accumulatedPlayTime,
@@ -1688,7 +1697,7 @@ export class LostDaysOfSpring {
     }
 
     // Check player-collectible collisions and mark collected items
-    updateCollectibles() {
+    updateCollectibles(now) {
         for (const c of this.coins) {
             if (!c.collected && this.rectsCollide(this.player, c)) {
                 c.collected = true;
@@ -1709,7 +1718,7 @@ export class LostDaysOfSpring {
                 this.player.weapon = u?.weapon ?? this.player.weapon;
                 if (u.message) {
                     this.activeMessage = u.message;
-                    this.messageShownAt = performance.now();
+                    this.messageShownAt = now;
                 }
             }
         }
@@ -2027,7 +2036,7 @@ export class LostDaysOfSpring {
         this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
-    draw() {
+    draw(now = performance.now()) {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.save();
@@ -2106,7 +2115,7 @@ export class LostDaysOfSpring {
             this.drawSpike(spike);
         }
 
-        const nowMs = performance.now();
+        const nowMs = now;
 
         for (const e of this.enemies) {
             if (e.dead) {
@@ -2151,7 +2160,13 @@ export class LostDaysOfSpring {
             this.drawExitMessage();
         }
 
-        if (this.activeMessage && !this.levelComplete && !this.gameOver) {
+        if (
+            this.activeMessage &&
+            !this.levelComplete &&
+            !this.gameOver &&
+            !this.mapView &&
+            !this.isPaused
+        ) {
             this.messageRenderer.drawMessagePanel(
                 this.ctx,
                 this.canvas,
@@ -2173,7 +2188,7 @@ export class LostDaysOfSpring {
         }
 
         if (this.gameOver) {
-            this.drawGameOver();
+            this.drawGameOver(now);
         }
     }
 
@@ -2197,8 +2212,8 @@ export class LostDaysOfSpring {
         );
     }
 
-    drawGameOver() {
-        const elapsed = performance.now() - this.gameOverAt;
+    drawGameOver(now) {
+        const elapsed = now - this.gameOverAt;
         const remaining = Math.max(
             0,
             Math.ceil((this.gameOverDelay - elapsed) / 1000),
@@ -2258,12 +2273,23 @@ export class LostDaysOfSpring {
         );
     }
 
-    updateMessages() {
-        const now = performance.now();
+    updateMessages(now) {
+        const hit =
+            this.messages.find((message) => {
+                if (message.strategy === "single" && message.shown) {
+                    return false;
+                }
+                return this.rectsCollide(this.player, message);
+            }) ?? null;
 
-        // displayTime takes priority: keep showing until the timer expires,
-        // regardless of whether the player is still in the hitbox.
         if (this.activeMessage?.displayTime && this.messageShownAt !== null) {
+            if (hit && hit !== this.activeMessage) {
+                // New message triggered — immediately dismiss current and show new.
+                this.activeMessage.shown = true;
+                this.activeMessage = hit;
+                this.messageShownAt = hit.displayTime ? now : null;
+                return;
+            }
             if (now - this.messageShownAt < this.activeMessage.displayTime) {
                 return;
             }
@@ -2274,30 +2300,30 @@ export class LostDaysOfSpring {
             return;
         }
 
-        const hit =
-            this.messages.find((message) => {
-                if (message.strategy === "single" && message.shown) {
-                    return false;
-                }
-                return this.rectsCollide(this.player, message);
-            }) ?? null;
-
         if (this.activeMessage && !hit) {
             // player just left the hitbox (no displayTime)
             this.activeMessage.shown = true;
         }
 
-        this.activeMessage = hit;
+        // Track when the player first entered the current message hitbox
+        if (hit !== this.messagePending) {
+            this.messagePending = hit;
+            this.messagePendingAt = hit ? now : null;
+        }
 
-        // Start the displayTime timer when a message with displayTime is activated.
-        if (hit?.displayTime) {
-            this.messageShownAt = now;
+        const wasActive = this.activeMessage === hit;
+        if (hit && now - this.messagePendingAt >= (hit.delay ?? 0)) {
+            this.activeMessage = hit;
+            if (hit.displayTime && !wasActive) {
+                this.messageShownAt = now;
+            }
         } else {
+            this.activeMessage = null;
             this.messageShownAt = null;
         }
     }
 
-    updateCheckpoints() {
+    updateCheckpoints(now) {
         for (const cp of this.checkpoints) {
             if (!cp.reached && this.rectsCollide(this.player, cp)) {
                 cp.reached = true;
@@ -2314,7 +2340,7 @@ export class LostDaysOfSpring {
                         ...(cp.message ? [cp.message.id] : []),
                     ]),
                 };
-                this.snapshotCheckpointState();
+                this.snapshotCheckpointState(now);
             }
         }
     }
@@ -2426,6 +2452,25 @@ export class LostDaysOfSpring {
 
         if (this.isTitleScreen) {
             this.drawTitleScreen();
+            if (this.titleFadeOut.active) {
+                const elapsed = now - this.titleFadeOut.startTime;
+                const progress = Math.min(
+                    elapsed / this.titleFadeOut.duration,
+                    1,
+                );
+                this.transitionRenderer.drawFadeOut(
+                    this.ctx,
+                    this.canvas,
+                    progress,
+                );
+                if (progress >= 1) {
+                    this.titleFadeOut.active = false;
+                    this.isTitleScreen = false;
+                    this.lastTime = now;
+                    this.gameFadeIn.active = true;
+                    this.gameFadeIn.startTime = now;
+                }
+            }
             window.requestAnimationFrame(this.loop);
             return;
         }
@@ -2440,12 +2485,21 @@ export class LostDaysOfSpring {
         this.accumulator += frameTime;
 
         while (this.accumulator >= this.gameLoop.fixedDt) {
-            this.update();
+            this.update(now);
             this.accumulator -= this.gameLoop.fixedDt;
         }
 
-        this.draw();
+        this.draw(now);
         this.updateDebug();
+
+        if (this.gameFadeIn.active) {
+            const elapsed = now - this.gameFadeIn.startTime;
+            const progress = Math.min(elapsed / this.gameFadeIn.duration, 1);
+            this.transitionRenderer.drawFadeIn(this.ctx, this.canvas, progress);
+            if (progress >= 1) {
+                this.gameFadeIn.active = false;
+            }
+        }
 
         if (this.gameOver && now - this.gameOverAt >= this.gameOverDelay) {
             this.resetGame();
@@ -2459,7 +2513,7 @@ export class LostDaysOfSpring {
             return;
         }
         this.isRunning = true;
-        this.lastTime = performance.now();
+        this.lastTime = performance.now() - this.gameLoop.fixedDt * 1000;
         window.requestAnimationFrame(this.loop);
     }
 
@@ -2519,6 +2573,7 @@ export class LostDaysOfSpring {
         this.isPaused = true;
         this.pauseMenuIndex = 0;
         this.pauseStartAt = performance.now();
+        this.draw();
         this.pauseRenderer.drawPauseScreen(
             this.ctx,
             this.canvas,
@@ -2545,6 +2600,9 @@ export class LostDaysOfSpring {
         }
         if (this.messageShownAt) {
             this.messageShownAt += pauseDuration;
+        }
+        if (this.messagePendingAt) {
+            this.messagePendingAt += pauseDuration;
         }
         this.player.knockbackUntil += pauseDuration;
 

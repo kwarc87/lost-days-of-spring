@@ -75,9 +75,22 @@ export const MESSAGES = {
 
     // ── Level 1 ───────────────────────────────────────────────────────────────
     LEVEL_1: {
+        WELCOME: [
+            { text: "Source data loaded.", color: "#fff" },
+            { text: " " },
+            { text: "Assets analyzed.", color: "#fff" },
+            { text: "Memories reconstructed.", color: "#fff" },
+            { text: "Player profile created.", color: "#fff" },
+            { text: " " },
+            { text: "World created successfully.", color: "#fff" },
+            { text: " " },
+            { text: "1 unresolved item detected.", color: "#f5c542" },
+            { text: " " },
+            { text: "Ready.", color: "#fff" },
+        ],
         INTRO: {
             title: {
-                text: "Welcome Colin to the planet SPRING",
+                text: "Lost Days Of Spring v1.0",
                 color: "#ffffff",
             },
             lines: [
@@ -90,11 +103,29 @@ export const MESSAGES = {
                         { text: "coins", color: "#f5c542" },
                         { text: " and ", color: "#ffffff" },
                         { text: "splinters", color: "#5ce8d0" },
-                        { text: ". Go, traveler!", color: "#ffffff" },
+                        { text: ". Go ahead Colin!", color: "#ffffff" },
                     ],
                 },
             ],
         },
+        WALK_HINT: [
+            {
+                segments: [
+                    {
+                        text: "To move forward / backward use ",
+                        color: "#fff",
+                    },
+                ],
+            },
+            {
+                segments: [
+                    { text: "ARROW RIGHT", color: "#f5c542" },
+                    { text: " / ", color: "#fff" },
+                    { text: "ARROW LEFT", color: "#f5c542" },
+                ],
+            },
+        ],
+
         JUMP_HINT: [
             {
                 segments: [

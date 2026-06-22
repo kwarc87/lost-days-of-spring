@@ -259,9 +259,10 @@ export const GameFactory = {
         offsetY = 0,
         title,
         lines,
-        relatedTo = "hitbox",
-        strategy = "multiple",
-        displayTime,
+        relatedTo = "viewPort",
+        strategy = "single",
+        displayTime = 5000,
+        delay = 0,
     } = {}) => ({
         id,
         x,
@@ -275,6 +276,7 @@ export const GameFactory = {
         relatedTo,
         strategy,
         ...(displayTime !== undefined && { displayTime }),
+        ...(delay > 0 && { delay }),
         shown: false,
     }),
     collectible: ({ id, x, y, ...rest } = {}) => ({
@@ -756,6 +758,7 @@ export const GameFactory = {
             relatedTo,
             strategy,
             displayTime,
+            delay,
         } = {}) =>
             GameFactory.message({
                 id,
@@ -770,6 +773,7 @@ export const GameFactory = {
                 relatedTo,
                 strategy,
                 displayTime,
+                delay,
             }),
         solid: ({ id, x, y, w, h, layout = "ground" } = {}) =>
             GameFactory.solid({

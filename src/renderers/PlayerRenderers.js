@@ -276,28 +276,34 @@ export const DefaultPlayerRenderer = {
     },
 
     drawMapPlayer: (ctx, player) => {
-        const r = player.originalWidth;
-        const cx = player.x + player.w / 2;
-        const bottom = player.y + player.h;
+        // Icon is always ~24px wide in screen space, regardless of map scale.
+        // Width = r * 4.4 is the larger dimension, so r = ICON_SIZE / 4.4.
+        const ICON_SIZE = 24;
+        const r = ICON_SIZE / 4.4;
+
+        // Convert world-space player position to screen space using current transform.
+        const t = ctx.getTransform();
+        const screenCx = t.e + (player.x + player.w / 2) * t.a;
+        const screenBottom = t.f + (player.y + player.h) * t.d;
 
         const headR = r * 1.3;
         const shoulderRx = r * 2.2;
         const shoulderRy = r * 1.5;
-        const shoulderCY = bottom - shoulderRy;
+        const shoulderCY = screenBottom - shoulderRy;
         const headCY = shoulderCY - headR - shoulderRy * 0.5;
 
         const fill = "#ff9020";
         const outline = "#b84000";
-        const lw = Math.max(2, r * 0.15);
 
         ctx.save();
-        ctx.lineWidth = lw;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.lineWidth = Math.max(2, r * 0.15);
         ctx.lineJoin = "round";
 
         // Shoulders — top half of an ellipse
         ctx.beginPath();
         ctx.ellipse(
-            cx,
+            screenCx,
             shoulderCY,
             shoulderRx,
             shoulderRy,
@@ -314,7 +320,7 @@ export const DefaultPlayerRenderer = {
 
         // Head
         ctx.beginPath();
-        ctx.arc(cx, headCY, headR, 0, Math.PI * 2);
+        ctx.arc(screenCx, headCY, headR, 0, Math.PI * 2);
         ctx.fillStyle = fill;
         ctx.fill();
         ctx.strokeStyle = outline;
