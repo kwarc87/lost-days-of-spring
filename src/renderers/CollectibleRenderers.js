@@ -50,10 +50,10 @@ const HEART_SCALE = 3;
 const HEART_BOB_PERIOD = 1800; // ms per full cycle
 const HEART_BOB_AMPLITUDE = 4;
 
-function getHeartBobOffset(collectible) {
+function getHeartBobOffset(collectible, now) {
     const phase = (collectible.id ?? 0) * 1.1;
     return Math.round(
-        Math.sin((performance.now() / HEART_BOB_PERIOD) * Math.PI * 2 + phase) *
+        Math.sin((now / HEART_BOB_PERIOD) * Math.PI * 2 + phase) *
             HEART_BOB_AMPLITUDE,
     );
 }
@@ -111,12 +111,16 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-    drawSplinter: (ctx, collectible, showDebug = false) => {
+    drawSplinter: (
+        ctx,
+        collectible,
+        showDebug = false,
+        now = performance.now(),
+    ) => {
         const img = getImg(GEMS_IMG_PATH);
         const { sx, sy } =
             SPLINTER_FRAMES[
-                Math.floor(performance.now() / SPLINTER_FRAME_MS) %
-                    SPLINTER_FRAMES.length
+                Math.floor(now / SPLINTER_FRAME_MS) % SPLINTER_FRAMES.length
             ];
 
         const dw = collectible.w ?? SPLINTER_SW * SPLINTER_SCALE;
@@ -150,12 +154,11 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-    drawWeaponUpgrade: (ctx, collectible) => {
+    drawWeaponUpgrade: (ctx, collectible, now = performance.now()) => {
         const img = getImg(WEAPON_IMG_PATH);
         const { sx, sy } =
             WEAPON_FRAMES[
-                Math.floor(performance.now() / WEAPON_FRAME_MS) %
-                    WEAPON_FRAMES.length
+                Math.floor(now / WEAPON_FRAME_MS) % WEAPON_FRAMES.length
             ];
 
         ctx.save();
@@ -193,10 +196,16 @@ export const DefaultCollectibleRenderer = {
         );
     },
 
-    drawHeart: (ctx, collectible, showDebug = false) => {
+    drawHeart: (
+        ctx,
+        collectible,
+        showDebug = false,
+        now = performance.now(),
+    ) => {
         ctx.save();
         const x = Math.round(collectible.x);
-        const y = Math.round(collectible.y) + getHeartBobOffset(collectible);
+        const y =
+            Math.round(collectible.y) + getHeartBobOffset(collectible, now);
 
         for (let row = 0; row < HEART_PIXELS.length; row++) {
             for (let col = 0; col < HEART_PIXELS[row].length; col++) {

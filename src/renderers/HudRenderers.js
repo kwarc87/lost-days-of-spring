@@ -1,5 +1,6 @@
 import { DefaultCollectibleRenderer } from "./CollectibleRenderers.js";
 import { MessageRenderer } from "./MessageRenderer.js";
+import { MESSAGES } from "../messages.js";
 
 // 7×6 pixel art heart grid
 const HEART_PIXELS = [
@@ -20,6 +21,8 @@ const HEART_HIGHLIGHT = [
     [0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0],
 ];
+
+const COLLECTED_OK_COLOR = "#72eb84";
 
 function drawPixelHeart(ctx, x, y, scale, full) {
     for (let row = 0; row < HEART_PIXELS.length; row++) {
@@ -56,10 +59,11 @@ export const DefaultHubRenderer = {
         player,
         currentLevelCollectiblesCount,
         currentLevelSplintersCount,
+        hasEnoughCoins,
+        hasEnoughSplinters,
     ) {
         const collected = player.coinsCount;
         const total = currentLevelCollectiblesCount;
-        const text = `${collected} / ${total}`;
 
         ctx.save();
 
@@ -118,7 +122,6 @@ export const DefaultHubRenderer = {
         const coinTextW = Math.ceil(
             ctx.measureText(`${total} / ${total}`).width,
         );
-        const splinterText = `${player.splintersCount ?? 0} / ${currentLevelSplintersCount ?? 0}`;
         const splinterTextW = Math.ceil(
             ctx.measureText(
                 `${currentLevelSplintersCount} / ${currentLevelSplintersCount}`,
@@ -151,9 +154,18 @@ export const DefaultHubRenderer = {
         // Coin row
         const coinIconY = boxY + panelPadY;
         DefaultCollectibleRenderer.drawCoin(ctx, { x: iconX, y: coinIconY });
-        ctx.fillStyle = "#ffd84a";
+        const coinSuffix = ` / ${total}`;
         ctx.textAlign = "right";
-        ctx.fillText(text, textRightX, coinIconY + ICON_SIZE / 2);
+        ctx.fillStyle = "#f0cc8b";
+        ctx.fillText(coinSuffix, textRightX, coinIconY + ICON_SIZE / 2);
+        ctx.fillStyle = hasEnoughCoins
+            ? COLLECTED_OK_COLOR
+            : MESSAGES.STATS.ENEMIES_COLOR;
+        ctx.fillText(
+            String(collected),
+            textRightX - ctx.measureText(coinSuffix).width,
+            coinIconY + ICON_SIZE / 2,
+        );
 
         // Splinter row
         const splinterIconY = coinIconY + ICON_SIZE + rowGap;
@@ -163,8 +175,17 @@ export const DefaultHubRenderer = {
             w: ICON_SIZE,
             h: ICON_SIZE,
         });
-        ctx.fillStyle = "#a8e8ff";
-        ctx.fillText(splinterText, textRightX, splinterIconY + ICON_SIZE / 2);
+        ctx.fillStyle = "#f0cc8b";
+        const splinterSuffix = ` / ${currentLevelSplintersCount ?? 0}`;
+        ctx.fillText(splinterSuffix, textRightX, splinterIconY + ICON_SIZE / 2);
+        ctx.fillStyle = hasEnoughSplinters
+            ? COLLECTED_OK_COLOR
+            : MESSAGES.STATS.ENEMIES_COLOR;
+        ctx.fillText(
+            String(player.splintersCount ?? 0),
+            textRightX - ctx.measureText(splinterSuffix).width,
+            splinterIconY + ICON_SIZE / 2,
+        );
         // ────────────────────────────────────────────────────────────────────
 
         ctx.restore();

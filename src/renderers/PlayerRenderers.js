@@ -129,9 +129,7 @@ function getAnimKey(player) {
     return "idle";
 }
 
-function getCurrentFrame(animKey, anim) {
-    const now = Date.now();
-
+function getCurrentFrame(animKey, anim, now) {
     if (_lastAnimKey !== animKey) {
         _animStartTime = now;
         _lastAnimKey = animKey;
@@ -140,7 +138,6 @@ function getCurrentFrame(animKey, anim) {
     const elapsed = now - _animStartTime;
     const delay = anim.delay ?? 0;
 
-    // ⬅️ najpierw obsługa opóźnienia
     if (elapsed < delay) {
         return anim.frames[0];
     }
@@ -156,8 +153,14 @@ function getCurrentFrame(animKey, anim) {
     return anim.frames[Math.min(frameIndex, anim.frames.length - 1)];
 }
 
+export function adjustAnimStartTime(delta) {
+    if (_animStartTime) {
+        _animStartTime += delta;
+    }
+}
+
 export const DefaultPlayerRenderer = {
-    draw: (ctx, player, debug = false) => {
+    draw: (ctx, player, debug = false, now = performance.now()) => {
         const animKey = getAnimKey(player);
         const anim = ANIMS[animKey];
         const img = getImg(anim.src);
@@ -166,7 +169,7 @@ export const DefaultPlayerRenderer = {
             return;
         }
 
-        const spriteFrame = getCurrentFrame(animKey, anim);
+        const spriteFrame = getCurrentFrame(animKey, anim, now);
         const dw = FW * SCALE;
         const dh = FH * SCALE;
 

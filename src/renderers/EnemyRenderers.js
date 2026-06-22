@@ -50,8 +50,8 @@ function offCanvas(w, h) {
     return [_oc, _octx];
 }
 
-function getFrame(frames, dying) {
-    return dying ? 0 : Math.floor(Date.now() / (1000 / FPS)) % frames;
+function getFrame(frames, dying, now) {
+    return dying ? 0 : Math.floor(now / (1000 / FPS)) % frames;
 }
 
 function blit(ctx, img, cfg, f, dx, dy) {
@@ -76,13 +76,13 @@ function drawDamaged(ctx, img, cfg, f, drawX, drawY) {
     blit(ctx, img, cfg, f, drawX, drawY);
 }
 
-function drawEnemy(ctx, enemy, cfg, debug, nowMs, onAfterDraw) {
+function drawEnemy(ctx, enemy, cfg, debug, now, onAfterDraw) {
     const img = getImg(cfg.src);
     if (!img?.complete || !img.naturalWidth) {
         return;
     }
 
-    const f = getFrame(cfg.frames, enemy.dying);
+    const f = getFrame(cfg.frames, enemy.dying, now);
     const dw = cfg.sw * S,
         dh = cfg.sh * S;
     const drawX = -dw / 2 + (enemy.offsetX ?? 0);
@@ -98,7 +98,7 @@ function drawEnemy(ctx, enemy, cfg, debug, nowMs, onAfterDraw) {
     if (enemy.dying) {
         ctx.globalAlpha = Math.max(
             0,
-            1 - (nowMs - enemy.dyingStartedAtMs) / enemy.dyingDurationMs,
+            1 - (now - enemy.dyingStartedAtMs) / enemy.dyingDurationMs,
         );
     }
     if (enemy.vx > 0) {
@@ -161,8 +161,8 @@ function drawSlimeMouth(ctx, drawX, drawY, f, secondaryColor) {
     ctx.fillRect(bx + 3, by + S, 7 * S, S);
 }
 
-function drawSlimeEnemy(ctx, enemy, debug, nowMs) {
-    drawEnemy(ctx, enemy, CFG1, debug, nowMs, (ctx, drawX, drawY, f) => {
+function drawSlimeEnemy(ctx, enemy, debug, now) {
+    drawEnemy(ctx, enemy, CFG1, debug, now, (ctx, drawX, drawY, f) => {
         drawSlimeEyes(ctx, drawX, drawY, f, enemy.mainColor);
         drawSlimeMouth(ctx, drawX, drawY, f, enemy.secondaryColor);
     });
@@ -184,8 +184,8 @@ function drawEvilEyeEye(ctx, drawX, drawY, f, eyeColor) {
     ctx.fillRect(bx, by, w, h);
 }
 
-function drawEvilEyeEnemy(ctx, enemy, debug, nowMs) {
-    drawEnemy(ctx, enemy, CFG2, debug, nowMs, (ctx, drawX, drawY, f) => {
+function drawEvilEyeEnemy(ctx, enemy, debug, now) {
+    drawEnemy(ctx, enemy, CFG2, debug, now, (ctx, drawX, drawY, f) => {
         drawEvilEyeEye(ctx, drawX, drawY, f, enemy.mainColor);
     });
 }
@@ -203,14 +203,14 @@ export const DefaultEnemyRenderer = {
         enemy,
         type = "slime",
         debug = false,
-        nowMs = performance.now(),
+        now = performance.now(),
     ) => {
         switch (type) {
             case "evilEye":
-                drawEvilEyeEnemy(ctx, enemy, debug, nowMs);
+                drawEvilEyeEnemy(ctx, enemy, debug, now);
                 break;
             default:
-                drawSlimeEnemy(ctx, enemy, debug, nowMs);
+                drawSlimeEnemy(ctx, enemy, debug, now);
         }
     },
 };

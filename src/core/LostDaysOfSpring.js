@@ -1,6 +1,9 @@
 import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
-import { DefaultPlayerRenderer } from "../renderers/PlayerRenderers.js";
+import {
+    DefaultPlayerRenderer,
+    adjustAnimStartTime,
+} from "../renderers/PlayerRenderers.js";
 import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
 import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
 import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
@@ -36,6 +39,7 @@ export class LostDaysOfSpring {
 
         // ====== INPUT ======
         this.keys = {};
+        this.jumpJustPressed = false;
 
         this.keysMap = {
             left: "ArrowLeft",
@@ -69,7 +73,12 @@ export class LostDaysOfSpring {
         this.levelComplete = false;
         this.gameOver = false;
         this.isTitleScreen = true;
-        this.titleFadeOut = { active: false, startTime: 0, duration: 750 };
+        this.titleFadeOut = {
+            active: false,
+            pending: false,
+            startTime: 0,
+            duration: 750,
+        };
         this.gameFadeIn = { active: false, startTime: 0, duration: 750 };
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
@@ -205,7 +214,7 @@ export class LostDaysOfSpring {
         this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
     }
 
-    loadLevel(levelId) {
+    loadLevel(levelId, now = performance.now()) {
         if (!LEVELS[levelId]) {
             // eslint-disable-next-line no-console
             console.error(`[LostDaysOfSpring] Level ${levelId} not found.`);
@@ -296,8 +305,7 @@ export class LostDaysOfSpring {
         this.cannonBullets = [];
         this.nextCannonBulletId = 0;
         for (const cannon of this.cannons) {
-            cannon.lastShootTime =
-                performance.now() - cannon.shootFrequency + cannon.delay;
+            cannon.lastShootTime = now - cannon.shootFrequency + cannon.delay;
         }
 
         // Reset Camera
@@ -316,11 +324,11 @@ export class LostDaysOfSpring {
         this.gameOverAt = 0;
         // Preserve the timer across deaths — only reset on a new level or after level complete
         if (isNewLevel || wasLevelComplete) {
-            this.levelStartAt = performance.now();
+            this.levelStartAt = now;
             this.totalPausedTime = 0;
             this.accumulatedPlayTime = this.checkpointRespawn?.playTimeMs ?? 0;
         } else if (wasGameOver) {
-            this.totalPausedTime += performance.now() - gameOverAt;
+            this.totalPausedTime += now - gameOverAt;
         }
         this.pauseStartAt = 0;
         this.mapView = false;
@@ -512,10 +520,10 @@ export class LostDaysOfSpring {
                 if (
                     e.code === this.keysMap.enter &&
                     !e.repeat &&
-                    !this.titleFadeOut.active
+                    !this.titleFadeOut.active &&
+                    !this.titleFadeOut.pending
                 ) {
-                    this.titleFadeOut.active = true;
-                    this.titleFadeOut.startTime = performance.now();
+                    this.titleFadeOut.pending = true;
                     this.keys = {};
                 }
                 return;
@@ -537,7 +545,7 @@ export class LostDaysOfSpring {
                     e.code === this.keysMap.jumpAlt) &&
                 !e.repeat
             ) {
-                this.player.jumpPressedAt = performance.now();
+                this.jumpJustPressed = true;
             }
 
             this.keys[e.code] = true;
@@ -691,7 +699,7 @@ export class LostDaysOfSpring {
         // Process deferred reset at the top of the tick before any logic runs
         if (this.pendingReset) {
             this.pendingReset = false;
-            this.loadLevel(this.currentLevelId);
+            this.loadLevel(this.currentLevelId, now);
             return;
         }
 
@@ -740,6 +748,10 @@ export class LostDaysOfSpring {
 
     // Handle keyboard input: movement, crouch, shooting, jump
     handleInput(now) {
+        if (this.jumpJustPressed) {
+            this.player.jumpPressedAt = now;
+            this.jumpJustPressed = false;
+        }
         if (this.player.frozenForTeleport) {
             return;
         }
@@ -1898,12 +1910,12 @@ export class LostDaysOfSpring {
         }
     }
 
-    drawPlayer() {
+    drawPlayer(now) {
         if (this.mapView) {
             this.playerRenderer.drawMapPlayer(this.ctx, this.player);
             return;
         }
-        this.playerRenderer.draw(this.ctx, this.player, this.showDebug);
+        this.playerRenderer.draw(this.ctx, this.player, this.showDebug, now);
     }
 
     drawPlatform(p) {
@@ -1935,14 +1947,14 @@ export class LostDaysOfSpring {
         );
     }
 
-    drawEnemy(e, nowMs) {
+    drawEnemy(e, now) {
         if (this.mapView) {
             if (this.showDebug) {
                 this.enemyRenderer.drawMapEnemy(this.ctx, e, e.sprite);
             }
             return;
         }
-        this.enemyRenderer.draw(this.ctx, e, e.sprite, this.showDebug, nowMs);
+        this.enemyRenderer.draw(this.ctx, e, e.sprite, this.showDebug, now);
     }
 
     drawCoin(c) {
@@ -1955,31 +1967,31 @@ export class LostDaysOfSpring {
         this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug);
     }
 
-    drawSplinter(s) {
+    drawSplinter(s, now) {
         if (this.mapView) {
             if (this.showDebug) {
                 this.collectibleRenderer.drawMapSplinter(this.ctx, s);
             }
             return;
         }
-        this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug);
+        this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug, now);
     }
 
-    drawHeart(s) {
+    drawHeart(s, now) {
         if (this.mapView) {
             if (this.showDebug) {
                 this.collectibleRenderer.drawMapHeart(this.ctx, s);
             }
             return;
         }
-        this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug);
+        this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug, now);
     }
 
-    drawWeaponUpgrade(s) {
+    drawWeaponUpgrade(s, now) {
         if (this.mapView) {
             return;
         }
-        this.collectibleRenderer.drawWeaponUpgrade(this.ctx, s);
+        this.collectibleRenderer.drawWeaponUpgrade(this.ctx, s, now);
     }
 
     drawBullet(b) {
@@ -2087,19 +2099,19 @@ export class LostDaysOfSpring {
 
         for (const s of this.splinters) {
             if (!s.collected) {
-                this.drawSplinters(s);
+                this.drawSplinters(s, now);
             }
         }
 
         for (const h of this.hearts) {
             if (!h.collected) {
-                this.drawHeart(h);
+                this.drawHeart(h, now);
             }
         }
 
         for (const u of this.weaponUpgrades) {
             if (!u.collected) {
-                this.drawWeaponUpgrade(u);
+                this.drawWeaponUpgrade(u, now);
             }
         }
 
@@ -2115,14 +2127,11 @@ export class LostDaysOfSpring {
             this.drawSpike(spike);
         }
 
-        const nowMs = now;
-
         for (const e of this.enemies) {
             if (e.dead) {
                 continue;
             }
-
-            this.drawEnemy(e, nowMs);
+            this.drawEnemy(e, now);
         }
 
         for (const cannon of this.cannons) {
@@ -2130,7 +2139,7 @@ export class LostDaysOfSpring {
         }
 
         if (!this.mapView) {
-            this.drawPlayer();
+            this.drawPlayer(now);
         }
 
         for (const cp of this.checkpoints) {
@@ -2147,7 +2156,7 @@ export class LostDaysOfSpring {
                 this.worldSize,
                 this.mapDiscovery,
             );
-            this.drawPlayer();
+            this.drawPlayer(now);
         }
 
         if (this.showDebug && !this.mapView) {
@@ -2181,6 +2190,8 @@ export class LostDaysOfSpring {
             this.player,
             this.currentLevelCoinsCount,
             this.currentLevelSplintersCount,
+            this.hasEnoughCoins,
+            this.hasEnoughSplinters,
         );
 
         if (this.levelComplete) {
@@ -2452,6 +2463,11 @@ export class LostDaysOfSpring {
 
         if (this.isTitleScreen) {
             this.drawTitleScreen();
+            if (this.titleFadeOut.pending) {
+                this.titleFadeOut.active = true;
+                this.titleFadeOut.startTime = now;
+                this.titleFadeOut.pending = false;
+            }
             if (this.titleFadeOut.active) {
                 const elapsed = now - this.titleFadeOut.startTime;
                 const progress = Math.min(
@@ -2609,6 +2625,11 @@ export class LostDaysOfSpring {
         for (const cannon of this.cannons) {
             cannon.lastShootTime += pauseDuration;
         }
+        for (const e of this.enemies) {
+            if (e.dyingStartedAtMs) {
+                e.dyingStartedAtMs += pauseDuration;
+            }
+        }
         for (const t of this.teleports) {
             if (t.playerEnteredAt) {
                 t.playerEnteredAt += pauseDuration;
@@ -2617,6 +2638,7 @@ export class LostDaysOfSpring {
                 t.frozenAt += pauseDuration;
             }
         }
+        adjustAnimStartTime(pauseDuration);
     }
 
     closePauseMenu() {
