@@ -2531,6 +2531,8 @@ export class LostDaysOfSpring {
                     this.titleFadeOut.active = false;
                     this.isTitleScreen = false;
                     this.lastTime = now;
+                    this.levelStartAt = now;
+                    this.totalPausedTime = 0;
                     this.gameFadeIn.active = true;
                     this.gameFadeIn.startTime = now;
                 }
@@ -2703,19 +2705,22 @@ export class LostDaysOfSpring {
 
         this.isPaused = false;
         this.totalPausedTime = 0;
-        this.accumulatedPlayTime = 0;
         this.pauseStartAt = 0;
         this.levelStartAt = performance.now();
 
         if (this.pauseMenuIndex === 1) {
             // Reset progress — clear all saves
             this.checkpointRespawn = null;
+            this.deathCount = 0;
+            this.accumulatedPlayTime = 0;
             CheckpointStorage.clear();
             for (const cp of this.checkpoints) {
                 cp.activated = false;
             }
         } else {
-            // Return to main screen — keep saves
+            // Return to main screen — restore time and deaths from checkpoint
+            this.accumulatedPlayTime = this.checkpointRespawn?.playTimeMs ?? 0;
+            this.deathCount = this.checkpointRespawn?.deathCount ?? 0;
             this.isTitleScreen = true;
         }
 
