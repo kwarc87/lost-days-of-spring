@@ -101,7 +101,7 @@ function drawEnemy(ctx, enemy, cfg, debug, now, onAfterDraw) {
             1 - (now - enemy.dyingStartedAtMs) / enemy.dyingDurationMs,
         );
     }
-    if (enemy.vx > 0) {
+    if (enemy.dirX * enemy.direction > 0) {
         ctx.scale(-1, 1);
     }
 

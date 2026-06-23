@@ -196,47 +196,99 @@ export const GameFactory = {
             layout,
         };
     },
-    enemy: ({ id, minX, maxX, y, speed = 1.5, health = 15, ...rest } = {}) => ({
+    enemy: ({
         id,
-        minX,
-        maxX,
-        x: minX,
-        y,
-        prevX: minX,
-        prevY: y,
-        speed,
-        vx: speed,
-        health,
-        recoilX: 8,
-        recoilY: 8,
-        isDamaged: false,
-        dying: false,
-        dyingStartedAtMs: null,
-        dyingDurationMs: 1000,
-        dead: false,
-        damage: 1,
-        damageTime: 0,
-        wasCollidingWithPlayer: false,
-        collidingWithPlayerThisFrame: false,
-        mainColor: "#e84855",
-        secondaryColor: "#f7b32b",
-        ...rest,
-    }),
-    slime: (args = {}) => ({
-        ...GameFactory.enemy(args),
-        sprite: "slime",
-        w: 86,
-        h: 128,
-        offsetX: 5,
-    }),
-    evilEye: (args = {}) => ({
-        ...GameFactory.enemy(args),
-        sprite: "evilEye",
-        h: 74,
-        w: 60,
-        offsetX: 16,
-        offsetY: 34,
-    }),
+        startX,
+        targetX,
+        startY,
+        targetY,
+        speed = 1.5,
+        health = 15,
+        ...rest
+    } = {}) => {
+        const dx = targetX - startX;
+        const dy = targetY - startY;
+        const length = Math.hypot(dx, dy);
+
+        return {
+            id,
+            startX,
+            targetX,
+            x: startX,
+            startY,
+            targetY,
+            y: startY,
+            prevX: startX,
+            prevY: startY,
+            dirX: dx / length,
+            dirY: dy / length,
+            speed,
+            direction: 1,
+            vx: speed,
+            health,
+            recoilX: 8,
+            recoilY: 8,
+            isDamaged: false,
+            dying: false,
+            dyingStartedAtMs: null,
+            dyingDurationMs: 1000,
+            dead: false,
+            damage: 1,
+            damageTime: 0,
+            wasCollidingWithPlayer: false,
+            collidingWithPlayerThisFrame: false,
+            mainColor: "#e84855",
+            secondaryColor: "#f7b32b",
+            ...rest,
+        };
+    },
+    slime: (args = {}) => {
+        const w = 86;
+        const h = 128;
+        const { startX, targetX, startY, targetY } = args;
+        const goingLeft = startX > targetX;
+        const goingRight = targetX > startX;
+        const goingUp = startY > targetY;
+        const goingDown = targetY > startY;
+        return {
+            ...GameFactory.enemy({
+                ...args,
+                startX: goingLeft ? startX - w : startX,
+                targetX: goingRight ? targetX - w : targetX,
+                startY: goingUp ? startY - h : startY,
+                targetY: goingDown ? targetY - h : targetY,
+            }),
+            ...(goingLeft || goingUp ? { direction: -1 } : {}),
+            sprite: "slime",
+            w,
+            h,
+            offsetX: 5,
+        };
+    },
+    evilEye: (args = {}) => {
+        const w = 60;
+        const h = 74;
+        const { startX, targetX, startY, targetY } = args;
+        const goingLeft = startX > targetX;
+        const goingRight = targetX > startX;
+        const goingUp = startY > targetY;
+        const goingDown = targetY > startY;
+        return {
+            ...GameFactory.enemy({
+                ...args,
+                startX: goingLeft ? startX - w : startX,
+                targetX: goingRight ? targetX - w : targetX,
+                startY: goingUp ? startY - h : startY,
+                targetY: goingDown ? targetY - h : targetY,
+            }),
+            ...(goingLeft || goingUp ? { direction: -1 } : {}),
+            sprite: "evilEye",
+            w,
+            h,
+            offsetX: 16,
+            offsetY: 34,
+        };
+    },
     exit: ({ id, x, y, w, h, ...rest } = {}) => ({
         id,
         x,
@@ -686,44 +738,62 @@ export const GameFactory = {
             },
             ...rest,
         }),
-        enemy: ({ id, minX, maxX, x = minX, y, speed, health, ...rest } = {}) =>
+        enemy: ({
+            id,
+            startX,
+            targetX,
+            startY,
+            targetY,
+            speed,
+            health,
+            ...rest
+        } = {}) =>
             GameFactory.enemy({
                 id,
-                minX: minX * GameFactory.GRID,
-                maxX: maxX * GameFactory.GRID,
-                y: y * GameFactory.GRID - 32,
-                x: x * GameFactory.GRID,
+                startX: startX * GameFactory.GRID,
+                targetX: targetX * GameFactory.GRID,
+                startY: startY * GameFactory.GRID,
+                targetY: targetY * GameFactory.GRID,
                 speed,
                 health,
                 ...rest,
             }),
-        slime: ({ id, minX, maxX, x = minX, y, speed, health, ...rest } = {}) =>
+        slime: ({
+            id,
+            startX,
+            targetX,
+            startY,
+            targetY,
+            speed,
+            health,
+            ...rest
+        } = {}) =>
             GameFactory.slime({
                 id,
-                minX: minX * GameFactory.GRID,
-                maxX: maxX * GameFactory.GRID,
-                y: y * GameFactory.GRID - 32,
-                x: x * GameFactory.GRID,
+                startX: startX * GameFactory.GRID,
+                targetX: targetX * GameFactory.GRID,
+                startY: startY * GameFactory.GRID - 32,
+                targetY: targetY * GameFactory.GRID - 32,
                 speed,
                 health,
                 ...rest,
             }),
         evilEye: ({
             id,
-            minX,
-            maxX,
-            x = minX,
-            y,
+            startX,
+            targetX,
+            startY,
+            targetY,
             speed,
             health,
             ...rest
         } = {}) =>
             GameFactory.evilEye({
                 id,
-                minX: minX * GameFactory.GRID,
-                maxX: maxX * GameFactory.GRID,
-                y: y * GameFactory.GRID,
-                x: x * GameFactory.GRID,
+                startX: startX * GameFactory.GRID,
+                targetX: targetX * GameFactory.GRID,
+                startY: startY * GameFactory.GRID,
+                targetY: targetY * GameFactory.GRID,
                 speed,
                 health,
                 ...rest,

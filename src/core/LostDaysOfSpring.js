@@ -1360,14 +1360,38 @@ export class LostDaysOfSpring {
 
             enemy.prevX = enemy.x;
             enemy.prevY = enemy.y;
-            enemy.x += enemy.vx;
 
-            if (enemy.x <= enemy.minX) {
-                enemy.x = enemy.minX;
-                enemy.vx = enemy.speed;
-            } else if (enemy.x + enemy.w >= enemy.maxX) {
-                enemy.x = enemy.maxX - enemy.w;
-                enemy.vx = -enemy.speed;
+            const moveX = enemy.dirX * enemy.speed * enemy.direction;
+            const moveY = enemy.dirY * enemy.speed * enemy.direction;
+
+            enemy.x += moveX;
+            enemy.y += moveY;
+
+            const signX = Math.sign(enemy.dirX);
+            const signY = Math.sign(enemy.dirY);
+
+            const passedX = this.hasPassedTarget(
+                enemy.x,
+                enemy.direction === 1 ? enemy.targetX : enemy.startX,
+                enemy.direction === 1 ? signX : -signX,
+            );
+
+            const passedY = this.hasPassedTarget(
+                enemy.y,
+                enemy.direction === 1 ? enemy.targetY : enemy.startY,
+                enemy.direction === 1 ? signY : -signY,
+            );
+
+            if (passedX && passedY) {
+                if (enemy.direction === 1) {
+                    enemy.x = enemy.targetX;
+                    enemy.y = enemy.targetY;
+                    enemy.direction = -1;
+                } else {
+                    enemy.x = enemy.startX;
+                    enemy.y = enemy.startY;
+                    enemy.direction = 1;
+                }
             }
         }
 
@@ -1438,32 +1462,21 @@ export class LostDaysOfSpring {
             ? enemy.x - this.player.w // came from left → push back left
             : enemy.x + enemy.w; // came from right → push back right
 
+        const playerAtTarget = {
+            x: targetX,
+            y: this.player.y,
+            w: this.player.w,
+            h: this.player.h,
+        };
+
         const blocked =
-            this.solids.some((p) =>
-                this.rectsCollide(
-                    {
-                        x: targetX,
-                        y: this.player.y,
-                        w: this.player.w,
-                        h: this.player.h,
-                    },
-                    p,
-                ),
-            ) ||
+            this.solids.some((p) => this.rectsCollide(playerAtTarget, p)) ||
             this.enemies.some(
                 (e) =>
                     e !== enemy &&
                     !e.dead &&
                     !e.dying &&
-                    this.rectsCollide(
-                        {
-                            x: targetX,
-                            y: this.player.y,
-                            w: this.player.w,
-                            h: this.player.h,
-                        },
-                        e,
-                    ),
+                    this.rectsCollide(playerAtTarget, e),
             );
 
         if (!blocked) {
@@ -1474,20 +1487,55 @@ export class LostDaysOfSpring {
                 ? this.player.x + this.player.w
                 : this.player.x - enemy.w;
             if (!enemy.dying) {
-                enemy.vx = -enemy.vx;
+                enemy.direction = -enemy.direction;
             }
         }
     }
 
     resolveEnemyCollisionY(enemy) {
+        if (!enemy.playerEnteredFromAbove && !enemy.playerEnteredFromBelow) {
+            return;
+        }
+
+        const targetY = enemy.playerEnteredFromAbove
+            ? enemy.y - this.player.h
+            : enemy.y + enemy.h;
+
+        const playerAtTarget = {
+            x: this.player.x,
+            y: targetY,
+            w: this.player.w,
+            h: this.player.h,
+        };
+
+        const blocked =
+            this.solids.some((p) => this.rectsCollide(playerAtTarget, p)) ||
+            this.enemies.some(
+                (e) =>
+                    e !== enemy &&
+                    !e.dead &&
+                    !e.dying &&
+                    this.rectsCollide(playerAtTarget, e),
+            );
+
+        if (blocked) {
+            enemy.y = enemy.playerEnteredFromAbove
+                ? this.player.y + this.player.h // No room above — snap enemy below player.
+                : this.player.y - enemy.h; // No room below — snap enemy above player.
+            if (!enemy.dying) {
+                enemy.direction = -enemy.direction;
+            }
+        } else {
+            this.player.y = targetY;
+            if (!enemy.playerEnteredFromAbove) {
+                this.player.vy = 0;
+            }
+        }
+
         if (enemy.playerEnteredFromAbove) {
-            this.player.y = enemy.y - this.player.h;
             this.player.vy = -enemy.recoilY;
             this.player.airborne = true;
             this.player.jumpPressedByUser = false;
-        } else if (enemy.playerEnteredFromBelow) {
-            this.player.y = enemy.y + enemy.h;
-            this.player.vy = 0;
         }
     }
 
