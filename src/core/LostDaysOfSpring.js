@@ -3,6 +3,7 @@ import { GameFactory } from "../factories/GameFactory.js";
 import {
     DefaultPlayerRenderer,
     adjustAnimStartTime,
+    PLAYER_DYING_DURATION_MS,
 } from "../renderers/PlayerRenderers.js";
 import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
 import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
@@ -221,17 +222,10 @@ export class LostDaysOfSpring {
             return;
         }
 
-        const isNewLevel = levelId !== this.currentLevelId;
-
-        const isRealLevelTransition =
-            this.currentLevelId !== null && isNewLevel;
-
-        // Clear checkpoint state when transitioning to a different level
-        if (isNewLevel || this.levelComplete) {
+        // Clear checkpoint state after completing the level
+        if (this.levelComplete) {
             this.checkpointRespawn = null;
-            if (isRealLevelTransition || this.levelComplete) {
-                CheckpointStorage.clear();
-            }
+            CheckpointStorage.clear();
         }
 
         // On first load or page reload, restore checkpoint from localStorage
@@ -242,9 +236,9 @@ export class LostDaysOfSpring {
             }
         }
 
-        // Reset death counter on level transition or after completing the level
+        // Reset death counter after completing the level
         // On same-level reload, restore from checkpoint (survives page refresh)
-        if (isNewLevel || this.levelComplete) {
+        if (this.levelComplete) {
             this.deathCount = this.checkpointRespawn?.deathCount ?? 0;
         }
 
@@ -304,9 +298,6 @@ export class LostDaysOfSpring {
         // Reset cannon bullets
         this.cannonBullets = [];
         this.nextCannonBulletId = 0;
-        for (const cannon of this.cannons) {
-            cannon.lastShootTime = now - cannon.shootFrequency + cannon.delay;
-        }
 
         // Reset Camera
         this.resetCameraToPlayerStart();
@@ -322,8 +313,8 @@ export class LostDaysOfSpring {
         this.levelCompleteAt = 0;
         this.gameOver = false;
         this.gameOverAt = 0;
-        // Preserve the timer across deaths — only reset on a new level or after level complete
-        if (isNewLevel || wasLevelComplete) {
+        // Preserve the timer across deaths — only reset after level complete
+        if (wasLevelComplete) {
             this.levelStartAt = now;
             this.totalPausedTime = 0;
             this.accumulatedPlayTime = this.checkpointRespawn?.playTimeMs ?? 0;
@@ -335,6 +326,15 @@ export class LostDaysOfSpring {
         this.isPaused = false;
         this.pauseMenuIndex = 0;
         this.playerAtExit = false;
+    }
+
+    startLevel(now) {
+        this.lastTime = now;
+        this.gameFadeIn.active = true;
+        this.gameFadeIn.startTime = now;
+        for (const cannon of this.cannons) {
+            cannon.lastShootTime = now - cannon.shootFrequency + cannon.delay;
+        }
     }
 
     extractCheckpointItems() {
@@ -495,6 +495,9 @@ export class LostDaysOfSpring {
             carryStartAt: 0,
             frozenForTeleport: false,
             knockbackUntil: 0,
+            dying: false,
+            dyingStartedAt: 0,
+            dead: false,
         });
     }
 
@@ -700,6 +703,7 @@ export class LostDaysOfSpring {
         if (this.pendingReset) {
             this.pendingReset = false;
             this.loadLevel(this.currentLevelId, now);
+            this.startLevel(now);
             return;
         }
 
@@ -713,6 +717,21 @@ export class LostDaysOfSpring {
 
         // Freeze game logic while level-complete or game-over screen is shown
         if (this.levelComplete || this.gameOver) {
+            return;
+        }
+
+        // Player dying — play death animation, then trigger game over
+        if (this.player.dying) {
+            if (now - this.player.dyingStartedAt >= PLAYER_DYING_DURATION_MS) {
+                this.player.dying = false;
+                this.player.dead = true;
+                this.gameOver = true;
+                this.gameOverAt = now;
+                if (this.checkpointRespawn !== null) {
+                    this.snapshotCheckpointState(now);
+                }
+            }
+            this.updateCamera(now);
             return;
         }
 
@@ -1563,16 +1582,13 @@ export class LostDaysOfSpring {
 
     checkPlayerIsDead(now) {
         if (this.player.life <= 0) {
-            this.gameOver = true;
-            this.deathCount++;
-            this.gameOverAt = now;
+            this.player.dying = true;
+            this.player.dyingStartedAt = now;
             this.player.vx = 0;
             this.player.vy = 0;
             this.player.shooting = false;
-
-            if (this.checkpointRespawn !== null) {
-                this.snapshotCheckpointState(now);
-            }
+            this.player.isHit = false;
+            this.deathCount++;
         }
     }
 
@@ -2002,7 +2018,14 @@ export class LostDaysOfSpring {
             }
             return;
         }
-        this.enemyRenderer.draw(this.ctx, e, e.sprite, this.showDebug, now);
+        this.enemyRenderer.draw(
+            this.ctx,
+            e,
+            e.sprite,
+            this.showDebug,
+            now,
+            this.player,
+        );
     }
 
     drawCoin(c) {
@@ -2504,39 +2527,49 @@ export class LostDaysOfSpring {
         );
     }
 
+    drawGameFadeIn(now) {
+        const elapsed = now - this.gameFadeIn.startTime;
+        const progress = Math.min(elapsed / this.gameFadeIn.duration, 1);
+        this.transitionRenderer.drawFadeIn(this.ctx, this.canvas, progress);
+        if (progress >= 1) {
+            this.gameFadeIn.active = false;
+        }
+    }
+
+    loopTitleScreen(now) {
+        this.drawTitleScreen();
+        if (this.titleFadeOut.pending) {
+            this.titleFadeOut.active = true;
+            this.titleFadeOut.startTime = now;
+            this.titleFadeOut.pending = false;
+        }
+        if (this.titleFadeOut.active) {
+            const elapsed = now - this.titleFadeOut.startTime;
+            const progress = Math.min(elapsed / this.titleFadeOut.duration, 1);
+            this.transitionRenderer.drawFadeOut(
+                this.ctx,
+                this.canvas,
+                progress,
+            );
+            if (progress >= 1) {
+                this.titleFadeOut.active = false;
+                this.isTitleScreen = false;
+                this.levelStartAt = now;
+                this.totalPausedTime = 0;
+                this.accumulatedPlayTime =
+                    this.checkpointRespawn?.playTimeMs ?? 0;
+                this.startLevel(now);
+            }
+        }
+    }
+
     loop(now) {
         if (!this.isRunning) {
             return;
         }
 
         if (this.isTitleScreen) {
-            this.drawTitleScreen();
-            if (this.titleFadeOut.pending) {
-                this.titleFadeOut.active = true;
-                this.titleFadeOut.startTime = now;
-                this.titleFadeOut.pending = false;
-            }
-            if (this.titleFadeOut.active) {
-                const elapsed = now - this.titleFadeOut.startTime;
-                const progress = Math.min(
-                    elapsed / this.titleFadeOut.duration,
-                    1,
-                );
-                this.transitionRenderer.drawFadeOut(
-                    this.ctx,
-                    this.canvas,
-                    progress,
-                );
-                if (progress >= 1) {
-                    this.titleFadeOut.active = false;
-                    this.isTitleScreen = false;
-                    this.lastTime = now;
-                    this.levelStartAt = now;
-                    this.totalPausedTime = 0;
-                    this.gameFadeIn.active = true;
-                    this.gameFadeIn.startTime = now;
-                }
-            }
+            this.loopTitleScreen(now);
             window.requestAnimationFrame(this.loop);
             return;
         }
@@ -2559,12 +2592,7 @@ export class LostDaysOfSpring {
         this.updateDebug();
 
         if (this.gameFadeIn.active) {
-            const elapsed = now - this.gameFadeIn.startTime;
-            const progress = Math.min(elapsed / this.gameFadeIn.duration, 1);
-            this.transitionRenderer.drawFadeIn(this.ctx, this.canvas, progress);
-            if (progress >= 1) {
-                this.gameFadeIn.active = false;
-            }
+            this.drawGameFadeIn(now);
         }
 
         if (this.gameOver && now - this.gameOverAt >= this.gameOverDelay) {
@@ -2600,6 +2628,7 @@ export class LostDaysOfSpring {
             !e.repeat &&
             !this.levelComplete &&
             !this.gameOver &&
+            !this.player.dying &&
             !this.mapView &&
             this.isRunning
         ) {
@@ -2655,6 +2684,9 @@ export class LostDaysOfSpring {
         if (this.player.lastHitTime) {
             this.player.lastHitTime += pauseDuration;
         }
+        if (this.player.dyingStartedAt) {
+            this.player.dyingStartedAt += pauseDuration;
+        }
         if (this.player.lastShootTime) {
             this.player.lastShootTime += pauseDuration;
         }
@@ -2675,6 +2707,11 @@ export class LostDaysOfSpring {
         for (const cannon of this.cannons) {
             cannon.lastShootTime += pauseDuration;
         }
+        for (const e of this.elevators) {
+            if (e.idleUntil) {
+                e.idleUntil += pauseDuration;
+            }
+        }
         for (const e of this.enemies) {
             if (e.dyingStartedAtMs) {
                 e.dyingStartedAtMs += pauseDuration;
@@ -2689,6 +2726,9 @@ export class LostDaysOfSpring {
             }
         }
         adjustAnimStartTime(pauseDuration);
+        if (this.gameFadeIn.active) {
+            this.gameFadeIn.startTime += pauseDuration;
+        }
     }
 
     closePauseMenu() {
@@ -2714,9 +2754,6 @@ export class LostDaysOfSpring {
             this.deathCount = 0;
             this.accumulatedPlayTime = 0;
             CheckpointStorage.clear();
-            for (const cp of this.checkpoints) {
-                cp.activated = false;
-            }
         } else {
             // Return to main screen — restore time and deaths from checkpoint
             this.accumulatedPlayTime = this.checkpointRespawn?.playTimeMs ?? 0;
@@ -2725,6 +2762,7 @@ export class LostDaysOfSpring {
         }
 
         this.loadLevel(this.currentLevelId);
+        this.startLevel(performance.now());
         this.start();
     }
 

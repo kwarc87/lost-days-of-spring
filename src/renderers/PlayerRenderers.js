@@ -80,7 +80,16 @@ const ANIMS = {
         offsetX: -10,
         loop: true,
     },
+    die: {
+        src: "textures/player/pink/die.png",
+        frames: [0, 1, 2],
+        fps: 6,
+        loop: false,
+    },
 };
+
+export const PLAYER_DYING_DURATION_MS =
+    (ANIMS.die.frames.length / ANIMS.die.fps) * 1000;
 
 import { getImg } from "../utils/imgCache.js";
 
@@ -104,6 +113,10 @@ function getOffCanvas(w, h) {
 }
 
 function getAnimKey(player) {
+    if (player.dying || player.dead) {
+        return "die";
+    }
+
     if (player.posture === "crouch") {
         if (Math.abs(player.vx) > 0.5) {
             return player.shooting ? "crouchShoot" : "crouch";

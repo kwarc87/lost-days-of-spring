@@ -76,7 +76,7 @@ function drawDamaged(ctx, img, cfg, f, drawX, drawY) {
     blit(ctx, img, cfg, f, drawX, drawY);
 }
 
-function drawEnemy(ctx, enemy, cfg, debug, now, onAfterDraw) {
+function drawEnemy(ctx, enemy, cfg, debug, now, player, onAfterDraw) {
     const img = getImg(cfg.src);
     if (!img?.complete || !img.naturalWidth) {
         return;
@@ -103,6 +103,12 @@ function drawEnemy(ctx, enemy, cfg, debug, now, onAfterDraw) {
     }
     if (enemy.dirX * enemy.direction > 0) {
         ctx.scale(-1, 1);
+    }
+
+    if (enemy.startX === enemy.targetX) {
+        if (player.x + player.w / 2 > enemy.x + enemy.w / 2) {
+            ctx.scale(-1, 1);
+        }
     }
 
     if (enemy.isDamaged || enemy.dying) {
@@ -161,8 +167,8 @@ function drawSlimeMouth(ctx, drawX, drawY, f, secondaryColor) {
     ctx.fillRect(bx + 3, by + S, 7 * S, S);
 }
 
-function drawSlimeEnemy(ctx, enemy, debug, now) {
-    drawEnemy(ctx, enemy, CFG1, debug, now, (ctx, drawX, drawY, f) => {
+function drawSlimeEnemy(ctx, enemy, debug, now, player) {
+    drawEnemy(ctx, enemy, CFG1, debug, now, player, (ctx, drawX, drawY, f) => {
         drawSlimeEyes(ctx, drawX, drawY, f, enemy.mainColor);
         drawSlimeMouth(ctx, drawX, drawY, f, enemy.secondaryColor);
     });
@@ -184,8 +190,8 @@ function drawEvilEyeEye(ctx, drawX, drawY, f, eyeColor) {
     ctx.fillRect(bx, by, w, h);
 }
 
-function drawEvilEyeEnemy(ctx, enemy, debug, now) {
-    drawEnemy(ctx, enemy, CFG2, debug, now, (ctx, drawX, drawY, f) => {
+function drawEvilEyeEnemy(ctx, enemy, debug, now, player) {
+    drawEnemy(ctx, enemy, CFG2, debug, now, player, (ctx, drawX, drawY, f) => {
         drawEvilEyeEye(ctx, drawX, drawY, f, enemy.mainColor);
     });
 }
@@ -204,13 +210,14 @@ export const DefaultEnemyRenderer = {
         type = "slime",
         debug = false,
         now = performance.now(),
+        player = {},
     ) => {
         switch (type) {
             case "evilEye":
-                drawEvilEyeEnemy(ctx, enemy, debug, now);
+                drawEvilEyeEnemy(ctx, enemy, debug, now, player);
                 break;
             default:
-                drawSlimeEnemy(ctx, enemy, debug, now);
+                drawSlimeEnemy(ctx, enemy, debug, now, player);
         }
     },
 };
