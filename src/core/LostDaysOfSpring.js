@@ -242,7 +242,8 @@ export class LostDaysOfSpring {
         if (this.levelComplete) {
             this.deathCount = 0;
         } else {
-            this.deathCount = this.checkpointRespawn?.deathCount ?? this.deathCount;
+            this.deathCount =
+                this.checkpointRespawn?.deathCount ?? this.deathCount;
         }
 
         this.currentLevelId = levelId;
@@ -625,6 +626,15 @@ export class LostDaysOfSpring {
                 continue;
             }
             if (this.rectsCollide(futurePlayer, p)) {
+                return false;
+            }
+        }
+
+        for (const e of this.enemies) {
+            if (e.dead || e.dying) {
+                continue;
+            }
+            if (this.rectsCollide(futurePlayer, e)) {
                 return false;
             }
         }
@@ -1462,6 +1472,7 @@ export class LostDaysOfSpring {
                     now,
                     enemy,
                     enemy.playerEnteredFromAbove,
+                    enemy.playerEnteredFromBelow,
                 );
                 break;
             }
@@ -1549,27 +1560,34 @@ export class LostDaysOfSpring {
             }
         } else {
             this.player.y = targetY;
-            if (!enemy.playerEnteredFromAbove) {
-                this.player.vy = 0;
-            }
         }
 
-        if (enemy.playerEnteredFromAbove) {
+        if (enemy.playerEnteredFromAbove && !blocked) {
             this.player.vy = -enemy.recoilY;
             this.player.airborne = true;
             this.player.jumpPressedByUser = false;
         }
+
+        if (enemy.playerEnteredFromBelow && this.player.vy < 0) {
+            this.player.vy = 0;
+        }
     }
 
-    applyDamageToPlayer(now, source, hitFromAbove = false) {
+    applyDamageToPlayer(
+        now,
+        source,
+        hitFromAbove = false,
+        hitFromBelow = false,
+    ) {
         this.player.life -= source.damage;
         this.player.lastHitTime = now;
         this.player.isHit = true;
         this.player.knockbackUntil = now + this.player.knockbackControlLock;
 
-        const recoilXForce = hitFromAbove
-            ? source.recoilX / 1.5
-            : source.recoilX;
+        const recoilXForce =
+            hitFromAbove || hitFromBelow
+                ? source.recoilX / 1.5
+                : source.recoilX;
         const recoilYForce = hitFromAbove
             ? source.recoilY * 1.5
             : source.recoilY;
@@ -1578,7 +1596,7 @@ export class LostDaysOfSpring {
         const hitFromLeft =
             this.player.x + this.player.w / 2 < source.x + source.w / 2;
         this.player.vx = hitFromLeft ? -recoilXForce : recoilXForce;
-        this.player.vy = -recoilYForce;
+        this.player.vy = hitFromBelow ? 0 : -recoilYForce;
 
         this.checkPlayerIsDead(now);
     }
