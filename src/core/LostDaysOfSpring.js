@@ -1078,6 +1078,32 @@ export class LostDaysOfSpring {
                 }
             }
         }
+
+        // Resolve player against enemies on the X axis so that large knockback
+        // velocities cannot overshoot the player into a nearby enemy.
+        for (const e of this.enemies) {
+            if (e.dead || e.dying) {
+                continue;
+            }
+            if (!this.rectsCollide(this.player, e)) {
+                continue;
+            }
+
+            const wasLeft = prevX + this.player.w <= e.x;
+            const wasRight = prevX >= e.x + e.w;
+
+            if (wasLeft) {
+                this.player.x = e.x - this.player.w;
+                this.player.vx = 0;
+                this.player.carryVx = 0;
+                this.player.carryVxInitial = 0;
+            } else if (wasRight) {
+                this.player.x = e.x + e.w;
+                this.player.vx = 0;
+                this.player.carryVx = 0;
+                this.player.carryVxInitial = 0;
+            }
+        }
     }
 
     // Move player along the Y axis, resolve platform collisions, and check fall-off
@@ -1458,7 +1484,7 @@ export class LostDaysOfSpring {
             }
         }
 
-        // Pass 2: resolve against the first colliding enemy only.
+        // Pass 2: damage from the first colliding enemy, overlap resolution for all.
         for (const enemy of this.enemies) {
             if (enemy.dead || enemy.dying) {
                 continue;
@@ -1478,10 +1504,10 @@ export class LostDaysOfSpring {
             }
 
             // Cooldown active or enemy is dying: resolve overlap without damage.
+            // No break — all colliding enemies are resolved so sandwiched
+            // collisions (player between two enemies) are handled correctly.
             this.resolveEnemyCollisionX(enemy);
             this.resolveEnemyCollisionY(enemy);
-
-            break;
         }
     }
 
@@ -1514,8 +1540,10 @@ export class LostDaysOfSpring {
 
         if (!blocked) {
             this.player.x = targetX;
-        } else {
+        } else if (enemy.dirX !== 0) {
             // No room for player — snap enemy clear and reverse.
+            // Skip for vertical-only enemies (dirX === 0): snapping their X or
+            // reversing direction would corrupt their vertical patrol.
             enemy.x = enemy.playerEnteredFromLeft
                 ? this.player.x + this.player.w
                 : this.player.x - enemy.w;
@@ -1551,14 +1579,17 @@ export class LostDaysOfSpring {
                     this.rectsCollide(playerAtTarget, e),
             );
 
-        if (blocked) {
+        if (blocked && enemy.dirY !== 0) {
+            // No room for player — snap enemy clear and reverse.
+            // Skip for horizontal-only enemies (dirY === 0): snapping their Y or
+            // reversing direction would corrupt their horizontal patrol.
             enemy.y = enemy.playerEnteredFromAbove
                 ? this.player.y + this.player.h // No room above — snap enemy below player.
                 : this.player.y - enemy.h; // No room below — snap enemy above player.
             if (!enemy.dying) {
                 enemy.direction = -enemy.direction;
             }
-        } else {
+        } else if (!blocked) {
             this.player.y = targetY;
         }
 
@@ -1568,7 +1599,7 @@ export class LostDaysOfSpring {
             this.player.jumpPressedByUser = false;
         }
 
-        if (enemy.playerEnteredFromBelow && this.player.vy < 0) {
+        if (enemy.playerEnteredFromBelow && !blocked && this.player.vy < 0) {
             this.player.vy = 0;
         }
     }
