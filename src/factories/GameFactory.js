@@ -490,6 +490,19 @@ export const GameFactory = {
             h: 49,
             ...rest,
         }),
+        terminalDirection: ({ x, y, direction = "up", ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 288,
+            cordY: 192,
+            w: 24,
+            h: 28,
+            direction,
+            ...rest,
+        }),
+        terminal: ({ x, y, ...rest } = {}) =>
+            GameFactory.environment.terminalDirection({ x, y, ...rest }),
         plant001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -1130,6 +1143,18 @@ export const GameFactory = {
                 }),
             checkpointFront: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.checkpointFront({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            terminalDirection: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.terminalDirection({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            terminal: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.terminal({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID,
                     ...rest,

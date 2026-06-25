@@ -198,10 +198,12 @@ function drawEvilEyeEnemy(ctx, enemy, debug, now, player) {
 
 export const DefaultEnemyRenderer = {
     drawMapEnemy: (ctx, enemy, type = "slime") => {
+        const now = Date.now();
+        const dummyPlayer = { x: 0, w: 0 };
         if (type === "evilEye") {
-            drawEvilEyeEnemy(ctx, enemy, true);
+            drawEvilEyeEnemy(ctx, enemy, true, now, dummyPlayer);
         } else {
-            drawSlimeEnemy(ctx, enemy, true);
+            drawSlimeEnemy(ctx, enemy, true, now, dummyPlayer);
         }
     },
     draw: (

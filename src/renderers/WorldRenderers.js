@@ -16,6 +16,68 @@ function drawLayer(ctx, img, cw, ch, cameraX, parallax) {
     }
 }
 
+const TERMINAL_ARROW_COLOR = "#72eb84";
+const TERMINAL_ARROW_PX = GameFactory.SCALE;
+const TERMINAL_ARROW_OFFSET_X = 4 * GameFactory.SCALE;
+const TERMINAL_ARROW_OFFSET_Y = 4 * GameFactory.SCALE;
+
+const TERMINAL_ARROWS = {
+    up: [
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0, 0],
+        [0, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+    down: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0, 0],
+        [0, 0, 0, 1, 0, 0, 0, 0],
+    ],
+    left: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1, 0],
+        [0, 1, 1, 0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+    right: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 1, 1, 0],
+        [0, 1, 1, 1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 0, 1, 1, 0],
+        [0, 0, 0, 0, 0, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+};
+
+function drawTerminalArrow(ctx, item) {
+    const pattern = TERMINAL_ARROWS[item.direction];
+    if (!pattern) {
+        return;
+    }
+    const baseX = Math.round(item.x) + TERMINAL_ARROW_OFFSET_X;
+    const baseY = Math.round(item.y) + TERMINAL_ARROW_OFFSET_Y;
+    const px = TERMINAL_ARROW_PX;
+    ctx.fillStyle = TERMINAL_ARROW_COLOR;
+    for (let row = 0; row < pattern.length; row++) {
+        for (let col = 0; col < pattern[row].length; col++) {
+            if (pattern[row][col]) {
+                ctx.fillRect(baseX + col * px, baseY + row * px, px, px);
+            }
+        }
+    }
+}
+
 // Draws a single environment item in world space
 function drawEnvironmentItem(ctx, item) {
     const prev = ctx.imageSmoothingEnabled;
@@ -104,7 +166,10 @@ export const DefaultWorldRenderer = {
             this.drawSolidBackground(ctx, item, item.solidFill);
             return;
         }
-        return drawEnvironmentItem(ctx, item);
+        drawEnvironmentItem(ctx, item);
+        if (item.direction) {
+            drawTerminalArrow(ctx, item);
+        }
     },
     drawBackground(ctx, canvas, camera) {
         const cw = canvas.width;
