@@ -679,6 +679,56 @@ export const GameFactory = {
             h: 16,
             ...rest,
         }),
+        wallBrickLeft: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 9,
+            cordY: 356,
+            w: 55,
+            h: 64,
+            ...rest,
+        }),
+        wallBrickRight: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 112,
+            cordY: 356,
+            w: 55,
+            h: 64,
+            ...rest,
+        }),
+        wallBrickVerticalPattern: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 80,
+            cordY: 372,
+            w: 16,
+            h: 64,
+            ...rest,
+        }),
+        wallBrickLeftSquare: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 16,
+            cordY: 411,
+            w: 48,
+            h: 24,
+            ...rest,
+        }),
+        wallBrickRightSquare: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 112,
+            cordY: 411,
+            w: 48,
+            h: 24,
+            ...rest,
+        }),
         wallSharpRightBottom: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -715,6 +765,16 @@ export const GameFactory = {
             cordY: 144,
             w: 16,
             h: 16,
+            ...rest,
+        }),
+        wallPipe: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 336,
+            cordY: 192,
+            w: 32,
+            h: 32,
             ...rest,
         }),
     },
@@ -1291,6 +1351,42 @@ export const GameFactory = {
                 }),
             wallInside: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.wallInside({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallBrickLeft: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallBrickLeft({
+                    x: x * GameFactory.GRID - 21,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallBrickRight: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallBrickRight({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallBrickVerticalPattern: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallBrickVerticalPattern({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallBrickLeftSquare: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallBrickLeftSquare({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallBrickRightSquare: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallBrickRightSquare({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            wallPipe: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.wallPipe({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID,
                     ...rest,
