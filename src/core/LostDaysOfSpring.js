@@ -129,7 +129,7 @@ export class LostDaysOfSpring {
             lookAheadYTargetDownCrouch: 216,
 
             // culling
-            margin: GameFactory.GRID * 10,
+            margin: GameFactory.GRID * 5,
         };
 
         // ====== PHYSICS ======
@@ -2007,8 +2007,8 @@ export class LostDaysOfSpring {
     }
 
     isVisibleInCamera(obj) {
-        const w = obj.w ?? 0;
-        const h = obj.h ?? 0;
+        const w = (obj.w ?? 0) * (obj.repeatX ?? 1);
+        const h = (obj.h ?? 0) * (obj.repeatY ?? 1);
         return !(
             obj.x + w < this.camera.x - this.camera.margin ||
             obj.x > this.camera.x + this.camera.width + this.camera.margin ||

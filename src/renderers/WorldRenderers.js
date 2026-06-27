@@ -91,11 +91,12 @@ function drawEnvironmentItem(ctx, item) {
 
     const srcX = item.cordX ?? 0;
     const srcY = item.cordY ?? 0;
-    const srcW = item.w ?? img.naturalWidth;
-    const srcH = item.h ?? img.naturalHeight;
 
-    const drawW = Math.round(srcW * GameFactory.SCALE);
-    const drawH = Math.round(srcH * GameFactory.SCALE);
+    // w/h are stored as world pixels (pre-scaled); derive source dims by dividing back.
+    const drawW = Math.round(item.w);
+    const drawH = Math.round(item.h);
+    const srcW = Math.round(drawW / GameFactory.SCALE);
+    const srcH = Math.round(drawH / GameFactory.SCALE);
     const cols = item.repeatX ?? 1;
     const rows = item.repeatY ?? 1;
     const contrast = item.contrast ?? 1;
