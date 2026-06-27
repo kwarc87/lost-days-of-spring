@@ -90,6 +90,7 @@ export class LostDaysOfSpring {
         this.gameOverDelay = 15000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
         this.elevatorSpeedOutsideOfTheCamera = 100;
+        this.elevatorCameraMargin = GameFactory.GRID * 15;
         this.mapDiscovery = null;
 
         // ====== PLAYER (Base static attributes set by factory) ======
@@ -213,6 +214,7 @@ export class LostDaysOfSpring {
         this.drawSpike = this.withCameraCulling(this.drawSpike);
         this.drawHeart = this.withCameraCulling(this.drawHeart);
         this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
+        this.drawExit = this.withCameraCulling(this.drawExit);
     }
 
     loadLevel(levelId, now = performance.now()) {
@@ -1243,7 +1245,10 @@ export class LostDaysOfSpring {
                 continue;
             }
 
-            const offScreen = !this.isVisibleInCamera(e);
+            const offScreen = !this.isVisibleInCamera(
+                e,
+                this.elevatorCameraMargin,
+            );
             const speed = offScreen
                 ? this.elevatorSpeedOutsideOfTheCamera
                 : e.speed;
@@ -2006,14 +2011,15 @@ export class LostDaysOfSpring {
         this.clampCameraToWorld();
     }
 
-    isVisibleInCamera(obj) {
+    isVisibleInCamera(obj, margin) {
         const w = (obj.w ?? 0) * (obj.repeatX ?? 1);
         const h = (obj.h ?? 0) * (obj.repeatY ?? 1);
+        const cameraMargin = margin ?? this.camera.margin;
         return !(
-            obj.x + w < this.camera.x - this.camera.margin ||
-            obj.x > this.camera.x + this.camera.width + this.camera.margin ||
-            obj.y + h < this.camera.y - this.camera.margin ||
-            obj.y > this.camera.y + this.camera.height + this.camera.margin
+            obj.x + w < this.camera.x - cameraMargin ||
+            obj.x > this.camera.x + this.camera.width + cameraMargin ||
+            obj.y + h < this.camera.y - cameraMargin ||
+            obj.y > this.camera.y + this.camera.height + cameraMargin
         );
     }
 
