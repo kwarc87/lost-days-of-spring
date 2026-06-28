@@ -783,7 +783,7 @@ export class LostDaysOfSpring {
 
         this.updateElevators(now);
 
-        this.movePlayerX();
+        this.movePlayerX(now);
         this.movePlayerY(now);
 
         this.updateEnemies(now);
@@ -1058,7 +1058,7 @@ export class LostDaysOfSpring {
     }
 
     // Move player along the X axis and resolve platform collisions
-    movePlayerX() {
+    movePlayerX(now) {
         const prevX = this.player.prevX ?? this.player.x;
 
         this.player.x += this.player.vx + this.player.carryVx;
@@ -1129,6 +1129,14 @@ export class LostDaysOfSpring {
                 this.player.vx = 0;
                 this.player.carryVx = 0;
                 this.player.carryVxInitial = 0;
+            }
+
+            if (wasLeft || wasRight) {
+                const cooldownIsActive =
+                    now - this.player.lastHitTime < this.player.hitCooldown;
+                if (!cooldownIsActive) {
+                    this.applyDamageToPlayer(now, e);
+                }
             }
         }
     }
@@ -1404,14 +1412,23 @@ export class LostDaysOfSpring {
             const wouldHitPlatform = this.platforms.some((p) =>
                 this.rectsCollide(nextPlayer, p),
             );
-            if (wouldHitPlatform && actualMoveY < 0) {
-                // Vertical elevator is pushing the player into a ceiling:
-                // reverse the elevator. movePlayerY cannot fix this because prevY
-                // was saved before the co-move, so wasAbove/wasBelow tests would fail.
-                // When moving downward, movePlayerY handles landing normally — no reversal needed.
+            const blockingEnemy = this.enemies.find(
+                (enemy) =>
+                    !enemy.dead &&
+                    !enemy.dying &&
+                    this.rectsCollide(nextPlayer, enemy),
+            );
+            if ((wouldHitPlatform || blockingEnemy) && actualMoveY < 0) {
                 e.x = previousX;
                 e.y = previousY;
                 e.direction = -e.direction;
+                if (blockingEnemy) {
+                    const cooldownIsActive =
+                        now - this.player.lastHitTime < this.player.hitCooldown;
+                    if (!cooldownIsActive) {
+                        this.applyDamageToPlayer(now, blockingEnemy);
+                    }
+                }
             } else {
                 this.player.x += actualMoveX;
                 this.player.y += actualMoveY;
@@ -2403,6 +2420,8 @@ export class LostDaysOfSpring {
             this.currentLevelEnemiesCount,
             playTimeMs,
             this.deathCount,
+            this.player.artifactsCount,
+            this.currentLevelArtifactsCount,
         );
     }
 
@@ -2430,6 +2449,8 @@ export class LostDaysOfSpring {
             remaining,
             playTimeMs,
             this.deathCount,
+            this.player.artifactsCount,
+            this.currentLevelArtifactsCount,
         );
     }
 

@@ -26,12 +26,16 @@ export const DefaultGameOverRenderer = {
         remaining,
         playTime,
         deathCount,
+        artifactsCount,
+        totalArtifacts,
     ) {
         const w = canvas.width;
         const h = canvas.height;
 
         const coinCountText = `${coinsCount} / ${totalCoins}`;
         const splinterCountText = `${splintersCount} / ${totalSplinters}`;
+        const artifactCountText = `${artifactsCount ?? 0} / ${totalArtifacts ?? 0}`;
+        const hasArtifacts = (totalArtifacts ?? 0) > 0;
         const enemiesText = MESSAGES.STATS.ENEMIES_TEXT(
             enemiesCount,
             totalEnemies,
@@ -62,6 +66,10 @@ export const DefaultGameOverRenderer = {
             ICON_SIZE +
             ICON_GAP +
             Math.ceil(ctx.measureText(splinterCountText).width);
+        const artifactRowW =
+            ICON_SIZE +
+            ICON_GAP +
+            Math.ceil(ctx.measureText(artifactCountText).width);
 
         const panelW =
             Math.max(
@@ -70,6 +78,7 @@ export const DefaultGameOverRenderer = {
                 subtitle2W,
                 coinRowW,
                 splinterRowW,
+                ...(hasArtifacts ? [artifactRowW] : []),
                 Math.ceil(ctx.measureText(enemiesText).width),
                 Math.ceil(ctx.measureText(deathsText).width),
                 Math.ceil(ctx.measureText(timeText).width),
@@ -88,6 +97,7 @@ export const DefaultGameOverRenderer = {
             ICON_SIZE +
             GAP +
             ICON_SIZE +
+            (hasArtifacts ? GAP + ICON_SIZE : 0) +
             GAP +
             LINE_H +
             GAP +
@@ -170,9 +180,36 @@ export const DefaultGameOverRenderer = {
             splinterRowY + textOffY,
         );
 
+        let artifactBaseY = splinterRowY + ICON_SIZE;
+        if (hasArtifacts) {
+            const artifactRowY = artifactBaseY + GAP;
+            const artifactRowX = Math.round(w / 2 - artifactRowW / 2);
+            DefaultCollectibleRenderer.drawArtifact(
+                ctx,
+                {
+                    x: artifactRowX,
+                    y: artifactRowY,
+                    w: ICON_SIZE,
+                    h: ICON_SIZE,
+                    cordX: 400,
+                    cordY: 48,
+                },
+                false,
+                0,
+            );
+            ctx.fillStyle = MESSAGES.STATS.ARTIFACTS_COLOR;
+            ctx.textAlign = "left";
+            ctx.fillText(
+                artifactCountText,
+                artifactRowX + ICON_SIZE + ICON_GAP,
+                artifactRowY + textOffY,
+            );
+            artifactBaseY = artifactRowY + ICON_SIZE;
+        }
+
         ctx.textAlign = "center";
 
-        const enemiesRowY = splinterRowY + ICON_SIZE + GAP;
+        const enemiesRowY = artifactBaseY + GAP;
         ctx.fillStyle = MESSAGES.STATS.ENEMIES_COLOR;
         ctx.fillText(enemiesText, w / 2, enemiesRowY);
 
