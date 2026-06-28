@@ -23,6 +23,10 @@ export const MESSAGES = {
             text: "You didn't get enough splinters",
             color: "#5ce8d0",
         },
+        NOT_ENOUGH_ARTIFACTS: {
+            text: "You didn't get enough artifacts",
+            color: "#4772da",
+        },
         COMPLETION_REQUIRED: {
             text: "to complete the level.",
             color: "#ffffff",
@@ -34,6 +38,7 @@ export const MESSAGES = {
         COINS_COLOR: "#f5c542",
         ENEMIES_COLOR: "#e85454",
         SPLINTERS_COLOR: "#5ce8d0",
+        ARTIFACTS_COLOR: "#4772da",
         COUNTDOWN_COLOR: "#7a8a99",
         TIME_COLOR: "#a0c4ff",
         COINS_TEXT: (count, total) => `Coins: ${count} / ${total}`,
@@ -101,8 +106,10 @@ export const MESSAGES = {
                 {
                     segments: [
                         { text: "coins", color: "#f5c542" },
-                        { text: " and ", color: "#ffffff" },
+                        { text: ", ", color: "#ffffff" },
                         { text: "splinters", color: "#5ce8d0" },
+                        { text: " and ", color: "#ffffff" },
+                        { text: "artifacts", color: "#4772da" },
                         { text: ". Go ahead Colin!", color: "#ffffff" },
                     ],
                 },
@@ -184,8 +191,12 @@ export const MESSAGES = {
     },
 };
 
-export function getExitLevelLines(hasEnoughCoins, hasEnoughSplinters) {
-    if (hasEnoughCoins && hasEnoughSplinters) {
+export function getExitLevelLines(
+    hasEnoughCoins,
+    hasEnoughSplinters,
+    hasEnoughArtifacts,
+) {
+    if (hasEnoughCoins && hasEnoughSplinters && hasEnoughArtifacts) {
         return MESSAGES.EXIT.READY;
     }
     const lines = [];
@@ -194,6 +205,9 @@ export function getExitLevelLines(hasEnoughCoins, hasEnoughSplinters) {
     }
     if (!hasEnoughSplinters) {
         lines.push(MESSAGES.EXIT.NOT_ENOUGH_SPLINTERS);
+    }
+    if (!hasEnoughArtifacts) {
+        lines.push(MESSAGES.EXIT.NOT_ENOUGH_ARTIFACTS);
     }
     lines.push(MESSAGES.EXIT.COMPLETION_REQUIRED);
     return lines;

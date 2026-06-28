@@ -46,6 +46,33 @@ const HEART_COLORS = [
 
 const HEART_SCALE = 3;
 
+const WEAPON_OUTLINE = 3;
+const WEAPON_OUTLINE_COLOR = "#51b9db";
+const WEAPON_OUTLINE_OFFSETS = [
+    [-WEAPON_OUTLINE, 0],
+    [WEAPON_OUTLINE, 0],
+    [0, -WEAPON_OUTLINE],
+    [0, WEAPON_OUTLINE],
+    [-WEAPON_OUTLINE, -WEAPON_OUTLINE],
+    [WEAPON_OUTLINE, -WEAPON_OUTLINE],
+    [-WEAPON_OUTLINE, WEAPON_OUTLINE],
+    [WEAPON_OUTLINE, WEAPON_OUTLINE],
+];
+
+let _woc = null,
+    _woctx = null;
+function getWeaponOffCanvas(w, h) {
+    if (!_woc) {
+        _woc = document.createElement("canvas");
+        _woctx = _woc.getContext("2d");
+    }
+    if (_woc.width !== w || _woc.height !== h) {
+        _woc.width = w;
+        _woc.height = h;
+    }
+    return [_woc, _woctx];
+}
+
 // Floating bob animation: ±4px sine wave, staggered per collectible ID
 const HEART_BOB_PERIOD = 1800; // ms per full cycle
 const HEART_BOB_AMPLITUDE = 4;
@@ -161,19 +188,26 @@ export const DefaultCollectibleRenderer = {
                 Math.floor(now / WEAPON_FRAME_MS) % WEAPON_FRAMES.length
             ];
 
+        const dw = WEAPON_SW * WEAPON_SCALE;
+        const dh = WEAPON_SH * WEAPON_SCALE;
+        const dx = Math.round(collectible.x);
+        const dy = Math.round(collectible.y);
+
+        const [oc, octx] = getWeaponOffCanvas(dw, dh);
+        octx.clearRect(0, 0, dw, dh);
+        octx.imageSmoothingEnabled = false;
+        octx.drawImage(img, sx, sy, WEAPON_SW, WEAPON_SH, 0, 0, dw, dh);
+        octx.globalCompositeOperation = "source-atop";
+        octx.fillStyle = WEAPON_OUTLINE_COLOR;
+        octx.fillRect(0, 0, dw, dh);
+        octx.globalCompositeOperation = "source-over";
+
         ctx.save();
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(
-            img,
-            sx,
-            sy,
-            WEAPON_SW,
-            WEAPON_SH,
-            Math.round(collectible.x),
-            Math.round(collectible.y),
-            WEAPON_SW * WEAPON_SCALE,
-            WEAPON_SH * WEAPON_SCALE,
-        );
+        for (const [ox, oy] of WEAPON_OUTLINE_OFFSETS) {
+            ctx.drawImage(oc, dx + ox, dy + oy);
+        }
+        ctx.drawImage(img, sx, sy, WEAPON_SW, WEAPON_SH, dx, dy, dw, dh);
         ctx.restore();
     },
     drawMapCoin: (ctx, collectible) => {
@@ -253,5 +287,59 @@ export const DefaultCollectibleRenderer = {
         // Lower V — narrowing to tip
         ctx.fillRect(x + 4, y + 14, 16, 6);
         ctx.fillRect(x + 8, y + 20, 8, 4);
+    },
+
+    drawArtifact: (
+        ctx,
+        collectible,
+        showDebug = false,
+        now = performance.now(),
+    ) => {
+        const img = getImg("textures/icons.png");
+        const sx = collectible.cordX ?? 0;
+        const sy = collectible.cordY ?? 0;
+        const sw = 16;
+        const sh = 16;
+        const dw = collectible.w ?? 48;
+        const dh = collectible.h ?? 48;
+        const bobY = getHeartBobOffset(collectible, now);
+
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(
+            img,
+            sx,
+            sy,
+            sw,
+            sh,
+            Math.round(collectible.x),
+            Math.round(collectible.y) + bobY,
+            dw,
+            dh,
+        );
+        ctx.restore();
+
+        if (showDebug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+                collectible.x,
+                collectible.y,
+                collectible.w,
+                collectible.h,
+            );
+            ctx.restore();
+        }
+    },
+
+    drawMapArtifact: (ctx, collectible) => {
+        ctx.fillStyle = "#4772da";
+        ctx.fillRect(
+            collectible.x,
+            collectible.y,
+            collectible.w,
+            collectible.h,
+        );
     },
 };

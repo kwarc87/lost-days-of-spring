@@ -60,10 +60,16 @@
             const levelParam = parseInt(params.get("level"), 10);
             const startLevel = levelParam === 2 ? 2 : 1;
 
+            const initialHpParam = Number(params.get("initialHp"));
+            const initialHp =
+                Number.isFinite(initialHpParam) && initialHpParam > 0
+                    ? initialHpParam
+                    : 6;
+
             Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(
                 () => {
                     document.getElementById("loading").classList.add("done");
-                    const game = new LostDaysOfSpring("game", debug);
+                    const game = new LostDaysOfSpring("game", debug, initialHp);
                     game.loadLevel(startLevel);
                     game.start();
                 },

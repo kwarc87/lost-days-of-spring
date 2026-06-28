@@ -49,6 +49,7 @@ export const GameFactory = {
         lastGroundType: null,
         coinsCount: 0,
         splintersCount: 0,
+        artifactsCount: 0,
         facing: "right",
         shooting: false,
         lastShootTime: 0,
@@ -340,6 +341,18 @@ export const GameFactory = {
         collected: false,
         ...rest,
     }),
+    artifact: ({ id, x, y, cordX = 0, cordY = 0, ...rest } = {}) =>
+        GameFactory.collectible({
+            id,
+            x,
+            y,
+            w: 48,
+            h: 48,
+            url: "textures/icons.png",
+            cordX: cordX * 16,
+            cordY: cordY * 16,
+            ...rest,
+        }),
     weapon: (overrides = {}) => ({
         id: 1,
         color: "#ffc300",
@@ -1118,6 +1131,15 @@ export const GameFactory = {
                 y: y * GameFactory.GRID + 6,
                 w: 36,
                 h: 36,
+                ...rest,
+            }),
+        artifact: ({ id, x, y, cordX, cordY, ...rest } = {}) =>
+            GameFactory.artifact({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                cordX,
+                cordY,
                 ...rest,
             }),
         weaponUpgrades: ({ id, x, y, ...rest } = {}) =>

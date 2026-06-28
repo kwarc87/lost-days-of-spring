@@ -750,16 +750,118 @@ export const LEVEL_001 = {
         GameFactory.grid.cracks({ id: 2029, x: 305, y: 117, w: 2, h: 4, layout: "cracksRightCap" }),
     ],
     collectibles: {
+        artifacts: [
+            GameFactory.grid.artifact({ id: 1, x: 24, y: 140, cordX: 25, cordY: 3 }), //disk
+            GameFactory.grid.artifact({ id: 2, x: 88, y: 133, cordX: 23, cordY: 5 }), //cassette blue
+            GameFactory.grid.artifact({ id: 3, x: 167.5, y: 137.5, cordX: 11, cordY: 2 }), //eight ball
+            GameFactory.grid.artifact({ id: 4, x: 283.5, y: 140, cordX: 24, cordY: 2 }), //lighter
+            GameFactory.grid.artifact({ id: 5, x: 447.5, y: 141, cordX: 1, cordY: 1 }), //basketball
+            GameFactory.grid.artifact({ id: 6, x: 515.5, y: 138.5, cordX: 2, cordY: 3 }), //key
+            GameFactory.grid.artifact({ id: 7, x: 496, y: 119, cordX: 0, cordY: 0 }), //CD
+            GameFactory.grid.artifact({ id: 8, x: 473, y: 115, cordX: 2, cordY: 4 }), //vinyl blue
+            GameFactory.grid.artifact({ id: 9, x: 8.5, y: 92.5, cordX: 8, cordY: 7 }), //keyboard
+            GameFactory.grid.artifact({ id: 10, x: 516.5, y: 89.5, cordX: 9, cordY: 2 }), //ping pong
+            GameFactory.grid.artifact({ id: 11, x: 501.5, y: 96.5, cordX: 16, cordY: 2 }), //binoculars
+            GameFactory.grid.artifact({ id: 12, x: 518.5, y: 112, cordX: 15, cordY: 6 }), //dice
+            GameFactory.grid.artifact({ id: 13, x: 442.5, y: 112, cordX: 2, cordY: 11 }), //hockey stick
+            GameFactory.grid.artifact({ id: 14, x: 467.5, y: 87.5, cordX: 24, cordY: 4 }), //headphones 001
+            GameFactory.grid.artifact({ id: 15, x: 375, y: 101.5, cordX: 23, cordY: 13 }), //watch 001
+            GameFactory.grid.artifact({ id: 16, x: 386, y: 88, cordX: 3, cordY: 0 }), //toilet paper
+            GameFactory.grid.artifact({ id: 17, x: 388, y: 95, cordX: 24, cordY: 13 }), //gameboy
+            GameFactory.grid.artifact({ id: 18, x: 324.4, y: 110, cordX: 0, cordY: 3 }), //screwdriver
+            GameFactory.grid.artifact({ id: 19, x: 278, y: 123, cordX: 19, cordY: 6 }), //footbal
+            GameFactory.grid.artifact({ id: 20, x: 333.5, y: 118.5, cordX: 1, cordY: 6 }), //bone
+            GameFactory.grid.artifact({ id: 21, x: 287.5, y: 113.5, cordX: 10, cordY: 6 }), //card 001
+            GameFactory.grid.artifact({ id: 22, x: 342.5, y: 93.5, cordX: 5, cordY: 3 }), //pill 001
+            GameFactory.grid.artifact({ id: 23, x: 263, y: 92, cordX: 4, cordY: 2 }), //note
+            GameFactory.grid.artifact({ id: 24, x: 221.5, y: 116.5, cordX: 2, cordY: 2 }), //magnifier
+            GameFactory.grid.artifact({ id: 25, x: 164.5, y: 116.5, cordX: 0, cordY: 4 }), //tablet
+            GameFactory.grid.artifact({ id: 26, x: 188, y: 101.5, cordX: 7, cordY: 4 }), //lightbulb
+            GameFactory.grid.artifact({ id: 27, x: 236, y: 99, cordX: 8, cordY: 4 }), //thermometer
+            GameFactory.grid.artifact({ id: 28, x: 158, y: 89, cordX: 3, cordY: 2 }), //sunglasses
+            GameFactory.grid.artifact({ id: 29, x: 209.5, y: 95.5, cordX: 12, cordY: 5 }), //palette
+            GameFactory.grid.artifact({ id: 30, x: 122.5, y: 116.5, cordX: 12, cordY: 6 }), //console 001 black
+            GameFactory.grid.artifact({ id: 31, x: 103, y: 117.5, cordX: 9, cordY: 9 }), //TV 001
+            GameFactory.grid.artifact({ id: 32, x: 59, y: 105, cordX: 7, cordY: 8 }), //phone
+            GameFactory.grid.artifact({ id: 33, x: 59, y: 95, cordX: 7, cordY: 5 }), //kite
+            GameFactory.grid.artifact({ id: 34, x: 59, y: 85, cordX: 9, cordY: 4 }), //bowling
+            GameFactory.grid.artifact({ id: 35, x: 73.5, y: 78.5, cordX: 13, cordY: 4 }), //paper plane
+            GameFactory.grid.artifact({ id: 36, x: 81.5, y: 60.5, cordX: 1, cordY: 3 }), //battery
+            GameFactory.grid.artifact({ id: 37, x: 90.5, y: 86.5, cordX: 2, cordY: 6 }), //toaster
+            GameFactory.grid.artifact({ id: 38, x: 139, y: 73, cordX: 1, cordY: 0 }), //book
+            GameFactory.grid.artifact({ id: 39, x: 104.5, y: 61.5, cordX: 4, cordY: 0 }), //coke
+            GameFactory.grid.artifact({ id: 40, x: 141.5, y: 56, cordX: 7, cordY: 2 }), //envelope
+            GameFactory.grid.artifact({ id: 41, x: 214.5, y: 69.5, cordX: 9, cordY: 0 }), //flashlight
+            GameFactory.grid.artifact({ id: 42, x: 247.5, y: 74.5, cordX: 10, cordY: 7 }), //card 002
+            GameFactory.grid.artifact({ id: 43, x: 293.5, y: 63, cordX: 13, cordY: 5 }), //button
+            GameFactory.grid.artifact({ id: 44, x: 303.5, y: 72.5, cordX: 1, cordY: 12 }), //note yellow
+            GameFactory.grid.artifact({ id: 45, x: 277, y: 76.5, cordX: 6, cordY: 10 }), //fire extinguisher
+            GameFactory.grid.artifact({ id: 46, x: 326.5, y: 75.5, cordX: 5, cordY: 0 }), //sock
+            GameFactory.grid.artifact({ id: 47, x: 369, y: 64.5, cordX: 24, cordY: 0 }), //calendar
+            GameFactory.grid.artifact({ id: 48, x: 386.5, y: 61.5, cordX: 29, cordY: 0 }), //tennis racket
+            GameFactory.grid.artifact({ id: 49, x: 412.5, y: 59.5, cordX: 26, cordY: 4 }), //toothbrush
+            GameFactory.grid.artifact({ id: 50, x: 448.5, y: 73, cordX: 27, cordY: 8 }), //laboratory blue
+            GameFactory.grid.artifact({ id: 51, x: 494, y: 57, cordX: 27, cordY: 9 }), //camera
+            GameFactory.grid.artifact({ id: 52, x: 516.5, y: 56.5, cordX: 27, cordY: 13 }), //id
+            GameFactory.grid.artifact({ id: 53, x: 507, y: 77, cordX: 0, cordY: 7 }), //baseball cap
+            GameFactory.grid.artifact({ id: 54, x: 499, y: 49, cordX: 1, cordY: 9 }), //ribbon
+            GameFactory.grid.artifact({ id: 55, x: 479.5, y: 32, cordX: 1, cordY: 11 }), //slice
+            GameFactory.grid.artifact({ id: 56, x: 459.5, y: 34, cordX: 8, cordY: 9 }), //TV 002
+            GameFactory.grid.artifact({ id: 57, x: 406, y: 35, cordX: 2, cordY: 5 }), //brush
+            GameFactory.grid.artifact({ id: 58, x: 417, y: 40, cordX: 7, cordY: 3 }), //wrench
+            GameFactory.grid.artifact({ id: 59, x: 374.5, y: 43, cordX: 4, cordY: 8 }), //lifebuoy
+            GameFactory.grid.artifact({ id: 60, x: 354, y: 37, cordX: 5, cordY: 8 }), //magnet
+            GameFactory.grid.artifact({ id: 61, x: 294, y: 46, cordX: 6, cordY: 8 }), //leaflet
+            GameFactory.grid.artifact({ id: 62, x: 267.5, y: 46, cordX: 18, cordY: 8 }), //emergency
+            GameFactory.grid.artifact({ id: 63, x: 325, y: 30, cordX: 23, cordY: 3 }), //cassette violet
+            GameFactory.grid.artifact({ id: 64, x: 197.5, y: 35.5, cordX: 22, cordY: 3 }), //tshirt with skull
+            GameFactory.grid.artifact({ id: 65, x: 162.5, y: 35.5, cordX: 17, cordY: 3 }), //microphone
+            GameFactory.grid.artifact({ id: 66, x: 149.5, y: 36.5, cordX: 5, cordY: 15 }), //guitar red
+            GameFactory.grid.artifact({ id: 67, x: 124.5, y: 39.5, cordX: 0, cordY: 15 }), //PC
+            GameFactory.grid.artifact({ id: 68, x: 117.5, y: 37.5, cordX: 3, cordY: 4 }), //vinyl red
+            GameFactory.grid.artifact({ id: 69, x: 89.5, y: 34.5, cordX: 10, cordY: 4 }), //13 ball
+            GameFactory.grid.artifact({ id: 70, x: 66.5, y: 46, cordX: 15, cordY: 4 }), //black dice
+            GameFactory.grid.artifact({ id: 71, x: 50.5, y: 33, cordX: 23, cordY: 6 }), //3D glasses
+            GameFactory.grid.artifact({ id: 72, x: 85.5, y: 21, cordX: 23, cordY: 7 }), //suitcase
+            GameFactory.grid.artifact({ id: 73, x: 116.5, y: 18, cordX: 23, cordY: 10 }), //pocket knife
+            GameFactory.grid.artifact({ id: 74, x: 120, y: 30, cordX: 23, cordY: 14 }), //xero
+            GameFactory.grid.artifact({ id: 75, x: 54.5, y: 10.5, cordX: 25, cordY: 13 }), //compass
+            GameFactory.grid.artifact({ id: 76, x: 14, y: 42, cordX: 11, cordY: 6 }), //card 003
+            GameFactory.grid.artifact({ id: 77, x: 10, y: 42, cordX: 11, cordY: 7 }), //card 004
+            GameFactory.grid.artifact({ id: 78, x: 22, y: 119, cordX: 11, cordY: 10 }), //paint red
+            GameFactory.grid.artifact({ id: 79, x: 25.5, y: 119, cordX: 14, cordY: 10 }), //paint green
+            GameFactory.grid.artifact({ id: 80, x: 29, y: 119, cordX: 13, cordY: 10 }), //paint blue
+            GameFactory.grid.artifact({ id: 81, x: 32, y: 97.5, cordX: 18, cordY: 10 }), //kittie
+            GameFactory.grid.artifact({ id: 82, x: 100.5, y: 19.5, cordX: 25, cordY: 3 }), //disk
+            GameFactory.grid.artifact({ id: 83, x: 161, y: 12, cordX: 24, cordY: 9 }), //newspaper
+            GameFactory.grid.artifact({ id: 84, x: 181.5, y: 12.5, cordX: 24, cordY: 8 }), //walkie talkie
+            GameFactory.grid.artifact({ id: 85, x: 221.5, y: 14, cordX: 0, cordY: 0 }), //cd
+            GameFactory.grid.artifact({ id: 86, x: 240, y: 9, cordX: 24, cordY: 10 }), //credit card
+            GameFactory.grid.artifact({ id: 87, x: 240, y: 13, cordX: 24, cordY: 12 }), //bag blue
+            GameFactory.grid.artifact({ id: 88, x: 240, y: 17, cordX: 24, cordY: 13 }), //gameboy
+            GameFactory.grid.artifact({ id: 89, x: 259.5, y: 11, cordX: 15, cordY: 5 }), //dice red
+            GameFactory.grid.artifact({ id: 90, x: 307.5, y: 19, cordX: 15, cordY: 9 }), //flower
+            GameFactory.grid.artifact({ id: 91, x: 372.5, y: 11, cordX: 1, cordY: 3 }), //battery
+            GameFactory.grid.artifact({ id: 92, x: 518.5, y: 31.5, cordX: 19, cordY: 6 }), //footbal
+            GameFactory.grid.artifact({ id: 93, x: 495.5, y: 30, cordX: 20, cordY: 8 }), //teddy bear
+            GameFactory.grid.artifact({ id: 94, x: 382.5, y: 12, cordX: 20, cordY: 12 }), //shoes
+            GameFactory.grid.artifact({ id: 95, x: 389, y: 14, cordX: 6, cordY: 3 }), //pill 002
+            GameFactory.grid.artifact({ id: 96, x: 401.5, y: 19, cordX: 4, cordY: 15 }), //guitar black
+            GameFactory.grid.artifact({ id: 97, x: 419, y: 13, cordX: 9, cordY: 2 }), //ping pong
+            GameFactory.grid.artifact({ id: 98, x: 428.5, y: 9.5, cordX: 0, cordY: 1 }), //paper clip
+            GameFactory.grid.artifact({ id: 99, x: 489.5, y: 19.5, cordX: 0, cordY: 2 }), //baseball ball
+            GameFactory.grid.artifact({ id: 100, x: 502.5, y: 16.5, cordX: 4, cordY: 6 }), //cash
+        ],
         splinters: [
-            GameFactory.grid.splinters({ id: 1, x: 88, y: 133 }),
+            GameFactory.grid.splinters({ id: 1, x: 96.5, y: 133 }),
             GameFactory.grid.splinters({ id: 2, x: 151, y: 134 }),
             GameFactory.grid.splinters({ id: 3, x: 190, y: 141 }),
             GameFactory.grid.splinters({ id: 4, x: 258, y: 133 }),
             GameFactory.grid.splinters({ id: 5, x: 319, y: 141 }),
             GameFactory.grid.splinters({ id: 6, x: 367, y: 141 }),
             GameFactory.grid.splinters({ id: 7, x: 399, y: 141 }),
-            GameFactory.grid.splinters({ id: 8, x: 447, y: 141 }),
-            GameFactory.grid.splinters({ id: 9, x: 515.5, y: 138.5 }),
+            GameFactory.grid.splinters({ id: 8, x: 408, y: 137 }),
+            GameFactory.grid.splinters({ id: 9, x: 490, y: 131 }),
             GameFactory.grid.splinters({ id: 10, x: 510, y: 114 }),
             GameFactory.grid.splinters({ id: 11, x: 396, y: 114 }),
             GameFactory.grid.splinters({ id: 12, x: 460.5, y: 112 }),
@@ -826,7 +928,7 @@ export const LEVEL_001 = {
             GameFactory.grid.splinters({ id: 73, x: 26, y: 57 }),
             GameFactory.grid.splinters({ id: 74, x: 24, y: 59 }),
             GameFactory.grid.splinters({ id: 75, x: 26, y: 59 }),
-            GameFactory.grid.splinters({ id: 76, x: 15.5, y: 42 }),
+            GameFactory.grid.splinters({ id: 76, x: 17, y: 42 }),
             GameFactory.grid.splinters({ id: 77, x: 23, y: 18 }),
             GameFactory.grid.splinters({ id: 78, x: 382.5, y: 8.5 }),
             GameFactory.grid.splinters({ id: 79, x: 403.5, y: 16.5 }),
@@ -841,7 +943,7 @@ export const LEVEL_001 = {
             GameFactory.grid.splinters({ id: 88, x: 426.5, y: 89 }),
             GameFactory.grid.splinters({ id: 89, x: 439.5, y: 89 }),
             GameFactory.grid.splinters({ id: 90, x: 452.5, y: 89 }),
-            GameFactory.grid.splinters({ id: 91, x: 442.5, y: 112 }),
+            GameFactory.grid.splinters({ id: 91, x: 375, y: 121 }),
             GameFactory.grid.splinters({ id: 92, x: 64.5, y: 56.5 }),
             GameFactory.grid.splinters({ id: 93, x: 458, y: 75 }),
             GameFactory.grid.splinters({ id: 94, x: 293, y: 108 }),
@@ -1569,18 +1671,6 @@ export const LEVEL_001 = {
         ...GameFactory.grid.environment.wallSharpLeftCol({ x: 302, y: 88, count: 2 }),
         ...GameFactory.grid.environment.wallSharpRightCol({ x: 332, y: 86, count: 4 }),
 
-        // elevator panel 1
-        GameFactory.grid.environment.elevatorPanel({ x: 394, y: 102 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 463, y: 102 }),
-
-        // elevator panel 2
-        GameFactory.grid.environment.elevatorPanel({ x: 259, y: 102 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 150, y: 102 }),
-
-        // elevator panel 3
-        GameFactory.grid.environment.elevatorPanel({ x: 55, y: 111 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 63, y: 78 }),
-
         // wall 6 (enemies rows)
         GameFactory.grid.environment.wallClean({ x: 107, y: 54, w: 7, h: 26 }),
         GameFactory.grid.environment.wallSharpLeftBottom({ x: 105, y: 54 }),
@@ -1714,15 +1804,6 @@ export const LEVEL_001 = {
         GameFactory.grid.environment.wallInside({ x: 359, y: 58 }),
         GameFactory.grid.environment.wallInside({ x: 368, y: 55 }),
 
-        // elevator panel 4
-        GameFactory.grid.environment.elevatorPanel({ x: 487, y: 44 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 478, y: 32.25 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 472, y: 44 }),
-
-        // elevator panel 5
-        GameFactory.grid.environment.elevatorPanel({ x: 208, y: 38 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 152, y: 38 }),
-
         // wall 8
         GameFactory.grid.environment.wallClean({ x: 265, y: 44, w: 15, h: 5 }),
         GameFactory.grid.environment.wallClean({ x: 282, y: 44, w: 16, h: 5 }),
@@ -1733,14 +1814,6 @@ export const LEVEL_001 = {
         ...GameFactory.grid.environment.wallSharpLeftCol({ x: 263, y: 44, count: 5 }),
         ...GameFactory.grid.environment.wallSharpRightCol({ x: 322, y: 44, count: 5 }),
         GameFactory.grid.environment.wallClean({ x: 298, y: 44, w: 2, h: 1 }),
-
-        // elevator panel 6
-        GameFactory.grid.environment.elevatorPanel({ x: 132, y: 20 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 236, y: 20 }),
-
-        // elevator panel 6
-        GameFactory.grid.environment.elevatorPanel({ x: 28, y: 122 }),
-        GameFactory.grid.environment.elevatorPanel({ x: 28, y: 18 }),
 
         // wall 9
         GameFactory.grid.environment.wallClean({ x: 8, y: 39, w: 13, h: 7 }),
@@ -2041,6 +2114,35 @@ export const LEVEL_001 = {
         GameFactory.grid.environment.wallBrickRight({ x: 164, y: 13 }),
         GameFactory.grid.environment.wallBrickRight({ x: 164, y: 17 }),
         GameFactory.grid.environment.wallBrickRight({ x: 163.5, y: 21 }),
+
+        // elevator panel 1
+        GameFactory.grid.environment.elevatorPanel({ x: 394, y: 102 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 463, y: 102 }),
+
+        // elevator panel 2
+        GameFactory.grid.environment.elevatorPanel({ x: 259, y: 102 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 150, y: 102 }),
+
+        // elevator panel 3
+        GameFactory.grid.environment.elevatorPanel({ x: 55, y: 111 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 63, y: 78 }),
+
+        // elevator panel 4
+        GameFactory.grid.environment.elevatorPanel({ x: 487, y: 44 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 478, y: 32.25 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 472, y: 44 }),
+
+        // elevator panel 5
+        GameFactory.grid.environment.elevatorPanel({ x: 208, y: 38 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 152, y: 38 }),
+
+        // elevator panel 6
+        GameFactory.grid.environment.elevatorPanel({ x: 132, y: 20 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 236, y: 20 }),
+
+        // elevator panel 7
+        GameFactory.grid.environment.elevatorPanel({ x: 28, y: 122 }),
+        GameFactory.grid.environment.elevatorPanel({ x: 28, y: 18 }),
 
     ],
     backgroundItems: [

@@ -33,10 +33,11 @@ import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
 import { TransitionRenderer } from "../renderers/TransitionRenderer.js";
 
 export class LostDaysOfSpring {
-    constructor(canvasId, showDebug = true) {
+    constructor(canvasId, showDebug = true, initialHp = 6) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
         this.showDebug = showDebug;
+        this.initialHp = initialHp;
 
         // ====== INPUT ======
         this.keys = {};
@@ -94,7 +95,11 @@ export class LostDaysOfSpring {
         this.mapDiscovery = null;
 
         // ====== PLAYER (Base static attributes set by factory) ======
-        this.player = GameFactory.player({ weapon: GameFactory.weapon() });
+        this.player = GameFactory.player({
+            weapon: GameFactory.weapon(),
+            life: this.initialHp,
+            maxLife: this.initialHp,
+        });
 
         // ====== WEAPON ======
         this.bullets = [];
@@ -198,6 +203,7 @@ export class LostDaysOfSpring {
         this.drawEnemy = this.withCameraCulling(this.drawEnemy);
         this.drawCoin = this.withCameraCulling(this.drawCoin);
         this.drawSplinters = this.withCameraCulling(this.drawSplinter);
+        this.drawArtifacts = this.withCameraCulling(this.drawArtifact);
         this.drawWeaponUpgrade = this.withCameraCulling(this.drawWeaponUpgrade);
         this.drawBullet = this.withCameraCulling(this.drawBullet);
         this.drawCannon = this.withCameraCulling(this.drawCannon);
@@ -265,6 +271,7 @@ export class LostDaysOfSpring {
         this.enemies = levelData.enemies ?? [];
         this.coins = levelData.collectibles?.coins ?? [];
         this.splinters = levelData.collectibles?.splinters ?? [];
+        this.artifacts = levelData.collectibles?.artifacts ?? [];
         this.hearts = levelData.collectibles?.hearts ?? [];
         this.weaponUpgrades = levelData?.collectibles?.weaponUpgrades ?? [];
         this.spikes = levelData.spikes ?? [];
@@ -282,6 +289,7 @@ export class LostDaysOfSpring {
         this.teleports = levelData.teleports ?? [];
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
+        this.currentLevelArtifactsCount = this.artifacts.length;
         this.currentLevelEnemiesCount = this.enemies.length;
 
         // Load checkpoints and extract embedded visual layers / messages
@@ -411,6 +419,14 @@ export class LostDaysOfSpring {
             }
         }
 
+        if (cr.collectedArtifactIds) {
+            for (const artifact of this.artifacts) {
+                if (cr.collectedArtifactIds.has(artifact.id)) {
+                    artifact.collected = true;
+                }
+            }
+        }
+
         if (cr.collectedHeartIds) {
             for (const heart of this.hearts) {
                 if (cr.collectedHeartIds.has(heart.id)) {
@@ -468,6 +484,7 @@ export class LostDaysOfSpring {
             this.checkpointRespawn?.y ?? levelData?.playerStart?.y ?? 0;
         const coinsCount = this.checkpointRespawn?.coinsCount ?? 0;
         const splintersCount = this.checkpointRespawn?.splintersCount ?? 0;
+        const artifactsCount = this.checkpointRespawn?.artifactsCount ?? 0;
 
         Object.assign(this.player, {
             x: respawnX,
@@ -489,6 +506,7 @@ export class LostDaysOfSpring {
             lastGroundType: null,
             coinsCount,
             splintersCount,
+            artifactsCount,
             weapon: this.checkpointRespawn?.weapon ?? GameFactory.weapon(),
             facing: "right",
             jumpPressedByUser: false,
@@ -590,6 +608,12 @@ export class LostDaysOfSpring {
     get hasEnoughSplinters() {
         return (
             this.player.splintersCount >= this.currentLevelSplintersCount / 2
+        );
+    }
+
+    get hasEnoughArtifacts() {
+        return (
+            this.player.artifactsCount >= this.currentLevelArtifactsCount / 2
         );
     }
 
@@ -979,7 +1003,8 @@ export class LostDaysOfSpring {
             if (
                 this.playerAtExit &&
                 this.hasEnoughCoins &&
-                this.hasEnoughSplinters
+                this.hasEnoughSplinters &&
+                this.hasEnoughArtifacts
             ) {
                 this.levelComplete = true;
                 this.levelCompleteAt = now;
@@ -1656,12 +1681,16 @@ export class LostDaysOfSpring {
             mapDiscoverySnapshot: this.mapDiscovery?.snapshot() ?? null,
             coinsCount: this.player.coinsCount,
             splintersCount: this.player.splintersCount,
+            artifactsCount: this.player.artifactsCount,
             weapon: this.player.weapon,
             collectedCoinIds: new Set(
                 this.coins.filter((c) => c.collected).map((c) => c.id),
             ),
             collectedSplinterIds: new Set(
                 this.splinters.filter((s) => s.collected).map((s) => s.id),
+            ),
+            collectedArtifactIds: new Set(
+                this.artifacts.filter((a) => a.collected).map((a) => a.id),
             ),
             collectedHeartIds: new Set(
                 this.hearts.filter((h) => h.collected).map((h) => h.id),
@@ -1842,6 +1871,13 @@ export class LostDaysOfSpring {
             if (!s.collected && this.rectsCollide(this.player, s)) {
                 s.collected = true;
                 this.player.splintersCount++;
+            }
+        }
+
+        for (const a of this.artifacts) {
+            if (!a.collected && this.rectsCollide(this.player, a)) {
+                a.collected = true;
+                this.player.artifactsCount++;
             }
         }
 
@@ -2106,6 +2142,16 @@ export class LostDaysOfSpring {
         this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug, now);
     }
 
+    drawArtifact(a, now) {
+        if (this.mapView) {
+            if (this.showDebug) {
+                this.collectibleRenderer.drawMapArtifact(this.ctx, a);
+            }
+            return;
+        }
+        this.collectibleRenderer.drawArtifact(this.ctx, a, this.showDebug, now);
+    }
+
     drawHeart(s, now) {
         if (this.mapView) {
             if (this.showDebug) {
@@ -2232,6 +2278,12 @@ export class LostDaysOfSpring {
             }
         }
 
+        for (const a of this.artifacts) {
+            if (!a.collected) {
+                this.drawArtifacts(a, now);
+            }
+        }
+
         for (const h of this.hearts) {
             if (!h.collected) {
                 this.drawHeart(h, now);
@@ -2321,6 +2373,8 @@ export class LostDaysOfSpring {
             this.currentLevelSplintersCount,
             this.hasEnoughCoins,
             this.hasEnoughSplinters,
+            this.currentLevelArtifactsCount,
+            this.hasEnoughArtifacts,
         );
 
         if (this.levelComplete) {
@@ -2548,6 +2602,10 @@ export class LostDaysOfSpring {
     }
 
     drawCheckpointIndicator(cp) {
+        if (this.mapView) {
+            this.checkpointRenderer.drawMap(this.ctx, cp);
+            return;
+        }
         this.checkpointRenderer.draw(this.ctx, cp);
     }
 
@@ -2571,6 +2629,7 @@ export class LostDaysOfSpring {
         const lines = getExitLevelLines(
             this.hasEnoughCoins,
             this.hasEnoughSplinters,
+            this.hasEnoughArtifacts,
         );
         MessageRenderer.drawPanel(this.ctx, { lines }, anchorX, anchorY);
     }

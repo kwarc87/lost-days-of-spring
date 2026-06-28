@@ -61,6 +61,8 @@ export const DefaultHubRenderer = {
         currentLevelSplintersCount,
         hasEnoughCoins,
         hasEnoughSplinters,
+        currentLevelArtifactsCount,
+        hasEnoughArtifacts,
     ) {
         const collected = player.coinsCount;
         const total = currentLevelCollectiblesCount;
@@ -127,13 +129,27 @@ export const DefaultHubRenderer = {
                 `${currentLevelSplintersCount} / ${currentLevelSplintersCount}`,
             ).width,
         );
+        const artifactTextW = Math.ceil(
+            ctx.measureText(
+                `${currentLevelArtifactsCount} / ${currentLevelArtifactsCount}`,
+            ).width,
+        );
+        const hasArtifacts = (currentLevelArtifactsCount ?? 0) > 0;
         const rowW = Math.max(
             ICON_SIZE + 8 + coinTextW,
             ICON_SIZE + 8 + splinterTextW,
+            ...(hasArtifacts ? [ICON_SIZE + 8 + artifactTextW] : []),
         );
         const rowGap = 8;
         const boxW = panelPadX * 2 + rowW;
-        const boxH = panelPadY * 2 + ICON_SIZE + rowGap + ICON_SIZE;
+        const boxH = hasArtifacts
+            ? panelPadY * 2 +
+              ICON_SIZE +
+              rowGap +
+              ICON_SIZE +
+              rowGap +
+              ICON_SIZE
+            : panelPadY * 2 + ICON_SIZE + rowGap + ICON_SIZE;
         const boxX = Math.round(canvas.width - boxW - 12);
         const boxY = 12;
 
@@ -186,7 +202,39 @@ export const DefaultHubRenderer = {
             textRightX - ctx.measureText(splinterSuffix).width,
             splinterIconY + ICON_SIZE / 2,
         );
-        // ────────────────────────────────────────────────────────────────────
+
+        // Artifact row
+        const artifactIconY = splinterIconY + ICON_SIZE + rowGap;
+        if (currentLevelArtifactsCount > 0) {
+            DefaultCollectibleRenderer.drawArtifact(
+                ctx,
+                {
+                    x: iconX,
+                    y: artifactIconY,
+                    w: ICON_SIZE,
+                    h: ICON_SIZE,
+                    cordX: 400,
+                    cordY: 48,
+                },
+                false,
+                0,
+            );
+            ctx.fillStyle = "#f0cc8b";
+            const artifactSuffix = ` / ${currentLevelArtifactsCount ?? 0}`;
+            ctx.fillText(
+                artifactSuffix,
+                textRightX,
+                artifactIconY + ICON_SIZE / 2,
+            );
+            ctx.fillStyle = hasEnoughArtifacts
+                ? COLLECTED_OK_COLOR
+                : MESSAGES.STATS.ENEMIES_COLOR;
+            ctx.fillText(
+                String(player.artifactsCount ?? 0),
+                textRightX - ctx.measureText(artifactSuffix).width,
+                artifactIconY + ICON_SIZE / 2,
+            );
+        }
 
         ctx.restore();
     },
