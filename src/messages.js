@@ -188,6 +188,171 @@ export const MESSAGES = {
                 ],
             },
         ],
+        ARTIFACTS: {
+            DISK001: {
+                lines: [
+                    { text: "A 1.44 MB floppy disk." },
+                    {
+                        text: "I remember the first time my brother brought it home.",
+                    },
+                    { text: "This is how computer games entered our lifes." },
+                ],
+            },
+            CASSETTE001: {
+                lines: [
+                    { text: "My First Awesome Mixtape!" },
+                    { text: "Radiohead, Pearl Jam, The Smashing Pumpkins..." },
+                ],
+            },
+            EIGHTBALL: {
+                lines: [
+                    { text: "The black 8-ball." },
+                    {
+                        text: "Jimmy's friends loved watching me lose with style.",
+                    },
+                ],
+            },
+            LIGHTER: {
+                lines: [
+                    { text: "Never liked smoking, but some people" },
+                    { text: "called me a lighter thief." },
+                ],
+            },
+            BASKETBALL: {
+                lines: [
+                    { text: "A basketball." },
+                    {
+                        text: "Having the poster of the NBA player made you at least 20% cooler.",
+                    },
+                ],
+            },
+            HOUSEKEY: {
+                lines: [
+                    { text: "A house key." },
+                    {
+                        text: "How many times have I lost it...",
+                    },
+                ],
+            },
+            CDROM: {
+                lines: [
+                    { text: "One of my first CD games was Phantasmagoria." },
+                    {
+                        text: "I still have a trauma.",
+                    },
+                ],
+            },
+            VINYL001: {
+                lines: [
+                    { text: "Dad loved these. Funny how they're cool again." },
+                    {
+                        text: "King Crimson's debut was basically a soundtrack to our lives.",
+                    },
+                ],
+            },
+            KEYBOARD: {
+                lines: [
+                    { text: "Not as cool as a guitar..." },
+                    {
+                        text: "But if you could play the intro to Karma Police, you were somebody.",
+                    },
+                ],
+            },
+            PINGPONG: {
+                lines: [
+                    { text: "Table tennis." },
+                    {
+                        text: "I was actually pretty good at this.",
+                    },
+                ],
+            },
+            BINOCULARS: {
+                lines: [
+                    { text: "Binoculars." },
+                    {
+                        text: "I could spend hours just looking out the window.",
+                    },
+                ],
+            },
+            DICE001: {
+                lines: [
+                    { text: "A dice." },
+                    { text: "Some adventures began with a single roll." },
+                ],
+            },
+            HOCKEYSTICK: {
+                lines: [
+                    { text: "Hockey never really clicked for me." },
+                    {
+                        text: "Jimmy's best friend couldn't get enough of it.",
+                    },
+                ],
+            },
+            HEADPHONES001: {
+                lines: [
+                    { text: "Headphones. Could there be anything" },
+                    {
+                        text: "more essential for a music nerd like me?",
+                    },
+                ],
+            },
+            WATCH001: {
+                lines: [
+                    { text: "My first real watch." },
+                    {
+                        text: "The second hand was a tiny spider.",
+                    },
+                ],
+            },
+            TOILETPAPER: {
+                lines: [{ text: "Only teenagers know a hundred uses for it." }],
+            },
+            GAMEBOY: {
+                lines: [
+                    {
+                        text: "Dear Nintendo...",
+                    },
+                    {
+                        text: "I'm so glad I grew up in your golden age.",
+                    },
+                ],
+            },
+            SCREWDRIVER: {
+                lines: [
+                    { text: "Dad had an amazing collection of screwdrivers." },
+                ],
+            },
+            BONE: {
+                lines: [
+                    { text: "Cheetos." },
+                    {
+                        text: "The one and only. Every adventure needed him.",
+                    },
+                ],
+            },
+            FOOTBALL: {
+                lines: [{ text: "Nobody scored more goals than Jimmy." }],
+            },
+            CARD001: {
+                lines: [
+                    { text: "Jimmy could bluff with a straight face." },
+                    {
+                        text: "I gave myself away every time.",
+                    },
+                ],
+            },
+            NOTE: {
+                lines: [
+                    { text: "Keep going, Colin." },
+                    { text: "I believe in you." },
+                    { text: "- J." },
+                ],
+                offsetY: -10,
+            },
+            PILL001: {
+                lines: [{ text: "I wish I had noticed sooner." }],
+            },
+        },
     },
 };
 

@@ -341,8 +341,8 @@ export const GameFactory = {
         collected: false,
         ...rest,
     }),
-    artifact: ({ id, x, y, cordX = 0, cordY = 0, ...rest } = {}) =>
-        GameFactory.collectible({
+    artifact: ({ id, x, y, cordX = 0, cordY = 0, message, ...rest } = {}) => {
+        const base = GameFactory.collectible({
             id,
             x,
             y,
@@ -352,7 +352,33 @@ export const GameFactory = {
             cordX: cordX * 16,
             cordY: cordY * 16,
             ...rest,
-        }),
+        });
+        if (message && typeof message === "object") {
+            const {
+                offsetX = 0,
+                offsetY = 0,
+                title,
+                lines,
+                displayTime = 7000,
+            } = message;
+            base.message = GameFactory.message({
+                id: `artifact-${id}-msg`,
+                x,
+                y,
+                w: 48,
+                h: 48,
+                offsetX,
+                offsetY,
+                ...(title !== undefined && { title }),
+                lines,
+                relatedTo: "viewPort",
+                strategy: "single",
+                displayTime,
+                delay: 0,
+            });
+        }
+        return base;
+    },
     weapon: (overrides = {}) => ({
         id: 1,
         color: "#ffc300",
@@ -1133,13 +1159,24 @@ export const GameFactory = {
                 h: 36,
                 ...rest,
             }),
-        artifact: ({ id, x, y, cordX, cordY, ...rest } = {}) =>
+        artifact: ({ id, x, y, cordX, cordY, message, ...rest } = {}) =>
             GameFactory.artifact({
                 id,
                 x: x * GameFactory.GRID,
                 y: y * GameFactory.GRID,
                 cordX,
                 cordY,
+                ...(message && typeof message === "object"
+                    ? {
+                          message: {
+                              ...message,
+                              offsetX:
+                                  (message.offsetX ?? 0) * GameFactory.GRID,
+                              offsetY:
+                                  (message.offsetY ?? 0) * GameFactory.GRID,
+                          },
+                      }
+                    : message !== undefined && { message }),
                 ...rest,
             }),
         weaponUpgrades: ({ id, x, y, ...rest } = {}) =>

@@ -280,6 +280,9 @@ export class LostDaysOfSpring {
         this.messageShownAt = null;
         this.messagePending = null;
         this.messagePendingAt = null;
+        this.activeArtifactMessage = null;
+        this.artifactMessageShownAt = null;
+        this.activeArtifactSource = null;
         this.exits = levelData.exits ?? [];
         this.hiddenWalls = levelData.hiddenWalls ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
@@ -798,6 +801,7 @@ export class LostDaysOfSpring {
         this.updateHiddenWalls();
         this.updateExit();
         this.updateMessages(now);
+        this.updateArtifactMessage(now);
         this.mapDiscovery?.markFromPlayer(this.player);
 
         this.updateCamera(now);
@@ -1895,6 +1899,11 @@ export class LostDaysOfSpring {
             if (!a.collected && this.rectsCollide(this.player, a)) {
                 a.collected = true;
                 this.player.artifactsCount++;
+                if (a.message) {
+                    this.activeArtifactMessage = a.message;
+                    this.artifactMessageShownAt = now;
+                    this.activeArtifactSource = a;
+                }
             }
         }
 
@@ -2382,6 +2391,42 @@ export class LostDaysOfSpring {
             );
         }
 
+        if (
+            this.activeArtifactMessage &&
+            !this.levelComplete &&
+            !this.gameOver &&
+            !this.mapView &&
+            !this.isPaused
+        ) {
+            this.messageRenderer.drawPanel(
+                this.ctx,
+                {
+                    title: this.activeArtifactMessage.title ?? null,
+                    lines: this.activeArtifactMessage.lines,
+                },
+                this.canvas.width / 2 +
+                    (this.activeArtifactMessage.offsetX ?? 0),
+                this.canvas.height -
+                    8 +
+                    (this.activeArtifactMessage.offsetY ?? 0),
+                {
+                    anchorBottom: true,
+                    bg: "#533794",
+                    border: { color: "#fff", width: 2, steps: 3 },
+                    icon: this.activeArtifactSource
+                        ? {
+                              url: this.activeArtifactSource.url,
+                              sx: this.activeArtifactSource.cordX,
+                              sy: this.activeArtifactSource.cordY,
+                              sw: 16,
+                              sh: 16,
+                              size: 48,
+                          }
+                        : undefined,
+                },
+            );
+        }
+
         this.hudRenderer.draw(
             this.ctx,
             this.canvas,
@@ -2486,6 +2531,23 @@ export class LostDaysOfSpring {
         this.playerAtExit = this.exits.some((exit) =>
             this.rectsCollide(this.player, this.exitHitbox(exit)),
         );
+    }
+
+    updateArtifactMessage(now) {
+        if (
+            !this.activeArtifactMessage ||
+            this.artifactMessageShownAt === null
+        ) {
+            return;
+        }
+        if (
+            now - this.artifactMessageShownAt >=
+            this.activeArtifactMessage.displayTime
+        ) {
+            this.activeArtifactMessage = null;
+            this.artifactMessageShownAt = null;
+            this.activeArtifactSource = null;
+        }
     }
 
     updateMessages(now) {
@@ -2836,6 +2898,9 @@ export class LostDaysOfSpring {
         }
         if (this.messageShownAt) {
             this.messageShownAt += pauseDuration;
+        }
+        if (this.artifactMessageShownAt) {
+            this.artifactMessageShownAt += pauseDuration;
         }
         if (this.messagePendingAt) {
             this.messagePendingAt += pauseDuration;

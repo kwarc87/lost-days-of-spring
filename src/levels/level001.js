@@ -751,29 +751,29 @@ export const LEVEL_001 = {
     ],
     collectibles: {
         artifacts: [
-            GameFactory.grid.artifact({ id: 1, x: 24, y: 140, cordX: 25, cordY: 3 }), //disk
-            GameFactory.grid.artifact({ id: 2, x: 88, y: 133, cordX: 23, cordY: 5 }), //cassette blue
-            GameFactory.grid.artifact({ id: 3, x: 167.5, y: 137.5, cordX: 11, cordY: 2 }), //eight ball
-            GameFactory.grid.artifact({ id: 4, x: 283.5, y: 140, cordX: 24, cordY: 2 }), //lighter
-            GameFactory.grid.artifact({ id: 5, x: 447.5, y: 141, cordX: 1, cordY: 1 }), //basketball
-            GameFactory.grid.artifact({ id: 6, x: 515.5, y: 138.5, cordX: 2, cordY: 3 }), //key
-            GameFactory.grid.artifact({ id: 7, x: 496, y: 119, cordX: 0, cordY: 0 }), //CD
-            GameFactory.grid.artifact({ id: 8, x: 473, y: 115, cordX: 2, cordY: 4 }), //vinyl blue
-            GameFactory.grid.artifact({ id: 9, x: 8.5, y: 92.5, cordX: 8, cordY: 7 }), //keyboard
-            GameFactory.grid.artifact({ id: 10, x: 516.5, y: 89.5, cordX: 9, cordY: 2 }), //ping pong
-            GameFactory.grid.artifact({ id: 11, x: 501.5, y: 96.5, cordX: 16, cordY: 2 }), //binoculars
-            GameFactory.grid.artifact({ id: 12, x: 518.5, y: 112, cordX: 15, cordY: 6 }), //dice
-            GameFactory.grid.artifact({ id: 13, x: 442.5, y: 112, cordX: 2, cordY: 11 }), //hockey stick
-            GameFactory.grid.artifact({ id: 14, x: 467.5, y: 87.5, cordX: 24, cordY: 4 }), //headphones 001
-            GameFactory.grid.artifact({ id: 15, x: 375, y: 101.5, cordX: 23, cordY: 13 }), //watch 001
-            GameFactory.grid.artifact({ id: 16, x: 386, y: 88, cordX: 3, cordY: 0 }), //toilet paper
-            GameFactory.grid.artifact({ id: 17, x: 388, y: 95, cordX: 24, cordY: 13 }), //gameboy
-            GameFactory.grid.artifact({ id: 18, x: 324.4, y: 110, cordX: 0, cordY: 3 }), //screwdriver
-            GameFactory.grid.artifact({ id: 19, x: 278, y: 123, cordX: 19, cordY: 6 }), //footbal
-            GameFactory.grid.artifact({ id: 20, x: 333.5, y: 118.5, cordX: 1, cordY: 6 }), //bone
-            GameFactory.grid.artifact({ id: 21, x: 287.5, y: 113.5, cordX: 10, cordY: 6 }), //card 001
-            GameFactory.grid.artifact({ id: 22, x: 342.5, y: 93.5, cordX: 5, cordY: 3 }), //pill 001
-            GameFactory.grid.artifact({ id: 23, x: 263, y: 92, cordX: 4, cordY: 2 }), //note
+            GameFactory.grid.artifact({ id: 1, x: 24, y: 140, cordX: 25, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.DISK001 }), //disk
+            GameFactory.grid.artifact({ id: 2, x: 88, y: 133, cordX: 23, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.CASSETTE001 }), //cassette blue
+            GameFactory.grid.artifact({ id: 3, x: 167.5, y: 137.5, cordX: 11, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.EIGHTBALL }), //eight ball
+            GameFactory.grid.artifact({ id: 4, x: 283.5, y: 140, cordX: 24, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.LIGHTER }), //lighter
+            GameFactory.grid.artifact({ id: 5, x: 447.5, y: 141, cordX: 1, cordY: 1, message: MESSAGES.LEVEL_1.ARTIFACTS.BASKETBALL }), //basketball
+            GameFactory.grid.artifact({ id: 6, x: 515.5, y: 138.5, cordX: 2, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.HOUSEKEY }), //key
+            GameFactory.grid.artifact({ id: 7, x: 496, y: 119, cordX: 0, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.CDROM }), //CD
+            GameFactory.grid.artifact({ id: 8, x: 473, y: 115, cordX: 2, cordY: 4, message: MESSAGES.LEVEL_1.ARTIFACTS.VINYL001 }), //vinyl blue
+            GameFactory.grid.artifact({ id: 9, x: 8.5, y: 92.5, cordX: 8, cordY: 7, message: MESSAGES.LEVEL_1.ARTIFACTS.KEYBOARD }), //keyboard
+            GameFactory.grid.artifact({ id: 10, x: 516.5, y: 89.5, cordX: 9, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.PINGPONG }), //ping pong
+            GameFactory.grid.artifact({ id: 11, x: 501.5, y: 96.5, cordX: 16, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.BINOCULARS }), //binoculars
+            GameFactory.grid.artifact({ id: 12, x: 518.5, y: 112, cordX: 15, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.DICE001 }), //dice
+            GameFactory.grid.artifact({ id: 13, x: 442.5, y: 112, cordX: 2, cordY: 11, message: MESSAGES.LEVEL_1.ARTIFACTS.HOCKEYSTICK }), //hockey stick
+            GameFactory.grid.artifact({ id: 14, x: 467.5, y: 87.5, cordX: 24, cordY: 4, message: MESSAGES.LEVEL_1.ARTIFACTS.HEADPHONES001 }), //headphones 001
+            GameFactory.grid.artifact({ id: 15, x: 375, y: 101.5, cordX: 23, cordY: 13, message: MESSAGES.LEVEL_1.ARTIFACTS.WATCH001 }), //watch 001
+            GameFactory.grid.artifact({ id: 16, x: 386, y: 88, cordX: 3, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.TOILETPAPER }), //toilet paper
+            GameFactory.grid.artifact({ id: 17, x: 388, y: 95, cordX: 24, cordY: 13, message: MESSAGES.LEVEL_1.ARTIFACTS.GAMEBOY }), //gameboy
+            GameFactory.grid.artifact({ id: 18, x: 324.4, y: 110, cordX: 0, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.SCREWDRIVER }), //screwdriver
+            GameFactory.grid.artifact({ id: 19, x: 278, y: 123, cordX: 19, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.FOOTBALL }), //footbal
+            GameFactory.grid.artifact({ id: 20, x: 333.5, y: 118.5, cordX: 1, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.BONE }), //bone
+            GameFactory.grid.artifact({ id: 21, x: 287.5, y: 113.5, cordX: 10, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.CARD001 }), //card 001
+            GameFactory.grid.artifact({ id: 22, x: 342.5, y: 93.5, cordX: 5, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.PILL001 }), //pill 001
+            GameFactory.grid.artifact({ id: 23, x: 263, y: 92, cordX: 4, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.NOTE }), //note
             GameFactory.grid.artifact({ id: 24, x: 221.5, y: 116.5, cordX: 2, cordY: 2 }), //magnifier
             GameFactory.grid.artifact({ id: 25, x: 164.5, y: 116.5, cordX: 0, cordY: 4 }), //tablet
             GameFactory.grid.artifact({ id: 26, x: 188, y: 101.5, cordX: 7, cordY: 4 }), //lightbulb

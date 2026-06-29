@@ -1,3 +1,5 @@
+import { getImg } from "../utils/imgCache.js";
+
 const BG_COLOR = "#3b1158";
 const BORDER_COLOR = "#fff";
 const BORDER_WIDTH = 2;
@@ -101,6 +103,9 @@ export const MessageRenderer = {
         const padX = opts.padX ?? PAD_X;
         const padY = opts.padY ?? PAD_Y;
         const gap = opts.gap ?? GAP;
+        const icon = opts.icon ?? null;
+        const ICON_GAP = 24;
+        const iconTotalW = icon ? icon.size + ICON_GAP : 0;
 
         ctx.save();
 
@@ -120,7 +125,7 @@ export const MessageRenderer = {
             maxW = Math.max(maxW, w);
         }
 
-        const panelW = Math.ceil(maxW) + padX * 2;
+        const panelW = Math.ceil(maxW) + padX * 2 + iconTotalW;
         let panelH = padY;
         if (title) {
             panelH += TITLE_H + GAP_AFTER_TITLE;
@@ -129,9 +134,15 @@ export const MessageRenderer = {
             panelH += lines.length * LINE_H + (lines.length - 1) * gap;
         }
         panelH += padY;
+        if (icon) {
+            panelH = Math.max(panelH, icon.size + padY);
+        }
 
         const panelX = Math.round(anchorX - panelW / 2);
-        const panelY = Math.round(anchorY - panelH / 2);
+        const panelY = opts.anchorBottom
+            ? Math.round(anchorY - panelH)
+            : Math.round(anchorY - panelH / 2);
+        const textAnchorX = anchorX + iconTotalW / 2;
 
         this.drawBackground(
             ctx,
@@ -144,10 +155,44 @@ export const MessageRenderer = {
                 width: BORDER_WIDTH,
                 steps: CORNER_STEPS,
             },
+            opts.bg ?? BG_COLOR,
         );
 
+        if (icon) {
+            const iconImg = getImg(icon.url);
+            if (iconImg) {
+                const iconX = Math.round(panelX + padX);
+                const iconY = Math.round(panelY + (panelH - icon.size) / 2);
+                ctx.save();
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(
+                    iconImg,
+                    icon.sx,
+                    icon.sy,
+                    icon.sw,
+                    icon.sh,
+                    iconX,
+                    iconY,
+                    icon.size,
+                    icon.size,
+                );
+                ctx.restore();
+            }
+        }
+
         ctx.textBaseline = "top";
-        let curY = panelY + padY;
+        let textBlockH = 0;
+        if (title) {
+            textBlockH += TITLE_H + GAP_AFTER_TITLE;
+        }
+        if (lines.length > 0) {
+            textBlockH += lines.length * LINE_H + (lines.length - 1) * gap;
+        }
+        const startY =
+            icon && textBlockH < panelH - padY * 2
+                ? Math.round(panelY + (panelH - textBlockH) / 2)
+                : panelY + padY;
+        let curY = startY;
 
         if (title) {
             ctx.font = FONT_TITLE;
@@ -155,11 +200,11 @@ export const MessageRenderer = {
             ctx.fillStyle = SHADOW_COLOR;
             ctx.fillText(
                 title.text,
-                anchorX + SHADOW_OFFSET,
+                textAnchorX + SHADOW_OFFSET,
                 curY + SHADOW_OFFSET,
             );
-            ctx.fillStyle = title.color;
-            ctx.fillText(title.text, anchorX, curY);
+            ctx.fillStyle = title.color ?? "#fff";
+            ctx.fillText(title.text, textAnchorX, curY);
             curY += TITLE_H + GAP_AFTER_TITLE;
         }
 
@@ -171,10 +216,10 @@ export const MessageRenderer = {
                     (s, seg) => s + ctx.measureText(seg.text).width,
                     0,
                 );
-                let cx = Math.round(anchorX - lineW / 2);
+                let cx = Math.round(textAnchorX - lineW / 2);
                 ctx.textAlign = "left";
                 for (const { text, color } of l.segments) {
-                    ctx.fillStyle = color;
+                    ctx.fillStyle = color ?? "#fff";
                     ctx.fillText(text, cx, curY);
                     cx += ctx.measureText(text).width;
                 }
@@ -183,11 +228,11 @@ export const MessageRenderer = {
                 ctx.fillStyle = SHADOW_COLOR;
                 ctx.fillText(
                     l.text,
-                    anchorX + SHADOW_OFFSET,
+                    textAnchorX + SHADOW_OFFSET,
                     curY + SHADOW_OFFSET,
                 );
-                ctx.fillStyle = l.color;
-                ctx.fillText(l.text, anchorX, curY);
+                ctx.fillStyle = l.color ?? "#fff";
+                ctx.fillText(l.text, textAnchorX, curY);
             }
             curY += LINE_H + (i < lines.length - 1 ? gap : 0);
         }
