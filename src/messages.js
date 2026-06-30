@@ -195,7 +195,7 @@ export const MESSAGES = {
                     {
                         text: "I remember the first time my brother brought it home.",
                     },
-                    { text: "This is how computer games entered our lifes." },
+                    { text: "This is how computer games entered our lives." },
                 ],
             },
             CASSETTE001: {
@@ -222,7 +222,7 @@ export const MESSAGES = {
                 lines: [
                     { text: "A basketball." },
                     {
-                        text: "Having the poster of the NBA player made you at least 20% cooler.",
+                        text: "Having the poster of an NBA player made you at least 20% cooler.",
                     },
                 ],
             },
@@ -238,7 +238,7 @@ export const MESSAGES = {
                 lines: [
                     { text: "One of my first CD games was Phantasmagoria." },
                     {
-                        text: "I still have a trauma.",
+                        text: "I'm still traumatized.",
                     },
                 ],
             },
@@ -276,7 +276,7 @@ export const MESSAGES = {
             },
             DICE001: {
                 lines: [
-                    { text: "A dice." },
+                    { text: "A die." },
                     { text: "Some adventures began with a single roll." },
                 ],
             },
@@ -341,7 +341,10 @@ export const MESSAGES = {
                     },
                 ],
             },
-            NOTE: {
+            CARD002: { lines: [{ text: "Four of a Kind." }] },
+            CARD003: { lines: [{ text: "Full House." }] },
+            CARD004: { lines: [{ text: "Straight." }] },
+            NOTE001: {
                 lines: [
                     { text: "Keep going, Colin." },
                     { text: "I believe in you." },
@@ -349,8 +352,299 @@ export const MESSAGES = {
                 ],
                 offsetY: -10,
             },
+            NOTE002: {
+                lines: [
+                    { text: "What remains of our restless youth..." },
+                    { text: "- J." },
+                ],
+                offsetY: -10,
+            },
+            NOTE003: {
+                lines: [{ text: "...ash and embers.?" }, { text: "- J." }],
+                offsetY: -10,
+            },
             PILL001: {
                 lines: [{ text: "I wish I had noticed sooner." }],
+            },
+            PILL002: {
+                lines: [{ text: "Could I have done anything?" }],
+            },
+            MAGNIFIER: {
+                lines: [
+                    {
+                        text: 'The initials "C.L.M." burned into a tree at the local park.',
+                    },
+                ],
+            },
+            FLYER: {
+                lines: [
+                    {
+                        text: "My first job was handing out flyers for Happy Tomato Pizza.",
+                    },
+                ],
+            },
+            TRAFFIC_CONE: {
+                lines: [
+                    {
+                        text: "For some reason, the street with Happy Tomato Pizza",
+                    },
+                    { text: "was almost always under construction." },
+                ],
+            },
+
+            CACTUS: {
+                lines: [
+                    {
+                        text: "Mr. Prickles kept me company all through high school.",
+                    },
+                ],
+            },
+            BATTERY: {
+                lines: [
+                    { text: "I had a whole army of these before" },
+                    { text: "I learned dead batteries could be toxic." },
+                ],
+            },
+            WALKIE_TALKIE: {
+                lines: [{ text: "- ROGER THAT" }],
+            },
+            TOOTHBRUSH: {
+                lines: [{ text: "Hygiene comes first." }],
+            },
+            PALETTE: {
+                lines: [
+                    {
+                        text: "My first love wanted to be a painter.",
+                    },
+                    {
+                        text: "That's the only reason I know who Salvador Dalí was.",
+                    },
+                ],
+            },
+            THERMOMETER: {
+                lines: [
+                    {
+                        text: "I remember the summer of '94 being incredibly hot.",
+                    },
+                ],
+            },
+            STYLUS_PHONE: {
+                lines: [
+                    { text: "It had a stylus..." },
+                    { text: "...and a whopping 128 MB of storage." },
+                ],
+            },
+            SUNGLASSES: {
+                lines: [{ text: "Things are getting serious." }],
+            },
+            BOOK: {
+                lines: [
+                    {
+                        text: "I must have read The Lord of the Rings a dozen times.",
+                    },
+                ],
+            },
+            CASH: {
+                lines: [
+                    { text: "Twelve bucks and fifty cents." },
+                    { text: "My weekly allowance from Dad." },
+                ],
+            },
+            BUTTON: {
+                lines: [{ text: 'I had a friend everyone called "Button."' }],
+            },
+            TV001: {
+                lines: [{ text: "'90s cartoons were the best." }],
+            },
+            RED_PAINT: {
+                lines: [{ text: "Red." }],
+            },
+            GREEN_PAINT: {
+                lines: [{ text: "Green." }],
+            },
+            BLUE_PAINT: {
+                lines: [{ text: "Blue." }],
+            },
+            ID_CARD: {
+                lines: [
+                    { text: "Jimmy's fake driver's license." },
+                    { text: "John Doe. Subtle as ever." },
+                ],
+            },
+            LABORATORY_BLUE: {
+                lines: [
+                    { text: "Mr. Green's classes were the best." },
+                    { text: "He let us poke around his lab after school." },
+                ],
+            },
+            TOASTER: {
+                lines: [
+                    {
+                        text: "Mom made the best mozzarella and chorizo toasties.",
+                    },
+                ],
+            },
+            FLASHLIGHT: {
+                lines: [
+                    { text: "A trusty flashlight." },
+                    {
+                        text: "Nighttime trips to the woods behind Joe's junkyard.",
+                    },
+                ],
+            },
+            CAMERA: {
+                lines: [
+                    { text: "Jimmy's camera." },
+                    {
+                        text: "For a while, Jimmy took pictures of absolutely everything.",
+                    },
+                ],
+            },
+            BRUSH: {
+                lines: [
+                    { text: "My parents let me paint our fence." },
+                    {
+                        text: "It was a solid 4/10.",
+                    },
+                ],
+            },
+            RIBBON: {
+                lines: [
+                    {
+                        text: "My amazing prize for the best horror story in fifth grade.",
+                    },
+                    { text: "And, of course, the principal's handshake." },
+                ],
+            },
+            RED_VINYL: {
+                lines: [{ text: "TA DA TA RA RA RA RAAA RA RA RA RAAAAAAA" }],
+            },
+            PENDRIVE: {
+                lines: [
+                    { text: "A USB drive." },
+                    { text: "My entire teenage life fit into 256 MB." },
+                ],
+            },
+            LIGHTBULB: {
+                lines: [
+                    { text: '"Magic trapped inside a glass bulb"' },
+                    { text: "five-year-old Colin used to say." },
+                ],
+            },
+            DIAL: {
+                lines: [{ text: "A dial could be an ancient artifact, too." }],
+            },
+            TSHIRT_WITH_SKULL: {
+                lines: [
+                    { text: "A T-shirt with a skull." },
+                    { text: "My favorite one." },
+                ],
+            },
+            KITTIE: {
+                lines: [{ text: "Meowwww." }],
+            },
+            GLASSES_3D: {
+                lines: [{ text: "Dinosaurs looked amazing in 3D." }],
+            },
+            POCKET_KNIFE: {
+                lines: [{ text: "The ultimate teenage gadget." }],
+            },
+            BASEBALL_CAP: {
+                lines: [
+                    { text: "A baseball cap." },
+                    { text: "I wore it backwards, of course." },
+                ],
+            },
+            BANDAGE: {
+                lines: [
+                    { text: "The ultimate cure for playground battle wounds." },
+                ],
+            },
+            MICROPHONE: {
+                lines: [{ text: "Mic check. One, two... one, two..." }],
+            },
+            RED_GUITAR: {
+                lines: [{ text: "We definitely need more distortion!" }],
+            },
+            PC: {
+                lines: [
+                    { text: "A 386 processor, 4 MB of RAM, and VGA graphics" },
+                    { text: "were all you needed to have a great time." },
+                ],
+            },
+            LIFE_PRESERVER: {
+                lines: [{ text: "Does anyone need help?" }],
+            },
+            COMPASS: {
+                lines: [
+                    { text: "An old compass." },
+                    { text: "It supposedly belonged to my grandpa." },
+                ],
+            },
+            FIZZY_DRINK: {
+                lines: [
+                    { text: "A fizzy drink." },
+                    { text: "I practically lived on this stuff." },
+                ],
+            },
+            TEDDY_BEAR: {
+                lines: [
+                    { text: "Mr. Grumpy!" },
+                    {
+                        text: "It's a little embarrassing, but I still miss him.",
+                    },
+                ],
+            },
+            WRENCH: {
+                lines: [{ text: "This was exactly what my old bike needed." }],
+            },
+            FIRE_EXTINGUISHER: {
+                lines: [
+                    { text: "Things got really dangerous" },
+                    { text: "when Mr. Green's lab caught fire" },
+                ],
+            },
+            RAINY_BOOTS: {
+                lines: [{ text: "The official footwear of rainy days." }],
+            },
+            PAPER_CLIP: {
+                lines: [
+                    { text: "Jimmy's friend could open any" },
+                    { text: "school locker with one of these." },
+                ],
+            },
+            FLOWER: {
+                lines: [
+                    { text: "Mom was a complete flower fanatic." },
+                    { text: "She definitely had a green thumb." },
+                ],
+            },
+            CALENDAR: {
+                lines: [
+                    { text: "July and August rule." },
+                    { text: "Obviously." },
+                ],
+            },
+            SUITCASE: {
+                lines: [{ text: "Dad's stylish suitcase." }],
+            },
+            PHOTOCOPIER: {
+                lines: [
+                    { text: "A photocopier in teachers' room." },
+                    {
+                        text: "According to legend, one student was once allowed to use it.",
+                    },
+                ],
+            },
+            SOCKS: {
+                lines: [
+                    {
+                        text: "Teenage feet should probably come with a warning label.",
+                    },
+                ],
+            },
+            BASEBALL: {
+                lines: [{ text: "Jimmy was a great pitcher." }],
             },
         },
     },
