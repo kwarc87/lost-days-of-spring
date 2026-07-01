@@ -198,33 +198,56 @@ export const MESSAGES = {
                     { text: "This is how computer games entered our lives." },
                 ],
             },
+            DISK002: {
+                lines: [
+                    { text: '"Lost Days Of Spring"' },
+                    {
+                        text: "\u00a9 Game created by Jimmy and Colin La Mehr (1997)",
+                    },
+                ],
+            },
             CASSETTE001: {
                 lines: [
                     { text: "My First Awesome Mixtape!" },
                     { text: "Radiohead, Pearl Jam, The Smashing Pumpkins..." },
                 ],
             },
+            CASSETTE002: {
+                lines: [{ text: "The Offspring - Americana" }],
+                displayTime: 3000,
+            },
+            CASSETTE003: {
+                lines: [{ text: "Bad Religion - Stranger Than Fiction" }],
+                displayTime: 3000,
+            },
+            CASSETTE004: {
+                lines: [{ text: '"Jimmy and Colin\'s Nightly Freak Show"' }],
+                displayTime: 3000,
+            },
             EIGHTBALL: {
                 lines: [
-                    { text: "The black 8-ball." },
+                    { text: "The black 8-ball. Jimmy's friends" },
                     {
-                        text: "Jimmy's friends loved watching me lose with style.",
+                        text: "loved watching me lose with style.",
                     },
                 ],
+                displayTime: 5000,
             },
             LIGHTER: {
                 lines: [
                     { text: "Never liked smoking, but some people" },
                     { text: "called me a lighter thief." },
                 ],
+                displayTime: 5000,
             },
             BASKETBALL: {
                 lines: [
-                    { text: "A basketball." },
+                    { text: "A basketball. Having the poster of an NBA" },
                     {
-                        text: "Having the poster of an NBA player made you at least 20% cooler.",
+                        text: " player made you at least 20% cooler.",
                     },
                 ],
+                displayTime: 6000,
             },
             HOUSEKEY: {
                 lines: [
@@ -233,29 +256,30 @@ export const MESSAGES = {
                         text: "How many times have I lost it...",
                     },
                 ],
+                displayTime: 5000,
             },
             CDROM: {
                 lines: [
-                    { text: "One of my first CD games was Phantasmagoria." },
+                    { text: "One of my first CD games was" },
                     {
-                        text: "I'm still traumatized.",
+                        text: "Phantasmagoria. I'm still traumatized.",
                     },
                 ],
+                displayTime: 5000,
             },
             VINYL001: {
                 lines: [
-                    { text: "Dad loved these. Funny how they're cool again." },
-                    {
-                        text: "King Crimson's debut was basically a soundtrack to our lives.",
-                    },
+                    { text: "Dad loved these. Funny how" },
+                    { text: "they're cool again. King Crimson's first album" },
+                    { text: "was basically a soundtrack to our lives." },
                 ],
+                displayTime: 8000,
             },
             KEYBOARD: {
                 lines: [
                     { text: "Not as cool as a guitar..." },
-                    {
-                        text: "But if you could play the intro to Karma Police, you were somebody.",
-                    },
+                    { text: "But if you could play the intro" },
+                    { text: "to Karma Police, you were somebody." },
                 ],
             },
             PINGPONG: {
@@ -265,19 +289,21 @@ export const MESSAGES = {
                         text: "I was actually pretty good at this.",
                     },
                 ],
+                displayTime: 5000,
             },
             BINOCULARS: {
                 lines: [
-                    { text: "Binoculars." },
+                    { text: "Binoculars. I could spend hours" },
                     {
-                        text: "I could spend hours just looking out the window.",
+                        text: "just looking out the window.",
                     },
                 ],
+                displayTime: 5000,
             },
             DICE001: {
                 lines: [
-                    { text: "A die." },
-                    { text: "Some adventures began with a single roll." },
+                    { text: "A die. Some adventures" },
+                    { text: "began with a single roll." },
                 ],
             },
             HOCKEYSTICK: {
@@ -287,6 +313,7 @@ export const MESSAGES = {
                         text: "Jimmy's best friend couldn't get enough of it.",
                     },
                 ],
+                displayTime: 5000,
             },
             HEADPHONES001: {
                 lines: [
@@ -295,6 +322,7 @@ export const MESSAGES = {
                         text: "more essential for a music nerd like me?",
                     },
                 ],
+                displayTime: 5000,
             },
             WATCH001: {
                 lines: [
@@ -303,9 +331,11 @@ export const MESSAGES = {
                         text: "The second hand was a tiny spider.",
                     },
                 ],
+                displayTime: 5000,
             },
             TOILETPAPER: {
                 lines: [{ text: "Only teenagers know a hundred uses for it." }],
+                displayTime: 5000,
             },
             GAMEBOY: {
                 lines: [
@@ -321,17 +351,19 @@ export const MESSAGES = {
                 lines: [
                     { text: "Dad had an amazing collection of screwdrivers." },
                 ],
+                displayTime: 5000,
             },
             BONE: {
                 lines: [
-                    { text: "Cheetos." },
+                    { text: "Cheetos. The one and only." },
                     {
-                        text: "The one and only. Every adventure needed him.",
+                        text: "Every adventure needed him.",
                     },
                 ],
             },
             FOOTBALL: {
                 lines: [{ text: "Nobody scored more goals than Jimmy." }],
+                displayTime: 5000,
             },
             CARD001: {
                 lines: [
@@ -340,10 +372,14 @@ export const MESSAGES = {
                         text: "I gave myself away every time.",
                     },
                 ],
+                displayTime: 5000,
             },
-            CARD002: { lines: [{ text: "Four of a Kind." }] },
-            CARD003: { lines: [{ text: "Full House." }] },
-            CARD004: { lines: [{ text: "Straight." }] },
+            CARD002: {
+                lines: [{ text: "Four of a Kind." }],
+                displayTime: 3000,
+            },
+            CARD003: { lines: [{ text: "Full House." }], displayTime: 3000 },
+            CARD004: { lines: [{ text: "Straight." }], displayTime: 3000 },
             NOTE001: {
                 lines: [
                     { text: "Keep going, Colin." },
@@ -360,8 +396,8 @@ export const MESSAGES = {
                 offsetY: -10,
             },
             NOTE003: {
-                lines: [{ text: "...ash and embers.?" }, { text: "- J." }],
-                offsetY: -10,
+                lines: [{ text: "...ash and embers?" }, { text: "- J." }],
+                offsetY: -5,
             },
             PILL001: {
                 lines: [{ text: "I wish I had noticed sooner." }],
@@ -371,9 +407,8 @@ export const MESSAGES = {
             },
             MAGNIFIER: {
                 lines: [
-                    {
-                        text: 'The initials "C.L.M." burned into a tree at the local park.',
-                    },
+                    { text: 'The initials "C.L.M." burned ' },
+                    { text: "into a tree at the local park." },
                 ],
             },
             FLYER: {
@@ -382,6 +417,7 @@ export const MESSAGES = {
                         text: "My first job was handing out flyers for Happy Tomato Pizza.",
                     },
                 ],
+                displayTime: 5000,
             },
             TRAFFIC_CONE: {
                 lines: [
@@ -398,6 +434,7 @@ export const MESSAGES = {
                         text: "Mr. Prickles kept me company all through high school.",
                     },
                 ],
+                displayTime: 5000,
             },
             BATTERY: {
                 lines: [
@@ -407,9 +444,11 @@ export const MESSAGES = {
             },
             WALKIE_TALKIE: {
                 lines: [{ text: "- ROGER THAT" }],
+                displayTime: 3000,
             },
             TOOTHBRUSH: {
                 lines: [{ text: "Hygiene comes first." }],
+                displayTime: 3000,
             },
             PALETTE: {
                 lines: [
@@ -427,22 +466,33 @@ export const MESSAGES = {
                         text: "I remember the summer of '94 being incredibly hot.",
                     },
                 ],
+                displayTime: 5000,
             },
             STYLUS_PHONE: {
                 lines: [
                     { text: "It had a stylus..." },
                     { text: "...and a whopping 128 MB of storage." },
                 ],
+                displayTime: 5000,
             },
             SUNGLASSES: {
                 lines: [{ text: "Things are getting serious." }],
+                displayTime: 5000,
             },
-            BOOK: {
+            BOOK001: {
                 lines: [
                     {
                         text: "I must have read The Lord of the Rings a dozen times.",
                     },
                 ],
+            },
+            BOOK002: {
+                lines: [
+                    {
+                        text: '"How to Survive High School Without Being a Loser."',
+                    },
+                ],
+                displayTime: 5000,
             },
             CASH: {
                 lines: [
@@ -452,18 +502,23 @@ export const MESSAGES = {
             },
             BUTTON: {
                 lines: [{ text: 'I had a friend everyone called "Button."' }],
+                displayTime: 5000,
             },
             TV001: {
                 lines: [{ text: "'90s cartoons were the best." }],
+                displayTime: 5000,
             },
             RED_PAINT: {
                 lines: [{ text: "Red." }],
+                displayTime: 3000,
             },
             GREEN_PAINT: {
                 lines: [{ text: "Green." }],
+                displayTime: 3000,
             },
             BLUE_PAINT: {
                 lines: [{ text: "Blue." }],
+                displayTime: 3000,
             },
             ID_CARD: {
                 lines: [
@@ -494,10 +549,8 @@ export const MESSAGES = {
             },
             CAMERA: {
                 lines: [
-                    { text: "Jimmy's camera." },
-                    {
-                        text: "For a while, Jimmy took pictures of absolutely everything.",
-                    },
+                    { text: "Jimmy's camera. For a while, Jimmy took" },
+                    { text: "pictures of absolutely everything." },
                 ],
             },
             BRUSH: {
@@ -510,14 +563,16 @@ export const MESSAGES = {
             },
             RIBBON: {
                 lines: [
+                    { text: "My amazing prize for the best horror story" },
                     {
-                        text: "My amazing prize for the best horror story in fifth grade.",
+                        text: "in fifth grade. And, of course, the principal's",
                     },
-                    { text: "And, of course, the principal's handshake." },
+                    { text: "handshake." },
                 ],
             },
             RED_VINYL: {
                 lines: [{ text: "TA DA TA RA RA RA RAAA RA RA RA RAAAAAAA" }],
+                displayTime: 5000,
             },
             PENDRIVE: {
                 lines: [
@@ -533,38 +588,45 @@ export const MESSAGES = {
             },
             DIAL: {
                 lines: [{ text: "A dial could be an ancient artifact, too." }],
+                displayTime: 5000,
             },
             TSHIRT_WITH_SKULL: {
                 lines: [
                     { text: "A T-shirt with a skull." },
                     { text: "My favorite one." },
                 ],
+                displayTime: 5000,
             },
             KITTIE: {
                 lines: [{ text: "Meowwww." }],
+                displayTime: 3000,
             },
             GLASSES_3D: {
                 lines: [{ text: "Dinosaurs looked amazing in 3D." }],
+                displayTime: 5000,
             },
             POCKET_KNIFE: {
                 lines: [{ text: "The ultimate teenage gadget." }],
+                displayTime: 5000,
             },
             BASEBALL_CAP: {
-                lines: [
-                    { text: "A baseball cap." },
-                    { text: "I wore it backwards, of course." },
-                ],
+                lines: [{ text: "Just my favorite baseball cap." }],
+                displayTime: 5000,
             },
             BANDAGE: {
                 lines: [
-                    { text: "The ultimate cure for playground battle wounds." },
+                    { text: "The ultimate cure" },
+                    { text: "for playground battle wounds." },
                 ],
+                displayTime: 5000,
             },
             MICROPHONE: {
                 lines: [{ text: "Mic check. One, two... one, two..." }],
+                displayTime: 5000,
             },
             RED_GUITAR: {
                 lines: [{ text: "We definitely need more distortion!" }],
+                displayTime: 5000,
             },
             PC: {
                 lines: [
@@ -574,29 +636,32 @@ export const MESSAGES = {
             },
             LIFE_PRESERVER: {
                 lines: [{ text: "Does anyone need help?" }],
+                displayTime: 5000,
             },
             COMPASS: {
                 lines: [
                     { text: "An old compass." },
                     { text: "It supposedly belonged to my grandpa." },
                 ],
+                displayTime: 5000,
             },
             FIZZY_DRINK: {
                 lines: [
                     { text: "A fizzy drink." },
                     { text: "I practically lived on this stuff." },
                 ],
+                displayTime: 5000,
             },
             TEDDY_BEAR: {
                 lines: [
                     { text: "Mr. Grumpy!" },
-                    {
-                        text: "It's a little embarrassing, but I still miss him.",
-                    },
+                    { text: "It's a little embarrassing," },
+                    { text: "but I still miss him." },
                 ],
             },
             WRENCH: {
                 lines: [{ text: "This was exactly what my old bike needed." }],
+                displayTime: 5000,
             },
             FIRE_EXTINGUISHER: {
                 lines: [
@@ -606,6 +671,7 @@ export const MESSAGES = {
             },
             RAINY_BOOTS: {
                 lines: [{ text: "The official footwear of rainy days." }],
+                displayTime: 5000,
             },
             PAPER_CLIP: {
                 lines: [
@@ -624,9 +690,11 @@ export const MESSAGES = {
                     { text: "July and August rule." },
                     { text: "Obviously." },
                 ],
+                displayTime: 5000,
             },
             SUITCASE: {
                 lines: [{ text: "Dad's stylish suitcase." }],
+                displayTime: 5000,
             },
             PHOTOCOPIER: {
                 lines: [
@@ -638,13 +706,115 @@ export const MESSAGES = {
             },
             SOCKS: {
                 lines: [
-                    {
-                        text: "Teenage feet should probably come with a warning label.",
-                    },
+                    { text: "Teenage feet should probably" },
+                    { text: "come with a warning label." },
                 ],
             },
             BASEBALL: {
                 lines: [{ text: "Jimmy was a great pitcher." }],
+                displayTime: 5000,
+            },
+            SNEAKERS: {
+                lines: [
+                    {
+                        text: "Sneakers. Grunge never really took over our school",
+                    },
+                    { text: "but it definitely had its crowd." },
+                ],
+            },
+            BARBELL: {
+                lines: [
+                    { text: "There was this guy everyone called Big Mike." },
+                    {
+                        text: "He practically lived at the gym. I preferred to keep my distance.",
+                    },
+                ],
+            },
+            NEWSPAPER: {
+                lines: [
+                    { text: "A local paper wrote about Jimmy and me after" },
+                    {
+                        text: "we won the state high school game development competition.",
+                    },
+                    { text: '"Lost Days of Spring" We really did spend' },
+                    {
+                        text: "the whole spring making that platformer. Totally worth it.",
+                    },
+                ],
+                displayTime: 9000,
+            },
+            KITE: {
+                lines: [
+                    { text: "A kite. It belonged to the neighborhood kids." },
+                    { text: "Dad finally got it off the roof months later." },
+                ],
+            },
+            PELICAN: {
+                lines: [
+                    { text: "That cheap plastic thing stood" },
+                    { text: "in Mrs. Brown's garden for decades." },
+                ],
+            },
+            PAPER_PLANE: {
+                lines: [
+                    { text: "None of mine ever landed in a storm drain." },
+                    {
+                        text: "As far as I know, there were no creepy clowns around.",
+                    },
+                ],
+            },
+            ENVELOPE: {
+                lines: [
+                    { text: "I spent years waiting for" },
+                    { text: "my invitation to magic school." },
+                ],
+            },
+            SANTA_HAT: {
+                lines: [
+                    { text: "I'll never forget how Jimmy" },
+                    { text: "ruined Christmas for me in first grade" },
+                    { text: "by telling me Santa wasn't real." },
+                ],
+            },
+            MAGNET: {
+                lines: [
+                    { text: '"Science Beach"' },
+                    { text: "We thought it was hilarious." },
+                ],
+                displayTime: 5000,
+            },
+            DRAWING_PIN: {
+                lines: [{ text: "I don't recommend sitting on it." }],
+                displayTime: 5000,
+            },
+            TRIANGLE: {
+                lines: [
+                    { text: "Ah, Mrs. Pines' music classes..." },
+                    { text: "and the thrill of singing" },
+                    {
+                        text: "Twinkle, Twinkle, Little Star for the 154th time.",
+                    },
+                ],
+            },
+            BAG: {
+                lines: [{ text: "Just my school backpack" }],
+                displayTime: 5000,
+            },
+            GIFT: {
+                lines: [
+                    {
+                        text: "My twelfth birthday gift from Jimmy - a skateboard.",
+                    },
+                    { text: "I rode it for years." },
+                ],
+            },
+            CALCULATOR: {
+                lines: [
+                    { text: "Did you know there used to be" },
+                    {
+                        text: "calculators you could play Snake on?",
+                    },
+                ],
             },
         },
     },

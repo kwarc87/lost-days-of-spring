@@ -751,7 +751,7 @@ export const LEVEL_001 = {
     ],
     collectibles: {
         artifacts: [
-            GameFactory.grid.artifact({ id: 1, x: 24, y: 140, cordX: 25, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.DISK001 }), //disk
+            GameFactory.grid.artifact({ id: 1, x: 24, y: 140, cordX: 25, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.DISK001 }), //disk 001
             GameFactory.grid.artifact({ id: 2, x: 88, y: 133, cordX: 23, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.CASSETTE001 }), //cassette blue
             GameFactory.grid.artifact({ id: 3, x: 167.5, y: 137.5, cordX: 11, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.EIGHTBALL }), //eight ball
             GameFactory.grid.artifact({ id: 4, x: 283.5, y: 140, cordX: 24, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.LIGHTER }), //lighter
@@ -772,7 +772,7 @@ export const LEVEL_001 = {
             GameFactory.grid.artifact({ id: 19, x: 278, y: 123, cordX: 19, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.FOOTBALL }), //footbal
             GameFactory.grid.artifact({ id: 20, x: 333.5, y: 118.5, cordX: 1, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.BONE }), //bone
             GameFactory.grid.artifact({ id: 21, x: 287.5, y: 113.5, cordX: 10, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.CARD001 }), //card 001
-            GameFactory.grid.artifact({ id: 22, x: 342.5, y: 93.5, cordX: 5, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.PILL001 }), //pill 001
+            GameFactory.grid.artifact({ id: 22, x: 342.5, y: 93.5, cordX: 13, cordY: 4, message: MESSAGES.LEVEL_1.ARTIFACTS.PAPER_PLANE }), //paper plane
             GameFactory.grid.artifact({ id: 23, x: 263, y: 92, cordX: 4, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.NOTE001 }), //note
             GameFactory.grid.artifact({ id: 24, x: 221.5, y: 116.5, cordX: 2, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.MAGNIFIER }), //magnifier
             GameFactory.grid.artifact({ id: 25, x: 164.5, y: 116.5, cordX: 0, cordY: 4, message: MESSAGES.LEVEL_1.ARTIFACTS.STYLUS_PHONE }), //stylus phone
@@ -780,47 +780,47 @@ export const LEVEL_001 = {
             GameFactory.grid.artifact({ id: 27, x: 236, y: 99, cordX: 8, cordY: 4, message: MESSAGES.LEVEL_1.ARTIFACTS.THERMOMETER }), //thermometer
             GameFactory.grid.artifact({ id: 28, x: 158, y: 89, cordX: 3, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.SUNGLASSES }), //sunglasses
             GameFactory.grid.artifact({ id: 29, x: 209.5, y: 95.5, cordX: 12, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.PALETTE }), //palette
-            GameFactory.grid.artifact({ id: 30, x: 122.5, y: 116.5, cordX: 12, cordY: 6 }), //console 001 black
-            GameFactory.grid.artifact({ id: 31, x: 103, y: 117.5, cordX: 9, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.TV001 }), //TV 001
-            GameFactory.grid.artifact({ id: 32, x: 59, y: 105, cordX: 7, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.DIAL }), //dial
-            GameFactory.grid.artifact({ id: 33, x: 59, y: 95, cordX: 7, cordY: 5 }), //kite
-            GameFactory.grid.artifact({ id: 34, x: 59, y: 85, cordX: 9, cordY: 4 }), //bowling
-            GameFactory.grid.artifact({ id: 35, x: 73.5, y: 78.5, cordX: 13, cordY: 4 }), //paper plane
+            GameFactory.grid.artifact({ id: 30, x: 122.5, y: 116.5, cordX: 9, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.TV001 }), //TV 001
+            GameFactory.grid.artifact({ id: 31, x: 103, y: 117.5, cordX: 24, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.DISK002 }), //disk 002
+            GameFactory.grid.artifact({ id: 32, x: 59, y: 95, cordX: 7, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.DIAL }), //dial
+            GameFactory.grid.artifact({ id: 33, x: 52, y: 91, cordX: 7, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.KITE }), //kite
+            GameFactory.grid.artifact({ id: 34, x: 50.5, y: 118, cordX: 18, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.PELICAN }), //pelican
+            GameFactory.grid.artifact({ id: 35, x: 73.5, y: 78.5, cordX: 1, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.BOOK001 }), //book
             GameFactory.grid.artifact({ id: 36, x: 81.5, y: 60.5, cordX: 1, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.BATTERY }), //battery
             GameFactory.grid.artifact({ id: 37, x: 90.5, y: 86.5, cordX: 2, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.TOASTER }), //toaster
-            GameFactory.grid.artifact({ id: 38, x: 139, y: 73, cordX: 1, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.BOOK }), //book
+            GameFactory.grid.artifact({ id: 38, x: 139, y: 73, cordX: 5, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.PILL001 }), //pill 001
             GameFactory.grid.artifact({ id: 39, x: 104.5, y: 61.5, cordX: 4, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.FIZZY_DRINK }), //fizzy drink
-            GameFactory.grid.artifact({ id: 40, x: 141.5, y: 56, cordX: 7, cordY: 2 }), //envelope
+            GameFactory.grid.artifact({ id: 40, x: 141.5, y: 56, cordX: 7, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.ENVELOPE }), //envelope
             GameFactory.grid.artifact({ id: 41, x: 214.5, y: 69.5, cordX: 9, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.FLASHLIGHT }), //flashlight
             GameFactory.grid.artifact({ id: 42, x: 247.5, y: 74.5, cordX: 10, cordY: 7, message: MESSAGES.LEVEL_1.ARTIFACTS.CARD002 }), //card 002
             GameFactory.grid.artifact({ id: 43, x: 293.5, y: 63, cordX: 13, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.BUTTON }), //button
             GameFactory.grid.artifact({ id: 44, x: 303.5, y: 72.5, cordX: 1, cordY: 12, message: MESSAGES.LEVEL_1.ARTIFACTS.NOTE002 }), //note yellow
-            GameFactory.grid.artifact({ id: 45, x: 277, y: 76.5, cordX: 6, cordY: 10, message: MESSAGES.LEVEL_1.ARTIFACTS.FIRE_EXTINGUISHER }), //fire extinguisher
+            GameFactory.grid.artifact({ id: 45, x: 277, y: 76.5, cordX: 27, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.LABORATORY_BLUE }), //laboratory blue
             GameFactory.grid.artifact({ id: 46, x: 326.5, y: 75.5, cordX: 5, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.SOCKS }), //socks
             GameFactory.grid.artifact({ id: 47, x: 369, y: 64.5, cordX: 24, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.CALENDAR }), //calendar
-            GameFactory.grid.artifact({ id: 48, x: 386.5, y: 61.5, cordX: 29, cordY: 0 }), //tennis racket
+            GameFactory.grid.artifact({ id: 48, x: 386.5, y: 61.5, cordX: 6, cordY: 10, message: MESSAGES.LEVEL_1.ARTIFACTS.FIRE_EXTINGUISHER }), //fire extinguisher
             GameFactory.grid.artifact({ id: 49, x: 412.5, y: 59.5, cordX: 26, cordY: 4, message: MESSAGES.LEVEL_1.ARTIFACTS.TOOTHBRUSH }), //toothbrush
-            GameFactory.grid.artifact({ id: 50, x: 448.5, y: 73, cordX: 27, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.LABORATORY_BLUE }), //laboratory blue
+            GameFactory.grid.artifact({ id: 50, x: 448.5, y: 73, cordX: 6, cordY: 13, message: MESSAGES.LEVEL_1.ARTIFACTS.SANTA_HAT }), //santa hat
             GameFactory.grid.artifact({ id: 51, x: 494, y: 57, cordX: 27, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.CAMERA }), //camera
             GameFactory.grid.artifact({ id: 52, x: 516.5, y: 56.5, cordX: 27, cordY: 13, message: MESSAGES.LEVEL_1.ARTIFACTS.ID_CARD }), //id
             GameFactory.grid.artifact({ id: 53, x: 507, y: 77, cordX: 0, cordY: 7, message: MESSAGES.LEVEL_1.ARTIFACTS.BASEBALL_CAP }), //baseball cap
             GameFactory.grid.artifact({ id: 54, x: 499, y: 49, cordX: 1, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.RIBBON }), //ribbon
             GameFactory.grid.artifact({ id: 55, x: 479.5, y: 32, cordX: 1, cordY: 11, message: MESSAGES.LEVEL_1.ARTIFACTS.BANDAGE }), //bandage
-            GameFactory.grid.artifact({ id: 56, x: 459.5, y: 34, cordX: 8, cordY: 9 }), //TV 002
+            GameFactory.grid.artifact({ id: 56, x: 459.5, y: 34, cordX: 5, cordY: 13, message: MESSAGES.LEVEL_1.ARTIFACTS.BOOK002 }), //book 002
             GameFactory.grid.artifact({ id: 57, x: 406, y: 35, cordX: 2, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.BRUSH }), //brush
             GameFactory.grid.artifact({ id: 58, x: 417, y: 40, cordX: 7, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.WRENCH }), //wrench
             GameFactory.grid.artifact({ id: 59, x: 374.5, y: 43, cordX: 4, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.LIFE_PRESERVER }), //life preserver
-            GameFactory.grid.artifact({ id: 60, x: 354, y: 37, cordX: 5, cordY: 8 }), //magnet
-            GameFactory.grid.artifact({ id: 61, x: 294, y: 46, cordX: 6, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.FLYER }), //flyer
-            GameFactory.grid.artifact({ id: 62, x: 267.5, y: 46, cordX: 18, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.TRAFFIC_CONE }), //traffic cone
-            GameFactory.grid.artifact({ id: 63, x: 325, y: 30, cordX: 23, cordY: 3 }), //cassette violet
+            GameFactory.grid.artifact({ id: 60, x: 354, y: 37, cordX: 5, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.MAGNET }), //magnet
+            GameFactory.grid.artifact({ id: 61, x: 267.5, y: 46, cordX: 6, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.FLYER }), //flyer
+            GameFactory.grid.artifact({ id: 62, x: 294, y: 46, cordX: 18, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.TRAFFIC_CONE }), //traffic cone
+            GameFactory.grid.artifact({ id: 63, x: 325, y: 30, cordX: 23, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.CASSETTE002 }), //cassette violet
             GameFactory.grid.artifact({ id: 64, x: 197.5, y: 35.5, cordX: 22, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.TSHIRT_WITH_SKULL }), //tshirt with skull
             GameFactory.grid.artifact({ id: 65, x: 162.5, y: 35.5, cordX: 17, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.MICROPHONE }), //microphone
             GameFactory.grid.artifact({ id: 66, x: 149.5, y: 36.5, cordX: 5, cordY: 15, message: MESSAGES.LEVEL_1.ARTIFACTS.RED_GUITAR }), //guitar red
             GameFactory.grid.artifact({ id: 67, x: 124.5, y: 39.5, cordX: 0, cordY: 15, message: MESSAGES.LEVEL_1.ARTIFACTS.PC }), //PC
             GameFactory.grid.artifact({ id: 68, x: 117.5, y: 37.5, cordX: 3, cordY: 4, message: MESSAGES.LEVEL_1.ARTIFACTS.RED_VINYL }), //vinyl red
-            GameFactory.grid.artifact({ id: 69, x: 89.5, y: 34.5, cordX: 0, cordY: 11 }), //stylus phone black
-            GameFactory.grid.artifact({ id: 70, x: 66.5, y: 46, cordX: 15, cordY: 4 }), //black dice
+            GameFactory.grid.artifact({ id: 69, x: 89.5, y: 34.5, cordX: 16, cordY: 12, message: MESSAGES.LEVEL_1.ARTIFACTS.SNEAKERS }), //sneakers
+            GameFactory.grid.artifact({ id: 70, x: 66.5, y: 46, cordX: 25, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.BARBELL }), //barbell
             GameFactory.grid.artifact({ id: 71, x: 50.5, y: 33, cordX: 23, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.GLASSES_3D }), //3D glasses
             GameFactory.grid.artifact({ id: 72, x: 85.5, y: 21, cordX: 23, cordY: 7, message: MESSAGES.LEVEL_1.ARTIFACTS.SUITCASE }), //suitcase
             GameFactory.grid.artifact({ id: 73, x: 116.5, y: 18, cordX: 23, cordY: 10, message: MESSAGES.LEVEL_1.ARTIFACTS.POCKET_KNIFE }), //pocket knife
@@ -833,20 +833,20 @@ export const LEVEL_001 = {
             GameFactory.grid.artifact({ id: 80, x: 29, y: 119, cordX: 13, cordY: 10, message: MESSAGES.LEVEL_1.ARTIFACTS.BLUE_PAINT }), //paint blue
             GameFactory.grid.artifact({ id: 81, x: 32, y: 97.5, cordX: 18, cordY: 10, message: MESSAGES.LEVEL_1.ARTIFACTS.KITTIE }), //kittie
             GameFactory.grid.artifact({ id: 82, x: 100.5, y: 19.5, cordX: 13, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.CACTUS }), //cactus
-            GameFactory.grid.artifact({ id: 83, x: 161, y: 12, cordX: 24, cordY: 9 }), //newspaper
+            GameFactory.grid.artifact({ id: 83, x: 161, y: 12, cordX: 24, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.NEWSPAPER }), //newspaper
             GameFactory.grid.artifact({ id: 84, x: 181.5, y: 12.5, cordX: 24, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.WALKIE_TALKIE }), //walkie talkie
-            GameFactory.grid.artifact({ id: 85, x: 221.5, y: 14, cordX: 0, cordY: 0}), //cd
-            GameFactory.grid.artifact({ id: 86, x: 240, y: 9, cordX: 24, cordY: 10 }), //credit card
-            GameFactory.grid.artifact({ id: 87, x: 240, y: 13, cordX: 24, cordY: 12 }), //bag blue
+            GameFactory.grid.artifact({ id: 85, x: 221.5, y: 14, cordX: 6, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.DRAWING_PIN }), //drawing pin
+            GameFactory.grid.artifact({ id: 86, x: 240, y: 9, cordX: 23, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.CASSETTE003 }), //cassette 003
+            GameFactory.grid.artifact({ id: 87, x: 240, y: 13, cordX: 24, cordY: 12, message: MESSAGES.LEVEL_1.ARTIFACTS.BAG }), //bag blue
             GameFactory.grid.artifact({ id: 88, x: 240, y: 17, cordX: 5, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.PENDRIVE }), //pendrive
-            GameFactory.grid.artifact({ id: 89, x: 259.5, y: 11, cordX: 15, cordY: 5 }), //dice red
+            GameFactory.grid.artifact({ id: 89, x: 259.5, y: 11, cordX: 4, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.GIFT }), //gift
             GameFactory.grid.artifact({ id: 90, x: 307.5, y: 19, cordX: 15, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.FLOWER }), //flower
-            GameFactory.grid.artifact({ id: 91, x: 372.5, y: 11, cordX: 1, cordY: 3 }), //battery
-            GameFactory.grid.artifact({ id: 92, x: 518.5, y: 31.5, cordX: 19, cordY: 6 }), //footbal
+            GameFactory.grid.artifact({ id: 91, x: 372.5, y: 11, cordX: 24, cordY: 7, message: MESSAGES.LEVEL_1.ARTIFACTS.CALCULATOR }), //calculator
+            GameFactory.grid.artifact({ id: 92, x: 518.5, y: 31.5, cordX: 23, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.CASSETTE004 }), //cassette 004
             GameFactory.grid.artifact({ id: 93, x: 495.5, y: 30, cordX: 20, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.TEDDY_BEAR }), //teddy bear
             GameFactory.grid.artifact({ id: 94, x: 382.5, y: 12, cordX: 20, cordY: 12, message: MESSAGES.LEVEL_1.ARTIFACTS.RAINY_BOOTS }), //rainy boots
             GameFactory.grid.artifact({ id: 95, x: 389, y: 14, cordX: 6, cordY: 3, message: MESSAGES.LEVEL_1.ARTIFACTS.PILL002 }), //pill 002
-            GameFactory.grid.artifact({ id: 96, x: 401.5, y: 19, cordX: 4, cordY: 15 }), //guitar black
+            GameFactory.grid.artifact({ id: 96, x: 401.5, y: 19, cordX: 0, cordY: 10, message: MESSAGES.LEVEL_1.ARTIFACTS.TRIANGLE }), //triangle
             GameFactory.grid.artifact({ id: 97, x: 419, y: 13, cordX: 0, cordY: 1, message: MESSAGES.LEVEL_1.ARTIFACTS.PAPER_CLIP }), //paper clip
             GameFactory.grid.artifact({ id: 98, x: 428.5, y: 9.5, cordX: 0, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.BASEBALL }), //baseball
             GameFactory.grid.artifact({ id: 99, x: 489.5, y: 19.5, cordX: 4, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.CASH }), //cash
