@@ -542,6 +542,16 @@ export const GameFactory = {
         }),
         terminal: ({ x, y, ...rest } = {}) =>
             GameFactory.environment.terminalDirection({ x, y, ...rest }),
+        mushroom: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/all-props.png",
+            cordX: 272,
+            cordY: 118,
+            w: 36 * GameFactory.SCALE,
+            h: 28 * GameFactory.SCALE,
+            ...rest,
+        }),
         plant001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -1336,6 +1346,12 @@ export const GameFactory = {
                 GameFactory.environment.terminal({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            mushroom: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.mushroom({
+                    x: x * GameFactory.GRID + 2 * GameFactory.SCALE,
+                    y: y * GameFactory.GRID - 12 * GameFactory.SCALE,
                     ...rest,
                 }),
             plant001: ({ x, y, ...rest } = {}) =>

@@ -202,7 +202,7 @@ export const MESSAGES = {
                 lines: [
                     { text: '"Lost Days Of Spring"' },
                     {
-                        text: "\u00a9 Game created by Jimmy and Colin La Mehr (1997)",
+                        text: "\u00a9 Game created by Jimmy La Mehr (1997)",
                     },
                 ],
             },
@@ -235,8 +235,8 @@ export const MESSAGES = {
             },
             LIGHTER: {
                 lines: [
-                    { text: "Never liked smoking, but some people" },
-                    { text: "called me a lighter thief." },
+                    { text: "Never liked smoking, but" },
+                    { text: "could be useful in some other ways." },
                 ],
                 displayTime: 5000,
             },
@@ -303,7 +303,7 @@ export const MESSAGES = {
             DICE001: {
                 lines: [
                     { text: "A die. Some adventures" },
-                    { text: "began with a single roll." },
+                    { text: "begin with a single roll." },
                 ],
             },
             HOCKEYSTICK: {
@@ -398,6 +398,7 @@ export const MESSAGES = {
             NOTE003: {
                 lines: [{ text: "...ash and embers?" }, { text: "- J." }],
                 offsetY: -5,
+                offsetX: -8,
             },
             PILL001: {
                 lines: [{ text: "I wish I had noticed sooner." }],
@@ -732,16 +733,16 @@ export const MESSAGES = {
             },
             NEWSPAPER: {
                 lines: [
-                    { text: "A local paper wrote about Jimmy and me after" },
+                    { text: "A local paper wrote about Jimmy after he won" },
                     {
-                        text: "we won the state high school game development competition.",
+                        text: "the state high school game development competition.",
                     },
-                    { text: '"Lost Days of Spring" We really did spend' },
+                    { text: '"Lost Days of Spring" - he really did spend' },
                     {
-                        text: "the whole spring making that platformer. Totally worth it.",
+                        text: "the whole spring making that platformer.",
                     },
                 ],
-                displayTime: 9000,
+                displayTime: 12000,
             },
             KITE: {
                 lines: [
