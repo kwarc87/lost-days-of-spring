@@ -53,7 +53,7 @@ export const GameFactory = {
         facing: "right",
         shooting: false,
         lastShootTime: 0,
-        shootingOffsetY: -4,
+        shootingOffsetY: -9,
         shootingCrouchOffsetY: 4,
         shootingOffsetX: 38,
         shootingCrouchOffsetX: 44,
