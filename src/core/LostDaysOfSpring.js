@@ -523,6 +523,7 @@ export class LostDaysOfSpring {
             carryStartAt: 0,
             frozenForTeleport: false,
             knockbackUntil: 0,
+            movingByInput: false,
             dying: false,
             dyingStartedAt: 0,
             dead: false,
@@ -851,6 +852,8 @@ export class LostDaysOfSpring {
             targetVx = speed;
             this.player.facing = "right";
         }
+
+        this.player.movingByInput = targetVx !== 0;
 
         const groundPlatform = this.solids.find(
             (p) => p.id === this.player.onGroundId,

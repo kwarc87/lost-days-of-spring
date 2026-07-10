@@ -18,6 +18,13 @@ const ANIMS = {
         fps: 12,
         loop: true,
     },
+    slidingIdle: {
+        src: "textures/player/pink/idle.png",
+        frames: [0],
+        fps: 1,
+        offsetY: 4,
+        loop: false,
+    },
     walkShoot: {
         src: "textures/player/pink/walk-shoot.png",
         frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -119,6 +126,9 @@ function getAnimKey(player) {
 
     if (player.posture === "crouch") {
         if (Math.abs(player.vx) > 0.5) {
+            if (!player.movingByInput) {
+                return "crouchIdle";
+            }
             return player.shooting ? "crouchShoot" : "crouch";
         }
         return player.shooting ? "crouchIdleShoot" : "crouchIdle";
@@ -132,11 +142,13 @@ function getAnimKey(player) {
     }
 
     if (player.shooting) {
-        return Math.abs(player.vx) > 0.5 ? "walkShoot" : "shoot";
+        return Math.abs(player.vx) > 0.5 && player.movingByInput
+            ? "walkShoot"
+            : "shoot";
     }
 
     if (Math.abs(player.vx) > 0.5) {
-        return "walk";
+        return player.movingByInput ? "walk" : "slidingIdle";
     }
 
     return "idle";
