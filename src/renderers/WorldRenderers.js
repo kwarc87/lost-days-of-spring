@@ -172,6 +172,22 @@ export const DefaultWorldRenderer = {
             drawTerminalArrow(ctx, item);
         }
     },
+    drawParallaxEnvironmentItem(ctx, item, camera) {
+        const ox = Math.round(camera.x * (1 - (item.parallaxX ?? 1)));
+        const oy = Math.round(camera.y * (1 - (item.parallaxY ?? 1)));
+        ctx.save();
+        ctx.translate(ox, oy);
+        if (item.solidFill) {
+            this.drawSolidBackground(ctx, item, item.solidFill);
+            ctx.restore();
+            return;
+        }
+        drawEnvironmentItem(ctx, item);
+        if (item.direction) {
+            drawTerminalArrow(ctx, item);
+        }
+        ctx.restore();
+    },
     drawBackground(ctx, canvas, camera) {
         const cw = canvas.width;
         const ch = canvas.height;

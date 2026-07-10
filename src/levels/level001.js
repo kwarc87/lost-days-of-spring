@@ -3760,5 +3760,8 @@ export const LEVEL_001 = {
     ],
     exits: [
         GameFactory.grid.exit({ id: 1, x: 505.5, y: 10 }),
-    ]
+    ],
+    parallax: [
+        GameFactory.grid.environment.hills001({ x: 40, y: 16, parallaxX: 0.15, parallaxY: 0.075 }),
+    ],
 };

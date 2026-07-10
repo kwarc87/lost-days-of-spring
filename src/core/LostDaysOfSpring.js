@@ -289,6 +289,7 @@ export class LostDaysOfSpring {
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
+        this.parallaxItems = levelData.parallax ?? [];
         this.cannons = levelData.cannons ?? [];
         this.teleports = levelData.teleports ?? [];
         this.currentLevelCoinsCount = this.coins.length;
@@ -2241,6 +2242,17 @@ export class LostDaysOfSpring {
         this.worldRenderer.drawEnvironmentItem(this.ctx, i);
     }
 
+    drawEnvParallaxItem(i) {
+        if (this.mapView) {
+            return;
+        }
+        this.worldRenderer.drawParallaxEnvironmentItem(
+            this.ctx,
+            i,
+            this.camera,
+        );
+    }
+
     drawTitleScreen() {
         const hasSave = CheckpointStorage.load() !== null;
         this.titleScreenRenderer.draw(this.ctx, this.canvas, hasSave);
@@ -2274,6 +2286,10 @@ export class LostDaysOfSpring {
                 -Math.round(this.camera.x),
                 -Math.round(this.camera.y),
             );
+        }
+
+        for (const i of this.parallaxItems) {
+            this.drawEnvParallaxItem(i);
         }
 
         for (const exit of this.exits) {
@@ -2508,9 +2524,8 @@ export class LostDaysOfSpring {
     }
 
     getCurrentPlayTimeMs() {
-        const now = this.isPaused ? this.pauseStartAt : performance.now();
         return (
-            now -
+            this.simulatedTime -
             this.levelStartAt -
             this.totalPausedTime +
             this.accumulatedPlayTime
@@ -2807,14 +2822,17 @@ export class LostDaysOfSpring {
             this.accumulator -= this.gameLoop.fixedDt;
         }
 
-        this.draw(now);
+        this.draw(this.simulatedTime);
         this.updateDebug();
 
         if (this.gameFadeIn.active) {
             this.drawGameFadeIn(now);
         }
 
-        if (this.gameOver && now - this.gameOverAt >= this.gameOverDelay) {
+        if (
+            this.gameOver &&
+            this.simulatedTime - this.gameOverAt >= this.gameOverDelay
+        ) {
             this.resetGame();
         }
 
@@ -2886,7 +2904,7 @@ export class LostDaysOfSpring {
         this.isPaused = true;
         this.pauseMenuIndex = 0;
         this.pauseStartAt = performance.now();
-        this.draw();
+        this.draw(this.simulatedTime);
         this.pauseRenderer.drawPauseScreen(
             this.ctx,
             this.canvas,
@@ -2995,7 +3013,7 @@ export class LostDaysOfSpring {
             this.mapView = true;
             this.stop();
             this.pauseStartAt = performance.now();
-            this.draw();
+            this.draw(this.simulatedTime);
         } else {
             this._resumeFromPause();
             this.mapView = false;

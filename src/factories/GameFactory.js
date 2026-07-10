@@ -552,6 +552,16 @@ export const GameFactory = {
             h: 28 * GameFactory.SCALE,
             ...rest,
         }),
+        hills001: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/hills.png",
+            cordX: 61,
+            cordY: 92,
+            w: 135 * GameFactory.SCALE,
+            h: 148 * GameFactory.SCALE,
+            ...rest,
+        }),
         plant001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -1352,6 +1362,12 @@ export const GameFactory = {
                 GameFactory.environment.mushroom({
                     x: x * GameFactory.GRID + 2 * GameFactory.SCALE,
                     y: y * GameFactory.GRID - 12 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            hills001: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.hills001({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
                     ...rest,
                 }),
             plant001: ({ x, y, ...rest } = {}) =>

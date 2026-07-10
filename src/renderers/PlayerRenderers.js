@@ -6,40 +6,40 @@ const FH = 48;
 
 const ANIMS = {
     idle: {
-        src: "textures/player/pink/idle.png",
+        src: "textures/player/idle.png",
         frames: [0, 1, 2, 3],
         fps: 4,
         offsetY: 4,
         loop: true,
     },
     walk: {
-        src: "textures/player/pink/walk.png",
+        src: "textures/player/walk.png",
         frames: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
         fps: 12,
         loop: true,
     },
     slidingIdle: {
-        src: "textures/player/pink/idle.png",
+        src: "textures/player/idle.png",
         frames: [0],
         fps: 1,
         offsetY: 4,
         loop: false,
     },
     walkShoot: {
-        src: "textures/player/pink/walk-shoot.png",
+        src: "textures/player/walk-shoot.png",
         frames: [0, 2, 3, 4, 5, 6, 7, 8, 9],
         fps: 12,
         loop: true,
     },
     jumpAsc: {
-        src: "textures/player/pink/jump.png",
+        src: "textures/player/jump.png",
         frames: [0, 1],
         fps: 12,
         offsetY: 4,
         loop: false,
     },
     jumpDesc: {
-        src: "textures/player/pink/jump.png",
+        src: "textures/player/jump.png",
         frames: [3, 4, 5],
         fps: 12,
         delay: 400,
@@ -47,49 +47,51 @@ const ANIMS = {
         loop: false,
     },
     jumpShoot: {
-        src: "textures/player/pink/jump-shoot.png",
+        src: "textures/player/jump-shoot.png",
         frames: [2, 7],
         fps: 12,
         offsetY: 2,
         loop: true,
     },
     shoot: {
-        src: "textures/player/pink/shoot.png",
+        src: "textures/player/shoot.png",
         frames: [0, 1],
         fps: 12,
         offsetY: 3,
         loop: true,
     },
     crouchIdle: {
-        src: "textures/player/pink/crouch.png",
+        src: "textures/player/crouch.png",
         frames: [0],
         fps: 1,
         offsetX: -15,
         loop: false,
     },
     crouchIdleShoot: {
-        src: "textures/player/pink/crouch-shoot.png",
+        src: "textures/player/crouch-shoot.png",
         frames: [0, 6],
         fps: 12,
         offsetX: 33,
+        extraH: 3,
         loop: true,
     },
     crouch: {
-        src: "textures/player/pink/crouch.png",
+        src: "textures/player/crouch.png",
         frames: [0, 1, 2, 3, 4, 5],
         fps: 12,
         offsetX: -15,
         loop: true,
     },
     crouchShoot: {
-        src: "textures/player/pink/crouch-shoot.png",
+        src: "textures/player/crouch-shoot.png",
         frames: [0, 1, 2, 3, 4, 5],
         fps: 12,
         offsetX: 33,
+        extraH: 3,
         loop: true,
     },
     die: {
-        src: "textures/player/pink/die.png",
+        src: "textures/player/die.png",
         frames: [0, 1, 2],
         fps: 6,
         loop: false,
@@ -196,11 +198,13 @@ export const DefaultPlayerRenderer = {
         }
 
         const spriteFrame = getCurrentFrame(animKey, anim, now);
-        const dw = FW * SCALE;
-        const dh = FH * SCALE;
+        const frameW = FW + (anim.extraW ?? 0);
+        const frameH = FH + (anim.extraH ?? 0);
+        const dw = frameW * SCALE;
+        const dh = frameH * SCALE;
 
-        const drawX = -dw / 2 + (anim.offsetX ?? 0);
-        const drawY = -dh + (anim.offsetY ?? 0);
+        const drawX = Math.round(-(FW * SCALE) / 2 + (anim.offsetX ?? 0));
+        const drawY = Math.round(-(FH * SCALE) + (anim.offsetY ?? 0));
 
         ctx.save();
         ctx.imageSmoothingEnabled = false;
@@ -213,7 +217,17 @@ export const DefaultPlayerRenderer = {
             ctx.scale(-1, 1);
         }
 
-        ctx.drawImage(img, spriteFrame * FW, 0, FW, FH, drawX, drawY, dw, dh);
+        ctx.drawImage(
+            img,
+            spriteFrame * FW,
+            0,
+            FW,
+            frameH,
+            drawX,
+            drawY,
+            dw,
+            dh,
+        );
 
         if (player.isHit) {
             const outlineSize = 3;
@@ -221,7 +235,17 @@ export const DefaultPlayerRenderer = {
 
             offCtx.clearRect(0, 0, dw, dh);
             offCtx.imageSmoothingEnabled = false;
-            offCtx.drawImage(img, spriteFrame * FW, 0, FW, FH, 0, 0, dw, dh);
+            offCtx.drawImage(
+                img,
+                spriteFrame * FW,
+                0,
+                FW,
+                frameH,
+                0,
+                0,
+                dw,
+                dh,
+            );
             offCtx.globalCompositeOperation = "source-atop";
             offCtx.fillStyle = "red";
             offCtx.fillRect(0, 0, dw, dh);
@@ -247,7 +271,7 @@ export const DefaultPlayerRenderer = {
                 spriteFrame * FW,
                 0,
                 FW,
-                FH,
+                frameH,
                 drawX,
                 drawY,
                 dw,
@@ -259,7 +283,17 @@ export const DefaultPlayerRenderer = {
 
             offCtx.clearRect(0, 0, dw, dh);
             offCtx.imageSmoothingEnabled = false;
-            offCtx.drawImage(img, spriteFrame * FW, 0, FW, FH, 0, 0, dw, dh);
+            offCtx.drawImage(
+                img,
+                spriteFrame * FW,
+                0,
+                FW,
+                frameH,
+                0,
+                0,
+                dw,
+                dh,
+            );
             offCtx.globalCompositeOperation = "source-atop";
             offCtx.fillStyle = "#51b9db";
             offCtx.fillRect(0, 0, dw, dh);
@@ -285,7 +319,7 @@ export const DefaultPlayerRenderer = {
                 spriteFrame * FW,
                 0,
                 FW,
-                FH,
+                frameH,
                 drawX,
                 drawY,
                 dw,
