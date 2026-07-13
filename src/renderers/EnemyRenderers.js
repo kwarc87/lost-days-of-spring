@@ -1,9 +1,10 @@
 import { getImg } from "../utils/imgCache.js";
+import { GameFactory } from "../factories/GameFactory.js";
 
-const SCALE = 3;
+const SCALE = GameFactory.SCALE;
 const S = SCALE;
 const FPS = 8;
-const OUTLINE = 3;
+const OUTLINE = 4;
 
 const CFG1 = {
     src: "textures/enemies/enemy001.png",
@@ -174,12 +175,12 @@ function drawSlimeEnemy(ctx, enemy, debug, now, player) {
     });
 }
 
-// slime — eye & mouth pixel anchors per frame
+// evilEye — eye pixel anchors per frame (scaled to current SCALE)
 const EVIL_EYE_EYE_DATA = [
-    { x: 30, y: 54, w: 7, h: 6 },
-    { x: 30, y: 42, w: 8, h: 9 },
-    { x: 30, y: 26, w: 7, h: 7 },
-    { x: 29, y: 30, w: 8, h: 9 },
+    { x: 40, y: 72, w: 9, h: 8 },
+    { x: 40, y: 56, w: 11, h: 12 },
+    { x: 40, y: 35, w: 9, h: 9 },
+    { x: 39, y: 40, w: 11, h: 12 },
 ];
 
 function drawEvilEyeEye(ctx, drawX, drawY, f, eyeColor) {

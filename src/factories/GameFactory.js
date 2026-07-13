@@ -4,61 +4,66 @@ let _nextCheckpointPlatformId = 9001;
 let _nextTeleportPlatformId = 8001;
 
 export const GameFactory = {
-    GRID: 48,
-    SCALE: 3,
-    player: (overrides = {}) => ({
-        x: 0,
-        y: 0,
-        prevX: 0,
-        prevY: 0,
-        w: 36,
-        h: 108,
-        vx: 0,
-        vy: 0,
-        life: 6,
-        maxLife: 6,
-        isHit: false,
-        lastHitTime: 0,
-        hitCooldown: 1000,
-        knockbackUntil: 0,
-        knockbackControlLock: 200,
-        acceleration: 0.8,
-        deceleration: 1.2,
-        airAcceleration: 2,
-        airDeceleration: 2,
-        carryVx: 0,
-        carryVxInitial: 0,
-        carryStartAt: 0,
-        carryDuration: 400,
-        speed: 5.8,
-        crouchSpeed: 3,
-        crouchHeight: 45,
-        crouchWidth: 72,
-        originalHeight: 108,
-        originalWidth: 36,
-        airborne: true,
-        jump: 16.4,
-        jumpPressedByUser: false,
-        jumpPressedAt: 0,
-        jumpBufferDuration: 80,
-        lastGroundedAt: 0,
-        coyoteDuration: 80,
-        onGroundId: null,
-        onGroundType: null,
-        lastGroundId: null,
-        lastGroundType: null,
-        coinsCount: 0,
-        splintersCount: 0,
-        artifactsCount: 0,
-        facing: "right",
-        shooting: false,
-        lastShootTime: 0,
-        shootingOffsetY: -9,
-        shootingCrouchOffsetY: 4,
-        shootingOffsetX: 38,
-        shootingCrouchOffsetX: 44,
-        ...overrides,
-    }),
+    // Sprite/world scale. Single source of truth: every world-pixel quantity
+    // derives from this. GRID = 16px tile * SCALE.
+    SCALE: 4,
+    GRID: 64,
+    player: (overrides = {}) => {
+        const S = GameFactory.SCALE;
+        return {
+            x: 0,
+            y: 0,
+            prevX: 0,
+            prevY: 0,
+            w: 12 * S,
+            h: 36 * S,
+            vx: 0,
+            vy: 0,
+            life: 6,
+            maxLife: 6,
+            isHit: false,
+            lastHitTime: 0,
+            hitCooldown: 1000,
+            knockbackUntil: 0,
+            knockbackControlLock: 200,
+            acceleration: 1,
+            deceleration: 1.6,
+            airAcceleration: 2.6,
+            airDeceleration: 2.6,
+            carryVx: 0,
+            carryVxInitial: 0,
+            carryStartAt: 0,
+            carryDuration: 400,
+            speed: 7.8,
+            crouchSpeed: 4,
+            crouchHeight: 15 * S,
+            crouchWidth: 24 * S,
+            originalHeight: 36 * S,
+            originalWidth: 12 * S,
+            airborne: true,
+            jump: 22,
+            jumpPressedByUser: false,
+            jumpPressedAt: 0,
+            jumpBufferDuration: 80,
+            lastGroundedAt: 0,
+            coyoteDuration: 80,
+            onGroundId: null,
+            onGroundType: null,
+            lastGroundId: null,
+            lastGroundType: null,
+            coinsCount: 0,
+            splintersCount: 0,
+            artifactsCount: 0,
+            facing: "right",
+            shooting: false,
+            lastShootTime: 0,
+            shootingOffsetY: -3 * S,
+            shootingCrouchOffsetY: 5,
+            shootingOffsetX: 50,
+            shootingCrouchOffsetX: 58,
+            ...overrides,
+        };
+    },
     solid: ({ id, x, y, w, h, layout = "ground", color } = {}) => ({
         id,
         x,
@@ -227,8 +232,8 @@ export const GameFactory = {
             direction: 1,
             vx: speed,
             health,
-            recoilX: 8,
-            recoilY: 8,
+            recoilX: 12,
+            recoilY: 12,
             isDamaged: false,
             dying: false,
             dyingStartedAtMs: null,
@@ -244,8 +249,8 @@ export const GameFactory = {
         };
     },
     slime: (args = {}) => {
-        const w = 86;
-        const h = 128;
+        const w = 112;
+        const h = 168;
         const { startX, targetX, startY, targetY } = args;
         const goingLeft = startX > targetX;
         const goingRight = targetX > startX;
@@ -263,12 +268,12 @@ export const GameFactory = {
             sprite: "slime",
             w,
             h,
-            offsetX: 5,
+            offsetX: 8,
         };
     },
     evilEye: (args = {}) => {
-        const w = 60;
-        const h = 74;
+        const w = 80;
+        const h = 96;
         const { startX, targetX, startY, targetY } = args;
         const goingLeft = startX > targetX;
         const goingRight = targetX > startX;
@@ -286,8 +291,8 @@ export const GameFactory = {
             sprite: "evilEye",
             w,
             h,
-            offsetX: 16,
-            offsetY: 34,
+            offsetX: 20,
+            offsetY: 44,
         };
     },
     exit: ({ id, x, y, w, h, ...rest } = {}) => ({
@@ -336,8 +341,8 @@ export const GameFactory = {
         id,
         x,
         y,
-        w: 24,
-        h: 24,
+        w: 32,
+        h: 32,
         collected: false,
         ...rest,
     }),
@@ -346,8 +351,8 @@ export const GameFactory = {
             id,
             x,
             y,
-            w: 48,
-            h: 48,
+            w: 64,
+            h: 64,
             url: "textures/icons.png",
             cordX: cordX * 16,
             cordY: cordY * 16,
@@ -365,8 +370,8 @@ export const GameFactory = {
                 id: `artifact-${id}-msg`,
                 x,
                 y,
-                w: 48,
-                h: 48,
+                w: 64,
+                h: 64,
                 offsetX,
                 offsetY,
                 ...(title !== undefined && { title }),
@@ -382,13 +387,13 @@ export const GameFactory = {
     weapon: (overrides = {}) => ({
         id: 1,
         color: "#ffc300",
-        speed: 12,
+        speed: 16,
         shootFrequency: 125,
         ammo: {
             vx: 0,
             vy: 0,
-            w: 8,
-            h: 8,
+            w: 12,
+            h: 12,
             damage: 5,
         },
         ...overrides,
@@ -397,22 +402,22 @@ export const GameFactory = {
         id,
         x,
         y,
-        w: 96,
-        h: 96,
+        w: 128,
+        h: 128,
         targetY,
         color: "#35fffd",
-        speed: 8,
+        speed: 12,
         shootFrequency: 2000,
         delay: 0,
         lastShootTime: 0,
         ammo: {
             vx: 0,
             vy: 0,
-            w: 8,
-            h: 8,
+            w: 12,
+            h: 12,
             damage: 1,
             recoilX: 0,
-            recoilY: 6,
+            recoilY: 8,
         },
         ...rest,
     }),
@@ -441,9 +446,9 @@ export const GameFactory = {
         damage = 1,
     } = {}) => {
         return Array.from({ length: count }, (_, i) => {
-            const firstItemAdditionalMargin = i === 0 ? 9 : 0;
+            const firstItemAdditionalMargin = i === 0 ? 12 : 0;
             const lastItemAdditionalMargin =
-                i === count - 1 && position === "down" ? 9 : 0;
+                i === count - 1 && position === "down" ? 12 : 0;
             const spikeW = 16 * GameFactory.SCALE;
             return GameFactory.spike({
                 id: startId + i,
@@ -467,18 +472,18 @@ export const GameFactory = {
         variant = 1,
         position = "down",
         damage = 1,
-        recoilX = 4,
-        recoilY = 8,
+        recoilX = 6,
+        recoilY = 12,
         w = 16 * GameFactory.SCALE,
         h = 16 * GameFactory.SCALE,
         offsetX = 0,
-        offsetY = -3,
+        offsetY = -4,
     } = {}) => ({
         id,
         x,
-        y: position === "up" ? y : y + 9,
+        y: position === "up" ? y : y + 12,
         w,
-        h: position === "up" ? h - 18 : h - 9,
+        h: position === "up" ? h - 24 : h - 12,
         variant,
         position,
         damage,
@@ -516,7 +521,7 @@ export const GameFactory = {
             cordX: 0,
             cordY: 260,
             w: 16 * GameFactory.SCALE,
-            h: 49 * GameFactory.SCALE,
+            h: 48 * GameFactory.SCALE,
             ...rest,
         }),
         checkpointFront: ({ x, y, ...rest } = {}) => ({
@@ -526,7 +531,7 @@ export const GameFactory = {
             cordX: 16,
             cordY: 260,
             w: 16 * GameFactory.SCALE,
-            h: 49 * GameFactory.SCALE,
+            h: 48 * GameFactory.SCALE,
             ...rest,
         }),
         terminalDirection: ({ x, y, direction = "up", ...rest } = {}) => ({
@@ -902,8 +907,8 @@ export const GameFactory = {
             id,
             x: x * GameFactory.GRID,
             y: y * GameFactory.GRID,
-            w: 96,
-            h: 192,
+            w: 128,
+            h: 240,
             targetX: targetX * GameFactory.GRID,
             targetY: targetY * GameFactory.GRID,
             delay: 200,
@@ -964,8 +969,8 @@ export const GameFactory = {
                 id,
                 startX: startX * GameFactory.GRID,
                 targetX: targetX * GameFactory.GRID,
-                startY: startY * GameFactory.GRID - 32,
-                targetY: targetY * GameFactory.GRID - 32,
+                startY: startY * GameFactory.GRID - 40,
+                targetY: targetY * GameFactory.GRID - 40,
                 speed,
                 health,
                 ...rest,
@@ -1159,8 +1164,10 @@ export const GameFactory = {
         coins: ({ id, x, y, ...rest } = {}) =>
             GameFactory.collectible({
                 id,
-                x: x * GameFactory.GRID + GameFactory.GRID / 4,
-                y: y * GameFactory.GRID + GameFactory.GRID / 4,
+                x: x * GameFactory.GRID + 8,
+                y: y * GameFactory.GRID + 8,
+                w: 48,
+                h: 48,
                 ...rest,
             }),
         hearts: ({ id, x, y, ...rest } = {}) =>
@@ -1173,10 +1180,10 @@ export const GameFactory = {
         splinters: ({ id, x, y, ...rest } = {}) =>
             GameFactory.collectible({
                 id,
-                x: x * GameFactory.GRID + 6,
-                y: y * GameFactory.GRID + 6,
-                w: 36,
-                h: 36,
+                x: x * GameFactory.GRID + 8,
+                y: y * GameFactory.GRID + 8,
+                w: 48,
+                h: 48,
                 ...rest,
             }),
         artifact: ({ id, x, y, cordX, cordY, message, ...rest } = {}) =>
@@ -1217,18 +1224,18 @@ export const GameFactory = {
             GameFactory.rowOfCollectibles({
                 startId,
                 count,
-                startX: x * GameFactory.GRID + GameFactory.GRID / 4,
-                y: y * GameFactory.GRID + GameFactory.GRID / 4,
+                startX: x * GameFactory.GRID + 8,
+                y: y * GameFactory.GRID + 8,
                 gap: gap * GameFactory.GRID,
-            }),
+            }).map((c) => ({ ...c, w: 48, h: 48 })),
         columnOfCollectibles: ({ startId, count, x, y, gap = 1 } = {}) =>
             GameFactory.columnOfCollectibles({
                 startId,
                 count,
-                x: x * GameFactory.GRID + GameFactory.GRID / 4,
-                startY: y * GameFactory.GRID + GameFactory.GRID / 4,
+                x: x * GameFactory.GRID + 8,
+                startY: y * GameFactory.GRID + 8,
                 gap: gap * GameFactory.GRID,
-            }),
+            }).map((c) => ({ ...c, w: 48, h: 48 })),
         rowOfSpikes: ({
             startId,
             count,

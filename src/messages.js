@@ -188,6 +188,21 @@ export const MESSAGES = {
                 ],
             },
         ],
+        FULLSCREEN_HINT: [
+            {
+                segments: [
+                    {
+                        text: "Press ",
+                        color: "#fff",
+                    },
+                    { text: "f ", color: "#f5c542" },
+                    {
+                        text: "to toggle fullscreen mode",
+                        color: "#fff",
+                    },
+                ],
+            },
+        ],
         ARTIFACTS: {
             DISK001: {
                 lines: [

@@ -57,6 +57,7 @@ export class LostDaysOfSpring {
             escape: "Escape",
             enter: "Enter",
             debugToggle: "NumpadAdd",
+            fullscreen: "KeyF",
             // Menu navigation
             menuUp: "ArrowUp",
             menuDown: "ArrowDown",
@@ -96,6 +97,9 @@ export class LostDaysOfSpring {
         this.verticalHitRecoilMultiplier = 1.5;
         this.mapDiscovery = null;
 
+        // ====== FULLSCREEN ======
+        this.isFullscreen = false;
+
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({
             weapon: GameFactory.weapon(),
@@ -125,16 +129,16 @@ export class LostDaysOfSpring {
             smoothing: 0.15, // base interpolation factor for camera position (0–1)
 
             lookAheadX: 0, // current horizontal look-ahead offset (interpolated)
-            lookAheadXTarget: 216, // horizontal look-ahead distance in pixels
+            lookAheadXTarget: 288, // horizontal look-ahead distance in pixels
             lookAheadXSmoothing: 0.02, // interpolation factor for horizontal look-ahead
 
             lookAheadY: 0, // current vertical look-ahead offset (interpolated)
-            lookAheadYTargetUp: 96, // look-ahead distance when ascending (pixels)
-            lookAheadYTargetDown: 312, // look-ahead distance when falling (pixels)
+            lookAheadYTargetUp: 128, // look-ahead distance when ascending (pixels)
+            lookAheadYTargetDown: 416, // look-ahead distance when falling (pixels)
             lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing (returning to center)
             lookAheadYSmoothingDown: 0.2, // faster smoothing when building downward look-ahead
 
-            lookAheadYTargetDownCrouch: 216,
+            lookAheadYTargetDownCrouch: 288,
 
             // culling
             margin: GameFactory.GRID * 5,
@@ -142,8 +146,8 @@ export class LostDaysOfSpring {
 
         // ====== PHYSICS ======
         this.physics = {
-            gravity: 0.52,
-            maxFallSpeed: 24,
+            gravity: 0.7,
+            maxFallSpeed: 32,
             fallGravityMultiplier: 1.45,
             jumpCutGravityMultiplier: 2.8,
         };
@@ -198,6 +202,18 @@ export class LostDaysOfSpring {
         this.initControls();
 
         this.decorateDrawMethods();
+
+        this.cameraSnapStep = 1;
+        this.resizeCanvasToFit();
+        window.addEventListener("resize", () => this.resizeCanvasToFit());
+        document.addEventListener("fullscreenchange", () => {
+            this.isFullscreen = !!document.fullscreenElement;
+            this.canvas.classList.toggle("fullscreen", this.isFullscreen);
+            this.resizeCanvasToFit();
+            if (!this.isFullscreen) {
+                navigator.keyboard?.unlock?.();
+            }
+        });
     }
 
     decorateDrawMethods() {
@@ -224,6 +240,63 @@ export class LostDaysOfSpring {
         this.drawHeart = this.withCameraCulling(this.drawHeart);
         this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
         this.drawExit = this.withCameraCulling(this.drawExit);
+    }
+
+    resizeCanvasToFit() {
+        const viewportW = window.innerWidth;
+
+        let cssW, cssH, snapStep;
+
+        if (viewportW >= 1920) {
+            cssW = 1920;
+            cssH = 1080;
+            snapStep = 1;
+        } else if (viewportW >= 1440) {
+            cssW = 1440;
+            cssH = 810;
+            snapStep = 4; // 4 × 0.75 = 3 px CSS → integer
+        } else if (viewportW >= 960) {
+            cssW = 960;
+            cssH = 540;
+            snapStep = 2; // 2 × 0.5 = 1 px CSS → integer
+        } else if (viewportW >= 480) {
+            cssW = 480;
+            cssH = 270;
+            snapStep = 4; // 4 × 0.25 = 1 px CSS → integer
+        } else {
+            // tryb płynny — dopasowanie do szerokości ekranu
+            cssW = viewportW;
+            cssH = Math.round(viewportW * (1080 / 1920));
+            snapStep = 4;
+        }
+
+        this.cameraSnapStep = snapStep;
+        this.canvas.style.width = cssW + "px";
+        this.canvas.style.height = cssH + "px";
+    }
+
+    toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement
+                .requestFullscreen()
+                .then(() => {
+                    this.isFullscreen = true;
+                    this.canvas.classList.add("fullscreen");
+                    this.resizeCanvasToFit();
+                    navigator.keyboard?.lock?.(["Escape"]).catch(() => {});
+                })
+                .catch(() => {});
+        } else {
+            navigator.keyboard?.unlock?.();
+            document
+                .exitFullscreen()
+                .then(() => {
+                    this.isFullscreen = false;
+                    this.canvas.classList.remove("fullscreen");
+                    this.resizeCanvasToFit();
+                })
+                .catch(() => {});
+        }
     }
 
     loadLevel(levelId, now = performance.now()) {
@@ -292,6 +365,7 @@ export class LostDaysOfSpring {
         this.parallaxItems = levelData.parallax ?? [];
         this.cannons = levelData.cannons ?? [];
         this.teleports = levelData.teleports ?? [];
+
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
         this.currentLevelArtifactsCount = this.artifacts.length;
@@ -554,6 +628,10 @@ export class LostDaysOfSpring {
                 this.updateDebug();
             }
 
+            if (e.code === this.keysMap.fullscreen && !e.repeat) {
+                this.toggleFullscreen();
+            }
+
             if (this.isTitleScreen) {
                 if (
                     e.code === this.keysMap.enter &&
@@ -561,6 +639,16 @@ export class LostDaysOfSpring {
                     !this.titleFadeOut.active &&
                     !this.titleFadeOut.pending
                 ) {
+                    if (!document.fullscreenElement) {
+                        this.canvas
+                            .requestFullscreen()
+                            .then(() => {
+                                navigator.keyboard
+                                    ?.lock?.(["Escape"])
+                                    .catch(() => {});
+                            })
+                            .catch(() => {});
+                    }
                     this.titleFadeOut.pending = true;
                     this.keys = {};
                 }
@@ -2048,14 +2136,27 @@ export class LostDaysOfSpring {
     }
 
     clampCameraToWorld() {
-        this.camera.x = Math.max(
-            0,
-            Math.min(this.camera.x, this.worldSize.width - this.camera.width),
-        );
-        this.camera.y = Math.max(
-            0,
-            Math.min(this.camera.y, this.worldSize.height - this.camera.height),
-        );
+        const snap = this.cameraSnapStep ?? 1;
+        this.camera.x =
+            Math.round(
+                Math.max(
+                    0,
+                    Math.min(
+                        this.camera.x,
+                        this.worldSize.width - this.camera.width,
+                    ),
+                ) / snap,
+            ) * snap;
+        this.camera.y =
+            Math.round(
+                Math.max(
+                    0,
+                    Math.min(
+                        this.camera.y,
+                        this.worldSize.height - this.camera.height,
+                    ),
+                ) / snap,
+            ) * snap;
     }
 
     resetCameraToPlayerStart() {
@@ -2282,10 +2383,7 @@ export class LostDaysOfSpring {
             );
         } else {
             this.drawWorld();
-            this.ctx.translate(
-                -Math.round(this.camera.x),
-                -Math.round(this.camera.y),
-            );
+            this.ctx.translate(-this.camera.x, -this.camera.y);
         }
 
         for (const i of this.parallaxItems) {
@@ -2392,6 +2490,14 @@ export class LostDaysOfSpring {
 
         if (this.showDebug && !this.mapView) {
             DebugGridRenderer.draw(this.ctx, this.camera, this.worldSize);
+            for (const t of this.teleports) {
+                this.ctx.save();
+                this.ctx.strokeStyle = "cyan";
+                this.ctx.lineWidth = 1;
+                this.ctx.strokeRect(t.x, t.y, t.w, t.h);
+                this.ctx.strokeRect(t.targetX, t.targetY, t.w, t.h);
+                this.ctx.restore();
+            }
         }
 
         this.ctx.restore();
@@ -2722,7 +2828,7 @@ export class LostDaysOfSpring {
             this.checkpointRenderer.drawMap(this.ctx, cp);
             return;
         }
-        this.checkpointRenderer.draw(this.ctx, cp);
+        this.checkpointRenderer.draw(this.ctx, cp, this.showDebug);
     }
 
     drawExit(exit) {

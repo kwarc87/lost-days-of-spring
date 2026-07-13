@@ -1,9 +1,10 @@
 import { getImg } from "../utils/imgCache.js";
+import { GameFactory } from "../factories/GameFactory.js";
 
 const SPIKE_IMG_PATH = "textures/tilesets.png";
 const SPIKE_SW = 16;
 const SPIKE_SH = 16;
-const SPIKE_SCALE = 3;
+const SPIKE_SCALE = GameFactory.SCALE;
 
 const SPIKE_VARIANTS = {
     1: { sx: 0, sy: 240 },
@@ -24,7 +25,12 @@ export const DefaultSpikeRenderer = {
         if (up) {
             ctx.translate(
                 Math.round(spike.x + (SPIKE_SW * SPIKE_SCALE) / 2 + ox),
-                Math.round(spike.y + (SPIKE_SH * SPIKE_SCALE) / 2 - 3 * 3 + oy),
+                Math.round(
+                    spike.y +
+                        (SPIKE_SH * SPIKE_SCALE) / 2 -
+                        3 * GameFactory.SCALE +
+                        oy,
+                ),
             );
             ctx.rotate(Math.PI);
             ctx.drawImage(

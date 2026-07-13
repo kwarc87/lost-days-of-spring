@@ -1,6 +1,12 @@
+html {
+    height: 100%;
+    overflow: hidden;
+}
+
 body {
     background: #000;
-    min-height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -20,7 +26,7 @@ body {
     background: #000;
     border-radius: 6px;
     font-family: "Silkscreen", monospace;
-    font-size: 14px;
+    font-size: 24px;
     color: #7a8a99;
     pointer-events: none;
     transition: opacity 0.3s ease;
@@ -31,12 +37,8 @@ body {
 }
 #game {
     display: block;
-    margin: 0 auto;
-    border: 3px solid #300c14;
-    box-shadow:
-        0 0 30px rgba(92, 30, 30, 0.6),
-        inset 0 0 40px rgba(0, 0, 0, 0.8);
-    border-radius: 8px;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 /* ===== DEBUG & CONTROLS PANELS ===== */

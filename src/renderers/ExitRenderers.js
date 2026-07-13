@@ -51,6 +51,7 @@ export const DefaultExitRenderer = {
         );
         ctx.restore();
         if (debug) {
+            const m = exit.triggerMargin ?? 0;
             ctx.save();
             ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
@@ -59,6 +60,13 @@ export const DefaultExitRenderer = {
                 exit.y,
                 exit.w * GameFactory.SCALE,
                 exit.h * GameFactory.SCALE,
+            );
+            ctx.strokeStyle = "cyan";
+            ctx.strokeRect(
+                exit.x - m,
+                exit.y - m,
+                exit.w * GameFactory.SCALE + m * 2,
+                exit.h * GameFactory.SCALE + m,
             );
             ctx.restore();
         }

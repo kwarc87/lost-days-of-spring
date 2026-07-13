@@ -3,15 +3,15 @@ import { MessageRenderer } from "./MessageRenderer.js";
 import { MESSAGES, formatPlayTime } from "../messages.js";
 
 const ICON_SIZE = 24;
-const ICON_GAP = 8;
+const ICON_GAP = 16;
 const PAD_X = 32;
 const PAD_Y = 24;
-const GAP = 16;
+const GAP = 24;
 const SUB_GAP = 6;
-const TITLE_H = 24;
-const LINE_H = 13;
-const TITLE_FONT = `normal 24px "Silkscreen", monospace`;
-const SUB_FONT = `normal 14px "Silkscreen", monospace`;
+const TITLE_H = 32;
+const LINE_H = 24;
+const TITLE_FONT = `normal 32px "Silkscreen", monospace`;
+const SUB_FONT = `normal 24px "Silkscreen", monospace`;
 
 export const DefaultGameOverRenderer = {
     drawGameOverScreen(
@@ -156,6 +156,8 @@ export const DefaultGameOverRenderer = {
         DefaultCollectibleRenderer.drawCoin(ctx, {
             x: coinsRowX,
             y: coinsRowY,
+            w: ICON_SIZE,
+            h: ICON_SIZE,
         });
         ctx.textAlign = "left";
         ctx.fillStyle = MESSAGES.STATS.COINS_COLOR;

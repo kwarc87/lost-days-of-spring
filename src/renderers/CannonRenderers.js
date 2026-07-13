@@ -5,8 +5,8 @@ const SRC_X = 29;
 const SRC_Y = 190;
 const SRC_W = 32;
 const SRC_H = 32;
-const DST_W = 96;
-const DST_H = 96;
+const DST_W = 128;
+const DST_H = 128;
 
 export const CannonRenderer = {
     drawMapCannon: (ctx, cannon) => {
@@ -31,31 +31,31 @@ export const CannonRenderer = {
         ctx.imageSmoothingEnabled = false;
         ctx.drawImage(img, SRC_X, SRC_Y, SRC_W, SRC_H, x, y, DST_W, DST_H);
 
-        const ex = x + 48;
-        const ey = y + 75;
+        const ex = x + 64;
+        const ey = y + 100;
         const color = cannon.color ?? "#35fffd";
 
         // 1. Full shape in main color
         ctx.fillStyle = color;
-        ctx.fillRect(ex - 9, ey - 6, 19, 3);
-        ctx.fillRect(ex - 12, ey - 3, 25, 3);
-        ctx.fillRect(ex - 12, ey, 25, 3);
-        ctx.fillRect(ex - 9, ey + 3, 19, 3);
-        ctx.fillRect(ex - 6, ey + 6, 13, 3);
+        ctx.fillRect(ex - 12, ey - 8, 25, 4);
+        ctx.fillRect(ex - 16, ey - 4, 33, 4);
+        ctx.fillRect(ex - 16, ey, 33, 4);
+        ctx.fillRect(ex - 12, ey + 4, 25, 4);
+        ctx.fillRect(ex - 8, ey + 8, 17, 4);
 
         // 2. Darken full shape → creates the border color
         ctx.fillStyle = "rgba(0,0,0,0.4)";
-        ctx.fillRect(ex - 9, ey - 6, 19, 3);
-        ctx.fillRect(ex - 12, ey - 3, 25, 3);
-        ctx.fillRect(ex - 12, ey, 25, 3);
-        ctx.fillRect(ex - 9, ey + 3, 19, 3);
-        ctx.fillRect(ex - 6, ey + 6, 13, 3);
+        ctx.fillRect(ex - 12, ey - 8, 25, 4);
+        ctx.fillRect(ex - 16, ey - 4, 33, 4);
+        ctx.fillRect(ex - 16, ey, 33, 4);
+        ctx.fillRect(ex - 12, ey + 4, 25, 4);
+        ctx.fillRect(ex - 8, ey + 8, 17, 4);
 
         // 3. Restore inner fill (inset 3px left/right, skip top+bottom rows)
         ctx.fillStyle = color;
-        ctx.fillRect(ex - 9, ey - 3, 19, 3);
-        ctx.fillRect(ex - 9, ey, 19, 3);
-        ctx.fillRect(ex - 6, ey + 3, 13, 3);
+        ctx.fillRect(ex - 12, ey - 4, 25, 4);
+        ctx.fillRect(ex - 12, ey, 25, 4);
+        ctx.fillRect(ex - 8, ey + 4, 17, 4);
 
         ctx.restore();
     },

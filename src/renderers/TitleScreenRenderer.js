@@ -1,16 +1,16 @@
 import { getImg } from "../utils/imgCache.js";
 import { DefaultPlatformRenderer } from "./PlatformRenderers.js";
 
-const TITLE_FONT = `normal 90px "Jacquard 12"`;
-const PROMPT_FONT = `500 24px "Silkscreen", monospace`;
-const CREDITS_FONT = `400 14px "Silkscreen", monospace`;
+const TITLE_FONT = `normal 112px "Jacquard 12"`;
+const PROMPT_FONT = `500 32px "Silkscreen", monospace`;
+const CREDITS_FONT = `400 18px "Silkscreen", monospace`;
 
 const TITLE_COLOR = "#73c3eb";
 const PROMPT_COLOR = "#f0cc8b";
 const CREDITS_COLOR = "#c8c8c8";
 const OUTLINE_COLOR = "#3b1158";
-const TITLE_OUTLINE_WIDTH = 14;
-const TEXT_OUTLINE_WIDTH = 3;
+const TITLE_OUTLINE_WIDTH = 18;
+const TEXT_OUTLINE_WIDTH = 8;
 
 function drawOutlinedText(
     ctx,
@@ -97,7 +97,7 @@ export const TitleScreenRenderer = {
             const promptY = Math.round(h * 0.54);
 
             ctx.strokeStyle = OUTLINE_COLOR;
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 8;
             ctx.lineJoin = "mitel";
             ctx.strokeText(promptText, w / 2, promptY);
 
@@ -118,7 +118,7 @@ export const TitleScreenRenderer = {
             creditsY,
             CREDITS_COLOR,
             OUTLINE_COLOR,
-            TEXT_OUTLINE_WIDTH,
+            TEXT_OUTLINE_WIDTH / 2,
         );
 
         // ── Skull decorations ──────────────────────────────────
@@ -141,7 +141,7 @@ export const TitleScreenRenderer = {
         }
 
         // ── Side wall platforms ────────────────────────────────
-        const TILE = 48;
+        const TILE = 64;
 
         ctx.save();
         ctx.translate(0, h);

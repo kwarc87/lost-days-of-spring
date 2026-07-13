@@ -2,55 +2,7 @@ import { DefaultCollectibleRenderer } from "./CollectibleRenderers.js";
 import { MessageRenderer } from "./MessageRenderer.js";
 import { MESSAGES } from "../messages.js";
 
-// 7×6 pixel art heart grid
-const HEART_PIXELS = [
-    [0, 1, 1, 0, 1, 1, 0],
-    [1, 1, 1, 1, 1, 1, 1],
-    [1, 1, 1, 1, 1, 1, 1],
-    [0, 1, 1, 1, 1, 1, 0],
-    [0, 0, 1, 1, 1, 0, 0],
-    [0, 0, 0, 1, 0, 0, 0],
-];
-
-// Highlight pixels (bright spot top-left of each lobe)
-const HEART_HIGHLIGHT = [
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 0, 0, 1, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0],
-];
-
 const COLLECTED_OK_COLOR = "#72eb84";
-
-function drawPixelHeart(ctx, x, y, scale, full) {
-    for (let row = 0; row < HEART_PIXELS.length; row++) {
-        for (let col = 0; col < HEART_PIXELS[row].length; col++) {
-            if (!HEART_PIXELS[row][col]) {
-                continue;
-            }
-
-            if (full) {
-                if (HEART_HIGHLIGHT[row][col]) {
-                    ctx.fillStyle = "#ff9ab4";
-                } else if (
-                    row === HEART_PIXELS.length - 1 ||
-                    (row >= 1 &&
-                        (col === 0 || col === HEART_PIXELS[row].length - 1))
-                ) {
-                    ctx.fillStyle = "#8b1a28";
-                } else {
-                    ctx.fillStyle = "#e8334a";
-                }
-            } else {
-                ctx.fillStyle = "#3d2335";
-            }
-
-            ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
-        }
-    }
-}
 
 export const DefaultHubRenderer = {
     draw(
@@ -72,12 +24,11 @@ export const DefaultHubRenderer = {
         // ── Hearts panel (top-left) ──────────────────────────────────────────
         const life = player.life ?? 0;
         const maxLife = player.maxLife ?? 6;
-        const heartScale = 3;
-        const heartW = 7 * heartScale; // 21px
-        const heartH = 6 * heartScale; // 18px
-        const heartGap = 5;
-        const heartPadX = 10;
-        const heartPadY = 9;
+        const heartW = 32; // 8px × HEART_SCALE 4
+        const heartH = 32;
+        const heartGap = 8;
+        const heartPadX = 14;
+        const heartPadY = 10;
         const heartsPanelW =
             heartPadX * 2 + maxLife * heartW + (maxLife - 1) * heartGap;
         const heartsPanelH = heartPadY * 2 + heartH;
@@ -97,11 +48,18 @@ export const DefaultHubRenderer = {
         for (let i = 0; i < maxLife; i++) {
             const hx = heartsPanelX + heartPadX + i * (heartW + heartGap);
             const hy = heartsPanelY + heartPadY;
-            drawPixelHeart(ctx, hx, hy, heartScale, i < life);
+            ctx.globalAlpha = i < life ? 1 : 0.25;
+            DefaultCollectibleRenderer.drawHeart(
+                ctx,
+                { x: hx, y: hy, id: 0, w: heartW, h: heartH },
+                false,
+                0,
+            );
         }
+        ctx.globalAlpha = 1;
 
         // ── Player name ───────────────────────────────────────────────────────
-        ctx.font = `500 20px "Silkscreen", monospace`;
+        ctx.font = `500 24px "Silkscreen", monospace`;
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         const nameX = heartsPanelX + heartsPanelW + 12;
@@ -115,11 +73,11 @@ export const DefaultHubRenderer = {
         // ────────────────────────────────────────────────────────────────────
 
         // ── Coin + splinter panel (top-right) ────────────────────────────────
-        const ICON_SIZE = 24;
-        const panelPadX = 10;
-        const panelPadY = 8;
+        const ICON_SIZE = 48;
+        const panelPadX = 14;
+        const panelPadY = 14;
 
-        ctx.font = `16px "Silkscreen", monospace`;
+        ctx.font = `24px "Silkscreen", monospace`;
 
         const coinTextW = Math.ceil(
             ctx.measureText(`${total} / ${total}`).width,
@@ -140,7 +98,7 @@ export const DefaultHubRenderer = {
             ICON_SIZE + 8 + splinterTextW,
             ...(hasArtifacts ? [ICON_SIZE + 8 + artifactTextW] : []),
         );
-        const rowGap = 8;
+        const rowGap = 12;
         const boxW = panelPadX * 2 + rowW;
         const boxH = hasArtifacts
             ? panelPadY * 2 +
@@ -169,7 +127,12 @@ export const DefaultHubRenderer = {
 
         // Coin row
         const coinIconY = boxY + panelPadY;
-        DefaultCollectibleRenderer.drawCoin(ctx, { x: iconX, y: coinIconY });
+        DefaultCollectibleRenderer.drawCoin(ctx, {
+            x: iconX,
+            y: coinIconY,
+            w: ICON_SIZE,
+            h: ICON_SIZE,
+        });
         const coinSuffix = ` / ${total}`;
         ctx.textAlign = "right";
         ctx.fillStyle = "#f0cc8b";
@@ -188,8 +151,6 @@ export const DefaultHubRenderer = {
         DefaultCollectibleRenderer.drawSplinter(ctx, {
             x: iconX,
             y: splinterIconY,
-            w: ICON_SIZE,
-            h: ICON_SIZE,
         });
         ctx.fillStyle = "#f0cc8b";
         const splinterSuffix = ` / ${currentLevelSplintersCount ?? 0}`;
@@ -211,8 +172,6 @@ export const DefaultHubRenderer = {
                 {
                     x: iconX,
                     y: artifactIconY,
-                    w: ICON_SIZE,
-                    h: ICON_SIZE,
                     cordX: 400,
                     cordY: 48,
                 },

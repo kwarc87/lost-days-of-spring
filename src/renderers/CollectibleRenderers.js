@@ -2,12 +2,13 @@
  * Default collectible rendering strategy (Pixel Art Golden Coin)
  */
 import { getImg } from "../utils/imgCache.js";
+import { GameFactory } from "../factories/GameFactory.js";
 
 const GEMS_IMG_PATH = "textures/gems-spritesheet.png";
 const SPLINTER_FRAME_MS = 150;
 const SPLINTER_SW = 12;
 const SPLINTER_SH = 12;
-const SPLINTER_SCALE = 3;
+const SPLINTER_SCALE = GameFactory.SCALE;
 
 const SPLINTER_FRAMES = [
     ...Array.from({ length: 7 }, (_, i) => ({ sx: 66 + i * 16, sy: 34 })),
@@ -17,7 +18,8 @@ const WEAPON_IMG_PATH = "textures/tilesets.png";
 const WEAPON_FRAME_MS = 250;
 const WEAPON_SW = 16;
 const WEAPON_SH = 16;
-const WEAPON_SCALE = 2;
+// Weapon pickup rendered at scale 3 (rounded from 2 × 4/3 to stay crisp).
+const WEAPON_SCALE = 3;
 
 const WEAPON_FRAMES = [
     ...Array.from({ length: 5 }, (_, i) => ({ sx: i * 80, sy: 324 })),
@@ -44,9 +46,18 @@ const HEART_COLORS = [
     "#991b2e", // shadow
 ];
 
-const HEART_SCALE = 3;
+const HEART_SCALE = GameFactory.SCALE;
 
-const WEAPON_OUTLINE = 3;
+const COIN_FRAME_MS = 150;
+const COIN_SW = 12;
+const COIN_SH = 12;
+const COIN_SCALE = GameFactory.SCALE;
+
+const COIN_FRAMES = [
+    ...Array.from({ length: 7 }, (_, i) => ({ sx: 450 + i * 16, sy: 34 })),
+];
+
+const WEAPON_OUTLINE = 4;
 const WEAPON_OUTLINE_COLOR = "#51b9db";
 const WEAPON_OUTLINE_OFFSETS = [
     [-WEAPON_OUTLINE, 0],
@@ -86,43 +97,32 @@ function getHeartBobOffset(collectible, now) {
 }
 
 export const DefaultCollectibleRenderer = {
-    drawCoin: (ctx, collectible, showDebug = false) => {
+    drawCoin: (
+        ctx,
+        collectible,
+        showDebug = false,
+        now = performance.now(),
+    ) => {
+        const img = getImg(GEMS_IMG_PATH);
+        const { sx, sy } =
+            COIN_FRAMES[Math.floor(now / COIN_FRAME_MS) % COIN_FRAMES.length];
+
+        const dw = collectible.w ?? COIN_SW * COIN_SCALE;
+        const dh = collectible.h ?? COIN_SH * COIN_SCALE;
+
         ctx.save();
-
-        const x = Math.round(collectible.x);
-        const y = Math.round(collectible.y);
-
-        // Shadow beneath the coin
-        ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-        ctx.fillRect(x + 4, y + 22, 16, 3);
-
-        // Core Border (Dark Gold / Brown) — 24x24
-        ctx.fillStyle = "#a87b00";
-        ctx.fillRect(x + 8, y + 0, 9, 24); // vertical core
-        ctx.fillRect(x + 3, y + 3, 19, 19); // main bulk square
-        ctx.fillRect(x + 0, y + 8, 24, 9); // horizontal core
-
-        // Coin Body (Bright Gold)
-        ctx.fillStyle = "#ffd700";
-        ctx.fillRect(x + 8, y + 3, 9, 19);
-        ctx.fillRect(x + 5, y + 5, 15, 15);
-        ctx.fillRect(x + 3, y + 8, 19, 9);
-
-        // Right/Bottom Inner Shading (Medium Gold)
-        ctx.fillStyle = "#e5a700";
-        ctx.fillRect(x + 8, y + 20, 9, 2); // bottom edge inner
-        ctx.fillRect(x + 5, y + 18, 15, 2); // bottom slope inner
-        ctx.fillRect(x + 20, y + 8, 2, 9); // right edge inner
-
-        // Center Engraving / Slot
-        ctx.fillStyle = "#cc9500";
-        ctx.fillRect(x + 10, y + 8, 5, 9);
-
-        // Shimmer / Shine (Top-Left corner)
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(x + 8, y + 5, 5, 2);
-        ctx.fillRect(x + 5, y + 8, 2, 5);
-
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(
+            img,
+            sx,
+            sy,
+            COIN_SW,
+            COIN_SH,
+            Math.round(collectible.x),
+            Math.round(collectible.y),
+            dw,
+            dh,
+        );
         ctx.restore();
 
         if (showDebug) {

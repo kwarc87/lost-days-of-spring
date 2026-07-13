@@ -7,13 +7,13 @@ const CORNER_STEPS = 3;
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
 const SHADOW_OFFSET = 1;
 
-const FONT_TITLE = `normal 20px "Silkscreen", monospace`;
-const FONT_BODY = `normal 14px "Silkscreen", monospace`;
-const TITLE_H = 24;
-const LINE_H = 14;
+const FONT_TITLE = `normal 28px "Silkscreen", monospace`;
+const FONT_BODY = `normal 20px "Silkscreen", monospace`;
+const TITLE_H = 28;
+const LINE_H = 20;
 
-const PAD_X = 20;
-const PAD_Y = 14;
+const PAD_X = 28;
+const PAD_Y = 20;
 const GAP = 6;
 const GAP_AFTER_TITLE = 6;
 

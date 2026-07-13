@@ -1,7 +1,13 @@
 import { GameFactory } from "../factories/GameFactory.js";
 
 export const DebugGridRenderer = {
-    draw(ctx, camera, worldSize, gapX = 48, gapY = 48) {
+    draw(
+        ctx,
+        camera,
+        worldSize,
+        gapX = GameFactory.GRID,
+        gapY = GameFactory.GRID,
+    ) {
         ctx.save();
         ctx.strokeStyle = "white";
         ctx.lineWidth = 0.5;

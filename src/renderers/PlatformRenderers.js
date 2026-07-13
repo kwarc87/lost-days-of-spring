@@ -33,12 +33,13 @@
     verticalConnector3x3LeftClean,
 } from "./PlatformHelpers.js";
 import { getImg } from "../utils/imgCache.js";
+import { GameFactory } from "../factories/GameFactory.js";
 
 const BASE_TILESET = {
     path: "textures/tilesets.png",
     tileWidthSrc: 16,
     tileHeightSrc: 16,
-    scale: 3,
+    scale: GameFactory.SCALE,
 };
 
 const GROUND_FULL = {
@@ -72,7 +73,7 @@ const BASE_CRACKS_TILESET = {
     path: "textures/tilesets.png",
     tileWidthSrc: 16,
     tileHeightSrc: 16,
-    scale: 3,
+    scale: GameFactory.SCALE,
 };
 
 const CRACKS_FULL = {

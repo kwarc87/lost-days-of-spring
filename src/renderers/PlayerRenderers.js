@@ -1,6 +1,8 @@
 // ─── Player animations — individual spritesheets per state ───────────────────
 // Each sheet: horizontal strip of 75×48 px frames, rendered at SCALE×.
-const SCALE = 3;
+import { GameFactory } from "../factories/GameFactory.js";
+
+const SCALE = GameFactory.SCALE;
 const FW = 75;
 const FH = 48;
 
@@ -64,14 +66,14 @@ const ANIMS = {
         src: "textures/player/crouch.png",
         frames: [0],
         fps: 1,
-        offsetX: -15,
+        offsetX: -16,
         loop: false,
     },
     crouchIdleShoot: {
         src: "textures/player/crouch-shoot.png",
         frames: [0, 6],
         fps: 12,
-        offsetX: 33,
+        offsetX: 48,
         extraH: 3,
         loop: true,
     },
@@ -86,7 +88,7 @@ const ANIMS = {
         src: "textures/player/crouch-shoot.png",
         frames: [0, 1, 2, 3, 4, 5],
         fps: 12,
-        offsetX: 33,
+        offsetX: 48,
         extraH: 3,
         loop: true,
     },
@@ -230,7 +232,7 @@ export const DefaultPlayerRenderer = {
         );
 
         if (player.isHit) {
-            const outlineSize = 3;
+            const outlineSize = 4;
             const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
 
             offCtx.clearRect(0, 0, dw, dh);
@@ -278,7 +280,7 @@ export const DefaultPlayerRenderer = {
                 dh,
             );
         } else if (player.frozenForTeleport) {
-            const outlineSize = 3;
+            const outlineSize = 4;
             const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
 
             offCtx.clearRect(0, 0, dw, dh);
