@@ -6,7 +6,7 @@ export const CheckpointRenderer = {
         ctx.restore();
         if (debug) {
             ctx.save();
-            ctx.strokeStyle = "cyan";
+            ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
             ctx.strokeRect(cp.x, cp.y, cp.w, cp.h);
             ctx.restore();

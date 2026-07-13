@@ -19,7 +19,7 @@ const WEAPON_FRAME_MS = 250;
 const WEAPON_SW = 16;
 const WEAPON_SH = 16;
 // Weapon pickup rendered at scale 3 (rounded from 2 × 4/3 to stay crisp).
-const WEAPON_SCALE = 3;
+const WEAPON_SCALE = 4;
 
 const WEAPON_FRAMES = [
     ...Array.from({ length: 5 }, (_, i) => ({ sx: i * 80, sy: 324 })),
@@ -181,7 +181,12 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-    drawWeaponUpgrade: (ctx, collectible, now = performance.now()) => {
+    drawWeaponUpgrade: (
+        ctx,
+        collectible,
+        showDebug = false,
+        now = performance.now(),
+    ) => {
         const img = getImg(WEAPON_IMG_PATH);
         const { sx, sy } =
             WEAPON_FRAMES[
@@ -209,6 +214,19 @@ export const DefaultCollectibleRenderer = {
         }
         ctx.drawImage(img, sx, sy, WEAPON_SW, WEAPON_SH, dx, dy, dw, dh);
         ctx.restore();
+
+        if (showDebug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(
+                collectible.x,
+                collectible.y,
+                collectible.w,
+                collectible.h,
+            );
+            ctx.restore();
+        }
     },
     drawMapCoin: (ctx, collectible) => {
         ctx.fillStyle = "#ffd700";

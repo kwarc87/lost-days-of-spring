@@ -59,8 +59,8 @@ export const GameFactory = {
             lastShootTime: 0,
             shootingOffsetY: -3 * S,
             shootingCrouchOffsetY: 5,
-            shootingOffsetX: 50,
-            shootingCrouchOffsetX: 58,
+            shootingOffsetX: 48,
+            shootingCrouchOffsetX: 56,
             ...overrides,
         };
     },
@@ -1209,10 +1209,10 @@ export const GameFactory = {
         weaponUpgrades: ({ id, x, y, ...rest } = {}) =>
             GameFactory.collectible({
                 id,
-                x: x * GameFactory.GRID + 8,
-                y: y * GameFactory.GRID + 8,
-                w: 32,
-                h: 32,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: 64,
+                h: 64,
                 message: {
                     lines: MESSAGES.WEAPON_UPGRADED,
                     relatedTo: "viewPort",
