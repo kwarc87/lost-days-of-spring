@@ -2,7 +2,7 @@
 import { MessageRenderer } from "./MessageRenderer.js";
 
 const FONT_TITLE = `normal 24px "Silkscreen", monospace`;
-const FONT_BODY = `normal 14px "Silkscreen", monospace`;
+const FONT_BODY = `normal 18px "Silkscreen", monospace`;
 const TITLE_COLOR = "#f5c542";
 const ITEM_COLOR = "#ffffff";
 const ITEM_DIMMED_COLOR = "#7a8a99";
@@ -13,16 +13,17 @@ const SHADOW_OFFSET = 1;
 
 const MENU_ITEMS = ["Resume game", "Reset progress", "Return to main screen"];
 
-const PAD_X = 36;
-const PAD_Y = 20;
+const PAD_X = 24;
+const PAD_Y = 18;
+
 const TITLE_H = 24;
-const TIME_GAP = 8;
-const TIME_H = 13;
+const TIME_GAP = 18;
+const TIME_H = 24;
 const TITLE_GAP = 18;
 const ITEM_H = 18;
-const ITEM_GAP = 10;
-const TRIANGLE_W = 10;
-const TRIANGLE_PAD = 10;
+const ITEM_GAP = 9;
+const TRIANGLE_W = 12;
+const TRIANGLE_PAD = 12;
 
 export const DefaultPauseRenderer = {
     menuItemCount: MENU_ITEMS.length,

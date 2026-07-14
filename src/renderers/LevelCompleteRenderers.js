@@ -2,16 +2,18 @@ import { DefaultCollectibleRenderer } from "./CollectibleRenderers.js";
 import { MessageRenderer } from "./MessageRenderer.js";
 import { MESSAGES, formatPlayTime } from "../messages.js";
 
+const PAD_X = 24;
+const PAD_Y = 18;
+
 const ICON_SIZE = 24;
 const ICON_GAP = 16;
-const PAD_X = 32;
-const PAD_Y = 24;
-const GAP = 24;
+const GAP = 18;
+const SUB_GAP = 6;
 const TITLE_H = 32;
-const LINE_H = 24;
-const HINT_H = 24;
-const TITLE_FONT = `normal 32px "Silkscreen", monospace`;
-const SUB_FONT = `normal 24px "Silkscreen", monospace`;
+const LINE_H = 18;
+const HINT_H = 18;
+const TITLE_FONT = `normal 24px "Silkscreen", monospace`;
+const SUB_FONT = `normal 18px "Silkscreen", monospace`;
 
 export const DefaultLevelCompleteRenderer = {
     drawLevelCompleteScreen: (
@@ -51,6 +53,12 @@ export const DefaultLevelCompleteRenderer = {
         );
 
         ctx.font = SUB_FONT;
+        const subtitleW = Math.ceil(
+            ctx.measureText(MESSAGES.LEVEL_COMPLETE.SUBTITLE).width,
+        );
+        const subtitle2W = Math.ceil(
+            ctx.measureText(MESSAGES.LEVEL_COMPLETE.SUBTITLE2).width,
+        );
         const coinRowW =
             ICON_SIZE +
             ICON_GAP +
@@ -67,6 +75,8 @@ export const DefaultLevelCompleteRenderer = {
         const panelW =
             Math.max(
                 titleW,
+                subtitleW,
+                subtitle2W,
                 coinRowW,
                 splinterRowW,
                 ...(hasArtifacts ? [artifactRowW] : []),
@@ -80,6 +90,10 @@ export const DefaultLevelCompleteRenderer = {
         const panelH =
             PAD_Y +
             TITLE_H +
+            SUB_GAP +
+            LINE_H +
+            SUB_GAP +
+            LINE_H +
             GAP +
             ICON_SIZE +
             GAP +
@@ -124,10 +138,38 @@ export const DefaultLevelCompleteRenderer = {
         ctx.fillText(MESSAGES.LEVEL_COMPLETE.TITLE, w / 2, panelY + PAD_Y);
 
         ctx.font = SUB_FONT;
+        const subtitleY = panelY + PAD_Y + TITLE_H + SUB_GAP;
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillText(
+            MESSAGES.LEVEL_COMPLETE.SUBTITLE,
+            w / 2 + 1,
+            subtitleY + 1,
+        );
+        ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.SUBTITLE_COLOR;
+        ctx.fillText(MESSAGES.LEVEL_COMPLETE.SUBTITLE, w / 2, subtitleY);
+
+        const subtitle2Y = subtitleY + LINE_H + SUB_GAP;
+        ctx.fillStyle = "rgba(0,0,0,0.55)";
+        ctx.fillText(
+            MESSAGES.LEVEL_COMPLETE.SUBTITLE2,
+            w / 2 + 1,
+            subtitle2Y + 1,
+        );
+        ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.SUBTITLE_COLOR;
+        ctx.fillText(MESSAGES.LEVEL_COMPLETE.SUBTITLE2, w / 2, subtitle2Y);
+
         ctx.imageSmoothingEnabled = false;
         const textOffY = Math.round((ICON_SIZE - LINE_H) / 2);
 
-        const coinsRowY = panelY + PAD_Y + TITLE_H + GAP;
+        const coinsRowY =
+            panelY +
+            PAD_Y +
+            TITLE_H +
+            SUB_GAP +
+            LINE_H +
+            SUB_GAP +
+            LINE_H +
+            GAP;
         const coinsRowX = Math.round(w / 2 - coinRowW / 2);
         DefaultCollectibleRenderer.drawCoin(ctx, {
             x: coinsRowX,

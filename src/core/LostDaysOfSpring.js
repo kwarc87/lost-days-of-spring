@@ -2302,7 +2302,12 @@ export class LostDaysOfSpring {
         if (this.mapView) {
             return;
         }
-        this.collectibleRenderer.drawWeaponUpgrade(this.ctx, s, now);
+        this.collectibleRenderer.drawWeaponUpgrade(
+            this.ctx,
+            s,
+            this.showDebug,
+            now,
+        );
     }
 
     drawBullet(b) {

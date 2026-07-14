@@ -54,7 +54,7 @@ export const MESSAGES = {
         TITLE: "YOU'VE LOST",
         TITLE_COLOR: "#a0c4ff",
         SUBTITLE: "But the journey continues,",
-        SUBTITLE2: "try again, traveler.",
+        SUBTITLE2: "try again, Colin.",
         SUBTITLE_COLOR: "#c8d6e5",
         DEATHS_TEXT: (count) => `Deaths: ${count}`,
         DEATHS_COLOR: "#e85454",
@@ -64,6 +64,9 @@ export const MESSAGES = {
     LEVEL_COMPLETE: {
         TITLE: "LEVEL COMPLETE!",
         TITLE_COLOR: "#f5c542",
+        SUBTITLE: "Congratulations Colin,",
+        SUBTITLE2: "your adventure will continue soon.",
+        SUBTITLE_COLOR: "#c8d6e5",
         RESTART_HINT: { text: "ESC \u2013 restart level", color: "#7a8a99" },
         DEATHS_TEXT: (count) => `Deaths: ${count}`,
         DEATHS_COLOR: "#e85454",
