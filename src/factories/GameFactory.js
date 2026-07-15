@@ -81,10 +81,10 @@ export const GameFactory = {
         w,
         h,
         layout = "ice",
-        acceleration = 0.05,
-        deceleration = 0.025,
-        airAcceleration = 0.15,
-        airDeceleration = 0.075,
+        acceleration = 0.075,
+        deceleration = 0.05,
+        airAcceleration = 0.2,
+        airDeceleration = 0.15,
         color,
     } = {}) => ({
         id,
@@ -447,21 +447,26 @@ export const GameFactory = {
     } = {}) => {
         return Array.from({ length: count }, (_, i) => {
             const firstItemAdditionalMargin = i === 0 ? 12 : 0;
-            const lastItemAdditionalMargin =
-                i === count - 1 && position === "down" ? 12 : 0;
+            const lastItemAdditionalMargin = i === count - 1 ? 12 : 0;
             const spikeW = 16 * GameFactory.SCALE;
+            const variant = (i % 2) + 1;
+            const isLastUpVariant2 =
+                position === "up" && i === count - 1 && variant === 2;
+            const extraOffsetX = isLastUpVariant2
+                ? -lastItemAdditionalMargin
+                : 0;
             return GameFactory.spike({
                 id: startId + i,
                 x: startX + i * spikeW + firstItemAdditionalMargin,
                 y,
-                variant: (i % 2) + 1,
+                variant,
                 position,
                 damage,
                 w:
                     spikeW -
                     firstItemAdditionalMargin -
                     lastItemAdditionalMargin,
-                offsetX: -firstItemAdditionalMargin,
+                offsetX: -firstItemAdditionalMargin + extraOffsetX,
             });
         });
     },
@@ -1058,10 +1063,10 @@ export const GameFactory = {
             w,
             h,
             layout = "ice",
-            acceleration = 0.06,
-            deceleration = 0.03,
-            airAcceleration = 0.18,
-            airDeceleration = 0.09,
+            acceleration = 0.075,
+            deceleration = 0.05,
+            airAcceleration = 0.2,
+            airDeceleration = 0.15,
         } = {}) =>
             GameFactory.ice({
                 id,
@@ -1082,10 +1087,10 @@ export const GameFactory = {
             w,
             h,
             layout = "iceOneDirection",
-            acceleration = 0.05,
-            deceleration = 0.025,
-            airAcceleration = 0.15,
-            airDeceleration = 0.075,
+            acceleration = 0.075,
+            deceleration = 0.05,
+            airAcceleration = 0.2,
+            airDeceleration = 0.15,
         } = {}) =>
             GameFactory.oneDirectionIce({
                 id,

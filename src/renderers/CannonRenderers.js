@@ -18,7 +18,7 @@ export const CannonRenderer = {
         ctx.fillRect(x, y, w, h);
     },
 
-    draw: (ctx, cannon) => {
+    draw: (ctx, cannon, debug = false) => {
         const img = getImg(SPRITE_URL);
         if (!img?.complete || !img.naturalWidth) {
             return;
@@ -58,6 +58,14 @@ export const CannonRenderer = {
         ctx.fillRect(ex - 8, ey + 4, 17, 4);
 
         ctx.restore();
+
+        if (debug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(cannon.x, cannon.y, cannon.w, cannon.h);
+            ctx.restore();
+        }
     },
 };
 

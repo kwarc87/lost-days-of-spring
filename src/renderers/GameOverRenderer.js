@@ -2,10 +2,11 @@ import { DefaultCollectibleRenderer } from "./CollectibleRenderers.js";
 import { MessageRenderer } from "./MessageRenderer.js";
 import { MESSAGES, formatPlayTime } from "../messages.js";
 
-const ICON_SIZE = 24;
-const ICON_GAP = 16;
 const PAD_X = 24;
 const PAD_Y = 18;
+
+const ICON_SIZE = 24;
+const ICON_GAP = 16;
 const GAP = 18;
 const SUB_GAP = 6;
 const TITLE_H = 32;

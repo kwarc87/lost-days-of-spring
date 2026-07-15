@@ -56,7 +56,7 @@ export class LostDaysOfSpring {
             map: "KeyM",
             escape: "Escape",
             enter: "Enter",
-            debugToggle: "NumpadAdd",
+            debugToggle: "Backspace",
             fullscreen: "KeyF",
             // Menu navigation
             menuUp: "ArrowUp",
@@ -1935,12 +1935,13 @@ export class LostDaysOfSpring {
             cannon.lastShootTime += cycles * cannon.shootFrequency;
 
             const bulletW = cannon.ammo.w;
+            const CANNON_BARREL_OFFSET_Y = -12;
             for (let i = 0; i < cycles; i++) {
                 this.cannonBullets.push({
                     ...cannon.ammo,
                     id: this.nextCannonBulletId++,
                     x: cannon.x + cannon.w / 2 - bulletW / 2,
-                    y: cannon.y + cannon.h,
+                    y: cannon.y + cannon.h + CANNON_BARREL_OFFSET_Y,
                     vx: 0,
                     vy: cannon.speed,
                     targetY: cannon.targetY,
@@ -2319,7 +2320,7 @@ export class LostDaysOfSpring {
             this.cannonRenderer.drawMapCannon(this.ctx, cannon);
             return;
         }
-        this.cannonRenderer.draw(this.ctx, cannon);
+        this.cannonRenderer.draw(this.ctx, cannon, this.showDebug);
     }
 
     drawCannonBullet(b) {
