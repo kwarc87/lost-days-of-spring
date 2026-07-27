@@ -31,6 +31,7 @@ import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
 import { TransitionRenderer } from "../renderers/TransitionRenderer.js";
+import { ArtifactGalleryRenderer } from "../renderers/ArtifactGalleryRenderer.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true, initialHp = 6) {
@@ -63,6 +64,7 @@ export class LostDaysOfSpring {
             menuDown: "ArrowDown",
             menuConfirm: "Enter",
             menuConfirmAlt: "Space",
+            gallery: "KeyI",
         };
 
         // ====== GAME STATE ======
@@ -96,6 +98,8 @@ export class LostDaysOfSpring {
         this.elevatorCameraMargin = GameFactory.GRID * 15;
         this.verticalHitRecoilMultiplier = 1.5;
         this.mapDiscovery = null;
+        this.isArtifactGallery = false;
+        this.frozenFrame = null; // offscreen canvas reused for frozen-world overlays
 
         // ====== FULLSCREEN ======
         this.isFullscreen = false;
@@ -189,6 +193,7 @@ export class LostDaysOfSpring {
         this.cannonBulletRenderer = CannonBulletRenderer;
         this.titleScreenRenderer = TitleScreenRenderer;
         this.transitionRenderer = TransitionRenderer;
+        this.artifactGallery = new ArtifactGalleryRenderer();
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -606,7 +611,7 @@ export class LostDaysOfSpring {
     }
 
     initControls() {
-        this._preventDefaultKeys = new Set([
+        this.preventDefaultKeys = new Set([
             ...Object.values(this.keysMap),
             "ControlLeft",
             "ControlRight",
@@ -619,7 +624,7 @@ export class LostDaysOfSpring {
         window.addEventListener("keydown", (e) => {
             e.stopPropagation();
 
-            if (this._preventDefaultKeys.has(e.code)) {
+            if (this.preventDefaultKeys.has(e.code)) {
                 e.preventDefault();
             }
 
@@ -655,10 +660,37 @@ export class LostDaysOfSpring {
                 return;
             }
 
+            if (this.isArtifactGallery) {
+                if (!e.repeat) {
+                    if (e.code === this.keysMap.escape) {
+                        this.closeArtifactGallery();
+                    } else if (e.code === this.keysMap.left) {
+                        this.artifactGallery.navigateLeft();
+                        this.animateGallery();
+                    } else if (e.code === this.keysMap.right) {
+                        this.artifactGallery.navigateRight();
+                        this.animateGallery();
+                    }
+                }
+                return;
+            }
+
             const wasPaused = this.isPaused;
             this.handlePauseMenuInput(e);
             if (wasPaused || this.isPaused) {
                 return;
+            }
+
+            if (e.code === this.keysMap.gallery && !e.repeat) {
+                if (
+                    !this.levelComplete &&
+                    !this.gameOver &&
+                    !this.mapView &&
+                    !this.player.dying
+                ) {
+                    this.openArtifactGallery();
+                    return;
+                }
             }
 
             // Toggle map overview
@@ -2508,7 +2540,12 @@ export class LostDaysOfSpring {
 
         this.ctx.restore();
 
-        if (this.playerAtExit && !this.levelComplete && !this.gameOver) {
+        if (
+            this.playerAtExit &&
+            !this.levelComplete &&
+            !this.gameOver &&
+            !this.isArtifactGallery
+        ) {
             this.drawExitMessage();
         }
 
@@ -2517,7 +2554,8 @@ export class LostDaysOfSpring {
             !this.levelComplete &&
             !this.gameOver &&
             !this.mapView &&
-            !this.isPaused
+            !this.isPaused &&
+            !this.isArtifactGallery
         ) {
             this.messageRenderer.drawMessagePanel(
                 this.ctx,
@@ -2532,7 +2570,8 @@ export class LostDaysOfSpring {
             !this.levelComplete &&
             !this.gameOver &&
             !this.mapView &&
-            !this.isPaused
+            !this.isPaused &&
+            !this.isArtifactGallery
         ) {
             this.messageRenderer.drawPanel(
                 this.ctx,
@@ -3025,7 +3064,7 @@ export class LostDaysOfSpring {
         );
     }
 
-    _resumeFromPause() {
+    resumeFromPause() {
         const pauseDuration = performance.now() - this.pauseStartAt;
         this.totalPausedTime += pauseDuration;
 
@@ -3087,7 +3126,7 @@ export class LostDaysOfSpring {
 
     closePauseMenu() {
         this.isPaused = false;
-        this._resumeFromPause();
+        this.resumeFromPause();
         this.start();
     }
 
@@ -3097,18 +3136,26 @@ export class LostDaysOfSpring {
             return;
         }
 
+        if (this.pauseMenuIndex === 1) {
+            // Artifact gallery — account for pause time, then open gallery
+            this.isPaused = false;
+            this.resumeFromPause();
+            this.openArtifactGallery();
+            return;
+        }
+
         this.isPaused = false;
         this.totalPausedTime = 0;
         this.pauseStartAt = 0;
         this.levelStartAt = performance.now();
 
-        if (this.pauseMenuIndex === 1) {
+        if (this.pauseMenuIndex === 2) {
             // Reset progress — clear all saves
             this.checkpointRespawn = null;
             this.deathCount = 0;
             this.accumulatedPlayTime = 0;
             CheckpointStorage.clear();
-        } else if (this.pauseMenuIndex === 2) {
+        } else if (this.pauseMenuIndex === 3) {
             // Return to main screen — restore time and deaths from checkpoint
             this.accumulatedPlayTime = this.checkpointRespawn?.playTimeMs ?? 0;
             this.deathCount = this.checkpointRespawn?.deathCount ?? 0;
@@ -3127,9 +3174,50 @@ export class LostDaysOfSpring {
             this.pauseStartAt = performance.now();
             this.draw(this.simulatedTime);
         } else {
-            this._resumeFromPause();
+            this.resumeFromPause();
             this.mapView = false;
             this.start();
         }
+    }
+
+    // Copies the current canvas into _frozenFrame (lazy-created offscreen canvas).
+    // Used whenever a semi-transparent overlay needs a stable world background.
+    captureFrame() {
+        if (!this.frozenFrame) {
+            this.frozenFrame = document.createElement("canvas");
+        }
+        this.frozenFrame.width = this.canvas.width;
+        this.frozenFrame.height = this.canvas.height;
+        this.frozenFrame.getContext("2d").drawImage(this.canvas, 0, 0);
+    }
+
+    openArtifactGallery() {
+        this.isArtifactGallery = true;
+        this.pauseStartAt = performance.now();
+        this.stop();
+        this.draw(this.simulatedTime);
+        this.captureFrame();
+        this.artifactGallery.open(this.artifacts);
+        this.drawGallery();
+    }
+
+    drawGallery() {
+        this.ctx.drawImage(this.frozenFrame, 0, 0);
+        this.artifactGallery.draw(this.ctx, this.canvas, performance.now());
+    }
+
+    // Burst RAF — runs only while the carousel is sliding (~150ms), then stops.
+    animateGallery() {
+        this.drawGallery();
+        if (this.artifactGallery._animOffset !== 0) {
+            requestAnimationFrame(() => this.animateGallery());
+        }
+    }
+
+    closeArtifactGallery() {
+        this.isArtifactGallery = false;
+        this.resumeFromPause();
+        this.lastTime = performance.now();
+        this.start();
     }
 }
