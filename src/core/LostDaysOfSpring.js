@@ -698,6 +698,15 @@ export class LostDaysOfSpring {
                 this.toggleMapView();
             }
 
+            // Exit map view with ESC
+            if (
+                e.code === this.keysMap.escape &&
+                !e.repeat &&
+                this.mapView
+            ) {
+                this.toggleMapView();
+            }
+
             if (
                 (e.code === this.keysMap.jump ||
                     e.code === this.keysMap.jumpAlt) &&

@@ -166,6 +166,18 @@ export const MESSAGES = {
                 ],
             },
         ],
+        GALLERY_HINT: [
+            {
+                segments: [
+                    {
+                        text: "To open the artifact gallery press ",
+                        color: "#fff",
+                    },
+                    { text: "I ", color: "#f5c542" },
+                    { text: ".", color: "#fff" },
+                ],
+            },
+        ],
         CROUCH_HINT: [
             {
                 segments: [
