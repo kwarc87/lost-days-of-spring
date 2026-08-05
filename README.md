@@ -1,21 +1,37 @@
 # Lost Days of Spring
 
-Prototype of a 2D narrative platformer / metroidvania game built in **vanilla JavaScript** using the HTML5 Canvas API.
+A 2D narrative platformer / metroidvania built in **vanilla JavaScript** using the HTML5 Canvas API.
 
-The project is currently in an early prototyping stage and serves two purposes:
+Colin La Mehr wakes up on a strange, unfamiliar planet and finds himself living through an unusual, pixel-art experience - piecing together fragments of his own life through the artifacts he discovers along the way.
 
-- a playable game prototype
+**[▶ Play the live demo](https://kwarc87.github.io/lost-days-of-spring/)**
+
+The project has grown beyond a simple prototype into a playable demo with a fully completable level (~1 hour of gameplay) and serves two purposes:
+
+- a playable game demo
 - a public portfolio project showcasing clean frontend architecture and game programming patterns
 
-## Current Focus
+## Features
 
-- player movement and game feel
-- collision system
-- enemy and platform rendering
-- level prototyping
-- debug tools
-- collectible and weapon systems
-- modular renderer/factory architecture
+- One full, completable level with a story outline (~1 hour of gameplay)
+- In-game tutorial
+- Fully implemented, elaborate movement physics
+- Multiple surface/terrain types affecting movement
+- Environmental hazards (spikes)
+- Teleport mechanics
+- Elevators
+- Enemy collision system with several enemy types
+- Shooting combat with a simple weapon upgrade system
+- Checkpoint system with progress saved to local storage
+- Minimap for navigation and progress tracking
+- Artifact gallery
+- Several kinds of collectibles
+- Dynamic camera behavior
+- Title screen
+- Fullscreen mode
+- In-game message/dialogue system
+- Advanced performance optimizations, including off-screen culling
+- The look and feel of classic old-school platformers, reimagined for a modern experience
 
 ## Tech Stack
 
@@ -28,11 +44,11 @@ The project is currently in an early prototyping stage and serves two purposes:
 
 ## Vision
 
-The long-term goal is to evolve the prototype into a story-driven **metroidvania / cinematic platformer** with a melancholic atmosphere, exploration, and arcade-inspired movement.
+The long-term goal is to keep expanding the demo into a full story-driven **metroidvania / cinematic platformer** with a melancholic atmosphere, exploration, and arcade-inspired movement.
 
 ## Status
 
-Early prototype / work in progress.
+Playable demo, actively evolving towards a fuller release.
 
 The codebase is expected to evolve significantly, including refactors and a possible future migration to **TypeScript**.
 
