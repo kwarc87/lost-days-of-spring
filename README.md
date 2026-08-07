@@ -1,5 +1,7 @@
 # Lost Days of Spring
 
+![Lost Days of Spring screenshot](public/img/ldos.webp)
+
 A 2D narrative platformer / metroidvania built in **vanilla JavaScript** using the HTML5 Canvas API.
 
 Colin La Mehr wakes up on a strange, unfamiliar planet and finds himself living through an unusual, pixel-art experience - piecing together fragments of his own life through the artifacts he discovers along the way.

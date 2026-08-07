@@ -100,6 +100,7 @@ export class LostDaysOfSpring {
         this.mapDiscovery = null;
         this.isArtifactGallery = false;
         this.frozenFrame = null; // offscreen canvas reused for frozen-world overlays
+        this.galleryLastIndex = 0; // remembers carousel position between gallery openings within a run
 
         // ====== FULLSCREEN ======
         this.isFullscreen = false;
@@ -322,6 +323,7 @@ export class LostDaysOfSpring {
             const saved = CheckpointStorage.load();
             if (saved?.levelId === levelId) {
                 this.checkpointRespawn = saved;
+                this.galleryLastIndex = 0;
             }
         }
 
@@ -662,7 +664,10 @@ export class LostDaysOfSpring {
 
             if (this.isArtifactGallery) {
                 if (!e.repeat) {
-                    if (e.code === this.keysMap.escape) {
+                    if (
+                        e.code === this.keysMap.escape ||
+                        e.code === this.keysMap.gallery
+                    ) {
                         this.closeArtifactGallery();
                     } else if (e.code === this.keysMap.left) {
                         this.artifactGallery.navigateLeft();
@@ -699,11 +704,7 @@ export class LostDaysOfSpring {
             }
 
             // Exit map view with ESC
-            if (
-                e.code === this.keysMap.escape &&
-                !e.repeat &&
-                this.mapView
-            ) {
+            if (e.code === this.keysMap.escape && !e.repeat && this.mapView) {
                 this.toggleMapView();
             }
 
@@ -906,6 +907,7 @@ export class LostDaysOfSpring {
                 this.player.dead = true;
                 this.gameOver = true;
                 this.gameOverAt = now;
+                this.galleryLastIndex = 0;
                 if (this.checkpointRespawn !== null) {
                     this.snapshotCheckpointState(now);
                 }
@@ -1156,6 +1158,7 @@ export class LostDaysOfSpring {
                 this.player.shooting = false;
                 this.player.jumpPressedByUser = false;
                 this.checkpointRespawn = null;
+                this.galleryLastIndex = 0;
                 CheckpointStorage.clear();
             }
         }
@@ -3163,6 +3166,7 @@ export class LostDaysOfSpring {
             this.checkpointRespawn = null;
             this.deathCount = 0;
             this.accumulatedPlayTime = 0;
+            this.galleryLastIndex = 0;
             CheckpointStorage.clear();
         } else if (this.pauseMenuIndex === 3) {
             // Return to main screen — restore time and deaths from checkpoint
@@ -3206,7 +3210,7 @@ export class LostDaysOfSpring {
         this.stop();
         this.draw(this.simulatedTime);
         this.captureFrame();
-        this.artifactGallery.open(this.artifacts);
+        this.artifactGallery.open(this.artifacts, this.galleryLastIndex);
         this.drawGallery();
     }
 
@@ -3225,6 +3229,7 @@ export class LostDaysOfSpring {
 
     closeArtifactGallery() {
         this.isArtifactGallery = false;
+        this.galleryLastIndex = this.artifactGallery.selectedIndex;
         this.resumeFromPause();
         this.lastTime = performance.now();
         this.start();

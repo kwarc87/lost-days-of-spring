@@ -75,10 +75,13 @@ export class ArtifactGalleryRenderer {
         this._maxDescH = 54;
     }
 
-    open(artifacts) {
+    open(artifacts, startIndex = 0) {
         this.isOpen = true;
         this.artifacts = artifacts;
-        this.selectedIndex = 0;
+        this.selectedIndex = Math.min(
+            Math.max(startIndex, 0),
+            Math.max(artifacts.length - 1, 0),
+        );
         this._animOffset = 0;
         this._animStartOffset = 0;
         this._maxDescH =
