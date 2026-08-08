@@ -907,7 +907,6 @@ export class LostDaysOfSpring {
                 this.player.dead = true;
                 this.gameOver = true;
                 this.gameOverAt = now;
-                this.galleryLastIndex = 0;
                 if (this.checkpointRespawn !== null) {
                     this.snapshotCheckpointState(now);
                 }

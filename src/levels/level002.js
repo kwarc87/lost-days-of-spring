@@ -41,7 +41,7 @@ export const LEVEL_002 = {
         GameFactory.grid.solid({ id: 24, x: 48, y: 78, w: 14, h: 2 }),
         GameFactory.grid.solid({ id: 25, x: 46, y: 102, w: 2, h: 1, layout: "boardRightCap" }),
         GameFactory.grid.solid({ id: 26, x: 52, y: 95, w: 12, h: 3 }),
-        GameFactory.grid.booster({ id: 27, x: 55, y: 109, w: 6, h: 1 }),
+        GameFactory.grid.booster({ id: 27, x: 55, y: 109, w: 6, h: 1, boostSpeed: 28 }),
         GameFactory.grid.solid({ id: 28, x: 58, y: 12, w: 4, h: 1, layout: "boardRightCap" }),
         GameFactory.grid.solid({ id: 29, x: 63, y: 14, w: 4, h: 1, layout: "board" }),
         GameFactory.grid.solid({ id: 30, x: 63, y: 91, w: 2, h: 1, layout: "board" }),

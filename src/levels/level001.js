@@ -1466,14 +1466,14 @@ export const LEVEL_001 = {
         GameFactory.grid.slime({ id: 45, startX: 309, targetX: 339, startY: 17, targetY: 17, speed: 5, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
         GameFactory.grid.slime({ id: 46, startX: 309, targetX: 339, startY: 17, targetY: 17, speed: 2.5, health: 15, mainColor: "#fa9bdd", secondaryColor: "#3d83b3" }),
 
-        GameFactory.grid.slime({ id: 47, startX: 239, targetX: 289, startY: 13, targetY: 13, speed: 7, health: 75, mainColor: "#bd067b", secondaryColor: "#3d83b3" }),
+        GameFactory.grid.slime({ id: 47, startX: 239, targetX: 289, startY: 13, targetY: 13, speed: 7.25, health: 75, mainColor: "#bd067b", secondaryColor: "#3d83b3" }),
         GameFactory.grid.slime({ id: 48, startX: 239, targetX: 289, startY: 13, targetY: 13, speed: 7, health: 75, mainColor: "#bd067b", secondaryColor: "#3d83b3" }),
         GameFactory.grid.slime({ id: 49, startX: 289, targetX: 239, startY: 13, targetY: 13, speed: 7, health: 75, mainColor: "#bd067b", secondaryColor: "#3d83b3" }),
         GameFactory.grid.slime({ id: 50, startX: 291, targetX: 339, startY: 13, targetY: 13, speed: 5, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
-        GameFactory.grid.slime({ id: 51, startX: 291, targetX: 339, startY: 13, targetY: 13, speed: 5, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
-        GameFactory.grid.slime({ id: 52, startX: 291, targetX: 339, startY: 13, targetY: 13, speed: 5, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
+        GameFactory.grid.slime({ id: 51, startX: 291, targetX: 339, startY: 13, targetY: 13, speed: 5.25, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
+        GameFactory.grid.slime({ id: 52, startX: 291, targetX: 339, startY: 13, targetY: 13, speed: 5.5, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
         GameFactory.grid.slime({ id: 53, startX: 339, targetX: 291, startY: 13, targetY: 13, speed: 5, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
-        GameFactory.grid.slime({ id: 54, startX: 339, targetX: 291, startY: 13, targetY: 13, speed: 5, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
+        GameFactory.grid.slime({ id: 54, startX: 339, targetX: 291, startY: 13, targetY: 13, speed: 5.25, health: 50, mainColor: "#e2de00", secondaryColor: "#fa9bdd" }),
 
         GameFactory.grid.slime({ id: 55, startX: 239, targetX: 259, startY: 9, targetY: 9, speed: 8, health: 100, mainColor: "#e61b09", secondaryColor: "#fff" }),
         GameFactory.grid.slime({ id: 56, startX: 261, targetX: 321, startY: 9, targetY: 9, speed: 8, health: 100, mainColor: "#e61b09", secondaryColor: "#fff" }),
