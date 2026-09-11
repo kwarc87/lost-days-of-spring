@@ -1,5 +1,6 @@
 import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
+import { CameraController } from "../systems/CameraController.js";
 import {
     DefaultPlayerRenderer,
     adjustAnimStartTime,
@@ -139,29 +140,10 @@ export class LostDaysOfSpring {
         this.teleports = [];
 
         // ====== CAMERA ======
-        this.camera = {
-            x: 0, // current camera X position in world
-            y: 0, // current camera Y position in world
-            width: this.canvas.width, // viewport width in pixels
-            height: this.canvas.height, // viewport height in pixels
-
-            smoothing: 0.15, // base interpolation factor for camera position (0–1)
-
-            lookAheadX: 0, // current horizontal look-ahead offset (interpolated)
-            lookAheadXTarget: 288, // horizontal look-ahead distance in pixels
-            lookAheadXSmoothing: 0.02, // interpolation factor for horizontal look-ahead
-
-            lookAheadY: 0, // current vertical look-ahead offset (interpolated)
-            lookAheadYTargetUp: 128, // look-ahead distance when ascending (pixels)
-            lookAheadYTargetDown: 416, // look-ahead distance when falling (pixels)
-            lookAheadYSmoothing: 0.12, // vertical look-ahead smoothing (returning to center)
-            lookAheadYSmoothingDown: 0.2, // faster smoothing when building downward look-ahead
-
-            lookAheadYTargetDownCrouch: 288,
-
-            // culling
-            margin: GameFactory.GRID * 5,
-        };
+        this.cameraController = new CameraController(
+            this.canvas.width,
+            this.canvas.height,
+        );
 
         // ====== PHYSICS ======
         this.physics = {
@@ -234,7 +216,6 @@ export class LostDaysOfSpring {
 
         this.decorateDrawMethods();
 
-        this.cameraSnapStep = 1;
         this.resizeCanvasToFit();
         window.addEventListener("resize", () => this.resizeCanvasToFit());
         document.addEventListener("fullscreenchange", () => {
@@ -301,7 +282,7 @@ export class LostDaysOfSpring {
             snapStep = 4;
         }
 
-        this.cameraSnapStep = snapStep;
+        this.cameraController.setSnapStep(snapStep);
         this.canvas.style.width = cssW + "px";
         this.canvas.style.height = cssH + "px";
     }
@@ -428,8 +409,6 @@ export class LostDaysOfSpring {
 
         // Reset Camera
         this.resetCameraToPlayerStart();
-        this.camera.lookAheadX = 0;
-        this.camera.lookAheadY = 0;
         this.mapDiscovery?.markFromPlayer(this.player);
 
         // Reset level-complete and game-over state
@@ -756,10 +735,10 @@ export class LostDaysOfSpring {
             const scaleX = this.canvas.width / rect.width;
             const scaleY = this.canvas.height / rect.height;
             this.mouse.worldX = Math.round(
-                (e.clientX - rect.left) * scaleX + this.camera.x,
+                (e.clientX - rect.left) * scaleX + this.getCamera().x,
             );
             this.mouse.worldY = Math.round(
-                (e.clientY - rect.top) * scaleY + this.camera.y,
+                (e.clientY - rect.top) * scaleY + this.getCamera().y,
             );
             if (!this.isRunning) {
                 this.updateDebug();
@@ -2125,129 +2104,8 @@ export class LostDaysOfSpring {
         normalDrawFn();
     }
 
-    calcDesiredLookAheadY(now) {
-        if (this.player.vy < 0) {
-            const upRatio = Math.min(
-                Math.abs(this.player.vy) / this.player.jump,
-                1,
-            );
-            return -this.camera.lookAheadYTargetUp * upRatio * upRatio;
-        }
-
-        if (this.player.vy > 0) {
-            const downRatio = Math.min(
-                this.player.vy / this.physics.maxFallSpeed,
-                1,
-            );
-            return this.camera.lookAheadYTargetDown * downRatio * downRatio;
-        }
-
-        if (this.player.onGroundType === "elevator") {
-            const elevator = this.elevators.find(
-                (e) => e.id === this.player.onGroundId,
-            );
-            if (!elevator || elevator.dirY === 0 || now < elevator.idleUntil) {
-                return 0;
-            }
-            const elevatorVy =
-                elevator.dirY * elevator.speed * elevator.direction;
-            if (elevatorVy < 0) {
-                const upRatio = Math.min(
-                    Math.abs(elevatorVy) / this.physics.maxFallSpeed,
-                    1,
-                );
-                return -this.camera.lookAheadYTargetUp * upRatio * upRatio;
-            }
-            const downRatio = Math.min(
-                elevatorVy / this.physics.maxFallSpeed,
-                1,
-            );
-            return this.camera.lookAheadYTargetDown * downRatio * downRatio;
-        }
-
-        return 0;
-    }
-
-    updateCameraX() {
-        const desiredLookAheadX =
-            this.player.facing === "right"
-                ? this.camera.lookAheadXTarget
-                : -this.camera.lookAheadXTarget;
-
-        this.camera.lookAheadX +=
-            (desiredLookAheadX - this.camera.lookAheadX) *
-            this.camera.lookAheadXSmoothing;
-
-        const targetX =
-            this.player.x + this.player.w / 2 - this.camera.width / 2;
-
-        this.camera.x +=
-            (targetX + this.camera.lookAheadX - this.camera.x) *
-            this.camera.smoothing;
-    }
-
-    updateCameraY(now) {
-        let desiredLookAheadY = this.calcDesiredLookAheadY(now);
-
-        if (this.isPlayerCrouching()) {
-            desiredLookAheadY += this.camera.lookAheadYTargetDownCrouch;
-        }
-
-        const ySmoothing =
-            desiredLookAheadY > this.camera.lookAheadY
-                ? this.camera.lookAheadYSmoothingDown
-                : this.camera.lookAheadYSmoothing;
-
-        this.camera.lookAheadY +=
-            (desiredLookAheadY - this.camera.lookAheadY) * ySmoothing;
-
-        const playerFootY = this.player.y + this.player.h;
-        const targetY =
-            playerFootY -
-            this.player.originalHeight / 2 -
-            this.camera.height / 2;
-
-        this.camera.y +=
-            (targetY + this.camera.lookAheadY - this.camera.y) *
-            this.camera.smoothing;
-    }
-
-    clampCameraToWorld() {
-        const snap = this.cameraSnapStep ?? 1;
-        this.camera.x =
-            Math.round(
-                Math.max(
-                    0,
-                    Math.min(
-                        this.camera.x,
-                        this.worldSize.width - this.camera.width,
-                    ),
-                ) / snap,
-            ) * snap;
-        this.camera.y =
-            Math.round(
-                Math.max(
-                    0,
-                    Math.min(
-                        this.camera.y,
-                        this.worldSize.height - this.camera.height,
-                    ),
-                ) / snap,
-            ) * snap;
-    }
-
     resetCameraToPlayerStart() {
-        const targetX =
-            this.player.x + this.player.w / 2 - this.camera.width / 2;
-        const playerFootY = this.player.y + this.player.h;
-        const targetY =
-            playerFootY -
-            this.player.originalHeight / 2 -
-            this.camera.height / 2;
-
-        this.camera.x = targetX;
-        this.camera.y = targetY;
-        this.clampCameraToWorld();
+        this.cameraController.resetToPlayerStart(this.player, this.worldSize);
     }
 
     updateCamera(now) {
@@ -2255,21 +2113,22 @@ export class LostDaysOfSpring {
             return;
         }
 
-        this.updateCameraX();
-        this.updateCameraY(now);
-        this.clampCameraToWorld();
+        this.cameraController.update(now, {
+            player: this.player,
+            worldSize: this.worldSize,
+            elevators: this.elevators,
+            physics: this.physics,
+            isCrouching: this.isPlayerCrouching(),
+        });
     }
 
     isVisibleInCamera(obj, margin) {
-        const w = (obj.w ?? 0) * (obj.repeatX ?? 1);
-        const h = (obj.h ?? 0) * (obj.repeatY ?? 1);
-        const cameraMargin = margin ?? this.camera.margin;
-        return !(
-            obj.x + w < this.camera.x - cameraMargin ||
-            obj.x > this.camera.x + this.camera.width + cameraMargin ||
-            obj.y + h < this.camera.y - cameraMargin ||
-            obj.y > this.camera.y + this.camera.height + cameraMargin
-        );
+        return this.cameraController.isVisible(obj, margin);
+    }
+
+    // Single access point for camera data — keeps ownership at CameraController.
+    getCamera() {
+        return this.cameraController.camera;
     }
 
     updateDamageCooldown(now) {
@@ -2283,19 +2142,34 @@ export class LostDaysOfSpring {
 
     drawPlayer(now) {
         this.renderByMode(this.player, this.mapPlayerRenderer, () =>
-            this.playerRenderer.draw(this.ctx, this.player, this.showDebug, now),
+            this.playerRenderer.draw(
+                this.ctx,
+                this.player,
+                this.showDebug,
+                now,
+            ),
         );
     }
 
     drawPlatform(p) {
         this.renderByMode(p, this.mapPlatformRenderer, () =>
-            this.platformRenderer.draw(this.ctx, p, this.showDebug, this.camera),
+            this.platformRenderer.draw(
+                this.ctx,
+                p,
+                this.showDebug,
+                this.getCamera(),
+            ),
         );
     }
 
     drawElevator(e) {
         this.renderByMode(e, this.mapPlatformRenderer, () =>
-            this.platformRenderer.draw(this.ctx, e, this.showDebug, this.camera),
+            this.platformRenderer.draw(
+                this.ctx,
+                e,
+                this.showDebug,
+                this.getCamera(),
+            ),
         );
     }
 
@@ -2305,7 +2179,7 @@ export class LostDaysOfSpring {
                 this.ctx,
                 w,
                 this.showDebug,
-                this.camera,
+                this.getCamera(),
             ),
         );
     }
@@ -2353,7 +2227,12 @@ export class LostDaysOfSpring {
 
     drawHeart(s, now) {
         this.renderByMode(s, this.mapHeartRenderer, () =>
-            this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug, now),
+            this.collectibleRenderer.drawHeart(
+                this.ctx,
+                s,
+                this.showDebug,
+                now,
+            ),
         );
     }
 
@@ -2405,7 +2284,7 @@ export class LostDaysOfSpring {
             this.worldRenderer.drawParallaxEnvironmentItem(
                 this.ctx,
                 i,
-                this.camera,
+                this.getCamera(),
             ),
         );
     }
@@ -2416,7 +2295,11 @@ export class LostDaysOfSpring {
     }
 
     drawWorld() {
-        this.worldRenderer.drawBackground(this.ctx, this.canvas, this.camera);
+        this.worldRenderer.drawBackground(
+            this.ctx,
+            this.canvas,
+            this.getCamera(),
+        );
     }
 
     drawEnvForegroundItem(i) {
@@ -2438,7 +2321,7 @@ export class LostDaysOfSpring {
             );
         } else {
             this.drawWorld();
-            this.ctx.translate(-this.camera.x, -this.camera.y);
+            this.ctx.translate(-this.getCamera().x, -this.getCamera().y);
         }
 
         for (const i of this.parallaxItems) {
@@ -2544,7 +2427,7 @@ export class LostDaysOfSpring {
         }
 
         if (this.showDebug && !this.mapView) {
-            DebugGridRenderer.draw(this.ctx, this.camera, this.worldSize);
+            DebugGridRenderer.draw(this.ctx, this.getCamera(), this.worldSize);
             for (const t of this.teleports) {
                 this.ctx.save();
                 this.ctx.strokeStyle = "cyan";
@@ -2578,7 +2461,7 @@ export class LostDaysOfSpring {
                 this.ctx,
                 this.canvas,
                 this.activeMessage,
-                this.camera,
+                this.getCamera(),
             );
         }
 
@@ -2902,8 +2785,8 @@ export class LostDaysOfSpring {
         if (!exit) {
             return;
         }
-        const anchorX = exit.x - this.camera.x + exit.dw / 2;
-        const anchorY = exit.y - this.camera.y + exit.dh / 2;
+        const anchorX = exit.x - this.getCamera().x + exit.dw / 2;
+        const anchorY = exit.y - this.getCamera().y + exit.dh / 2;
         const lines = getExitLevelLines(
             this.hasEnoughCoins,
             this.hasEnoughSplinters,
