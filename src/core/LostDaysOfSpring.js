@@ -30,6 +30,7 @@ import {
 import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
+import { TeleportController } from "../systems/TeleportController.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
@@ -116,7 +117,7 @@ export class LostDaysOfSpring {
         this.nextCannonBulletId = 0;
 
         // ====== TELEPORTS ======
-        this.teleports = [];
+        this.teleportController = new TeleportController();
 
         // ====== CAMERA ======
         this.cameraController = new CameraController(
@@ -194,7 +195,7 @@ export class LostDaysOfSpring {
 
         this.mouse = new DebugMouseTracker(this.canvas, () => this.getCamera());
         if (this.showDebug) {
-            this.mouse.attach(() => {
+            this.attachMouseTracking(() => {
                 if (!this.isRunning) {
                     this.updateDebug();
                 }
@@ -243,11 +244,11 @@ export class LostDaysOfSpring {
 
         // Clear checkpoint state after completing the level
         if (this.levelComplete) {
-            this.checkpointManager.clear();
+            this.clearCheckpoint();
         }
 
         // On first load or page reload, restore checkpoint from localStorage
-        if (this.checkpointManager.loadSaved(levelId)) {
+        if (this.loadSavedCheckpoint(levelId)) {
             this.galleryLastIndex = 0;
         }
 
@@ -258,8 +259,7 @@ export class LostDaysOfSpring {
             this.deathCount = 0;
         } else {
             this.deathCount =
-                this.checkpointManager.getRespawn()?.deathCount ??
-                this.deathCount;
+                this.getCheckpointRespawn()?.deathCount ?? this.deathCount;
         }
 
         this.currentLevelId = levelId;
@@ -296,7 +296,7 @@ export class LostDaysOfSpring {
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
         this.parallaxItems = levelData.parallax ?? [];
         this.cannons = levelData.cannons ?? [];
-        this.teleports = levelData.teleports ?? [];
+        this.setTeleports(levelData.teleports);
 
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
@@ -304,18 +304,20 @@ export class LostDaysOfSpring {
         this.currentLevelEnemiesCount = this.enemies.length;
 
         // Load checkpoints and extract embedded visual layers / messages
-        this.checkpointManager.setCheckpoints(levelData.checkpoints ?? []);
-        const checkpointItems = this.checkpointManager.extractItems();
+        this.setCheckpoints(levelData.checkpoints ?? []);
+        const checkpointItems = this.extractCheckpointItems();
         this.preBackgroundItems.push(...checkpointItems.back);
         this.foregroundItems.push(...checkpointItems.front);
         this.messages.push(...checkpointItems.messages);
         this.platforms.push(...checkpointItems.platforms);
-        this.extractTeleportItems();
+        const teleportItems = this.extractTeleportItems();
+        this.foregroundItems.push(...teleportItems.foreground);
+        this.platforms.push(...teleportItems.platforms);
         // Elevators first: same priority order as movePlayerY collision resolution.
         this.solids = [...this.elevators, ...this.platforms];
 
         // Restore checkpoint state (collected items, killed enemies, etc.)
-        this.checkpointManager.restoreProgress({
+        this.restoreCheckpointProgress({
             coins: this.coins,
             splinters: this.splinters,
             artifacts: this.artifacts,
@@ -357,7 +359,7 @@ export class LostDaysOfSpring {
             this.levelStartAt = now;
             this.totalPausedTime = 0;
             this.accumulatedPlayTime =
-                this.checkpointManager.getRespawn()?.playTimeMs ?? 0;
+                this.getCheckpointRespawn()?.playTimeMs ?? 0;
         } else if (wasGameOver) {
             this.totalPausedTime += now - gameOverAt;
         }
@@ -378,32 +380,8 @@ export class LostDaysOfSpring {
         }
     }
 
-    extractTeleportItems() {
-        for (const t of this.teleports) {
-            t.originItem = GameFactory.teleport({
-                x: t.x,
-                y: t.y,
-            });
-            t.targetItem = GameFactory.teleport({
-                x: t.targetX,
-                y: t.targetY,
-            });
-            t.playerEnteredAt = null;
-            t.frozenAt = null;
-            t.justTeleported = false;
-            this.foregroundItems.push(t.originItem);
-            this.foregroundItems.push(t.targetItem);
-            if (t.platform) {
-                this.platforms.push(t.platform);
-            }
-            if (t.targetPlatform) {
-                this.platforms.push(t.targetPlatform);
-            }
-        }
-    }
-
     resetPlayerProperties(levelData) {
-        const cr = this.checkpointManager.getRespawn();
+        const cr = this.getCheckpointRespawn();
         const respawnX = cr?.x ?? levelData?.playerStart?.x ?? 0;
         const respawnY = cr?.y ?? levelData?.playerStart?.y ?? 0;
         const coinsCount = cr?.coinsCount ?? 0;
@@ -485,19 +463,19 @@ export class LostDaysOfSpring {
         if (e.code === this.keysMap.debugToggle && !e.repeat) {
             this.showDebug = !this.showDebug;
             if (this.showDebug) {
-                this.mouse.attach(() => {
+                this.attachMouseTracking(() => {
                     if (!this.isRunning) {
                         this.updateDebug();
                     }
                 });
             } else {
-                this.mouse.detach();
+                this.detachMouseTracking();
             }
             this.updateDebug();
         }
 
         if (e.code === this.keysMap.fullscreen && !e.repeat) {
-            this.displayController.toggleFullscreen();
+            this.toggleFullscreen();
         }
     }
 
@@ -726,7 +704,7 @@ export class LostDaysOfSpring {
                 this.player.dead = true;
                 this.gameOver = true;
                 this.gameOverAt = now;
-                if (this.checkpointManager.getRespawn() !== null) {
+                if (this.getCheckpointRespawn() !== null) {
                     this.snapshotCheckpointState(now);
                 }
             }
@@ -970,7 +948,7 @@ export class LostDaysOfSpring {
                 this.player.vy = 0;
                 this.player.shooting = false;
                 this.player.jumpPressedByUser = false;
-                this.checkpointManager.clear();
+                this.clearCheckpoint();
                 this.galleryLastIndex = 0;
             }
         }
@@ -1922,6 +1900,30 @@ export class LostDaysOfSpring {
         return this.checkpointManager.checkpoints;
     }
 
+    clearCheckpoint() {
+        this.checkpointManager.clear();
+    }
+
+    loadSavedCheckpoint(levelId) {
+        return this.checkpointManager.loadSaved(levelId);
+    }
+
+    getCheckpointRespawn() {
+        return this.checkpointManager.getRespawn();
+    }
+
+    setCheckpoints(checkpoints) {
+        this.checkpointManager.setCheckpoints(checkpoints);
+    }
+
+    extractCheckpointItems() {
+        return this.checkpointManager.extractItems();
+    }
+
+    restoreCheckpointProgress(context) {
+        this.checkpointManager.restoreProgress(context);
+    }
+
     // Single access point for key state — keeps ownership at InputController.
     isKeyDown(action) {
         return this.inputController.isDown(action);
@@ -1945,6 +1947,40 @@ export class LostDaysOfSpring {
 
     consumeJumpBuffer() {
         return this.inputController.consumeJumpBuffer();
+    }
+
+    // Single access point for teleport definitions — keeps ownership at TeleportController.
+    getTeleports() {
+        return this.teleportController.getTeleports();
+    }
+
+    setTeleports(teleports) {
+        this.teleportController.setTeleports(teleports);
+    }
+
+    extractTeleportItems() {
+        return this.teleportController.extractItems();
+    }
+
+    adjustTeleportsForPause(pauseDuration) {
+        this.teleportController.adjustForPause(pauseDuration);
+    }
+
+    toggleFullscreen() {
+        this.displayController.toggleFullscreen();
+    }
+
+    // Single access point for debug cursor data — keeps ownership at DebugMouseTracker.
+    getMouse() {
+        return this.mouse;
+    }
+
+    attachMouseTracking(onMove) {
+        this.mouse.attach(onMove);
+    }
+
+    detachMouseTracking() {
+        this.mouse.detach();
     }
 
     updateDamageCooldown(now) {
@@ -2244,7 +2280,7 @@ export class LostDaysOfSpring {
 
         if (this.showDebug && !this.mapView) {
             DebugGridRenderer.draw(this.ctx, this.getCamera(), this.worldSize);
-            for (const t of this.teleports) {
+            for (const t of this.getTeleports()) {
                 this.ctx.save();
                 this.ctx.strokeStyle = "cyan";
                 this.ctx.lineWidth = 1;
@@ -2509,65 +2545,7 @@ export class LostDaysOfSpring {
     }
 
     updateTeleports(now) {
-        this.player.isInTeleport = false;
-        for (const t of this.teleports) {
-            const targetZone = { x: t.targetX, y: t.targetY, w: t.w, h: t.h };
-            const inOrigin = rectsCollide(this.player, t);
-            const inTarget = rectsCollide(this.player, targetZone);
-
-            if (!inOrigin && !inTarget) {
-                t.originItem.cordX = 64;
-                t.targetItem.cordX = 64;
-                t.playerEnteredAt = null;
-                t.justTeleported = false;
-                // this condition is for enemy recoil
-                if (t.frozenAt !== null) {
-                    t.frozenAt = null;
-                    this.player.frozenForTeleport = false;
-                }
-                continue;
-            }
-
-            this.player.isInTeleport = true;
-            (inOrigin ? t.originItem : t.targetItem).cordX = 96;
-
-            if (
-                t.playerEnteredAt === null &&
-                !t.justTeleported &&
-                t.frozenAt === null
-            ) {
-                t.playerEnteredAt = now;
-                t.enteredOrigin = inOrigin;
-            }
-
-            if (
-                t.playerEnteredAt !== null &&
-                now - t.playerEnteredAt >= t.delay
-            ) {
-                t.frozenAt = now;
-                t.playerEnteredAt = null;
-                this.player.vx = 0;
-                this.player.vy = 0;
-                this.player.carryVx = 0;
-                this.player.carryVxInitial = 0;
-                this.player.frozenForTeleport = true;
-            }
-
-            if (t.frozenAt !== null && now - t.frozenAt >= t.frozenDelay) {
-                const [dx, dy] = t.enteredOrigin
-                    ? [t.targetX, t.targetY]
-                    : [t.x, t.y];
-                this.player.x = dx + t.w / 2 - this.player.w / 2;
-                this.player.y = dy + t.h - this.player.h;
-                this.player.vx = 0;
-                this.player.vy = 0;
-                this.player.frozenForTeleport = false;
-                t.originItem.cordX = 64;
-                t.targetItem.cordX = 64;
-                t.frozenAt = null;
-                t.justTeleported = true;
-            }
-        }
+        this.teleportController.update(now, this.player);
     }
 
     drawCheckpointIndicator(cp) {
@@ -2603,7 +2581,7 @@ export class LostDaysOfSpring {
             this.showDebug,
             this.debug,
             this.player,
-            this.mouse,
+            this.getMouse(),
         );
     }
 
@@ -2637,7 +2615,7 @@ export class LostDaysOfSpring {
                 this.levelStartAt = now;
                 this.totalPausedTime = 0;
                 this.accumulatedPlayTime =
-                    this.checkpointManager.getRespawn()?.playTimeMs ?? 0;
+                    this.getCheckpointRespawn()?.playTimeMs ?? 0;
                 this.startLevel(now);
             }
         }
@@ -2805,14 +2783,7 @@ export class LostDaysOfSpring {
                 e.dyingStartedAtMs += pauseDuration;
             }
         }
-        for (const t of this.teleports) {
-            if (t.playerEnteredAt) {
-                t.playerEnteredAt += pauseDuration;
-            }
-            if (t.frozenAt) {
-                t.frozenAt += pauseDuration;
-            }
-        }
+        this.adjustTeleportsForPause(pauseDuration);
         adjustAnimStartTime(pauseDuration);
         this.simulatedTime += pauseDuration;
         if (this.gameFadeIn.active) {
@@ -2847,13 +2818,13 @@ export class LostDaysOfSpring {
 
         if (this.pauseMenuIndex === 2) {
             // Reset progress — clear all saves
-            this.checkpointManager.clear();
+            this.clearCheckpoint();
             this.deathCount = 0;
             this.accumulatedPlayTime = 0;
             this.galleryLastIndex = 0;
         } else if (this.pauseMenuIndex === 3) {
             // Return to main screen — restore time and deaths from checkpoint
-            const cr = this.checkpointManager.getRespawn();
+            const cr = this.getCheckpointRespawn();
             this.accumulatedPlayTime = cr?.playTimeMs ?? 0;
             this.deathCount = cr?.deathCount ?? 0;
             this.isTitleScreen = true;
