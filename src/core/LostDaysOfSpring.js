@@ -32,6 +32,10 @@ import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
+import { InputController } from "../systems/InputController.js";
+import { KEYS_MAP } from "../config/keysMap.js";
+import { DisplayController } from "../systems/DisplayController.js";
+import { DebugMouseTracker } from "../systems/DebugMouseTracker.js";
 import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
 import { TransitionRenderer } from "../renderers/TransitionRenderer.js";
 import { ArtifactGalleryRenderer } from "../renderers/ArtifactGalleryRenderer.js";
@@ -58,31 +62,8 @@ export class LostDaysOfSpring {
         this.initialHp = initialHp;
 
         // ====== INPUT ======
-        this.keys = {};
-        this.jumpJustPressed = false;
-
-        this.keysMap = {
-            left: "ArrowLeft",
-            right: "ArrowRight",
-            jump: "Space",
-            jumpAlt: "KeyZ",
-            crouch: "ArrowDown",
-            crouchAlt: "KeyC",
-            shoot: "KeyX",
-            shootAlt: "AltRight",
-            pause: "KeyP",
-            map: "KeyM",
-            escape: "Escape",
-            enter: "Enter",
-            debugToggle: "Backspace",
-            fullscreen: "KeyF",
-            // Menu navigation
-            menuUp: "ArrowUp",
-            menuDown: "ArrowDown",
-            menuConfirm: "Enter",
-            menuConfirmAlt: "Space",
-            gallery: "KeyI",
-        };
+        this.keysMap = KEYS_MAP;
+        this.inputController = new InputController(this.keysMap);
 
         // ====== GAME STATE ======
         this.currentLevelId = null;
@@ -118,9 +99,6 @@ export class LostDaysOfSpring {
         this.frozenFrame = null; // offscreen canvas reused for frozen-world overlays
         this.galleryLastIndex = 0; // remembers carousel position between gallery openings within a run
 
-        // ====== FULLSCREEN ======
-        this.isFullscreen = false;
-
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({
             weapon: GameFactory.weapon(),
@@ -144,6 +122,10 @@ export class LostDaysOfSpring {
         this.cameraController = new CameraController(
             this.canvas.width,
             this.canvas.height,
+        );
+        this.displayController = new DisplayController(
+            this.canvas,
+            this.cameraController,
         );
 
         // ====== PHYSICS ======
@@ -210,23 +192,20 @@ export class LostDaysOfSpring {
         this.loop = this.loop.bind(this);
         this.isRunning = false;
 
-        this.mouse = { worldX: 0, worldY: 0 };
-
-        this.initMouseDebug();
+        this.mouse = new DebugMouseTracker(this.canvas, () => this.getCamera());
+        if (this.showDebug) {
+            this.mouse.attach(() => {
+                if (!this.isRunning) {
+                    this.updateDebug();
+                }
+            });
+        }
         this.initControls();
 
         this.decorateDrawMethods();
 
-        this.resizeCanvasToFit();
-        window.addEventListener("resize", () => this.resizeCanvasToFit());
-        document.addEventListener("fullscreenchange", () => {
-            this.isFullscreen = !!document.fullscreenElement;
-            this.canvas.classList.toggle("fullscreen", this.isFullscreen);
-            this.resizeCanvasToFit();
-            if (!this.isFullscreen) {
-                navigator.keyboard?.unlock?.();
-            }
-        });
+        this.displayController.resizeCanvasToFit();
+        this.displayController.attach();
     }
 
     decorateDrawMethods() {
@@ -253,63 +232,6 @@ export class LostDaysOfSpring {
         this.drawHeart = this.withCameraCulling(this.drawHeart);
         this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
         this.drawExit = this.withCameraCulling(this.drawExit);
-    }
-
-    resizeCanvasToFit() {
-        const viewportW = window.innerWidth;
-
-        let cssW, cssH, snapStep;
-
-        if (viewportW >= 1920) {
-            cssW = 1920;
-            cssH = 1080;
-            snapStep = 1;
-        } else if (viewportW >= 1440) {
-            cssW = 1440;
-            cssH = 810;
-            snapStep = 4; // 4 × 0.75 = 3 px CSS → integer
-        } else if (viewportW >= 960) {
-            cssW = 960;
-            cssH = 540;
-            snapStep = 2; // 2 × 0.5 = 1 px CSS → integer
-        } else if (viewportW >= 480) {
-            cssW = 480;
-            cssH = 270;
-            snapStep = 4; // 4 × 0.25 = 1 px CSS → integer
-        } else {
-            // tryb płynny — dopasowanie do szerokości ekranu
-            cssW = viewportW;
-            cssH = Math.round(viewportW * (1080 / 1920));
-            snapStep = 4;
-        }
-
-        this.cameraController.setSnapStep(snapStep);
-        this.canvas.style.width = cssW + "px";
-        this.canvas.style.height = cssH + "px";
-    }
-
-    toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement
-                .requestFullscreen()
-                .then(() => {
-                    this.isFullscreen = true;
-                    this.canvas.classList.add("fullscreen");
-                    this.resizeCanvasToFit();
-                    navigator.keyboard?.lock?.(["Escape"]).catch(() => {});
-                })
-                .catch(() => {});
-        } else {
-            navigator.keyboard?.unlock?.();
-            document
-                .exitFullscreen()
-                .then(() => {
-                    this.isFullscreen = false;
-                    this.canvas.classList.remove("fullscreen");
-                    this.resizeCanvasToFit();
-                })
-                .catch(() => {});
-        }
     }
 
     loadLevel(levelId, now = performance.now()) {
@@ -408,7 +330,7 @@ export class LostDaysOfSpring {
         this.resetPlayerProperties(levelData);
 
         // Clear held keys to prevent ghost input on level start
-        this.keys = {};
+        this.clearInput();
 
         // Reset bullets
         this.bullets = [];
@@ -529,133 +451,123 @@ export class LostDaysOfSpring {
     }
 
     initControls() {
-        this.preventDefaultKeys = new Set([
-            ...Object.values(this.keysMap),
-            "ControlLeft",
-            "ControlRight",
-        ]);
-
-        window.addEventListener("blur", () => {
-            this.keys = {};
-        });
-
-        window.addEventListener("keydown", (e) => {
-            e.stopPropagation();
-
-            if (this.preventDefaultKeys.has(e.code)) {
-                e.preventDefault();
-            }
-
-            if (e.code === this.keysMap.debugToggle && !e.repeat) {
-                this.showDebug = !this.showDebug;
-                this.updateDebug();
-            }
-
-            if (e.code === this.keysMap.fullscreen && !e.repeat) {
-                this.toggleFullscreen();
-            }
-
-            if (this.isTitleScreen) {
-                if (
-                    e.code === this.keysMap.enter &&
-                    !e.repeat &&
-                    !this.titleFadeOut.active &&
-                    !this.titleFadeOut.pending
-                ) {
-                    if (!document.fullscreenElement) {
-                        this.canvas
-                            .requestFullscreen()
-                            .then(() => {
-                                navigator.keyboard
-                                    ?.lock?.(["Escape"])
-                                    .catch(() => {});
-                            })
-                            .catch(() => {});
-                    }
-                    this.titleFadeOut.pending = true;
-                    this.keys = {};
-                }
-                return;
-            }
-
-            if (this.isArtifactGallery) {
-                if (!e.repeat) {
-                    if (
-                        e.code === this.keysMap.escape ||
-                        e.code === this.keysMap.gallery
-                    ) {
-                        this.closeArtifactGallery();
-                    } else if (e.code === this.keysMap.left) {
-                        this.artifactGallery.navigateLeft();
-                        this.animateGallery();
-                    } else if (e.code === this.keysMap.right) {
-                        this.artifactGallery.navigateRight();
-                        this.animateGallery();
-                    }
-                }
-                return;
-            }
-
-            const wasPaused = this.isPaused;
-            this.handlePauseMenuInput(e);
-            if (wasPaused || this.isPaused) {
-                return;
-            }
-
-            if (e.code === this.keysMap.gallery && !e.repeat) {
-                if (
-                    !this.levelComplete &&
-                    !this.gameOver &&
-                    !this.mapView &&
-                    !this.player.dying
-                ) {
-                    this.openArtifactGallery();
-                    return;
-                }
-            }
-
-            // Toggle map overview
-            if (e.code === this.keysMap.map && !e.repeat) {
-                this.toggleMapView();
-            }
-
-            // Exit map view with ESC
-            if (e.code === this.keysMap.escape && !e.repeat && this.mapView) {
-                this.toggleMapView();
-            }
-
-            if (
-                (e.code === this.keysMap.jump ||
-                    e.code === this.keysMap.jumpAlt) &&
-                !e.repeat
-            ) {
-                this.jumpJustPressed = true;
-            }
-
-            this.keys[e.code] = true;
-        });
-
-        window.addEventListener("keyup", (e) => {
-            e.stopPropagation();
-            this.keys[e.code] = false;
+        this.inputController.attach({
+            onBlur: () => this.clearInput(),
+            onKeyDown: (e) => this.handleKeyDown(e),
+            onKeyUp: (e) => this.markKeyUp(e.code),
         });
     }
 
-    initMouseDebug() {
-        this.canvas.addEventListener("mousemove", (e) => {
-            const rect = this.canvas.getBoundingClientRect();
-            const scaleX = this.canvas.width / rect.width;
-            const scaleY = this.canvas.height / rect.height;
-            this.mouse.worldX = Math.round(
-                (e.clientX - rect.left) * scaleX + this.getCamera().x,
-            );
-            this.mouse.worldY = Math.round(
-                (e.clientY - rect.top) * scaleY + this.getCamera().y,
-            );
-            if (!this.isRunning) {
-                this.updateDebug();
+    handleKeyDown(e) {
+        this.handleGlobalToggles(e);
+
+        if (this.isTitleScreen) {
+            this.handleTitleScreenKeyDown(e);
+            return;
+        }
+
+        if (this.isArtifactGallery) {
+            this.handleGalleryKeyDown(e);
+            return;
+        }
+
+        const wasPaused = this.isPaused;
+        this.handlePauseMenuInput(e);
+        if (wasPaused || this.isPaused) {
+            return;
+        }
+
+        this.handleGameplayKeyDown(e);
+    }
+
+    // Toggles active regardless of game mode (title screen, gallery, pause, gameplay).
+    handleGlobalToggles(e) {
+        if (e.code === this.keysMap.debugToggle && !e.repeat) {
+            this.showDebug = !this.showDebug;
+            if (this.showDebug) {
+                this.mouse.attach(() => {
+                    if (!this.isRunning) {
+                        this.updateDebug();
+                    }
+                });
+            } else {
+                this.mouse.detach();
             }
-        });
+            this.updateDebug();
+        }
+
+        if (e.code === this.keysMap.fullscreen && !e.repeat) {
+            this.displayController.toggleFullscreen();
+        }
+    }
+
+    handleTitleScreenKeyDown(e) {
+        if (
+            e.code === this.keysMap.enter &&
+            !e.repeat &&
+            !this.titleFadeOut.active &&
+            !this.titleFadeOut.pending
+        ) {
+            if (!document.fullscreenElement) {
+                this.canvas
+                    .requestFullscreen()
+                    .then(() => {
+                        navigator.keyboard?.lock?.(["Escape"]).catch(() => {});
+                    })
+                    .catch(() => {});
+            }
+            this.titleFadeOut.pending = true;
+            this.clearInput();
+        }
+    }
+
+    handleGalleryKeyDown(e) {
+        if (e.repeat) {
+            return;
+        }
+
+        if (e.code === this.keysMap.escape || e.code === this.keysMap.gallery) {
+            this.closeArtifactGallery();
+        } else if (e.code === this.keysMap.left) {
+            this.artifactGallery.navigateLeft();
+            this.animateGallery();
+        } else if (e.code === this.keysMap.right) {
+            this.artifactGallery.navigateRight();
+            this.animateGallery();
+        }
+    }
+
+    handleGameplayKeyDown(e) {
+        if (e.code === this.keysMap.gallery && !e.repeat) {
+            if (
+                !this.levelComplete &&
+                !this.gameOver &&
+                !this.mapView &&
+                !this.player.dying
+            ) {
+                this.openArtifactGallery();
+                return;
+            }
+        }
+
+        // Toggle map overview
+        if (e.code === this.keysMap.map && !e.repeat) {
+            this.toggleMapView();
+        }
+
+        // Exit map view with ESC
+        if (e.code === this.keysMap.escape && !e.repeat && this.mapView) {
+            this.toggleMapView();
+        }
+
+        if (
+            (e.code === this.keysMap.jump || e.code === this.keysMap.jumpAlt) &&
+            !e.repeat
+        ) {
+            this.markJumpJustPressed();
+        }
+
+        this.markKeyDown(e.code);
     }
 
     get hasEnoughCoins() {
@@ -795,7 +707,7 @@ export class LostDaysOfSpring {
         }
 
         // Dismiss level-complete or game-over screen
-        if (this.keys[this.keysMap.escape]) {
+        if (this.isKeyDown("escape")) {
             if (this.levelComplete || this.gameOver) {
                 this.resetGame();
                 return;
@@ -855,9 +767,8 @@ export class LostDaysOfSpring {
 
     // Handle keyboard input: movement, crouch, shooting, jump
     handleInput(now) {
-        if (this.jumpJustPressed) {
+        if (this.consumeJumpBuffer()) {
             this.player.jumpPressedAt = now;
-            this.jumpJustPressed = false;
         }
         if (this.player.frozenForTeleport) {
             return;
@@ -880,13 +791,10 @@ export class LostDaysOfSpring {
             ? this.player.crouchSpeed
             : this.player.speed;
 
-        if (this.keys[this.keysMap.left] && !this.keys[this.keysMap.right]) {
+        if (this.isKeyDown("left") && !this.isKeyDown("right")) {
             targetVx = -speed;
             this.player.facing = "left";
-        } else if (
-            this.keys[this.keysMap.right] &&
-            !this.keys[this.keysMap.left]
-        ) {
+        } else if (this.isKeyDown("right") && !this.isKeyDown("left")) {
             targetVx = speed;
             this.player.facing = "right";
         }
@@ -929,8 +837,7 @@ export class LostDaysOfSpring {
 
     handleCrouchInput() {
         if (
-            (this.keys[this.keysMap.crouchAlt] ||
-                this.keys[this.keysMap.crouch]) &&
+            (this.isKeyDown("crouchAlt") || this.isKeyDown("crouch")) &&
             !this.player.airborne
         ) {
             if (!this.isPlayerCrouching()) {
@@ -958,7 +865,7 @@ export class LostDaysOfSpring {
         const customShootingOffsetX = this.isPlayerCrouching()
             ? this.player.shootingCrouchOffsetX
             : this.player.shootingOffsetX;
-        if (this.keys[this.keysMap.shoot] || this.keys[this.keysMap.shootAlt]) {
+        if (this.isKeyDown("shoot") || this.isKeyDown("shootAlt")) {
             this.player.shooting = true;
             if (
                 now - this.player.lastShootTime >
@@ -1050,7 +957,7 @@ export class LostDaysOfSpring {
     }
 
     handleEnterInput(now) {
-        if (this.keys[this.keysMap.enter]) {
+        if (this.isKeyDown("enter")) {
             if (
                 this.playerAtExit &&
                 this.hasEnoughCoins &&
@@ -1074,8 +981,7 @@ export class LostDaysOfSpring {
         let currentGravity = this.physics.gravity;
         const isAscending = this.player.vy < 0;
         const isFalling = this.player.vy > 0;
-        const jumpHeld =
-            this.keys[this.keysMap.jump] || this.keys[this.keysMap.jumpAlt];
+        const jumpHeld = this.isKeyDown("jump") || this.isKeyDown("jumpAlt");
 
         // Variable jump height: fall faster if jump key is released while ascending
         if (isAscending && !jumpHeld && this.player.jumpPressedByUser) {
@@ -2014,6 +1920,31 @@ export class LostDaysOfSpring {
     // Single access point for checkpoint definitions — keeps ownership at CheckpointManager.
     getCheckpoints() {
         return this.checkpointManager.checkpoints;
+    }
+
+    // Single access point for key state — keeps ownership at InputController.
+    isKeyDown(action) {
+        return this.inputController.isDown(action);
+    }
+
+    clearInput() {
+        this.inputController.clear();
+    }
+
+    markJumpJustPressed() {
+        this.inputController.markJumpJustPressed();
+    }
+
+    markKeyDown(code) {
+        this.inputController.markKeyDown(code);
+    }
+
+    markKeyUp(code) {
+        this.inputController.markKeyUp(code);
+    }
+
+    consumeJumpBuffer() {
+        return this.inputController.consumeJumpBuffer();
     }
 
     updateDamageCooldown(now) {

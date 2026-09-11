@@ -1,0 +1,22 @@
+export const KEYS_MAP = {
+    left: "ArrowLeft",
+    right: "ArrowRight",
+    jump: "Space",
+    jumpAlt: "KeyZ",
+    crouch: "ArrowDown",
+    crouchAlt: "KeyC",
+    shoot: "KeyX",
+    shootAlt: "AltRight",
+    pause: "KeyP",
+    map: "KeyM",
+    escape: "Escape",
+    enter: "Enter",
+    debugToggle: "Backspace",
+    fullscreen: "KeyF",
+    // Menu navigation
+    menuUp: "ArrowUp",
+    menuDown: "ArrowDown",
+    menuConfirm: "Enter",
+    menuConfirmAlt: "Space",
+    gallery: "KeyI",
+};
