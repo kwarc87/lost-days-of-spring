@@ -31,6 +31,7 @@ import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
 import { TeleportController } from "../systems/TeleportController.js";
+import { ProjectileController } from "../systems/ProjectileController.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
@@ -107,14 +108,8 @@ export class LostDaysOfSpring {
             maxLife: this.initialHp,
         });
 
-        // ====== WEAPON ======
-        this.bullets = [];
-        this.nextBulletId = 0;
-
-        // ====== CANNONS ======
-        this.cannons = [];
-        this.cannonBullets = [];
-        this.nextCannonBulletId = 0;
+        // ====== PROJECTILES (bullets, cannons, spikes) ======
+        this.projectileController = new ProjectileController();
 
         // ====== TELEPORTS ======
         this.teleportController = new TeleportController();
@@ -280,7 +275,7 @@ export class LostDaysOfSpring {
         this.artifacts = levelData.collectibles?.artifacts ?? [];
         this.hearts = levelData.collectibles?.hearts ?? [];
         this.weaponUpgrades = levelData?.collectibles?.weaponUpgrades ?? [];
-        this.spikes = levelData.spikes ?? [];
+        this.setSpikes(levelData.spikes);
         this.messages = levelData.messages ?? [];
         this.activeMessage = null;
         this.messageShownAt = null;
@@ -295,7 +290,7 @@ export class LostDaysOfSpring {
         this.backgroundItems = levelData.backgroundItems ?? [];
         this.preBackgroundItems = levelData.preBackgroundItems ?? [];
         this.parallaxItems = levelData.parallax ?? [];
-        this.cannons = levelData.cannons ?? [];
+        this.setCannons(levelData.cannons);
         this.setTeleports(levelData.teleports);
 
         this.currentLevelCoinsCount = this.coins.length;
@@ -335,12 +330,10 @@ export class LostDaysOfSpring {
         this.clearInput();
 
         // Reset bullets
-        this.bullets = [];
-        this.nextBulletId = 0;
+        this.resetBullets();
 
         // Reset cannon bullets
-        this.cannonBullets = [];
-        this.nextCannonBulletId = 0;
+        this.resetCannonBullets();
 
         // Reset Camera
         this.resetCameraToPlayerStart();
@@ -375,9 +368,7 @@ export class LostDaysOfSpring {
         this.simulatedTime = now; // sync simulation clock with wall clock at level start
         this.gameFadeIn.active = true;
         this.gameFadeIn.startTime = now;
-        for (const cannon of this.cannons) {
-            cannon.lastShootTime = now - cannon.shootFrequency + cannon.delay;
-        }
+        this.resetCannonTimers(now);
     }
 
     resetPlayerProperties(levelData) {
@@ -853,10 +844,9 @@ export class LostDaysOfSpring {
                     this.player.facing === "left"
                         ? -this.player.weapon.speed
                         : this.player.weapon.speed;
-                this.bullets.push({
+                this.spawnBullet({
                     ...this.player.weapon.ammo,
                     color: this.player.weapon.color,
-                    id: this.nextBulletId++,
                     x:
                         this.player.facing === "left"
                             ? this.player.x - customShootingOffsetX
@@ -1651,141 +1641,39 @@ export class LostDaysOfSpring {
     }
 
     updateSpikesDamage(now) {
-        for (const spike of this.spikes) {
-            if (rectsCollide(this.player, spike)) {
-                const cooldownIsActive =
-                    now - this.player.lastHitTime < this.player.hitCooldown;
-
-                if (!cooldownIsActive) {
-                    const hitFromAbove =
-                        this.player.prevY + this.player.h <= spike.y;
-                    this.applyDamageToPlayer(now, spike, hitFromAbove);
-                    if (this.gameOver) {
-                        return;
-                    }
-                }
-                break;
-            }
-        }
+        this.projectileController.updateSpikesDamage(
+            now,
+            this.player,
+            (now, spike, hitFromAbove) => {
+                this.applyDamageToPlayer(now, spike, hitFromAbove);
+            },
+        );
     }
 
     // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions
     updateBullets(now) {
-        for (
-            let bulletIndex = this.bullets.length - 1;
-            bulletIndex >= 0;
-            bulletIndex--
-        ) {
-            const bullet = this.bullets[bulletIndex];
-            bullet.x += bullet.vx;
-            bullet.y += bullet.vy;
-
-            // Remove if outside world bounds
-            if (
-                bullet.x > this.worldSize.width ||
-                bullet.x + bullet.w < 0 ||
-                bullet.y > this.worldSize.height ||
-                bullet.y + bullet.h < 0
-            ) {
-                this.bullets.splice(bulletIndex, 1);
-                continue;
-            }
-
-            let consumedOnEnemy = false;
-            // Bullet-enemy collision
-            for (let i = this.enemies.length - 1; i >= 0; i--) {
-                if (this.enemies[i].dead || this.enemies[i].dying) {
-                    continue;
-                }
-                if (rectsCollide(bullet, this.enemies[i])) {
-                    const enemy = this.enemies[i];
-                    enemy.health -= bullet.damage;
-                    if (enemy.health <= 0) {
-                        enemy.health = 0;
-                        enemy.isDamaged = false;
-                        enemy.dying = true;
-                        enemy.dyingStartedAtMs = now;
-                    } else {
-                        enemy.isDamaged = true;
-                        enemy.damageTime = now;
-                    }
-                    consumedOnEnemy = true; // bullet consumed on hit
-                    this.bullets.splice(bulletIndex, 1);
-                    break;
-                }
-            }
-
-            if (consumedOnEnemy) {
-                continue;
-            }
-
-            let consumedOnPlatform = false;
-            for (let i = this.solids.length - 1; i >= 0; i--) {
-                if (rectsCollide(bullet, this.solids[i])) {
-                    this.bullets.splice(bulletIndex, 1);
-                    consumedOnPlatform = true;
-                    break;
-                }
-            }
-
-            if (consumedOnPlatform) {
-                continue;
-            }
-        }
+        this.projectileController.updateBullets(now, {
+            worldSize: this.worldSize,
+            enemies: this.enemies,
+            solids: this.solids,
+        });
     }
 
     // Trigger cannons to shoot based on shootFrequency
     updateCannons(now) {
-        for (const cannon of this.cannons) {
-            const elapsed = now - cannon.lastShootTime;
-            if (elapsed < cannon.shootFrequency) {
-                continue;
-            }
-
-            const cycles = Math.floor(elapsed / cannon.shootFrequency);
-            cannon.lastShootTime += cycles * cannon.shootFrequency;
-
-            const bulletW = cannon.ammo.w;
-            const CANNON_BARREL_OFFSET_Y = -12;
-            for (let i = 0; i < cycles; i++) {
-                this.cannonBullets.push({
-                    ...cannon.ammo,
-                    id: this.nextCannonBulletId++,
-                    x: cannon.x + cannon.w / 2 - bulletW / 2,
-                    y: cannon.y + cannon.h + CANNON_BARREL_OFFSET_Y,
-                    vx: 0,
-                    vy: cannon.speed,
-                    targetY: cannon.targetY,
-                    color: cannon.color,
-                });
-            }
-        }
+        this.projectileController.updateCannons(now);
     }
 
     // Move cannon bullets and check collision with player only
     updateCannonBullets(now) {
-        for (let i = this.cannonBullets.length - 1; i >= 0; i--) {
-            const bullet = this.cannonBullets[i];
-            bullet.x += bullet.vx;
-            bullet.y += bullet.vy;
-
-            if (bullet.y > bullet.targetY) {
-                this.cannonBullets.splice(i, 1);
-                continue;
-            }
-
-            if (rectsCollide(bullet, this.player)) {
-                this.cannonBullets.splice(i, 1);
-                const cooldownIsActive =
-                    now - this.player.lastHitTime < this.player.hitCooldown;
-                if (!cooldownIsActive) {
-                    this.applyDamageToPlayer(now, bullet);
-                    if (this.gameOver) {
-                        return;
-                    }
-                }
-            }
-        }
+        this.projectileController.updateCannonBullets(
+            now,
+            this.player,
+            (now, bullet) => {
+                this.applyDamageToPlayer(now, bullet);
+                return this.gameOver;
+            },
+        );
     }
 
     // Check player-collectible collisions and mark collected items
@@ -1981,6 +1869,51 @@ export class LostDaysOfSpring {
 
     detachMouseTracking() {
         this.mouse.detach();
+    }
+
+    // Single access point for projectile/hazard state — keeps ownership at ProjectileController.
+    getBullets() {
+        return this.projectileController.getBullets();
+    }
+
+    getCannonBullets() {
+        return this.projectileController.getCannonBullets();
+    }
+
+    getCannons() {
+        return this.projectileController.getCannons();
+    }
+
+    getSpikes() {
+        return this.projectileController.getSpikes();
+    }
+
+    setCannons(cannons) {
+        this.projectileController.setCannons(cannons);
+    }
+
+    setSpikes(spikes) {
+        this.projectileController.setSpikes(spikes);
+    }
+
+    resetBullets() {
+        this.projectileController.resetBullets();
+    }
+
+    resetCannonBullets() {
+        this.projectileController.resetCannonBullets();
+    }
+
+    spawnBullet(bulletData) {
+        this.projectileController.spawnBullet(bulletData);
+    }
+
+    resetCannonTimers(now) {
+        this.projectileController.resetCannonTimers(now);
+    }
+
+    adjustCannonsForPause(pauseDuration) {
+        this.projectileController.adjustForPause(pauseDuration);
     }
 
     updateDamageCooldown(now) {
@@ -2196,11 +2129,11 @@ export class LostDaysOfSpring {
             this.drawEnvBackgroundItem(i);
         }
 
-        for (const w of this.bullets) {
+        for (const w of this.getBullets()) {
             this.drawBullet(w);
         }
 
-        for (const b of this.cannonBullets) {
+        for (const b of this.getCannonBullets()) {
             this.drawCannonBullet(b);
         }
 
@@ -2242,7 +2175,7 @@ export class LostDaysOfSpring {
             this.drawElevator(e);
         }
 
-        for (const spike of this.spikes) {
+        for (const spike of this.getSpikes()) {
             this.drawSpike(spike);
         }
 
@@ -2253,7 +2186,7 @@ export class LostDaysOfSpring {
             this.drawEnemy(e, now);
         }
 
-        for (const cannon of this.cannons) {
+        for (const cannon of this.getCannons()) {
             this.drawCannon(cannon);
         }
 
@@ -2770,9 +2703,7 @@ export class LostDaysOfSpring {
             this.player.knockbackUntil += pauseDuration;
         }
 
-        for (const cannon of this.cannons) {
-            cannon.lastShootTime += pauseDuration;
-        }
+        this.adjustCannonsForPause(pauseDuration);
         for (const e of this.elevators) {
             if (e.idleUntil) {
                 e.idleUntil += pauseDuration;
