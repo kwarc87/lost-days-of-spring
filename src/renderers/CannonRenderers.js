@@ -9,15 +9,6 @@ const DST_W = 128;
 const DST_H = 128;
 
 export const CannonRenderer = {
-    drawMapCannon: (ctx, cannon) => {
-        const x = Math.round(cannon.x);
-        const y = Math.round(cannon.y);
-        const { w, h } = cannon;
-
-        ctx.fillStyle = "#C1311B";
-        ctx.fillRect(x, y, w, h);
-    },
-
     draw: (ctx, cannon, debug = false) => {
         const img = getImg(SPRITE_URL);
         if (!img?.complete || !img.naturalWidth) {

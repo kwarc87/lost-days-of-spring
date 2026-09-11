@@ -12,11 +12,4 @@ export const CheckpointRenderer = {
             ctx.restore();
         }
     },
-
-    drawMap(ctx, cp) {
-        ctx.save();
-        ctx.fillStyle = cp.reached ? "#72eb84" : "#f472b6";
-        ctx.fillRect(cp.x, cp.y, cp.w, cp.h);
-        ctx.restore();
-    },
 };

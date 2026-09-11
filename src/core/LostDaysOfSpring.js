@@ -32,6 +32,20 @@ import { MapDiscovery } from "../services/MapDiscovery.js";
 import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
 import { TransitionRenderer } from "../renderers/TransitionRenderer.js";
 import { ArtifactGalleryRenderer } from "../renderers/ArtifactGalleryRenderer.js";
+import {
+    MapPlayerRenderer,
+    MapPlatformRenderer,
+    MapEnemyRenderer,
+    MapCoinRenderer,
+    MapSplinterRenderer,
+    MapArtifactRenderer,
+    MapHeartRenderer,
+    MapCannonRenderer,
+    MapSpikeRenderer,
+    MapCheckpointRenderer,
+    MapExitRenderer,
+    NOOP_RENDERER,
+} from "../renderers/MapRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true, initialHp = 6) {
@@ -194,6 +208,17 @@ export class LostDaysOfSpring {
         this.cannonBulletRenderer = CannonBulletRenderer;
         this.titleScreenRenderer = TitleScreenRenderer;
         this.transitionRenderer = TransitionRenderer;
+        this.mapPlayerRenderer = MapPlayerRenderer;
+        this.mapPlatformRenderer = MapPlatformRenderer;
+        this.mapEnemyRenderer = MapEnemyRenderer;
+        this.mapCoinRenderer = MapCoinRenderer;
+        this.mapSplinterRenderer = MapSplinterRenderer;
+        this.mapArtifactRenderer = MapArtifactRenderer;
+        this.mapHeartRenderer = MapHeartRenderer;
+        this.mapCannonRenderer = MapCannonRenderer;
+        this.mapSpikeRenderer = MapSpikeRenderer;
+        this.mapCheckpointRenderer = MapCheckpointRenderer;
+        this.mapExitRenderer = MapExitRenderer;
         this.artifactGallery = new ArtifactGalleryRenderer();
 
         this.lastTime = performance.now();
@@ -2092,6 +2117,14 @@ export class LostDaysOfSpring {
         };
     }
 
+    renderByMode(obj, mapRenderer, normalDrawFn) {
+        if (this.mapView) {
+            mapRenderer.draw(this.ctx, obj, this.showDebug);
+            return;
+        }
+        normalDrawFn();
+    }
+
     calcDesiredLookAheadY(now) {
         if (this.player.vy < 0) {
             const upRatio = Math.min(
@@ -2249,108 +2282,89 @@ export class LostDaysOfSpring {
     }
 
     drawPlayer(now) {
-        if (this.mapView) {
-            this.playerRenderer.drawMapPlayer(this.ctx, this.player);
-            return;
-        }
-        this.playerRenderer.draw(this.ctx, this.player, this.showDebug, now);
+        this.renderByMode(this.player, this.mapPlayerRenderer, () =>
+            this.playerRenderer.draw(this.ctx, this.player, this.showDebug, now),
+        );
     }
 
     drawPlatform(p) {
-        if (this.mapView) {
-            this.platformRenderer.drawMap(this.ctx, p, this.showDebug);
-            return;
-        }
-        this.platformRenderer.draw(this.ctx, p, this.showDebug, this.camera);
+        this.renderByMode(p, this.mapPlatformRenderer, () =>
+            this.platformRenderer.draw(this.ctx, p, this.showDebug, this.camera),
+        );
     }
 
     drawElevator(e) {
-        if (this.mapView) {
-            this.platformRenderer.drawMap(this.ctx, e, this.showDebug);
-            return;
-        }
-        this.platformRenderer.draw(this.ctx, e, this.showDebug, this.camera);
+        this.renderByMode(e, this.mapPlatformRenderer, () =>
+            this.platformRenderer.draw(this.ctx, e, this.showDebug, this.camera),
+        );
     }
 
-    drawHiddenWall(wall) {
-        if (this.mapView) {
-            this.platformRenderer.drawMap(this.ctx, wall, this.showDebug);
-            return;
-        }
-        this.platformRenderer.drawHiddenWall(
-            this.ctx,
-            wall,
-            this.showDebug,
-            this.camera,
+    drawHiddenWall(w) {
+        this.renderByMode(w, this.mapPlatformRenderer, () =>
+            this.platformRenderer.drawHiddenWall(
+                this.ctx,
+                w,
+                this.showDebug,
+                this.camera,
+            ),
         );
     }
 
     drawEnemy(e, now) {
-        if (this.mapView) {
-            if (this.showDebug) {
-                this.enemyRenderer.drawMapEnemy(this.ctx, e, e.sprite);
-            }
-            return;
-        }
-        this.enemyRenderer.draw(
-            this.ctx,
-            e,
-            e.sprite,
-            this.showDebug,
-            now,
-            this.player,
+        this.renderByMode(e, this.mapEnemyRenderer, () =>
+            this.enemyRenderer.draw(
+                this.ctx,
+                e,
+                e.sprite,
+                this.showDebug,
+                now,
+                this.player,
+            ),
         );
     }
 
     drawCoin(c) {
-        if (this.mapView) {
-            if (this.showDebug) {
-                this.collectibleRenderer.drawMapCoin(this.ctx, c);
-            }
-            return;
-        }
-        this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug);
+        this.renderByMode(c, this.mapCoinRenderer, () =>
+            this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug),
+        );
     }
 
     drawSplinter(s, now) {
-        if (this.mapView) {
-            if (this.showDebug) {
-                this.collectibleRenderer.drawMapSplinter(this.ctx, s);
-            }
-            return;
-        }
-        this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug, now);
+        this.renderByMode(s, this.mapSplinterRenderer, () =>
+            this.collectibleRenderer.drawSplinter(
+                this.ctx,
+                s,
+                this.showDebug,
+                now,
+            ),
+        );
     }
 
     drawArtifact(a, now) {
-        if (this.mapView) {
-            if (this.showDebug) {
-                this.collectibleRenderer.drawMapArtifact(this.ctx, a);
-            }
-            return;
-        }
-        this.collectibleRenderer.drawArtifact(this.ctx, a, this.showDebug, now);
+        this.renderByMode(a, this.mapArtifactRenderer, () =>
+            this.collectibleRenderer.drawArtifact(
+                this.ctx,
+                a,
+                this.showDebug,
+                now,
+            ),
+        );
     }
 
     drawHeart(s, now) {
-        if (this.mapView) {
-            if (this.showDebug) {
-                this.collectibleRenderer.drawMapHeart(this.ctx, s);
-            }
-            return;
-        }
-        this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug, now);
+        this.renderByMode(s, this.mapHeartRenderer, () =>
+            this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug, now),
+        );
     }
 
     drawWeaponUpgrade(s, now) {
-        if (this.mapView) {
-            return;
-        }
-        this.collectibleRenderer.drawWeaponUpgrade(
-            this.ctx,
-            s,
-            this.showDebug,
-            now,
+        this.renderByMode(s, NOOP_RENDERER, () =>
+            this.collectibleRenderer.drawWeaponUpgrade(
+                this.ctx,
+                s,
+                this.showDebug,
+                now,
+            ),
         );
     }
 
@@ -2359,11 +2373,9 @@ export class LostDaysOfSpring {
     }
 
     drawCannon(cannon) {
-        if (this.mapView) {
-            this.cannonRenderer.drawMapCannon(this.ctx, cannon);
-            return;
-        }
-        this.cannonRenderer.draw(this.ctx, cannon, this.showDebug);
+        this.renderByMode(cannon, this.mapCannonRenderer, () =>
+            this.cannonRenderer.draw(this.ctx, cannon, this.showDebug),
+        );
     }
 
     drawCannonBullet(b) {
@@ -2371,35 +2383,30 @@ export class LostDaysOfSpring {
     }
 
     drawSpike(spike) {
-        if (this.mapView) {
-            this.spikeRenderer.drawMapSpike(this.ctx, spike);
-            return;
-        }
-        this.spikeRenderer.draw(this.ctx, spike, this.showDebug);
+        this.renderByMode(spike, this.mapSpikeRenderer, () =>
+            this.spikeRenderer.draw(this.ctx, spike, this.showDebug),
+        );
     }
 
     drawEnvPreBackgroundItem(i) {
-        if (this.mapView) {
-            return;
-        }
-        this.worldRenderer.drawEnvironmentItem(this.ctx, i);
+        this.renderByMode(i, NOOP_RENDERER, () =>
+            this.worldRenderer.drawEnvironmentItem(this.ctx, i),
+        );
     }
 
     drawEnvBackgroundItem(i) {
-        if (this.mapView) {
-            return;
-        }
-        this.worldRenderer.drawEnvironmentItem(this.ctx, i);
+        this.renderByMode(i, NOOP_RENDERER, () =>
+            this.worldRenderer.drawEnvironmentItem(this.ctx, i),
+        );
     }
 
     drawEnvParallaxItem(i) {
-        if (this.mapView) {
-            return;
-        }
-        this.worldRenderer.drawParallaxEnvironmentItem(
-            this.ctx,
-            i,
-            this.camera,
+        this.renderByMode(i, NOOP_RENDERER, () =>
+            this.worldRenderer.drawParallaxEnvironmentItem(
+                this.ctx,
+                i,
+                this.camera,
+            ),
         );
     }
 
@@ -2413,10 +2420,9 @@ export class LostDaysOfSpring {
     }
 
     drawEnvForegroundItem(i) {
-        if (this.mapView) {
-            return;
-        }
-        this.worldRenderer.drawEnvironmentItem(this.ctx, i);
+        this.renderByMode(i, NOOP_RENDERER, () =>
+            this.worldRenderer.drawEnvironmentItem(this.ctx, i),
+        );
     }
 
     draw(now = performance.now()) {
@@ -2699,8 +2705,8 @@ export class LostDaysOfSpring {
         return {
             x: exit.x - m,
             y: exit.y - m,
-            w: exit.w * GameFactory.SCALE + m * 2,
-            h: exit.h * GameFactory.SCALE + m,
+            w: exit.dw + m * 2,
+            h: exit.dh + m,
         };
     }
 
@@ -2880,19 +2886,15 @@ export class LostDaysOfSpring {
     }
 
     drawCheckpointIndicator(cp) {
-        if (this.mapView) {
-            this.checkpointRenderer.drawMap(this.ctx, cp);
-            return;
-        }
-        this.checkpointRenderer.draw(this.ctx, cp, this.showDebug);
+        this.renderByMode(cp, this.mapCheckpointRenderer, () =>
+            this.checkpointRenderer.draw(this.ctx, cp, this.showDebug),
+        );
     }
 
     drawExit(exit) {
-        if (this.mapView) {
-            this.exitRenderer.drawMapExit(this.ctx, exit);
-            return;
-        }
-        this.exitRenderer.draw(this.ctx, exit, this.showDebug);
+        this.renderByMode(exit, this.mapExitRenderer, () =>
+            this.exitRenderer.draw(this.ctx, exit, this.showDebug),
+        );
     }
 
     drawExitMessage() {
@@ -2900,10 +2902,8 @@ export class LostDaysOfSpring {
         if (!exit) {
             return;
         }
-        const anchorX =
-            exit.x - this.camera.x + (exit.w * GameFactory.SCALE) / 2;
-        const anchorY =
-            exit.y - this.camera.y + (exit.h * GameFactory.SCALE) / 2;
+        const anchorX = exit.x - this.camera.x + exit.dw / 2;
+        const anchorY = exit.y - this.camera.y + exit.dh / 2;
         const lines = getExitLevelLines(
             this.hasEnoughCoins,
             this.hasEnoughSplinters,

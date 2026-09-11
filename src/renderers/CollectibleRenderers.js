@@ -228,26 +228,6 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-    drawMapCoin: (ctx, collectible) => {
-        ctx.fillStyle = "#ffd700";
-        ctx.fillRect(
-            collectible.x,
-            collectible.y,
-            collectible.w,
-            collectible.h,
-        );
-    },
-
-    drawMapSplinter: (ctx, collectible) => {
-        ctx.fillStyle = "#68eef2";
-        ctx.fillRect(
-            collectible.x,
-            collectible.y,
-            collectible.w,
-            collectible.h,
-        );
-    },
-
     drawHeart: (
         ctx,
         collectible,
@@ -289,22 +269,6 @@ export const DefaultCollectibleRenderer = {
             );
             ctx.restore();
         }
-    },
-
-    drawMapHeart: (ctx, collectible) => {
-        const x = collectible.x;
-        const y = collectible.y;
-
-        ctx.fillStyle = "#e8334a";
-        // Left lobe
-        ctx.fillRect(x + 2, y, 8, 8);
-        // Right lobe
-        ctx.fillRect(x + 14, y, 8, 8);
-        // Body connecting lobes
-        ctx.fillRect(x + 1, y + 4, 22, 10);
-        // Lower V — narrowing to tip
-        ctx.fillRect(x + 4, y + 14, 16, 6);
-        ctx.fillRect(x + 8, y + 20, 8, 4);
     },
 
     drawArtifact: (
@@ -349,15 +313,5 @@ export const DefaultCollectibleRenderer = {
             );
             ctx.restore();
         }
-    },
-
-    drawMapArtifact: (ctx, collectible) => {
-        ctx.fillStyle = "#4772da";
-        ctx.fillRect(
-            collectible.x,
-            collectible.y,
-            collectible.w,
-            collectible.h,
-        );
     },
 };

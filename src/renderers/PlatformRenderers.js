@@ -621,19 +621,11 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
     }
 }
 
-const MAP_COLORS = {
-    solid: "#6d5ad9",
-    oneDirection: "#4a3db0",
-    booster: "#FBDB6D",
-    elevator: "#3d83b3",
-};
-
 function drawSimpleTiled(ctx, platform) {
-    const color = platform.color ?? MAP_COLORS[platform.type];
-    if (!color) {
+    if (!platform.color) {
         return;
     }
-    ctx.fillStyle = color;
+    ctx.fillStyle = platform.color;
     ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
 }
 
@@ -685,25 +677,5 @@ export const DefaultPlatformRenderer = {
             camera,
         );
         ctx.globalAlpha = prev;
-    },
-    drawMap(ctx, platform) {
-        const color = platform.color ?? MAP_COLORS[platform.type];
-        if (!color) {
-            return;
-        }
-        // Snap world-space rect to exact screen pixels to prevent sub-pixel
-        // anti-aliasing seams between touching platforms.  Two platforms sharing
-        // the same world boundary will compute the same Math.round() value and
-        // therefore the same screen edge — guaranteed zero gap.
-        const t = ctx.getTransform();
-        const sx1 = Math.round(t.e + platform.x * t.a);
-        const sy1 = Math.round(t.f + platform.y * t.d);
-        const sx2 = Math.round(t.e + (platform.x + platform.w) * t.a);
-        const sy2 = Math.round(t.f + (platform.y + platform.h) * t.d);
-        ctx.save();
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.fillStyle = color;
-        ctx.fillRect(sx1, sy1, sx2 - sx1, sy2 - sy1);
-        ctx.restore();
     },
 };

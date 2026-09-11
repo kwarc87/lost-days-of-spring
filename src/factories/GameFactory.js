@@ -301,6 +301,10 @@ export const GameFactory = {
         y,
         w,
         h,
+        // dw/dh = world-space render/hitbox size; w/h stay unscaled — also used
+        // as the sprite source-crop size in ExitRenderers.js.
+        dw: w * GameFactory.SCALE,
+        dh: h * GameFactory.SCALE,
         cordX: 108,
         cordY: 36,
         url: "textures/all-props.png",
