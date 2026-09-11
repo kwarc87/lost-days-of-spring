@@ -32,10 +32,13 @@ import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
 import { TeleportController } from "../systems/TeleportController.js";
 import { ProjectileController } from "../systems/ProjectileController.js";
+import { ElevatorController } from "../systems/ElevatorController.js";
+import { hasPassedTarget } from "../utils/patrol.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
 import { KEYS_MAP } from "../config/keysMap.js";
+import { PHYSICS } from "../config/physics.js";
 import { DisplayController } from "../systems/DisplayController.js";
 import { DebugMouseTracker } from "../systems/DebugMouseTracker.js";
 import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
@@ -93,8 +96,6 @@ export class LostDaysOfSpring {
         this.pauseStartAt = 0; // timestamp (ms) when the current pause started
         this.gameOverDelay = 15000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
-        this.elevatorSpeedOutsideOfTheCamera = 100;
-        this.elevatorCameraMargin = GameFactory.GRID * 15;
         this.verticalHitRecoilMultiplier = 1.5;
         this.mapDiscovery = null;
         this.isArtifactGallery = false;
@@ -111,6 +112,9 @@ export class LostDaysOfSpring {
         // ====== PROJECTILES (bullets, cannons, spikes) ======
         this.projectileController = new ProjectileController();
 
+        // ====== ELEVATORS ======
+        this.elevatorController = new ElevatorController();
+
         // ====== TELEPORTS ======
         this.teleportController = new TeleportController();
 
@@ -125,12 +129,7 @@ export class LostDaysOfSpring {
         );
 
         // ====== PHYSICS ======
-        this.physics = {
-            gravity: 0.7,
-            maxFallSpeed: 32,
-            fallGravityMultiplier: 1.45,
-            jumpCutGravityMultiplier: 2.8,
-        };
+        this.physics = PHYSICS;
 
         // ====== POSTURES ======
         this.playerPostures = {
@@ -268,7 +267,7 @@ export class LostDaysOfSpring {
             GameFactory.GRID * 3,
         );
         this.platforms = levelData.platforms ?? [];
-        this.elevators = levelData.elevators ?? [];
+        this.setElevators(levelData.elevators);
         this.enemies = levelData.enemies ?? [];
         this.coins = levelData.collectibles?.coins ?? [];
         this.splinters = levelData.collectibles?.splinters ?? [];
@@ -309,7 +308,7 @@ export class LostDaysOfSpring {
         this.foregroundItems.push(...teleportItems.foreground);
         this.platforms.push(...teleportItems.platforms);
         // Elevators first: same priority order as movePlayerY collision resolution.
-        this.solids = [...this.elevators, ...this.platforms];
+        this.solids = [...this.getElevators(), ...this.platforms];
 
         // Restore checkpoint state (collected items, killed enemies, etc.)
         this.restoreCheckpointProgress({
@@ -319,7 +318,7 @@ export class LostDaysOfSpring {
             hearts: this.hearts,
             weaponUpgrades: this.weaponUpgrades,
             enemies: this.enemies,
-            elevators: this.elevators,
+            elevators: this.getElevators(),
             messages: this.messages,
             mapDiscovery: this.mapDiscovery,
         });
@@ -619,13 +618,6 @@ export class LostDaysOfSpring {
         return this.player.posture === this.playerPostures.CROUCH;
     }
 
-    isPlayerOnElevator(elevator) {
-        return (
-            this.player.onGroundType === "elevator" &&
-            this.player.onGroundId === elevator.id
-        );
-    }
-
     getPlayerHitboxForPosture(posture) {
         if (posture === this.playerPostures.CROUCH) {
             return {
@@ -903,9 +895,7 @@ export class LostDaysOfSpring {
 
     handleElevatorJump(now) {
         if (this.player.onGroundType === "elevator") {
-            const elev = this.elevators.find(
-                (e) => e.id === this.player.onGroundId,
-            );
+            const elev = this.getElevatorById(this.player.onGroundId);
             if (elev && elev.triggered && now >= elev.idleUntil) {
                 const elevVx = elev.dirX * elev.speed * elev.direction;
                 const elevVy = elev.dirY * elev.speed * elev.direction;
@@ -1193,175 +1183,19 @@ export class LostDaysOfSpring {
     }
 
     updateElevators(now) {
-        for (const e of this.elevators) {
-            e.previousX = e.x;
-            e.previousY = e.y;
-            if (!e.triggered) {
-                continue;
-            }
-            if (now < e.idleUntil) {
-                continue;
-            }
-
-            const offScreen = !this.isVisibleInCamera(
-                e,
-                this.elevatorCameraMargin,
-            );
-            const speed = offScreen
-                ? this.elevatorSpeedOutsideOfTheCamera
-                : e.speed;
-
-            const playerIsOnElevator = offScreen
-                ? false
-                : this.isPlayerOnElevator(e);
-
-            const moveX = e.dirX * speed * e.direction;
-            const moveY = e.dirY * speed * e.direction;
-
-            const { shouldSkip, picksUp } = offScreen
-                ? { shouldSkip: false, picksUp: false }
-                : this.checkElevatorPlayerBlock(
-                      e,
-                      moveX,
-                      moveY,
-                      playerIsOnElevator,
-                  );
-            if (shouldSkip) {
-                continue;
-            }
-
-            const previousX = e.x;
-            const previousY = e.y;
-
-            this.moveElevator(e, moveX, moveY, now);
-            this.applyElevatorToPlayer(
-                e,
-                previousX,
-                previousY,
-                picksUp,
-                playerIsOnElevator,
-                now,
-            );
-        }
-    }
-
-    // Checks whether the player is in the path of the elevator.
-    // Returns shouldSkip=true (and reverses direction) when the elevator must bounce,
-    // or picksUp=true when the elevator should collect a standing player from below.
-    checkElevatorPlayerBlock(e, moveX, moveY, playerIsOnElevator) {
-        const nextX = e.x + moveX;
-        const nextY = e.y + moveY;
-
-        const sweptElevator = {
-            x: Math.min(e.x, nextX),
-            y: Math.min(e.y, nextY),
-            w: e.w + Math.abs(moveX),
-            h: e.h + Math.abs(moveY),
-        };
-
-        const playerBlocksElevator =
-            !playerIsOnElevator && rectsCollide(this.player, sweptElevator);
-
-        // Elevator moving upward reaches a player standing just above it —
-        // instead of bouncing, pick the player up.
-        const picksUp =
-            playerBlocksElevator &&
-            moveY < 0 &&
-            !this.player.airborne &&
-            this.player.y + this.player.h <= e.y;
-
-        if (playerBlocksElevator && !picksUp) {
-            if (!this.player.airborne) {
-                e.direction = -e.direction;
-            }
-            return { shouldSkip: true, picksUp: false };
-        }
-
-        return { shouldSkip: false, picksUp };
-    }
-
-    // Moves the elevator by the given delta and snaps it to the endpoint when overshot.
-    moveElevator(e, moveX, moveY, now) {
-        e.x += moveX;
-        e.y += moveY;
-
-        const signX = Math.sign(e.dirX);
-        const signY = Math.sign(e.dirY);
-
-        const passedX = this.hasPassedTarget(
-            e.x,
-            e.direction === 1 ? e.targetX : e.startX,
-            e.direction === 1 ? signX : -signX,
-        );
-        const passedY = this.hasPassedTarget(
-            e.y,
-            e.direction === 1 ? e.targetY : e.startY,
-            e.direction === 1 ? signY : -signY,
-        );
-
-        if (passedX && passedY) {
-            if (e.direction === 1) {
-                e.x = e.targetX;
-                e.y = e.targetY;
-                e.direction = -1;
-            } else {
-                e.x = e.startX;
-                e.y = e.startY;
-                e.direction = 1;
-            }
-
-            e.idleUntil = now + e.waitTime;
-        }
-    }
-
-    // Carries a riding player along with the elevator, or snaps a picked-up player onto it.
-    applyElevatorToPlayer(
-        e,
-        previousX,
-        previousY,
-        picksUp,
-        playerIsOnElevator,
-        now,
-    ) {
-        const actualMoveX = e.x - previousX;
-        const actualMoveY = e.y - previousY;
-
-        if (playerIsOnElevator) {
-            const nextPlayer = {
-                x: this.player.x + actualMoveX,
-                y: this.player.y + actualMoveY,
-                w: this.player.w,
-                h: this.player.h,
-            };
-            const wouldHitPlatform = this.platforms.some((p) =>
-                rectsCollide(nextPlayer, p),
-            );
-            const blockingEnemy = this.enemies.find(
-                (enemy) =>
-                    !enemy.dead &&
-                    !enemy.dying &&
-                    rectsCollide(nextPlayer, enemy),
-            );
-            if ((wouldHitPlatform || blockingEnemy) && actualMoveY < 0) {
-                e.x = previousX;
-                e.y = previousY;
-                e.direction = -e.direction;
-                if (blockingEnemy) {
-                    const cooldownIsActive =
-                        now - this.player.lastHitTime < this.player.hitCooldown;
-                    if (!cooldownIsActive) {
-                        this.applyDamageToPlayer(now, blockingEnemy);
-                    }
-                }
-            } else {
-                this.player.x += actualMoveX;
-                this.player.y += actualMoveY;
-            }
-        } else if (picksUp) {
-            // Elevator arrived at player's feet from below — snap player onto elevator.
-            this.handlePlatformLanding(e, now);
-            this.handlePlatformLandingResponse(e);
-        }
+        this.elevatorController.update(now, {
+            player: this.player,
+            platforms: this.platforms,
+            enemies: this.enemies,
+            isVisibleInCamera: (obj, margin) =>
+                this.isVisibleInCamera(obj, margin),
+            onPlatformLanding: (elevator, landingNow) => {
+                this.handlePlatformLanding(elevator, landingNow);
+                this.handlePlatformLandingResponse(elevator);
+            },
+            onPlayerHit: (hitNow, enemy) =>
+                this.applyDamageToPlayer(hitNow, enemy),
+        });
     }
 
     // Move enemies and check player-enemy collisions
@@ -1399,13 +1233,13 @@ export class LostDaysOfSpring {
             const signX = Math.sign(enemy.dirX);
             const signY = Math.sign(enemy.dirY);
 
-            const passedX = this.hasPassedTarget(
+            const passedX = hasPassedTarget(
                 enemy.x,
                 enemy.direction === 1 ? enemy.targetX : enemy.startX,
                 enemy.direction === 1 ? signX : -signX,
             );
 
-            const passedY = this.hasPassedTarget(
+            const passedY = hasPassedTarget(
                 enemy.y,
                 enemy.direction === 1 ? enemy.targetY : enemy.startY,
                 enemy.direction === 1 ? signY : -signY,
@@ -1626,7 +1460,7 @@ export class LostDaysOfSpring {
             hearts: this.hearts,
             weaponUpgrades: this.weaponUpgrades,
             enemies: this.enemies,
-            elevators: this.elevators,
+            elevators: this.getElevators(),
             messages: this.messages,
             mapDiscovery: this.mapDiscovery,
             levelStartAt: this.levelStartAt,
@@ -1768,7 +1602,7 @@ export class LostDaysOfSpring {
         this.cameraController.update(now, {
             player: this.player,
             worldSize: this.worldSize,
-            elevators: this.elevators,
+            elevators: this.getElevators(),
             physics: this.physics,
             isCrouching: this.isPlayerCrouching(),
         });
@@ -1914,6 +1748,23 @@ export class LostDaysOfSpring {
 
     adjustCannonsForPause(pauseDuration) {
         this.projectileController.adjustForPause(pauseDuration);
+    }
+
+    // Single access point for elevator definitions — keeps ownership at ElevatorController.
+    getElevators() {
+        return this.elevatorController.getElevators();
+    }
+
+    setElevators(elevators) {
+        this.elevatorController.setElevators(elevators);
+    }
+
+    getElevatorById(id) {
+        return this.elevatorController.findById(id);
+    }
+
+    adjustElevatorsForPause(pauseDuration) {
+        this.elevatorController.adjustForPause(pauseDuration);
     }
 
     updateDamageCooldown(now) {
@@ -2171,7 +2022,7 @@ export class LostDaysOfSpring {
             this.drawHiddenWall(wall);
         }
 
-        for (const e of this.elevators) {
+        for (const e of this.getElevators()) {
             this.drawElevator(e);
         }
 
@@ -2704,11 +2555,7 @@ export class LostDaysOfSpring {
         }
 
         this.adjustCannonsForPause(pauseDuration);
-        for (const e of this.elevators) {
-            if (e.idleUntil) {
-                e.idleUntil += pauseDuration;
-            }
-        }
+        this.adjustElevatorsForPause(pauseDuration);
         for (const e of this.enemies) {
             if (e.dyingStartedAtMs) {
                 e.dyingStartedAtMs += pauseDuration;
