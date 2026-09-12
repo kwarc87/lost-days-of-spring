@@ -104,8 +104,6 @@ export const PLAYER_DYING_DURATION_MS = (ANIMS.die.frames.length / ANIMS.die.fps
 
 import { getImg } from "../utils/imgCache.js";
 
-let _animStartTime = 0;
-let _lastAnimKey = null;
 let _offCanvas = null;
 let _offCtx = null;
 
@@ -156,13 +154,13 @@ function getAnimKey(player) {
     return "idle";
 }
 
-function getCurrentFrame(animKey, anim, now) {
-    if (_lastAnimKey !== animKey) {
-        _animStartTime = now;
-        _lastAnimKey = animKey;
+function getCurrentFrame(player, animKey, anim, now) {
+    if (player.lastAnimKey !== animKey) {
+        player.animStartTime = now;
+        player.lastAnimKey = animKey;
     }
 
-    const elapsed = now - _animStartTime;
+    const elapsed = now - player.animStartTime;
     const delay = anim.delay ?? 0;
 
     if (elapsed < delay) {
@@ -180,12 +178,6 @@ function getCurrentFrame(animKey, anim, now) {
     return anim.frames[Math.min(frameIndex, anim.frames.length - 1)];
 }
 
-export function adjustAnimStartTime(delta) {
-    if (_animStartTime) {
-        _animStartTime += delta;
-    }
-}
-
 export const DefaultPlayerRenderer = {
     draw: (ctx, player, { debug = false, now = performance.now() } = {}) => {
         const animKey = getAnimKey(player);
@@ -196,7 +188,7 @@ export const DefaultPlayerRenderer = {
             return;
         }
 
-        const spriteFrame = getCurrentFrame(animKey, anim, now);
+        const spriteFrame = getCurrentFrame(player, animKey, anim, now);
         const frameW = FW + (anim.extraW ?? 0);
         const frameH = FH + (anim.extraH ?? 0);
         const dw = frameW * SCALE;

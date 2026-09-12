@@ -61,6 +61,8 @@ export const GameFactory = {
             shootingCrouchOffsetY: 5,
             shootingOffsetX: 48,
             shootingCrouchOffsetX: 56,
+            animStartTime: 0,
+            lastAnimKey: null,
             ...overrides,
         };
     },
@@ -114,6 +116,8 @@ export const GameFactory = {
         dying: false,
         dyingStartedAt: 0,
         dead: false,
+        animStartTime: 0,
+        lastAnimKey: null,
     }),
     // Resolves respawn position/weapon/counters from a checkpoint (or level start
     // as fallback) and builds the full respawn state for the given player/posture.

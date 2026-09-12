@@ -67,6 +67,9 @@ export class PauseController {
         if (player.knockbackUntil) {
             player.knockbackUntil += pauseDuration;
         }
+        if (player.animStartTime) {
+            player.animStartTime += pauseDuration;
+        }
     }
 
     // Ends the freeze window and propagates its duration to the player plus every

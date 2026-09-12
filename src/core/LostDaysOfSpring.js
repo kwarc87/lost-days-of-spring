@@ -1,7 +1,7 @@
 import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
 import { CameraController } from "../systems/CameraController.js";
-import { adjustAnimStartTime, PLAYER_DYING_DURATION_MS } from "../renderers/PlayerRenderers.js";
+import { PLAYER_DYING_DURATION_MS } from "../renderers/PlayerRenderers.js";
 import {
     DefaultPauseRenderer,
     MENU_ITEMS,
@@ -951,7 +951,6 @@ export class LostDaysOfSpring {
             this.enemyController,
             this.teleportController,
         ]);
-        adjustAnimStartTime(pauseDuration);
         this.simulatedTime += pauseDuration;
         if (this.gameFadeIn.active) {
             this.gameFadeIn.startTime += pauseDuration;
