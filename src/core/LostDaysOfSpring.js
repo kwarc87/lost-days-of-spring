@@ -24,6 +24,8 @@ import { CannonRenderer, CannonBulletRenderer } from "../renderers/CannonRendere
 import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
+import { PauseController } from "../systems/PauseController.js";
+import { ExitController } from "../systems/ExitController.js";
 import { TeleportController } from "../systems/TeleportController.js";
 import { ProjectileController } from "../systems/ProjectileController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
@@ -73,10 +75,9 @@ export class LostDaysOfSpring {
         this.currentLevelId = null;
         this.pendingReset = false;
         this.checkpointManager = new CheckpointManager();
+        this.pauseController = new PauseController();
         this.deathCount = 0;
         this.mapView = false;
-        this.isPaused = false;
-        this.pauseMenuIndex = 0; // 0 = Resume, 1 = Restart
         this.levelComplete = false;
         this.gameOver = false;
         this.isTitleScreen = true;
@@ -90,9 +91,7 @@ export class LostDaysOfSpring {
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
         this.levelStartAt = 0; // timestamp (ms) when the level was loaded
-        this.totalPausedTime = 0; // accumulated paused time (ms) within current level
         this.accumulatedPlayTime = 0; // play time (ms) carried over from previous sessions via checkpoint
-        this.pauseStartAt = 0; // timestamp (ms) when the current pause started
         this.gameOverDelay = 15000; // ms until auto-restart after game over
         this.worldGroundId = "world-ground";
         this.verticalHitRecoilMultiplier = 1.5;
@@ -125,6 +124,9 @@ export class LostDaysOfSpring {
 
         // ====== TELEPORTS ======
         this.teleportController = new TeleportController();
+
+        // ====== EXITS ======
+        this.exitController = new ExitController();
 
         // ====== CAMERA ======
         this.cameraController = new CameraController(this.canvas.width, this.canvas.height);
@@ -281,7 +283,7 @@ export class LostDaysOfSpring {
         this.collectibleController.setCollectibles(levelData.collectibles);
         this.projectileController.setSpikes(levelData.spikes);
         this.messageController.setMessages(levelData.messages);
-        this.exits = levelData.exits ?? [];
+        this.exitController.setExits(levelData.exits);
         this.hiddenWalls = levelData.hiddenWalls ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
         this.backgroundItems = levelData.backgroundItems ?? [];
@@ -347,16 +349,13 @@ export class LostDaysOfSpring {
         // Preserve the timer across deaths — only reset after level complete
         if (wasLevelComplete) {
             this.levelStartAt = now;
-            this.totalPausedTime = 0;
+            this.pauseController.totalPausedTime = 0;
             this.accumulatedPlayTime = this.checkpointManager.getRespawn()?.playTimeMs ?? 0;
         } else if (wasGameOver) {
-            this.totalPausedTime += now - gameOverAt;
+            this.pauseController.totalPausedTime += now - gameOverAt;
         }
-        this.pauseStartAt = 0;
+        this.pauseController.resetMenu();
         this.mapView = false;
-        this.isPaused = false;
-        this.pauseMenuIndex = 0;
-        this.playerAtExit = false;
     }
 
     startLevel(now) {
@@ -410,9 +409,9 @@ export class LostDaysOfSpring {
             return;
         }
 
-        const wasPaused = this.isPaused;
+        const wasPaused = this.pauseController.isPaused;
         this.handlePauseMenuInput(e);
-        if (wasPaused || this.isPaused) {
+        if (wasPaused || this.pauseController.isPaused) {
             return;
         }
 
@@ -727,7 +726,7 @@ export class LostDaysOfSpring {
     handleEnterInput(now) {
         if (this.inputController.isDown("enter")) {
             if (
-                this.playerAtExit &&
+                this.exitController.playerAtExit &&
                 this.hasEnoughCoins &&
                 this.hasEnoughSplinters &&
                 this.hasEnoughArtifacts
@@ -841,7 +840,7 @@ export class LostDaysOfSpring {
             messages: this.messageController.getMessages(),
             mapDiscovery: this.mapDiscovery,
             levelStartAt: this.levelStartAt,
-            totalPausedTime: this.totalPausedTime,
+            totalPausedTime: this.pauseController.totalPausedTime,
             accumulatedPlayTime: this.accumulatedPlayTime,
             deathCount: this.deathCount,
         };
@@ -1083,7 +1082,7 @@ export class LostDaysOfSpring {
             this.drawEnvParallaxItem(i);
         }
 
-        for (const exit of this.exits) {
+        for (const exit of this.exitController.getExits()) {
             this.drawExit(exit);
         }
 
@@ -1191,7 +1190,12 @@ export class LostDaysOfSpring {
 
         this.ctx.restore();
 
-        if (this.playerAtExit && !this.levelComplete && !this.gameOver && !this.isArtifactGallery) {
+        if (
+            this.exitController.playerAtExit &&
+            !this.levelComplete &&
+            !this.gameOver &&
+            !this.isArtifactGallery
+        ) {
             this.drawExitMessage();
         }
 
@@ -1201,7 +1205,7 @@ export class LostDaysOfSpring {
             !this.levelComplete &&
             !this.gameOver &&
             !this.mapView &&
-            !this.isPaused &&
+            !this.pauseController.isPaused &&
             !this.isArtifactGallery
         ) {
             this.messageRenderer.drawMessagePanel(
@@ -1218,7 +1222,7 @@ export class LostDaysOfSpring {
             !this.levelComplete &&
             !this.gameOver &&
             !this.mapView &&
-            !this.isPaused &&
+            !this.pauseController.isPaused &&
             !this.isArtifactGallery
         ) {
             const activeArtifactSource = this.messageController.getActiveArtifactSource();
@@ -1273,7 +1277,7 @@ export class LostDaysOfSpring {
         const playTimeMs =
             this.levelCompleteAt -
             this.levelStartAt -
-            this.totalPausedTime +
+            this.pauseController.totalPausedTime +
             this.accumulatedPlayTime;
         this.levelCompleteRenderer.drawLevelCompleteScreen(
             this.ctx,
@@ -1295,7 +1299,10 @@ export class LostDaysOfSpring {
         const elapsed = now - this.gameOverAt;
         const remaining = Math.max(0, Math.ceil((this.gameOverDelay - elapsed) / 1000));
         const playTimeMs =
-            this.gameOverAt - this.levelStartAt - this.totalPausedTime + this.accumulatedPlayTime;
+            this.gameOverAt -
+            this.levelStartAt -
+            this.pauseController.totalPausedTime +
+            this.accumulatedPlayTime;
 
         this.gameOverRenderer.drawGameOverScreen(
             this.ctx,
@@ -1316,28 +1323,15 @@ export class LostDaysOfSpring {
 
     getCurrentPlayTimeMs() {
         return (
-            this.simulatedTime - this.levelStartAt - this.totalPausedTime + this.accumulatedPlayTime
+            this.simulatedTime -
+            this.levelStartAt -
+            this.pauseController.totalPausedTime +
+            this.accumulatedPlayTime
         );
-    }
-
-    exitHitbox(exit) {
-        const m = exit.triggerMargin;
-        return {
-            x: exit.x - m,
-            y: exit.y - m,
-            w: exit.dw + m * 2,
-            h: exit.dh + m,
-        };
-    }
-
-    findActiveExit() {
-        return this.exits.find((e) => rectsCollide(this.player, this.exitHitbox(e))) ?? null;
     }
 
     updateExit() {
-        this.playerAtExit = this.exits.some((exit) =>
-            rectsCollide(this.player, this.exitHitbox(exit))
-        );
+        this.exitController.update(this.player);
     }
 
     updateArtifactMessage(now) {
@@ -1373,7 +1367,7 @@ export class LostDaysOfSpring {
     }
 
     drawExitMessage() {
-        const exit = this.findActiveExit();
+        const exit = this.exitController.findActiveExit(this.player);
         if (!exit) {
             return;
         }
@@ -1415,7 +1409,7 @@ export class LostDaysOfSpring {
                 this.titleFadeOut.active = false;
                 this.isTitleScreen = false;
                 this.levelStartAt = now;
-                this.totalPausedTime = 0;
+                this.pauseController.totalPausedTime = 0;
                 this.accumulatedPlayTime = this.checkpointManager.getRespawn()?.playTimeMs ?? 0;
                 this.startLevel(now);
             }
@@ -1476,7 +1470,7 @@ export class LostDaysOfSpring {
     }
 
     handlePauseMenuInput(e) {
-        if (this.isPaused) {
+        if (this.pauseController.isPaused) {
             if (!e.repeat) {
                 this.handlePauseMenuKey(e.code);
             }
@@ -1501,11 +1495,11 @@ export class LostDaysOfSpring {
             case this.keysMap.menuDown: {
                 const count = this.pauseRenderer.menuItemCount;
                 const dir = code === this.keysMap.menuUp ? -1 : 1;
-                this.pauseMenuIndex = (this.pauseMenuIndex + dir + count) % count;
+                this.pauseController.moveMenuIndex(dir, count);
                 this.pauseRenderer.drawPausePanel(
                     this.ctx,
                     this.canvas,
-                    this.pauseMenuIndex,
+                    this.pauseController.menuIndex,
                     this.getCurrentPlayTimeMs()
                 );
                 break;
@@ -1523,23 +1517,20 @@ export class LostDaysOfSpring {
 
     openPauseMenu() {
         this.stop();
-        this.isPaused = true;
-        this.pauseMenuIndex = 0;
-        this.pauseStartAt = performance.now();
+        this.pauseController.open(performance.now());
         this.draw(this.simulatedTime);
         this.pauseRenderer.drawPauseScreen(
             this.ctx,
             this.canvas,
-            this.pauseMenuIndex,
+            this.pauseController.menuIndex,
             this.getCurrentPlayTimeMs()
         );
     }
 
     resumeFromPause() {
-        const pauseDuration = performance.now() - this.pauseStartAt;
-        this.totalPausedTime += pauseDuration;
+        const pauseDuration = this.pauseController.endFreeze(performance.now());
 
-        this.adjustPlayerForPause(pauseDuration);
+        this.pauseController.adjustPlayerTimers(this.player, pauseDuration);
         this.messageController.adjustForPause(pauseDuration);
         this.projectileController.adjustForPause(pauseDuration);
         this.elevatorController.adjustForPause(pauseDuration);
@@ -1552,59 +1543,37 @@ export class LostDaysOfSpring {
         }
     }
 
-    adjustPlayerForPause(pauseDuration) {
-        if (this.player.lastHitTime) {
-            this.player.lastHitTime += pauseDuration;
-        }
-        if (this.player.dyingStartedAt) {
-            this.player.dyingStartedAt += pauseDuration;
-        }
-        if (this.player.lastShootTime) {
-            this.player.lastShootTime += pauseDuration;
-        }
-        if (this.player.lastGroundedAt) {
-            this.player.lastGroundedAt += pauseDuration;
-        }
-        if (this.player.carryStartAt) {
-            this.player.carryStartAt += pauseDuration;
-        }
-        if (this.player.knockbackUntil) {
-            this.player.knockbackUntil += pauseDuration;
-        }
-    }
-
     closePauseMenu() {
-        this.isPaused = false;
+        this.pauseController.close();
         this.resumeFromPause();
         this.start();
     }
 
     confirmPauseMenuItem() {
-        if (this.pauseMenuIndex === 0) {
+        if (this.pauseController.menuIndex === 0) {
             this.closePauseMenu();
             return;
         }
 
-        if (this.pauseMenuIndex === 1) {
+        if (this.pauseController.menuIndex === 1) {
             // Artifact gallery — account for pause time, then open gallery
-            this.isPaused = false;
+            this.pauseController.close();
             this.resumeFromPause();
             this.openArtifactGallery();
             return;
         }
 
-        this.isPaused = false;
-        this.totalPausedTime = 0;
-        this.pauseStartAt = 0;
+        this.pauseController.close();
+        this.pauseController.resetClock();
         this.levelStartAt = performance.now();
 
-        if (this.pauseMenuIndex === 2) {
+        if (this.pauseController.menuIndex === 2) {
             // Reset progress — clear all saves
             this.checkpointManager.clear();
             this.deathCount = 0;
             this.accumulatedPlayTime = 0;
             this.galleryLastIndex = 0;
-        } else if (this.pauseMenuIndex === 3) {
+        } else if (this.pauseController.menuIndex === 3) {
             // Return to main screen — restore time and deaths from checkpoint
             const cr = this.checkpointManager.getRespawn();
             this.accumulatedPlayTime = cr?.playTimeMs ?? 0;
@@ -1621,7 +1590,7 @@ export class LostDaysOfSpring {
         if (!this.mapView) {
             this.mapView = true;
             this.stop();
-            this.pauseStartAt = performance.now();
+            this.pauseController.beginFreeze(performance.now());
             this.draw(this.simulatedTime);
         } else {
             this.resumeFromPause();
@@ -1643,7 +1612,7 @@ export class LostDaysOfSpring {
 
     openArtifactGallery() {
         this.isArtifactGallery = true;
-        this.pauseStartAt = performance.now();
+        this.pauseController.beginFreeze(performance.now());
         this.stop();
         this.draw(this.simulatedTime);
         this.captureFrame();
