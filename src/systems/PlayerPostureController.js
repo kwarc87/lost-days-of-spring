@@ -1,0 +1,119 @@
+import { rectsCollide } from "../utils/collision.js";
+
+// Owns the player's posture system: crouch/stand hitbox switching and the
+// collision checks that decide whether a posture change is currently possible.
+export class PlayerPostureController {
+    constructor(postures) {
+        this.postures = postures;
+    }
+
+    isCrouching(player) {
+        return player.posture === this.postures.CROUCH;
+    }
+
+    canStandUp(player, solids, enemies) {
+        return this.canApplyPosture(
+            player,
+            solids,
+            enemies,
+            player.originalHeight,
+            player.originalWidth
+        );
+    }
+
+    findCrouchAnchor(player, solids, enemies) {
+        const h = player.crouchHeight;
+        const w = player.crouchWidth;
+        for (const anchor of ["center", "start", "end"]) {
+            if (this.canApplyPosture(player, solids, enemies, h, w, anchor)) {
+                return anchor;
+            }
+        }
+        return null;
+    }
+
+    // Checks whether the player's hitbox at the given size/anchor would collide
+    // with any solid or enemy, without actually applying the posture change.
+    canApplyPosture(player, solids, enemies, height, width, anchor = "center") {
+        const bottomY = player.y + player.h;
+        let startX;
+        if (anchor === "start") {
+            startX = player.x;
+        } else if (anchor === "end") {
+            startX = player.x + player.w - width;
+        } else {
+            startX = player.x + player.w / 2 - width / 2;
+        }
+
+        const futurePlayer = {
+            x: startX,
+            y: bottomY - height,
+            w: width,
+            h: height,
+        };
+
+        for (const p of solids) {
+            if (p.dead) {
+                continue;
+            }
+            if (p.type === "oneDirection") {
+                continue;
+            }
+            if (rectsCollide(futurePlayer, p)) {
+                return false;
+            }
+        }
+
+        for (const e of enemies) {
+            if (e.dead || e.dying) {
+                continue;
+            }
+            if (rectsCollide(futurePlayer, e)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    applyPosture(player, posture, anchor = "center") {
+        const hitbox = this.getHitboxForPosture(player, posture);
+        player.posture = posture;
+        this.applyHeight(player, hitbox.h);
+        this.applyWidth(player, hitbox.w, anchor);
+    }
+
+    getHitboxForPosture(player, posture) {
+        if (posture === this.postures.CROUCH) {
+            return {
+                w: player.crouchWidth,
+                h: player.crouchHeight,
+            };
+        }
+
+        return {
+            w: player.originalWidth,
+            h: player.originalHeight,
+        };
+    }
+
+    applyHeight(player, nextHeight) {
+        // anchor should be always bottom
+        const bottom = player.y + player.h;
+        player.h = nextHeight;
+        player.y = bottom - nextHeight;
+    }
+
+    applyWidth(player, nextWidth, anchor = "center") {
+        let nextX;
+        if (anchor === "start") {
+            nextX = player.x;
+        } else if (anchor === "end") {
+            nextX = player.x + player.w - nextWidth;
+        } else {
+            nextX = player.x + player.w / 2 - nextWidth / 2;
+        }
+        player.w = nextWidth;
+        player.x = nextX;
+    }
+}

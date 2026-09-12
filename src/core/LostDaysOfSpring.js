@@ -30,6 +30,7 @@ import { ElevatorController } from "../systems/ElevatorController.js";
 import { EnemyController } from "../systems/EnemyController.js";
 import { MessageController } from "../systems/MessageController.js";
 import { PlayerPhysicsController } from "../systems/PlayerPhysicsController.js";
+import { PlayerPostureController } from "../systems/PlayerPostureController.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
@@ -133,6 +134,7 @@ export class LostDaysOfSpring {
             STANDING: "standing",
             CROUCH: "crouch",
         };
+        this.playerPostureController = new PlayerPostureController(this.playerPostures);
 
         // ====== DEBUG ======
         this.debug = {
@@ -495,99 +497,20 @@ export class LostDaysOfSpring {
         this.markKeyDown(e.code);
     }
 
-    canApplyPosture(height, width, anchor = "center") {
-        const bottomY = this.player.y + this.player.h;
-        let startX;
-        if (anchor === "start") {
-            startX = this.player.x;
-        } else if (anchor === "end") {
-            startX = this.player.x + this.player.w - width;
-        } else {
-            startX = this.player.x + this.player.w / 2 - width / 2;
-        }
-
-        const futurePlayer = {
-            x: startX,
-            y: bottomY - height,
-            w: width,
-            h: height,
-        };
-
-        for (const p of this.solids) {
-            if (p.dead) {
-                continue;
-            }
-            if (p.type === "oneDirection") {
-                continue;
-            }
-            if (rectsCollide(futurePlayer, p)) {
-                return false;
-            }
-        }
-
-        for (const e of this.getEnemies()) {
-            if (e.dead || e.dying) {
-                continue;
-            }
-            if (rectsCollide(futurePlayer, e)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     findCrouchAnchor() {
-        const h = this.player.crouchHeight;
-        const w = this.player.crouchWidth;
-        for (const anchor of ["center", "start", "end"]) {
-            if (this.canApplyPosture(h, w, anchor)) {
-                return anchor;
-            }
-        }
-        return null;
+        return this.playerPostureController.findCrouchAnchor(
+            this.player,
+            this.solids,
+            this.getEnemies()
+        );
     }
 
     canStandUp() {
-        return this.canApplyPosture(this.player.originalHeight, this.player.originalWidth);
+        return this.playerPostureController.canStandUp(this.player, this.solids, this.getEnemies());
     }
 
     isPlayerCrouching() {
-        return this.player.posture === this.playerPostures.CROUCH;
-    }
-
-    getPlayerHitboxForPosture(posture) {
-        if (posture === this.playerPostures.CROUCH) {
-            return {
-                w: this.player.crouchWidth,
-                h: this.player.crouchHeight,
-            };
-        }
-
-        return {
-            w: this.player.originalWidth,
-            h: this.player.originalHeight,
-        };
-    }
-
-    applyPlayerHeight(nextHeight) {
-        // anchor should be always bottom
-        const bottom = this.player.y + this.player.h;
-        this.player.h = nextHeight;
-        this.player.y = bottom - nextHeight;
-    }
-
-    applyPlayerWidth(nextWidth, anchor = "center") {
-        let nextX;
-        if (anchor === "start") {
-            nextX = this.player.x;
-        } else if (anchor === "end") {
-            nextX = this.player.x + this.player.w - nextWidth;
-        } else {
-            nextX = this.player.x + this.player.w / 2 - nextWidth / 2;
-        }
-        this.player.w = nextWidth;
-        this.player.x = nextX;
+        return this.playerPostureController.isCrouching(this.player);
     }
 
     resetGame() {
@@ -715,10 +638,7 @@ export class LostDaysOfSpring {
     }
 
     applyPosture(posture, anchor = "center") {
-        const hitbox = this.getPlayerHitboxForPosture(posture);
-        this.player.posture = posture;
-        this.applyPlayerHeight(hitbox.h);
-        this.applyPlayerWidth(hitbox.w, anchor);
+        this.playerPostureController.applyPosture(this.player, posture, anchor);
     }
 
     handleShootingInput(now) {
