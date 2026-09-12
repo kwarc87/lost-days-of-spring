@@ -1,20 +1,13 @@
 // Owns player health/damage: applying hits (life loss, recoil, knockback lock),
 // the death transition, and the post-hit invulnerability cooldown.
 export class PlayerHealthController {
-    constructor(verticalHitRecoilMultiplier) {
+    constructor(verticalHitRecoilMultiplier, playerPhysicsController, combatController) {
         this.verticalHitRecoilMultiplier = verticalHitRecoilMultiplier;
+        this.playerPhysicsController = playerPhysicsController;
+        this.combatController = combatController;
     }
 
-    applyDamage(
-        now,
-        player,
-        source,
-        hitFromAbove,
-        hitFromBelow,
-        onDeath,
-        playerPhysicsController,
-        combatController
-    ) {
+    applyDamage(now, player, source, hitFromAbove, hitFromBelow, onDeath) {
         player.life -= source.damage;
         player.lastHitTime = now;
         player.isHit = true;
@@ -31,9 +24,9 @@ export class PlayerHealthController {
         const hitFromLeft = player.x + player.w / 2 < source.x + source.w / 2;
         const vx = hitFromLeft ? -recoilXForce : recoilXForce;
         const vy = hitFromBelow ? 0 : -recoilYForce;
-        playerPhysicsController.applyKnockback(player, vx, vy);
+        this.playerPhysicsController.applyKnockback(player, vx, vy);
 
-        this.checkDeath(now, player, onDeath, playerPhysicsController, combatController);
+        this.checkDeath(now, player, onDeath);
     }
 
     canHeal(player) {
@@ -47,14 +40,14 @@ export class PlayerHealthController {
         }
     }
 
-    checkDeath(now, player, onDeath, playerPhysicsController, combatController) {
+    checkDeath(now, player, onDeath) {
         if (player.life > 0) {
             return;
         }
         player.dying = true;
         player.dyingStartedAt = now;
-        playerPhysicsController.stopMovement(player);
-        combatController.stopShooting(player);
+        this.playerPhysicsController.stopMovement(player);
+        this.combatController.stopShooting(player);
         player.isHit = false;
         onDeath();
     }

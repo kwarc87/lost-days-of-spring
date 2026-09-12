@@ -2,8 +2,9 @@ import { GameFactory } from "../factories/GameFactory.js";
 import { rectsCollide } from "../utils/collision.js";
 
 export class TeleportController {
-    constructor() {
+    constructor(playerPhysicsController) {
         this.teleports = [];
+        this.playerPhysicsController = playerPhysicsController;
     }
 
     setTeleports(teleports) {
@@ -39,7 +40,7 @@ export class TeleportController {
         return { foreground, platforms };
     }
 
-    update(now, player, playerPhysicsController) {
+    update(now, player) {
         player.isInTeleport = false;
         for (const t of this.teleports) {
             const targetZone = { x: t.targetX, y: t.targetY, w: t.w, h: t.h };
@@ -70,13 +71,13 @@ export class TeleportController {
             if (t.playerEnteredAt !== null && now - t.playerEnteredAt >= t.delay) {
                 t.frozenAt = now;
                 t.playerEnteredAt = null;
-                playerPhysicsController.stopMovement(player);
+                this.playerPhysicsController.stopMovement(player);
                 player.frozenForTeleport = true;
             }
 
             if (t.frozenAt !== null && now - t.frozenAt >= t.frozenDelay) {
                 const [dx, dy] = t.enteredOrigin ? [t.targetX, t.targetY] : [t.x, t.y];
-                playerPhysicsController.warpTo(
+                this.playerPhysicsController.warpTo(
                     player,
                     dx + t.w / 2 - player.w / 2,
                     dy + t.h - player.h

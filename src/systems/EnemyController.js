@@ -3,8 +3,9 @@ import { hasPassedTarget } from "../utils/patrol.js";
 
 // Owns enemy definitions/state: patrol movement plus player-enemy collision resolution.
 export class EnemyController {
-    constructor() {
+    constructor(playerPhysicsController) {
         this.enemies = [];
+        this.playerPhysicsController = playerPhysicsController;
     }
 
     setEnemies(enemies) {
@@ -36,19 +37,9 @@ export class EnemyController {
         }
     }
 
-    update(
-        now,
-        { player, solids, verticalHitRecoilMultiplier, onPlayerHit, playerPhysicsController }
-    ) {
+    update(now, { player, solids, verticalHitRecoilMultiplier, onPlayerHit }) {
         this.patrol(now);
-        this.resolvePlayerCollision(
-            now,
-            player,
-            solids,
-            verticalHitRecoilMultiplier,
-            onPlayerHit,
-            playerPhysicsController
-        );
+        this.resolvePlayerCollision(now, player, solids, verticalHitRecoilMultiplier, onPlayerHit);
     }
 
     // Applies damage to an enemy and transitions it into the dying state on death.
@@ -126,14 +117,7 @@ export class EnemyController {
         }
     }
 
-    resolvePlayerCollision(
-        now,
-        player,
-        solids,
-        verticalHitRecoilMultiplier,
-        onPlayerHit,
-        playerPhysicsController
-    ) {
+    resolvePlayerCollision(now, player, solids, verticalHitRecoilMultiplier, onPlayerHit) {
         const cooldownIsActive = now - player.lastHitTime < player.hitCooldown;
 
         // Pass 1: mark ALL colliding enemies and record entry side.
@@ -174,18 +158,12 @@ export class EnemyController {
             // Cooldown active: resolve overlap without damage.
             // No break — all colliding enemies are resolved so sandwiched
             // collisions (player between two enemies) are handled correctly.
-            this.resolveCollisionX(enemy, player, solids, playerPhysicsController);
-            this.resolveCollisionY(
-                enemy,
-                player,
-                solids,
-                verticalHitRecoilMultiplier,
-                playerPhysicsController
-            );
+            this.resolveCollisionX(enemy, player, solids);
+            this.resolveCollisionY(enemy, player, solids, verticalHitRecoilMultiplier);
         }
     }
 
-    resolveCollisionX(enemy, player, solids, playerPhysicsController) {
+    resolveCollisionX(enemy, player, solids) {
         // Vertical entry — Y phase handles it.
         if (enemy.playerEnteredFromAbove || enemy.playerEnteredFromBelow) {
             return;
@@ -209,7 +187,7 @@ export class EnemyController {
             );
 
         if (!blocked) {
-            playerPhysicsController.setPosition(player, targetX, player.y);
+            this.playerPhysicsController.setPosition(player, targetX, player.y);
         } else if (enemy.dirX !== 0) {
             // No room for player — snap enemy clear and reverse.
             // Skip for vertical-only enemies (dirX === 0): snapping their X or
@@ -221,7 +199,7 @@ export class EnemyController {
         }
     }
 
-    resolveCollisionY(enemy, player, solids, verticalHitRecoilMultiplier, playerPhysicsController) {
+    resolveCollisionY(enemy, player, solids, verticalHitRecoilMultiplier) {
         if (!enemy.playerEnteredFromAbove && !enemy.playerEnteredFromBelow) {
             return;
         }
@@ -252,11 +230,11 @@ export class EnemyController {
                 enemy.direction = -enemy.direction;
             }
         } else if (!blocked) {
-            playerPhysicsController.setPosition(player, player.x, targetY);
+            this.playerPhysicsController.setPosition(player, player.x, targetY);
         }
 
         if (enemy.playerEnteredFromAbove && !blocked) {
-            playerPhysicsController.applyKnockback(
+            this.playerPhysicsController.applyKnockback(
                 player,
                 player.vx,
                 -enemy.recoilY * verticalHitRecoilMultiplier,
@@ -265,7 +243,7 @@ export class EnemyController {
         }
 
         if (enemy.playerEnteredFromBelow && !blocked && player.vy < 0) {
-            playerPhysicsController.stopUpwardVelocity(player);
+            this.playerPhysicsController.stopUpwardVelocity(player);
         }
     }
 }

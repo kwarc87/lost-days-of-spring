@@ -75,6 +75,10 @@ export class LostDaysOfSpring {
             maxLife: this.initialHp,
         });
 
+        // ====== PHYSICS ======
+        this.physics = PHYSICS;
+        this.playerPhysicsController = new PlayerPhysicsController(this.physics);
+
         // ====== PROJECTILES (bullets, cannons, spikes) ======
         this.combatController = new CombatController();
 
@@ -82,7 +86,7 @@ export class LostDaysOfSpring {
         this.elevatorController = new ElevatorController();
 
         // ====== ENEMIES ======
-        this.enemyController = new EnemyController();
+        this.enemyController = new EnemyController(this.playerPhysicsController);
 
         // ====== COLLECTIBLES ======
         this.collectibleController = new CollectibleController();
@@ -91,7 +95,7 @@ export class LostDaysOfSpring {
         this.messageController = new MessageController();
 
         // ====== TELEPORTS ======
-        this.teleportController = new TeleportController();
+        this.teleportController = new TeleportController(this.playerPhysicsController);
 
         // ====== EXITS ======
         this.exitController = new ExitController();
@@ -103,19 +107,22 @@ export class LostDaysOfSpring {
         this.cameraController = new CameraController(this.canvas.width, this.canvas.height);
         this.displayController = new DisplayController(this.canvas, this.cameraController);
 
-        // ====== PHYSICS ======
-        this.physics = PHYSICS;
-        this.playerPhysicsController = new PlayerPhysicsController(this.physics);
-
         // ====== POSTURES ======
         this.playerPostures = {
             STANDING: "standing",
             CROUCH: "crouch",
         };
-        this.playerPostureController = new PlayerPostureController(this.playerPostures);
+        this.playerPostureController = new PlayerPostureController(
+            this.playerPostures,
+            this.playerPhysicsController
+        );
 
         // ====== PLAYER HEALTH ======
-        this.playerHealthController = new PlayerHealthController(this.verticalHitRecoilMultiplier);
+        this.playerHealthController = new PlayerHealthController(
+            this.verticalHitRecoilMultiplier,
+            this.playerPhysicsController,
+            this.combatController
+        );
 
         // ====== DEBUG ======
         this.debug = {
@@ -500,18 +507,12 @@ export class LostDaysOfSpring {
             this.player,
             this.solids,
             this.enemyController.getEnemies(),
-            this.inputController,
-            this.playerPhysicsController
+            this.inputController
         );
     }
 
     applyPosture(posture, anchor = "center") {
-        this.playerPostureController.applyPosture(
-            this.player,
-            posture,
-            this.playerPhysicsController,
-            anchor
-        );
+        this.playerPostureController.applyPosture(this.player, posture, anchor);
     }
 
     handleShootingInput(now) {
@@ -630,7 +631,6 @@ export class LostDaysOfSpring {
             verticalHitRecoilMultiplier: this.verticalHitRecoilMultiplier,
             onPlayerHit: (hitNow, enemy, hitFromAbove, hitFromBelow) =>
                 this.applyDamageToPlayer(hitNow, enemy, hitFromAbove, hitFromBelow),
-            playerPhysicsController: this.playerPhysicsController,
         });
     }
 
@@ -643,9 +643,7 @@ export class LostDaysOfSpring {
             hitFromBelow,
             () => {
                 this.deathCount++;
-            },
-            this.playerPhysicsController,
-            this.combatController
+            }
         );
     }
 
@@ -848,7 +846,7 @@ export class LostDaysOfSpring {
     }
 
     updateTeleports(now) {
-        this.teleportController.update(now, this.player, this.playerPhysicsController);
+        this.teleportController.update(now, this.player);
     }
 
     updateDebug() {
