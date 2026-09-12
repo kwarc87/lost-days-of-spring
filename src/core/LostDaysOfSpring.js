@@ -1,27 +1,13 @@
 import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
 import { CameraController } from "../systems/CameraController.js";
-import {
-    DefaultPlayerRenderer,
-    adjustAnimStartTime,
-    PLAYER_DYING_DURATION_MS,
-} from "../renderers/PlayerRenderers.js";
-import { DefaultPlatformRenderer } from "../renderers/PlatformRenderers.js";
-import { DefaultEnemyRenderer } from "../renderers/EnemyRenderers.js";
-import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
-import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
-import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
-import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
+import { adjustAnimStartTime, PLAYER_DYING_DURATION_MS } from "../renderers/PlayerRenderers.js";
+import { DefaultPauseRenderer, MENU_ITEMS } from "../renderers/PauseRenderers.js";
 import { DebugHudRenderer } from "../renderers/DebugRenderers.js";
 import { SceneRenderer } from "../renderers/SceneRenderer.js";
-import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
-import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
-import { CheckpointRenderer } from "../renderers/CheckpointRenderer.js";
-import { DefaultExitRenderer } from "../renderers/ExitRenderers.js";
 import { MessageRenderer } from "../renderers/MessageRenderer.js";
-import { CannonRenderer, CannonBulletRenderer } from "../renderers/CannonRenderers.js";
 import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
@@ -48,20 +34,6 @@ import { DebugMouseTracker } from "../systems/DebugMouseTracker.js";
 import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
 import { TransitionRenderer } from "../renderers/TransitionRenderer.js";
 import { ArtifactGalleryRenderer } from "../renderers/ArtifactGalleryRenderer.js";
-import {
-    MapPlayerRenderer,
-    MapPlatformRenderer,
-    MapEnemyRenderer,
-    MapCoinRenderer,
-    MapSplinterRenderer,
-    MapArtifactRenderer,
-    MapHeartRenderer,
-    MapCannonRenderer,
-    MapSpikeRenderer,
-    MapCheckpointRenderer,
-    MapExitRenderer,
-    NOOP_RENDERER,
-} from "../renderers/MapRenderers.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true, initialHp = 6) {
@@ -152,38 +124,7 @@ export class LostDaysOfSpring {
             maxFrameTime: 0.25,
         };
 
-        // Default player drawing method assigned via Strategy pattern
-        this.playerRenderer = DefaultPlayerRenderer;
-        this.platformRenderer = DefaultPlatformRenderer;
-        this.enemyRenderer = DefaultEnemyRenderer;
-        this.collectibleRenderer = DefaultCollectibleRenderer;
-        this.worldRenderer = DefaultWorldRenderer;
-        this.pauseRenderer = DefaultPauseRenderer;
-        this.weaponRenderer = DefaultWeaponRenderer;
-        this.hudRenderer = DefaultHubRenderer;
-        this.levelCompleteRenderer = DefaultLevelCompleteRenderer;
-        this.gameOverRenderer = DefaultGameOverRenderer;
-        this.spikeRenderer = DefaultSpikeRenderer;
-        this.checkpointRenderer = CheckpointRenderer;
-        this.exitRenderer = DefaultExitRenderer;
-        this.messageRenderer = MessageRenderer;
-        this.cannonRenderer = CannonRenderer;
-        this.cannonBulletRenderer = CannonBulletRenderer;
-        this.titleScreenRenderer = TitleScreenRenderer;
-        this.transitionRenderer = TransitionRenderer;
-        this.mapPlayerRenderer = MapPlayerRenderer;
-        this.mapPlatformRenderer = MapPlatformRenderer;
-        this.mapEnemyRenderer = MapEnemyRenderer;
-        this.mapCoinRenderer = MapCoinRenderer;
-        this.mapSplinterRenderer = MapSplinterRenderer;
-        this.mapArtifactRenderer = MapArtifactRenderer;
-        this.mapHeartRenderer = MapHeartRenderer;
-        this.mapCannonRenderer = MapCannonRenderer;
-        this.mapSpikeRenderer = MapSpikeRenderer;
-        this.mapCheckpointRenderer = MapCheckpointRenderer;
-        this.mapExitRenderer = MapExitRenderer;
         this.galleryController = new ArtifactGalleryController(new ArtifactGalleryRenderer());
-        this.sceneRenderer = SceneRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -207,8 +148,6 @@ export class LostDaysOfSpring {
         };
         this.initControls();
 
-        this.decorateDrawMethods();
-
         this.displayController.resizeCanvasToFit();
         this.displayController.attach();
     }
@@ -223,26 +162,6 @@ export class LostDaysOfSpring {
 
     get hasEnoughArtifacts() {
         return this.player.artifactsCount >= this.currentLevelArtifactsCount / 2;
-    }
-
-    decorateDrawMethods() {
-        this.drawPlatform = this.withCameraCulling(this.drawPlatform);
-        this.drawElevator = this.withCameraCulling(this.drawElevator);
-        this.drawEnemy = this.withCameraCulling(this.drawEnemy);
-        this.drawCoin = this.withCameraCulling(this.drawCoin);
-        this.drawSplinter = this.withCameraCulling(this.drawSplinter);
-        this.drawArtifact = this.withCameraCulling(this.drawArtifact);
-        this.drawWeaponUpgrade = this.withCameraCulling(this.drawWeaponUpgrade);
-        this.drawBullet = this.withCameraCulling(this.drawBullet);
-        this.drawCannon = this.withCameraCulling(this.drawCannon);
-        this.drawCannonBullet = this.withCameraCulling(this.drawCannonBullet);
-        this.drawEnvPreBackgroundItem = this.withCameraCulling(this.drawEnvPreBackgroundItem);
-        this.drawEnvBackgroundItem = this.withCameraCulling(this.drawEnvBackgroundItem);
-        this.drawEnvForegroundItem = this.withCameraCulling(this.drawEnvForegroundItem);
-        this.drawSpike = this.withCameraCulling(this.drawSpike);
-        this.drawHeart = this.withCameraCulling(this.drawHeart);
-        this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
-        this.drawExit = this.withCameraCulling(this.drawExit);
     }
 
     loadLevel(levelId, now = performance.now()) {
@@ -889,29 +808,6 @@ export class LostDaysOfSpring {
         }
     }
 
-    withCameraCulling(drawFn) {
-        return (obj, ...args) => {
-            if (this.mapView) {
-                drawFn.call(this, obj, ...args);
-                return;
-            }
-
-            if (!this.cameraController.isVisible(obj)) {
-                return;
-            }
-
-            drawFn.call(this, obj, ...args);
-        };
-    }
-
-    renderByMode(obj, mapRenderer, normalDrawFn) {
-        if (this.mapView) {
-            mapRenderer.draw(this.ctx, obj, this.showDebug);
-            return;
-        }
-        normalDrawFn();
-    }
-
     resetCameraToPlayerStart() {
         this.cameraController.resetToPlayerStart(this.player, this.worldSize);
     }
@@ -934,130 +830,13 @@ export class LostDaysOfSpring {
         this.playerHealthController.updateDamageCooldown(now, this.player);
     }
 
-    drawPlayer(now) {
-        this.renderByMode(this.player, this.mapPlayerRenderer, () =>
-            this.playerRenderer.draw(this.ctx, this.player, this.showDebug, now)
-        );
-    }
-
-    drawPlatform(p) {
-        this.renderByMode(p, this.mapPlatformRenderer, () =>
-            this.platformRenderer.draw(this.ctx, p, this.showDebug, this.cameraController.camera)
-        );
-    }
-
-    drawElevator(e) {
-        this.renderByMode(e, this.mapPlatformRenderer, () =>
-            this.platformRenderer.draw(this.ctx, e, this.showDebug, this.cameraController.camera)
-        );
-    }
-
-    drawHiddenWall(w) {
-        this.renderByMode(w, this.mapPlatformRenderer, () =>
-            this.platformRenderer.drawHiddenWall(
-                this.ctx,
-                w,
-                this.showDebug,
-                this.cameraController.camera
-            )
-        );
-    }
-
-    drawEnemy(e, now) {
-        this.renderByMode(e, this.mapEnemyRenderer, () =>
-            this.enemyRenderer.draw(this.ctx, e, e.sprite, this.showDebug, now, this.player)
-        );
-    }
-
-    drawCoin(c) {
-        this.renderByMode(c, this.mapCoinRenderer, () =>
-            this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug)
-        );
-    }
-
-    drawSplinter(s, now) {
-        this.renderByMode(s, this.mapSplinterRenderer, () =>
-            this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug, now)
-        );
-    }
-
-    drawArtifact(a, now) {
-        this.renderByMode(a, this.mapArtifactRenderer, () =>
-            this.collectibleRenderer.drawArtifact(this.ctx, a, this.showDebug, now)
-        );
-    }
-
-    drawHeart(s, now) {
-        this.renderByMode(s, this.mapHeartRenderer, () =>
-            this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug, now)
-        );
-    }
-
-    drawWeaponUpgrade(s, now) {
-        this.renderByMode(s, NOOP_RENDERER, () =>
-            this.collectibleRenderer.drawWeaponUpgrade(this.ctx, s, this.showDebug, now)
-        );
-    }
-
-    drawBullet(b) {
-        this.weaponRenderer.draw(this.ctx, b);
-    }
-
-    drawCannon(cannon) {
-        this.renderByMode(cannon, this.mapCannonRenderer, () =>
-            this.cannonRenderer.draw(this.ctx, cannon, this.showDebug)
-        );
-    }
-
-    drawCannonBullet(b) {
-        this.cannonBulletRenderer.draw(this.ctx, b);
-    }
-
-    drawSpike(spike) {
-        this.renderByMode(spike, this.mapSpikeRenderer, () =>
-            this.spikeRenderer.draw(this.ctx, spike, this.showDebug)
-        );
-    }
-
-    drawEnvPreBackgroundItem(i) {
-        this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawEnvironmentItem(this.ctx, i)
-        );
-    }
-
-    drawEnvBackgroundItem(i) {
-        this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawEnvironmentItem(this.ctx, i)
-        );
-    }
-
-    drawEnvParallaxItem(i) {
-        this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawParallaxEnvironmentItem(
-                this.ctx,
-                i,
-                this.cameraController.camera
-            )
-        );
-    }
-
     drawTitleScreen() {
         const hasSave = CheckpointStorage.load() !== null;
-        this.titleScreenRenderer.draw(this.ctx, this.canvas, hasSave);
-    }
-
-    drawWorld() {
-        this.worldRenderer.drawBackground(this.ctx, this.canvas, this.cameraController.camera);
-    }
-
-    drawEnvForegroundItem(i) {
-        this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawEnvironmentItem(this.ctx, i)
-        );
+        TitleScreenRenderer.draw(this.ctx, this.canvas, hasSave);
     }
 
     draw(now = performance.now()) {
-        this.sceneRenderer.draw(this.ctx, this, now);
+        SceneRenderer.draw(this.ctx, this, now);
     }
 
     drawLevelComplete() {
@@ -1066,7 +845,7 @@ export class LostDaysOfSpring {
             this.levelStartAt -
             this.pauseController.totalPausedTime +
             this.accumulatedPlayTime;
-        this.levelCompleteRenderer.drawLevelCompleteScreen(
+        DefaultLevelCompleteRenderer.draw(
             this.ctx,
             this.canvas,
             this.player.coinsCount,
@@ -1091,7 +870,7 @@ export class LostDaysOfSpring {
             this.pauseController.totalPausedTime +
             this.accumulatedPlayTime;
 
-        this.gameOverRenderer.drawGameOverScreen(
+        DefaultGameOverRenderer.draw(
             this.ctx,
             this.canvas,
             this.player.coinsCount,
@@ -1141,18 +920,6 @@ export class LostDaysOfSpring {
         this.teleportController.update(now, this.player);
     }
 
-    drawCheckpointIndicator(cp) {
-        this.renderByMode(cp, this.mapCheckpointRenderer, () =>
-            this.checkpointRenderer.draw(this.ctx, cp, this.showDebug)
-        );
-    }
-
-    drawExit(exit) {
-        this.renderByMode(exit, this.mapExitRenderer, () =>
-            this.exitRenderer.draw(this.ctx, exit, this.showDebug)
-        );
-    }
-
     drawExitMessage() {
         const exit = this.exitController.findActiveExit(this.player);
         if (!exit) {
@@ -1175,7 +942,7 @@ export class LostDaysOfSpring {
     drawGameFadeIn(now) {
         const elapsed = now - this.gameFadeIn.startTime;
         const progress = Math.min(elapsed / this.gameFadeIn.duration, 1);
-        this.transitionRenderer.drawFadeIn(this.ctx, this.canvas, progress);
+        TransitionRenderer.drawFadeIn(this.ctx, this.canvas, progress);
         if (progress >= 1) {
             this.gameFadeIn.active = false;
         }
@@ -1185,7 +952,7 @@ export class LostDaysOfSpring {
         this.drawTitleScreen();
         const fade = this.titleScreenController.update(now);
         if (fade) {
-            this.transitionRenderer.drawFadeOut(this.ctx, this.canvas, fade.progress);
+            TransitionRenderer.drawFadeOut(this.ctx, this.canvas, fade.progress);
             if (fade.justFinished) {
                 this.levelStartAt = now;
                 this.pauseController.totalPausedTime = 0;
@@ -1252,10 +1019,10 @@ export class LostDaysOfSpring {
         switch (code) {
             case this.keysMap.menuUp:
             case this.keysMap.menuDown: {
-                const count = this.pauseRenderer.menuItemCount;
+                const count = MENU_ITEMS.length;
                 const dir = code === this.keysMap.menuUp ? -1 : 1;
                 this.pauseController.moveMenuIndex(dir, count);
-                this.pauseRenderer.drawPausePanel(
+                DefaultPauseRenderer.drawPausePanel(
                     this.ctx,
                     this.canvas,
                     this.pauseController.menuIndex,
@@ -1278,7 +1045,7 @@ export class LostDaysOfSpring {
         this.stop();
         this.pauseController.open(performance.now());
         this.draw(this.simulatedTime);
-        this.pauseRenderer.drawPauseScreen(
+        DefaultPauseRenderer.drawPauseScreen(
             this.ctx,
             this.canvas,
             this.pauseController.menuIndex,

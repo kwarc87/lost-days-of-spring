@@ -12,7 +12,7 @@ const SPIKE_VARIANTS = {
 };
 
 export const DefaultSpikeRenderer = {
-    draw: (ctx, spike, debug = false) => {
+    draw: (ctx, spike, { debug = false } = {}) => {
         const img = getImg(SPIKE_IMG_PATH);
         const { sx, sy } = SPIKE_VARIANTS[spike.variant] ?? SPIKE_VARIANTS[1];
         const up = spike.position === "up";

@@ -187,7 +187,7 @@ export function adjustAnimStartTime(delta) {
 }
 
 export const DefaultPlayerRenderer = {
-    draw: (ctx, player, debug = false, now = performance.now()) => {
+    draw: (ctx, player, { debug = false, now = performance.now() } = {}) => {
         const animKey = getAnimKey(player);
         const anim = ANIMS[animKey];
         const img = getImg(anim.src);

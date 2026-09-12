@@ -1,4 +1,8 @@
 import { DebugGridRenderer } from "./DebugRenderers.js";
+import { drawEntity } from "./EntityRenderPipeline.js";
+import { DefaultWorldRenderer } from "./WorldRenderers.js";
+import { MessageRenderer } from "./MessageRenderer.js";
+import { DefaultHubRenderer } from "./HudRenderers.js";
 
 // Orchestrates the whole-frame draw order (world -> layers -> entities -> UI
 // overlays). Takes the game instance as a state facade so it can call back
@@ -10,108 +14,108 @@ export const SceneRenderer = {
         ctx.save();
 
         if (game.mapView) {
-            game.worldRenderer.drawMapBackground(ctx, game.canvas, game.worldSize);
+            DefaultWorldRenderer.drawMapBackground(ctx, game.canvas, game.worldSize);
         } else {
-            game.drawWorld();
+            DefaultWorldRenderer.drawBackground(ctx, game.canvas, game.cameraController.camera);
             ctx.translate(-game.cameraController.camera.x, -game.cameraController.camera.y);
         }
 
         for (const i of game.parallaxItems) {
-            game.drawEnvParallaxItem(i);
+            drawEntity(ctx, game, "envParallax", i, now);
         }
 
         for (const exit of game.exitController.getExits()) {
-            game.drawExit(exit);
+            drawEntity(ctx, game, "exit", exit, now);
         }
 
         for (const i of game.preBackgroundItems) {
-            game.drawEnvPreBackgroundItem(i);
+            drawEntity(ctx, game, "envPreBackground", i, now);
         }
 
         for (const p of game.platforms) {
-            game.drawPlatform(p);
+            drawEntity(ctx, game, "platform", p, now);
         }
 
         for (const i of game.backgroundItems) {
-            game.drawEnvBackgroundItem(i);
+            drawEntity(ctx, game, "envBackground", i, now);
         }
 
         for (const w of game.projectileController.getBullets()) {
-            game.drawBullet(w);
+            drawEntity(ctx, game, "bullet", w, now);
         }
 
         for (const b of game.projectileController.getCannonBullets()) {
-            game.drawCannonBullet(b);
+            drawEntity(ctx, game, "cannonBullet", b, now);
         }
 
         for (const c of game.collectibleController.getCoins()) {
             if (!c.collected) {
-                game.drawCoin(c);
+                drawEntity(ctx, game, "coin", c, now);
             }
         }
 
         for (const s of game.collectibleController.getSplinters()) {
             if (!s.collected) {
-                game.drawSplinter(s, now);
+                drawEntity(ctx, game, "splinter", s, now);
             }
         }
 
         for (const a of game.collectibleController.getArtifacts()) {
             if (!a.collected) {
-                game.drawArtifact(a, now);
+                drawEntity(ctx, game, "artifact", a, now);
             }
         }
 
         for (const h of game.collectibleController.getHearts()) {
             if (!h.collected) {
-                game.drawHeart(h, now);
+                drawEntity(ctx, game, "heart", h, now);
             }
         }
 
         for (const u of game.collectibleController.getWeaponUpgrades()) {
             if (!u.collected) {
-                game.drawWeaponUpgrade(u, now);
+                drawEntity(ctx, game, "weaponUpgrade", u, now);
             }
         }
 
         for (const wall of game.hiddenWalls) {
-            game.drawHiddenWall(wall);
+            drawEntity(ctx, game, "hiddenWall", wall, now);
         }
 
         for (const e of game.elevatorController.getElevators()) {
-            game.drawElevator(e);
+            drawEntity(ctx, game, "elevator", e, now);
         }
 
         for (const spike of game.projectileController.getSpikes()) {
-            game.drawSpike(spike);
+            drawEntity(ctx, game, "spike", spike, now);
         }
 
         for (const e of game.enemyController.getEnemies()) {
             if (e.dead) {
                 continue;
             }
-            game.drawEnemy(e, now);
+            drawEntity(ctx, game, "enemy", e, now);
         }
 
         for (const cannon of game.projectileController.getCannons()) {
-            game.drawCannon(cannon);
+            drawEntity(ctx, game, "cannon", cannon, now);
         }
 
         if (!game.mapView) {
-            game.drawPlayer(now);
+            drawEntity(ctx, game, "player", game.player, now);
         }
 
         for (const cp of game.checkpointManager.checkpoints) {
-            game.drawCheckpointIndicator(cp);
+            drawEntity(ctx, game, "checkpoint", cp, now);
         }
 
         for (const i of game.foregroundItems) {
-            game.drawEnvForegroundItem(i);
+            drawEntity(ctx, game, "envForeground", i, now);
         }
 
         if (game.mapView) {
-            game.worldRenderer.drawMapUndiscoveredMask(ctx, game.worldSize, game.mapDiscovery);
-            game.drawPlayer(now);
+            DefaultWorldRenderer.drawMapUndiscoveredMask(ctx, game.worldSize, game.mapDiscovery);
+            drawEntity(ctx, game, "player", game.player, now);
         }
 
         if (game.showDebug && !game.mapView) {
@@ -146,7 +150,7 @@ export const SceneRenderer = {
             !game.pauseController.isPaused &&
             !game.galleryController.active
         ) {
-            game.messageRenderer.drawMessagePanel(
+            MessageRenderer.drawMessagePanel(
                 ctx,
                 game.canvas,
                 activeMessage,
@@ -164,7 +168,7 @@ export const SceneRenderer = {
             !game.galleryController.active
         ) {
             const activeArtifactSource = game.messageController.getActiveArtifactSource();
-            game.messageRenderer.drawPanel(
+            MessageRenderer.drawPanel(
                 ctx,
                 {
                     title: activeArtifactMessage.title ?? null,
@@ -190,7 +194,7 @@ export const SceneRenderer = {
             );
         }
 
-        game.hudRenderer.draw(
+        DefaultHubRenderer.draw(
             ctx,
             game.canvas,
             game.player,

@@ -90,7 +90,7 @@ function getHeartBobOffset(collectible, now) {
 }
 
 export const DefaultCollectibleRenderer = {
-    drawCoin: (ctx, collectible, showDebug = false, now = performance.now()) => {
+    drawCoin: (ctx, collectible, { debug: showDebug = false, now = performance.now() } = {}) => {
         const img = getImg(GEMS_IMG_PATH);
         const { sx, sy } = COIN_FRAMES[Math.floor(now / COIN_FRAME_MS) % COIN_FRAMES.length];
 
@@ -120,7 +120,11 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-    drawSplinter: (ctx, collectible, showDebug = false, now = performance.now()) => {
+    drawSplinter: (
+        ctx,
+        collectible,
+        { debug: showDebug = false, now = performance.now() } = {}
+    ) => {
         const img = getImg(GEMS_IMG_PATH);
         const { sx, sy } =
             SPLINTER_FRAMES[Math.floor(now / SPLINTER_FRAME_MS) % SPLINTER_FRAMES.length];
@@ -151,7 +155,11 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-    drawWeaponUpgrade: (ctx, collectible, showDebug = false, now = performance.now()) => {
+    drawWeaponUpgrade: (
+        ctx,
+        collectible,
+        { debug: showDebug = false, now = performance.now() } = {}
+    ) => {
         const img = getImg(WEAPON_IMG_PATH);
         const { sx, sy } = WEAPON_FRAMES[Math.floor(now / WEAPON_FRAME_MS) % WEAPON_FRAMES.length];
 
@@ -185,7 +193,7 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-    drawHeart: (ctx, collectible, showDebug = false, now = performance.now()) => {
+    drawHeart: (ctx, collectible, { debug: showDebug = false, now = performance.now() } = {}) => {
         ctx.save();
         const x = Math.round(collectible.x);
         const y = Math.round(collectible.y) + getHeartBobOffset(collectible, now);
@@ -216,8 +224,11 @@ export const DefaultCollectibleRenderer = {
             ctx.restore();
         }
     },
-
-    drawArtifact: (ctx, collectible, showDebug = false, now = performance.now()) => {
+    drawArtifact: (
+        ctx,
+        collectible,
+        { debug: showDebug = false, now = performance.now() } = {}
+    ) => {
         const img = getImg("textures/icons.png");
         const sx = collectible.cordX ?? 0;
         const sy = collectible.cordY ?? 0;

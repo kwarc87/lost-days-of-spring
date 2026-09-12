@@ -51,8 +51,7 @@ export const DefaultHubRenderer = {
             DefaultCollectibleRenderer.drawHeart(
                 ctx,
                 { x: hx, y: hy, id: 0, w: heartW, h: heartH },
-                false,
-                0
+                { debug: false, now: 0 }
             );
         }
         ctx.globalAlpha = 1;
@@ -159,8 +158,7 @@ export const DefaultHubRenderer = {
                     cordX: 400,
                     cordY: 48,
                 },
-                false,
-                0
+                { debug: false, now: 0 }
             );
             ctx.fillStyle = "#f0cc8b";
             const artifactSuffix = ` / ${currentLevelArtifactsCount ?? 0}`;

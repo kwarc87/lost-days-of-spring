@@ -9,7 +9,7 @@ const DST_W = 128;
 const DST_H = 128;
 
 export const CannonRenderer = {
-    draw: (ctx, cannon, debug = false) => {
+    draw: (ctx, cannon, { debug = false } = {}) => {
         const img = getImg(SPRITE_URL);
         if (!img?.complete || !img.naturalWidth) {
             return;

@@ -1,5 +1,5 @@
 export const CheckpointRenderer = {
-    draw(ctx, cp, debug = false) {
+    draw(ctx, cp, { debug = false } = {}) {
         ctx.save();
         ctx.fillStyle = cp.reached ? "#72eb84" : "#323031";
         ctx.fillRect(cp.x + 42, cp.y + 80, 20, 64);

@@ -587,7 +587,7 @@ const HIDDEN_WALL_OPACITY_DEFAULT = 1;
 const HIDDEN_WALL_TRANSITION_DURATION = 150;
 
 export const DefaultPlatformRenderer = {
-    draw(ctx, platform, showDebug, camera) {
+    draw(ctx, platform, { debug: showDebug = false, camera } = {}) {
         if (platform.layout === "simple") {
             drawSimpleTiled(ctx, platform);
             return;
@@ -600,7 +600,7 @@ export const DefaultPlatformRenderer = {
             camera
         );
     },
-    drawHiddenWall(ctx, wall, showDebug, camera) {
+    drawHiddenWall(ctx, wall, { debug: showDebug = false, camera } = {}) {
         const opacityTarget = wall.entered
             ? HIDDEN_WALL_OPACITY_ENTERED
             : HIDDEN_WALL_OPACITY_DEFAULT;

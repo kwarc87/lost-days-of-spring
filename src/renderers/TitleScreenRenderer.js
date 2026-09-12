@@ -143,13 +143,15 @@ export const TitleScreenRenderer = {
                 h: TILE * 3,
                 layout: "ground",
             },
-            false,
             {
-                x: -TILE,
-                y: -TILE,
-                width: h + TILE * 2,
-                height: TILE * 3,
-                margin: 0,
+                debug: false,
+                camera: {
+                    x: -TILE,
+                    y: -TILE,
+                    width: h + TILE * 2,
+                    height: TILE * 3,
+                    margin: 0,
+                },
             }
         );
         ctx.restore();
@@ -166,13 +168,15 @@ export const TitleScreenRenderer = {
                 h: TILE * 3,
                 layout: "ground",
             },
-            false,
             {
-                x: -TILE,
-                y: -TILE,
-                width: h + TILE * 2,
-                height: TILE * 3,
-                margin: 0,
+                debug: false,
+                camera: {
+                    x: -TILE,
+                    y: -TILE,
+                    width: h + TILE * 2,
+                    height: TILE * 3,
+                    margin: 0,
+                },
             }
         );
         ctx.restore();

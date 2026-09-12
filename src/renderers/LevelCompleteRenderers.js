@@ -16,7 +16,7 @@ const TITLE_FONT = `normal 24px "Silkscreen", monospace`;
 const SUB_FONT = `normal 18px "Silkscreen", monospace`;
 
 export const DefaultLevelCompleteRenderer = {
-    drawLevelCompleteScreen: (
+    draw: (
         ctx,
         canvas,
         coinsCount,
@@ -174,8 +174,7 @@ export const DefaultLevelCompleteRenderer = {
                     cordX: 400,
                     cordY: 48,
                 },
-                false,
-                0
+                { debug: false, now: 0 }
             );
             ctx.fillStyle = MESSAGES.STATS.ARTIFACTS_COLOR;
             ctx.textAlign = "left";

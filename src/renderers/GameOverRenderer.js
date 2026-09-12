@@ -15,7 +15,7 @@ const TITLE_FONT = `normal 24px "Silkscreen", monospace`;
 const SUB_FONT = `normal 18px "Silkscreen", monospace`;
 
 export const DefaultGameOverRenderer = {
-    drawGameOverScreen(
+    draw(
         ctx,
         canvas,
         coinsCount,
@@ -177,8 +177,7 @@ export const DefaultGameOverRenderer = {
                     cordX: 400,
                     cordY: 48,
                 },
-                false,
-                0
+                { debug: false, now: 0 }
             );
             ctx.fillStyle = MESSAGES.STATS.ARTIFACTS_COLOR;
             ctx.textAlign = "left";

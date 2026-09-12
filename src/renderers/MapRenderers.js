@@ -1,7 +1,8 @@
-// ─── Map-view renderers — Strategy pattern for `LostDaysOfSpring#renderByMode` ──
-// Each object exposes a uniform `draw(ctx, obj, debug)` method (debug is ignored
-// by renderers that have nothing to gate). Consolidated in one file, mirroring
-// the existing DebugRenderers.js / CollectibleRenderers.js grouping convention.
+// ─── Map-view renderers — Strategy pattern used by EntityRenderPipeline.js ──
+// Each object exposes a uniform `draw(ctx, obj, opts)` method, mirroring the
+// primary renderers' signature (opts is ignored by renderers with nothing to
+// gate). Consolidated in one file, mirroring the existing DebugRenderers.js /
+// CollectibleRenderers.js grouping convention.
 
 const MAP_COLORS = {
     solid: "#6d5ad9",
@@ -81,7 +82,7 @@ export const MapPlatformRenderer = {
 };
 
 export const MapEnemyRenderer = {
-    draw: (ctx, enemy, debug = false) => {
+    draw: (ctx, enemy, { debug = false } = {}) => {
         if (!debug) {
             return;
         }
@@ -91,7 +92,7 @@ export const MapEnemyRenderer = {
 };
 
 export const MapCoinRenderer = {
-    draw: (ctx, collectible, debug = false) => {
+    draw: (ctx, collectible, { debug = false } = {}) => {
         if (!debug) {
             return;
         }
@@ -101,7 +102,7 @@ export const MapCoinRenderer = {
 };
 
 export const MapSplinterRenderer = {
-    draw: (ctx, collectible, debug = false) => {
+    draw: (ctx, collectible, { debug = false } = {}) => {
         if (!debug) {
             return;
         }
@@ -111,7 +112,7 @@ export const MapSplinterRenderer = {
 };
 
 export const MapArtifactRenderer = {
-    draw: (ctx, collectible, debug = false) => {
+    draw: (ctx, collectible, { debug = false } = {}) => {
         if (!debug) {
             return;
         }
@@ -121,7 +122,7 @@ export const MapArtifactRenderer = {
 };
 
 export const MapHeartRenderer = {
-    draw: (ctx, collectible, debug = false) => {
+    draw: (ctx, collectible, { debug = false } = {}) => {
         if (!debug) {
             return;
         }
@@ -212,7 +213,3 @@ export const MapExitRenderer = {
         ctx.fill();
     },
 };
-
-// Shared no-op for entities that render nothing in map view (weapon upgrades,
-// environment items) — keeps the dispatcher generic with no special-casing.
-export const NOOP_RENDERER = { draw: () => {} };

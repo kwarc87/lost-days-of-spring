@@ -1,7 +1,7 @@
 import { getImg } from "../utils/imgCache.js";
 
 export const DefaultExitRenderer = {
-    draw: (ctx, exit, debug = false) => {
+    draw: (ctx, exit, { debug = false } = {}) => {
         const img = getImg(exit.url);
         if (!img?.complete || !img.naturalWidth) {
             return;

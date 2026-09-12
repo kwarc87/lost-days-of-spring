@@ -192,7 +192,11 @@ function drawEvilEyeEnemy(ctx, enemy, debug, now, player) {
 }
 
 export const DefaultEnemyRenderer = {
-    draw: (ctx, enemy, type = "slime", debug = false, now = performance.now(), player = {}) => {
+    draw: (
+        ctx,
+        enemy,
+        { type = "slime", debug = false, now = performance.now(), player = {} } = {}
+    ) => {
         switch (type) {
             case "evilEye":
                 drawEvilEyeEnemy(ctx, enemy, debug, now, player);
