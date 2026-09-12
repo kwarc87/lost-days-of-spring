@@ -33,7 +33,7 @@ import { CheckpointManager } from "../systems/CheckpointManager.js";
 import { TeleportController } from "../systems/TeleportController.js";
 import { ProjectileController } from "../systems/ProjectileController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
-import { hasPassedTarget } from "../utils/patrol.js";
+import { EnemyController } from "../systems/EnemyController.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
@@ -114,6 +114,9 @@ export class LostDaysOfSpring {
 
         // ====== ELEVATORS ======
         this.elevatorController = new ElevatorController();
+
+        // ====== ENEMIES ======
+        this.enemyController = new EnemyController();
 
         // ====== TELEPORTS ======
         this.teleportController = new TeleportController();
@@ -268,7 +271,7 @@ export class LostDaysOfSpring {
         );
         this.platforms = levelData.platforms ?? [];
         this.setElevators(levelData.elevators);
-        this.enemies = levelData.enemies ?? [];
+        this.setEnemies(levelData.enemies);
         this.coins = levelData.collectibles?.coins ?? [];
         this.splinters = levelData.collectibles?.splinters ?? [];
         this.artifacts = levelData.collectibles?.artifacts ?? [];
@@ -295,7 +298,7 @@ export class LostDaysOfSpring {
         this.currentLevelCoinsCount = this.coins.length;
         this.currentLevelSplintersCount = this.splinters.length;
         this.currentLevelArtifactsCount = this.artifacts.length;
-        this.currentLevelEnemiesCount = this.enemies.length;
+        this.currentLevelEnemiesCount = this.getEnemies().length;
 
         // Load checkpoints and extract embedded visual layers / messages
         this.setCheckpoints(levelData.checkpoints ?? []);
@@ -317,7 +320,7 @@ export class LostDaysOfSpring {
             artifacts: this.artifacts,
             hearts: this.hearts,
             weaponUpgrades: this.weaponUpgrades,
-            enemies: this.enemies,
+            enemies: this.getEnemies(),
             elevators: this.getElevators(),
             messages: this.messages,
             mapDiscovery: this.mapDiscovery,
@@ -584,7 +587,7 @@ export class LostDaysOfSpring {
             }
         }
 
-        for (const e of this.enemies) {
+        for (const e of this.getEnemies()) {
             if (e.dead || e.dying) {
                 continue;
             }
@@ -1023,7 +1026,7 @@ export class LostDaysOfSpring {
 
         // Resolve player against enemies on the X axis so that large knockback
         // velocities cannot overshoot the player into a nearby enemy.
-        for (const e of this.enemies) {
+        for (const e of this.getEnemies()) {
             if (e.dead || e.dying) {
                 continue;
             }
@@ -1172,21 +1175,11 @@ export class LostDaysOfSpring {
         this.player.vy = 0;
     }
 
-    hasPassedTarget(current, target, directionSign) {
-        if (directionSign > 0) {
-            return current >= target;
-        }
-        if (directionSign < 0) {
-            return current <= target;
-        }
-        return true;
-    }
-
     updateElevators(now) {
         this.elevatorController.update(now, {
             player: this.player,
             platforms: this.platforms,
-            enemies: this.enemies,
+            enemies: this.getEnemies(),
             isVisibleInCamera: (obj, margin) =>
                 this.isVisibleInCamera(obj, margin),
             onPlatformLanding: (elevator, landingNow) => {
@@ -1200,213 +1193,18 @@ export class LostDaysOfSpring {
 
     // Move enemies and check player-enemy collisions
     updateEnemies(now) {
-        for (const enemy of this.enemies) {
-            if (enemy.dead) {
-                continue;
-            }
-
-            enemy.wasCollidingWithPlayer = enemy.collidingWithPlayerThisFrame;
-            enemy.collidingWithPlayerThisFrame = false;
-
-            if (enemy.dying) {
-                if (now - enemy.dyingStartedAtMs >= enemy.dyingDurationMs) {
-                    enemy.dying = false;
-                    enemy.dead = true;
-                }
-                continue;
-            }
-
-            // Clear damage flash after 200ms
-            if (enemy.isDamaged && now - enemy.damageTime > 200) {
-                enemy.isDamaged = false;
-            }
-
-            enemy.prevX = enemy.x;
-            enemy.prevY = enemy.y;
-
-            const moveX = enemy.dirX * enemy.speed * enemy.direction;
-            const moveY = enemy.dirY * enemy.speed * enemy.direction;
-
-            enemy.x += moveX;
-            enemy.y += moveY;
-
-            const signX = Math.sign(enemy.dirX);
-            const signY = Math.sign(enemy.dirY);
-
-            const passedX = hasPassedTarget(
-                enemy.x,
-                enemy.direction === 1 ? enemy.targetX : enemy.startX,
-                enemy.direction === 1 ? signX : -signX,
-            );
-
-            const passedY = hasPassedTarget(
-                enemy.y,
-                enemy.direction === 1 ? enemy.targetY : enemy.startY,
-                enemy.direction === 1 ? signY : -signY,
-            );
-
-            if (passedX && passedY) {
-                if (enemy.direction === 1) {
-                    enemy.x = enemy.targetX;
-                    enemy.y = enemy.targetY;
-                    enemy.direction = -1;
-                } else {
-                    enemy.x = enemy.startX;
-                    enemy.y = enemy.startY;
-                    enemy.direction = 1;
-                }
-            }
-        }
-
-        this.resolvePlayerEnemyCollision(now);
-    }
-
-    resolvePlayerEnemyCollision(now) {
-        const cooldownIsActive =
-            now - this.player.lastHitTime < this.player.hitCooldown;
-
-        // Pass 1: mark ALL colliding enemies and record entry side.
-        // Must be separate from resolution so enemies that are reached after
-        // a `break` still get their wasCollidingWithPlayer state updated.
-        for (const enemy of this.enemies) {
-            if (enemy.dead || enemy.dying) {
-                continue;
-            }
-            if (!rectsCollide(this.player, enemy)) {
-                continue;
-            }
-
-            enemy.collidingWithPlayerThisFrame = true;
-
-            // Record entry side once at first frame of contact.
-            if (!enemy.wasCollidingWithPlayer) {
-                enemy.playerEnteredFromLeft =
-                    this.player.prevX + this.player.w <= enemy.prevX;
-                enemy.playerEnteredFromAbove =
-                    this.player.prevY + this.player.h <= enemy.prevY;
-                enemy.playerEnteredFromBelow =
-                    this.player.prevY >= enemy.prevY + enemy.h;
-            }
-        }
-
-        // Pass 2: damage from the first colliding enemy, overlap resolution for all.
-        for (const enemy of this.enemies) {
-            if (enemy.dead || enemy.dying) {
-                continue;
-            }
-            if (!enemy.collidingWithPlayerThisFrame) {
-                continue;
-            }
-
-            if (!cooldownIsActive) {
+        this.enemyController.update(now, {
+            player: this.player,
+            solids: this.solids,
+            verticalHitRecoilMultiplier: this.verticalHitRecoilMultiplier,
+            onPlayerHit: (hitNow, enemy, hitFromAbove, hitFromBelow) =>
                 this.applyDamageToPlayer(
-                    now,
+                    hitNow,
                     enemy,
-                    enemy.playerEnteredFromAbove,
-                    enemy.playerEnteredFromBelow,
-                );
-                break;
-            }
-
-            // Cooldown active: resolve overlap without damage.
-            // No break — all colliding enemies are resolved so sandwiched
-            // collisions (player between two enemies) are handled correctly.
-            this.resolveEnemyCollisionX(enemy);
-            this.resolveEnemyCollisionY(enemy);
-        }
-    }
-
-    resolveEnemyCollisionX(enemy) {
-        // Vertical entry — Y phase handles it.
-        if (enemy.playerEnteredFromAbove || enemy.playerEnteredFromBelow) {
-            return;
-        }
-
-        const targetX = enemy.playerEnteredFromLeft
-            ? enemy.x - this.player.w // came from left → push back left
-            : enemy.x + enemy.w; // came from right → push back right
-
-        const playerAtTarget = {
-            x: targetX,
-            y: this.player.y,
-            w: this.player.w,
-            h: this.player.h,
-        };
-
-        const blocked =
-            this.solids.some((p) => rectsCollide(playerAtTarget, p)) ||
-            this.enemies.some(
-                (e) =>
-                    e !== enemy &&
-                    !e.dead &&
-                    !e.dying &&
-                    rectsCollide(playerAtTarget, e),
-            );
-
-        if (!blocked) {
-            this.player.x = targetX;
-        } else if (enemy.dirX !== 0) {
-            // No room for player — snap enemy clear and reverse.
-            // Skip for vertical-only enemies (dirX === 0): snapping their X or
-            // reversing direction would corrupt their vertical patrol.
-            enemy.x = enemy.playerEnteredFromLeft
-                ? this.player.x + this.player.w
-                : this.player.x - enemy.w;
-            if (!enemy.dying) {
-                enemy.direction = -enemy.direction;
-            }
-        }
-    }
-
-    resolveEnemyCollisionY(enemy) {
-        if (!enemy.playerEnteredFromAbove && !enemy.playerEnteredFromBelow) {
-            return;
-        }
-
-        const targetY = enemy.playerEnteredFromAbove
-            ? enemy.y - this.player.h
-            : enemy.y + enemy.h;
-
-        const playerAtTarget = {
-            x: this.player.x,
-            y: targetY,
-            w: this.player.w,
-            h: this.player.h,
-        };
-
-        const blocked =
-            this.solids.some((p) => rectsCollide(playerAtTarget, p)) ||
-            this.enemies.some(
-                (e) =>
-                    e !== enemy &&
-                    !e.dead &&
-                    !e.dying &&
-                    rectsCollide(playerAtTarget, e),
-            );
-
-        if (blocked && enemy.dirY !== 0) {
-            // No room for player — snap enemy clear and reverse.
-            // Skip for horizontal-only enemies (dirY === 0): snapping their Y or
-            // reversing direction would corrupt their horizontal patrol.
-            enemy.y = enemy.playerEnteredFromAbove
-                ? this.player.y + this.player.h // No room above — snap enemy below player.
-                : this.player.y - enemy.h; // No room below — snap enemy above player.
-            if (!enemy.dying) {
-                enemy.direction = -enemy.direction;
-            }
-        } else if (!blocked) {
-            this.player.y = targetY;
-        }
-
-        if (enemy.playerEnteredFromAbove && !blocked) {
-            this.player.vy = -enemy.recoilY * this.verticalHitRecoilMultiplier;
-            this.player.airborne = true;
-            this.player.jumpPressedByUser = false;
-        }
-
-        if (enemy.playerEnteredFromBelow && !blocked && this.player.vy < 0) {
-            this.player.vy = 0;
-        }
+                    hitFromAbove,
+                    hitFromBelow,
+                ),
+        });
     }
 
     applyDamageToPlayer(
@@ -1459,7 +1257,7 @@ export class LostDaysOfSpring {
             artifacts: this.artifacts,
             hearts: this.hearts,
             weaponUpgrades: this.weaponUpgrades,
-            enemies: this.enemies,
+            enemies: this.getEnemies(),
             elevators: this.getElevators(),
             messages: this.messages,
             mapDiscovery: this.mapDiscovery,
@@ -1488,7 +1286,7 @@ export class LostDaysOfSpring {
     updateBullets(now) {
         this.projectileController.updateBullets(now, {
             worldSize: this.worldSize,
-            enemies: this.enemies,
+            enemies: this.getEnemies(),
             solids: this.solids,
         });
     }
@@ -1767,6 +1565,19 @@ export class LostDaysOfSpring {
         this.elevatorController.adjustForPause(pauseDuration);
     }
 
+    // Single access point for enemy state — keeps ownership at EnemyController.
+    getEnemies() {
+        return this.enemyController.getEnemies();
+    }
+
+    setEnemies(enemies) {
+        this.enemyController.setEnemies(enemies);
+    }
+
+    adjustEnemiesForPause(pauseDuration) {
+        this.enemyController.adjustForPause(pauseDuration);
+    }
+
     updateDamageCooldown(now) {
         if (
             this.player.isHit &&
@@ -2030,7 +1841,7 @@ export class LostDaysOfSpring {
             this.drawSpike(spike);
         }
 
-        for (const e of this.enemies) {
+        for (const e of this.getEnemies()) {
             if (e.dead) {
                 continue;
             }
@@ -2172,7 +1983,7 @@ export class LostDaysOfSpring {
             this.currentLevelCoinsCount,
             this.player.splintersCount,
             this.currentLevelSplintersCount,
-            this.enemies.filter((e) => e.dead || e.dying).length,
+            this.getEnemies().filter((e) => e.dead || e.dying).length,
             this.currentLevelEnemiesCount,
             playTimeMs,
             this.deathCount,
@@ -2200,7 +2011,7 @@ export class LostDaysOfSpring {
             this.currentLevelCoinsCount,
             this.player.splintersCount,
             this.currentLevelSplintersCount,
-            this.enemies.filter((e) => e.dead || e.dying).length,
+            this.getEnemies().filter((e) => e.dead || e.dying).length,
             this.currentLevelEnemiesCount,
             remaining,
             playTimeMs,
@@ -2556,11 +2367,7 @@ export class LostDaysOfSpring {
 
         this.adjustCannonsForPause(pauseDuration);
         this.adjustElevatorsForPause(pauseDuration);
-        for (const e of this.enemies) {
-            if (e.dyingStartedAtMs) {
-                e.dyingStartedAtMs += pauseDuration;
-            }
-        }
+        this.adjustEnemiesForPause(pauseDuration);
         this.adjustTeleportsForPause(pauseDuration);
         adjustAnimStartTime(pauseDuration);
         this.simulatedTime += pauseDuration;
