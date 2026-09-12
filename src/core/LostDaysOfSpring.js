@@ -28,6 +28,7 @@ import { TeleportController } from "../systems/TeleportController.js";
 import { ProjectileController } from "../systems/ProjectileController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
 import { EnemyController } from "../systems/EnemyController.js";
+import { CollectibleController } from "../systems/CollectibleController.js";
 import { MessageController } from "../systems/MessageController.js";
 import { PlayerPhysicsController } from "../systems/PlayerPhysicsController.js";
 import { PlayerPostureController } from "../systems/PlayerPostureController.js";
@@ -114,6 +115,9 @@ export class LostDaysOfSpring {
 
         // ====== ENEMIES ======
         this.enemyController = new EnemyController();
+
+        // ====== COLLECTIBLES ======
+        this.collectibleController = new CollectibleController();
 
         // ====== MESSAGES ======
         this.messageController = new MessageController();
@@ -270,11 +274,7 @@ export class LostDaysOfSpring {
         this.platforms = levelData.platforms ?? [];
         this.setElevators(levelData.elevators);
         this.setEnemies(levelData.enemies);
-        this.coins = levelData.collectibles?.coins ?? [];
-        this.splinters = levelData.collectibles?.splinters ?? [];
-        this.artifacts = levelData.collectibles?.artifacts ?? [];
-        this.hearts = levelData.collectibles?.hearts ?? [];
-        this.weaponUpgrades = levelData?.collectibles?.weaponUpgrades ?? [];
+        this.setCollectibles(levelData.collectibles);
         this.setSpikes(levelData.spikes);
         this.setMessages(levelData.messages);
         this.exits = levelData.exits ?? [];
@@ -286,9 +286,9 @@ export class LostDaysOfSpring {
         this.setCannons(levelData.cannons);
         this.setTeleports(levelData.teleports);
 
-        this.currentLevelCoinsCount = this.coins.length;
-        this.currentLevelSplintersCount = this.splinters.length;
-        this.currentLevelArtifactsCount = this.artifacts.length;
+        this.currentLevelCoinsCount = this.getCoins().length;
+        this.currentLevelSplintersCount = this.getSplinters().length;
+        this.currentLevelArtifactsCount = this.getArtifacts().length;
         this.currentLevelEnemiesCount = this.getEnemies().length;
 
         // Load checkpoints and extract embedded visual layers / messages
@@ -306,11 +306,11 @@ export class LostDaysOfSpring {
 
         // Restore checkpoint state (collected items, killed enemies, etc.)
         this.restoreCheckpointProgress({
-            coins: this.coins,
-            splinters: this.splinters,
-            artifacts: this.artifacts,
-            hearts: this.hearts,
-            weaponUpgrades: this.weaponUpgrades,
+            coins: this.getCoins(),
+            splinters: this.getSplinters(),
+            artifacts: this.getArtifacts(),
+            hearts: this.getHearts(),
+            weaponUpgrades: this.getWeaponUpgrades(),
             enemies: this.getEnemies(),
             elevators: this.getElevators(),
             messages: this.getMessages(),
@@ -840,11 +840,11 @@ export class LostDaysOfSpring {
         return {
             currentLevelId: this.currentLevelId,
             player: this.player,
-            coins: this.coins,
-            splinters: this.splinters,
-            artifacts: this.artifacts,
-            hearts: this.hearts,
-            weaponUpgrades: this.weaponUpgrades,
+            coins: this.getCoins(),
+            splinters: this.getSplinters(),
+            artifacts: this.getArtifacts(),
+            hearts: this.getHearts(),
+            weaponUpgrades: this.getWeaponUpgrades(),
             enemies: this.getEnemies(),
             elevators: this.getElevators(),
             messages: this.getMessages(),
@@ -894,50 +894,12 @@ export class LostDaysOfSpring {
 
     // Check player-collectible collisions and mark collected items
     updateCollectibles(now) {
-        for (const c of this.coins) {
-            if (!c.collected && rectsCollide(this.player, c)) {
-                c.collected = true;
-                this.player.coinsCount++;
-            }
-        }
-
-        for (const s of this.splinters) {
-            if (!s.collected && rectsCollide(this.player, s)) {
-                s.collected = true;
-                this.player.splintersCount++;
-            }
-        }
-
-        for (const a of this.artifacts) {
-            if (!a.collected && rectsCollide(this.player, a)) {
-                a.collected = true;
-                this.player.artifactsCount++;
-                if (a.message) {
-                    this.showArtifactMessage(a.message, a, now);
-                }
-            }
-        }
-
-        for (const u of this.weaponUpgrades) {
-            if (!u.collected && rectsCollide(this.player, u)) {
-                u.collected = true;
-                this.player.weapon = u?.weapon ?? this.player.weapon;
-                if (u.message) {
-                    this.showWeaponMessage(u.message, now);
-                }
-            }
-        }
-
-        for (const h of this.hearts) {
-            if (
-                !h.collected &&
-                rectsCollide(this.player, h) &&
-                this.player.life < this.player.maxLife
-            ) {
-                h.collected = true;
-                this.player.life++;
-            }
-        }
+        this.collectibleController.update(now, {
+            player: this.player,
+            onArtifactMessage: (message, source, msgNow) =>
+                this.showArtifactMessage(message, source, msgNow),
+            onWeaponMessage: (message, msgNow) => this.showWeaponMessage(message, msgNow),
+        });
     }
 
     updateHiddenWalls() {
@@ -1159,6 +1121,31 @@ export class LostDaysOfSpring {
         this.enemyController.adjustForPause(pauseDuration);
     }
 
+    // Single access point for collectible state — keeps ownership at CollectibleController.
+    setCollectibles(collectibles) {
+        this.collectibleController.setCollectibles(collectibles);
+    }
+
+    getCoins() {
+        return this.collectibleController.getCoins();
+    }
+
+    getSplinters() {
+        return this.collectibleController.getSplinters();
+    }
+
+    getArtifacts() {
+        return this.collectibleController.getArtifacts();
+    }
+
+    getHearts() {
+        return this.collectibleController.getHearts();
+    }
+
+    getWeaponUpgrades() {
+        return this.collectibleController.getWeaponUpgrades();
+    }
+
     // Single access point for messages — keeps ownership at MessageController.
     getMessages() {
         return this.messageController.getMessages();
@@ -1351,31 +1338,31 @@ export class LostDaysOfSpring {
             this.drawCannonBullet(b);
         }
 
-        for (const c of this.coins) {
+        for (const c of this.getCoins()) {
             if (!c.collected) {
                 this.drawCoin(c);
             }
         }
 
-        for (const s of this.splinters) {
+        for (const s of this.getSplinters()) {
             if (!s.collected) {
                 this.drawSplinter(s, now);
             }
         }
 
-        for (const a of this.artifacts) {
+        for (const a of this.getArtifacts()) {
             if (!a.collected) {
                 this.drawArtifact(a, now);
             }
         }
 
-        for (const h of this.hearts) {
+        for (const h of this.getHearts()) {
             if (!h.collected) {
                 this.drawHeart(h, now);
             }
         }
 
-        for (const u of this.weaponUpgrades) {
+        for (const u of this.getWeaponUpgrades()) {
             if (!u.collected) {
                 this.drawWeaponUpgrade(u, now);
             }
@@ -1897,7 +1884,7 @@ export class LostDaysOfSpring {
         this.stop();
         this.draw(this.simulatedTime);
         this.captureFrame();
-        this.artifactGallery.open(this.artifacts, this.galleryLastIndex);
+        this.artifactGallery.open(this.getArtifacts(), this.galleryLastIndex);
         this.drawGallery();
     }
 
