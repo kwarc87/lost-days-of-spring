@@ -11,6 +11,22 @@ export class PlayerPostureController {
         return player.posture === this.postures.CROUCH;
     }
 
+    // Crouch is only allowed while grounded; stand back up as soon as there's room.
+    handleCrouchInput(player, solids, enemies, inputController) {
+        const crouchHeld = inputController.isDown("crouchAlt") || inputController.isDown("crouch");
+
+        if (crouchHeld && !player.airborne) {
+            if (!this.isCrouching(player)) {
+                const anchor = this.findCrouchAnchor(player, solids, enemies);
+                if (anchor !== null) {
+                    this.applyPosture(player, this.postures.CROUCH, anchor);
+                }
+            }
+        } else if (this.isCrouching(player) && this.canStandUp(player, solids, enemies)) {
+            this.applyPosture(player, this.postures.STANDING);
+        }
+    }
+
     canStandUp(player, solids, enemies) {
         return this.canApplyPosture(
             player,

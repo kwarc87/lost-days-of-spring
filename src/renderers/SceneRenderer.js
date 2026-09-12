@@ -3,6 +3,7 @@ import { drawEntity } from "./EntityRenderPipeline.js";
 import { DefaultWorldRenderer } from "./WorldRenderers.js";
 import { MessageRenderer } from "./MessageRenderer.js";
 import { DefaultHubRenderer } from "./HudRenderers.js";
+import { getExitLevelLines } from "../messages.js";
 
 // Orchestrates the whole-frame draw order (world -> layers -> entities -> UI
 // overlays). Takes the game instance as a state facade so it can call back
@@ -40,11 +41,11 @@ export const SceneRenderer = {
             drawEntity(ctx, game, "envBackground", i, now);
         }
 
-        for (const w of game.projectileController.getBullets()) {
+        for (const w of game.combatController.getBullets()) {
             drawEntity(ctx, game, "bullet", w, now);
         }
 
-        for (const b of game.projectileController.getCannonBullets()) {
+        for (const b of game.combatController.getCannonBullets()) {
             drawEntity(ctx, game, "cannonBullet", b, now);
         }
 
@@ -78,7 +79,7 @@ export const SceneRenderer = {
             }
         }
 
-        for (const wall of game.hiddenWalls) {
+        for (const wall of game.hiddenWallController.getHiddenWalls()) {
             drawEntity(ctx, game, "hiddenWall", wall, now);
         }
 
@@ -86,7 +87,7 @@ export const SceneRenderer = {
             drawEntity(ctx, game, "elevator", e, now);
         }
 
-        for (const spike of game.projectileController.getSpikes()) {
+        for (const spike of game.combatController.getSpikes()) {
             drawEntity(ctx, game, "spike", spike, now);
         }
 
@@ -97,7 +98,7 @@ export const SceneRenderer = {
             drawEntity(ctx, game, "enemy", e, now);
         }
 
-        for (const cannon of game.projectileController.getCannons()) {
+        for (const cannon of game.combatController.getCannons()) {
             drawEntity(ctx, game, "cannon", cannon, now);
         }
 
@@ -138,7 +139,18 @@ export const SceneRenderer = {
             !game.gameOver &&
             !game.galleryController.active
         ) {
-            game.drawExitMessage();
+            const exit = game.exitController.findActiveExit(game.player);
+            if (exit) {
+                const camera = game.cameraController.camera;
+                const anchorX = exit.x - camera.x + exit.dw / 2;
+                const anchorY = exit.y - camera.y + exit.dh / 2;
+                const lines = getExitLevelLines(
+                    game.hasEnoughCoins,
+                    game.hasEnoughSplinters,
+                    game.hasEnoughArtifacts
+                );
+                MessageRenderer.drawPanel(ctx, { lines }, anchorX, anchorY);
+            }
         }
 
         const activeMessage = game.messageController.getActiveMessage();

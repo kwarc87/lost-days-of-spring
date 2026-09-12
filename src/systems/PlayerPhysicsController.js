@@ -43,6 +43,29 @@ export class PlayerPhysicsController {
         }
     }
 
+    // Read horizontal input, resolve target speed/facing (crouch-aware), and
+    // ease vx toward it. Knockback locks out player-driven horizontal input.
+    handleHorizontalMovementInput(now, player, { inputController, isCrouching, solids }) {
+        if (now < player.knockbackUntil) {
+            return;
+        }
+
+        let targetVx = 0;
+        const speed = isCrouching() ? player.crouchSpeed : player.speed;
+
+        if (inputController.isDown("left") && !inputController.isDown("right")) {
+            targetVx = -speed;
+            player.facing = "left";
+        } else if (inputController.isDown("right") && !inputController.isDown("left")) {
+            targetVx = speed;
+            player.facing = "right";
+        }
+
+        player.movingByInput = targetVx !== 0;
+
+        this.applyHorizontalMovement(player, targetVx, solids);
+    }
+
     // Ease vx toward targetVx using the acceleration/deceleration of the platform
     // the player is standing on (or last stood on, while airborne).
     applyHorizontalMovement(player, targetVx, solids) {
@@ -90,6 +113,46 @@ export class PlayerPhysicsController {
             player.carryVxInitial = elevVx;
             player.carryVx = elevVx;
             player.carryStartAt = now;
+        }
+    }
+
+    // Consume a buffered jump press (respecting crouch, knockback, coyote time,
+    // and boosters) and apply the resulting vy/elevator boost.
+    handleJumpInput(now, player, { isCrouching, elevatorController }) {
+        if (isCrouching()) {
+            return;
+        }
+        if (now < player.knockbackUntil) {
+            return;
+        }
+        const jumpBuffered = now - player.jumpPressedAt <= player.jumpBufferDuration;
+
+        const isOnBooster = player.onGroundType === "booster";
+        const leftBoosterRecently = player.lastGroundType === "booster";
+
+        const hasCoyoteTime =
+            now - player.lastGroundedAt <= player.coyoteDuration && !leftBoosterRecently;
+
+        const canGroundJump = !isOnBooster && (!player.airborne || hasCoyoteTime);
+
+        if (jumpBuffered && canGroundJump) {
+            player.vy = -player.jump;
+
+            this.handleElevatorJump(now, player, elevatorController);
+
+            player.airborne = true;
+            player.lastGroundedAt = 0;
+            player.onGroundId = null;
+            player.onGroundType = null;
+            player.jumpPressedByUser = true;
+            player.jumpPressedAt = 0;
+        }
+    }
+
+    handleElevatorJump(now, player, elevatorController) {
+        if (player.onGroundType === "elevator") {
+            const elev = elevatorController.findById(player.onGroundId);
+            this.applyElevatorJumpBoost(now, player, elev);
         }
     }
 

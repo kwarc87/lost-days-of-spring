@@ -7,8 +7,6 @@ import { DebugHudRenderer } from "../renderers/DebugRenderers.js";
 import { SceneRenderer } from "../renderers/SceneRenderer.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
-import { MessageRenderer } from "../renderers/MessageRenderer.js";
-import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
 import { PauseController } from "../systems/PauseController.js";
@@ -16,7 +14,8 @@ import { ExitController } from "../systems/ExitController.js";
 import { TitleScreenController } from "../systems/TitleScreenController.js";
 import { ArtifactGalleryController } from "../systems/ArtifactGalleryController.js";
 import { TeleportController } from "../systems/TeleportController.js";
-import { ProjectileController } from "../systems/ProjectileController.js";
+import { HiddenWallController } from "../systems/HiddenWallController.js";
+import { CombatController } from "../systems/CombatController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
 import { EnemyController } from "../systems/EnemyController.js";
 import { CollectibleController } from "../systems/CollectibleController.js";
@@ -25,7 +24,6 @@ import { PlayerPhysicsController } from "../systems/PlayerPhysicsController.js";
 import { PlayerPostureController } from "../systems/PlayerPostureController.js";
 import { PlayerHealthController } from "../systems/PlayerHealthController.js";
 import { LevelLoader } from "../services/LevelLoader.js";
-import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
 import { KEYS_MAP } from "../config/keysMap.js";
 import { PHYSICS } from "../config/physics.js";
@@ -74,7 +72,7 @@ export class LostDaysOfSpring {
         });
 
         // ====== PROJECTILES (bullets, cannons, spikes) ======
-        this.projectileController = new ProjectileController();
+        this.combatController = new CombatController();
 
         // ====== ELEVATORS ======
         this.elevatorController = new ElevatorController();
@@ -93,6 +91,9 @@ export class LostDaysOfSpring {
 
         // ====== EXITS ======
         this.exitController = new ExitController();
+
+        // ====== HIDDEN WALLS ======
+        this.hiddenWallController = new HiddenWallController();
 
         // ====== CAMERA ======
         this.cameraController = new CameraController(this.canvas.width, this.canvas.height);
@@ -198,17 +199,17 @@ export class LostDaysOfSpring {
             elevatorController: this.elevatorController,
             enemyController: this.enemyController,
             collectibleController: this.collectibleController,
-            projectileController: this.projectileController,
+            combatController: this.combatController,
             messageController: this.messageController,
             exitController: this.exitController,
             teleportController: this.teleportController,
+            hiddenWallController: this.hiddenWallController,
             checkpointManager: this.checkpointManager,
         });
         this.worldSize = loaded.worldSize;
         this.mapDiscovery = loaded.mapDiscovery;
         this.platforms = loaded.platforms;
         this.solids = loaded.solids;
-        this.hiddenWalls = loaded.hiddenWalls;
         this.foregroundItems = loaded.foregroundItems;
         this.backgroundItems = loaded.backgroundItems;
         this.preBackgroundItems = loaded.preBackgroundItems;
@@ -224,10 +225,10 @@ export class LostDaysOfSpring {
         this.inputController.clear();
 
         // Reset bullets
-        this.projectileController.resetBullets();
+        this.combatController.resetBullets();
 
         // Reset cannon bullets
-        this.projectileController.resetCannonBullets();
+        this.combatController.resetCannonBullets();
 
         // Reset Camera
         this.resetCameraToPlayerStart();
@@ -258,7 +259,7 @@ export class LostDaysOfSpring {
         this.simulatedTime = now; // sync simulation clock with wall clock at level start
         this.gameFadeIn.active = true;
         this.gameFadeIn.startTime = now;
-        this.projectileController.resetCannonTimers(now);
+        this.combatController.resetCannonTimers(now);
     }
 
     resetPlayerProperties(levelData) {
@@ -409,22 +410,6 @@ export class LostDaysOfSpring {
         this.inputController.markKeyDown(e.code);
     }
 
-    findCrouchAnchor() {
-        return this.playerPostureController.findCrouchAnchor(
-            this.player,
-            this.solids,
-            this.enemyController.getEnemies()
-        );
-    }
-
-    canStandUp() {
-        return this.playerPostureController.canStandUp(
-            this.player,
-            this.solids,
-            this.enemyController.getEnemies()
-        );
-    }
-
     isPlayerCrouching() {
         return this.playerPostureController.isCrouching(this.player);
     }
@@ -519,41 +504,20 @@ export class LostDaysOfSpring {
     }
 
     handleHorizontalMovementInput(now) {
-        if (now < this.player.knockbackUntil) {
-            return;
-        }
-
-        let targetVx = 0;
-
-        const speed = this.isPlayerCrouching() ? this.player.crouchSpeed : this.player.speed;
-
-        if (this.inputController.isDown("left") && !this.inputController.isDown("right")) {
-            targetVx = -speed;
-            this.player.facing = "left";
-        } else if (this.inputController.isDown("right") && !this.inputController.isDown("left")) {
-            targetVx = speed;
-            this.player.facing = "right";
-        }
-
-        this.player.movingByInput = targetVx !== 0;
-
-        this.playerPhysicsController.applyHorizontalMovement(this.player, targetVx, this.solids);
+        this.playerPhysicsController.handleHorizontalMovementInput(now, this.player, {
+            inputController: this.inputController,
+            isCrouching: () => this.isPlayerCrouching(),
+            solids: this.solids,
+        });
     }
 
     handleCrouchInput() {
-        if (
-            (this.inputController.isDown("crouchAlt") || this.inputController.isDown("crouch")) &&
-            !this.player.airborne
-        ) {
-            if (!this.isPlayerCrouching()) {
-                const anchor = this.findCrouchAnchor();
-                if (anchor !== null) {
-                    this.applyPosture(this.playerPostures.CROUCH, anchor);
-                }
-            }
-        } else if (this.isPlayerCrouching() && this.canStandUp()) {
-            this.applyPosture(this.playerPostures.STANDING);
-        }
+        this.playerPostureController.handleCrouchInput(
+            this.player,
+            this.solids,
+            this.enemyController.getEnemies(),
+            this.inputController
+        );
     }
 
     applyPosture(posture, anchor = "center") {
@@ -561,75 +525,19 @@ export class LostDaysOfSpring {
     }
 
     handleShootingInput(now) {
-        const customShootingOffsetY = this.isPlayerCrouching()
-            ? this.player.shootingCrouchOffsetY
-            : this.player.shootingOffsetY;
-        const customShootingOffsetX = this.isPlayerCrouching()
-            ? this.player.shootingCrouchOffsetX
-            : this.player.shootingOffsetX;
-        if (this.inputController.isDown("shoot") || this.inputController.isDown("shootAlt")) {
-            this.player.shooting = true;
-            if (now - this.player.lastShootTime > this.player.weapon.shootFrequency) {
-                const bulletVx =
-                    this.player.facing === "left"
-                        ? -this.player.weapon.speed
-                        : this.player.weapon.speed;
-                this.projectileController.spawnBullet({
-                    ...this.player.weapon.ammo,
-                    color: this.player.weapon.color,
-                    x:
-                        this.player.facing === "left"
-                            ? this.player.x - customShootingOffsetX
-                            : this.player.x +
-                              this.player.w -
-                              this.player.weapon.ammo.w +
-                              customShootingOffsetX,
-                    y: this.player.y + this.player.h / 2 + customShootingOffsetY,
-                    vx: bulletVx,
-                });
-                this.player.lastShootTime = now;
-            }
-        } else {
-            this.player.shooting = false;
-        }
+        this.combatController.handlePlayerShootingInput(
+            now,
+            this.player,
+            this.inputController,
+            this.isPlayerCrouching()
+        );
     }
 
     handleJumpInput(now) {
-        if (this.isPlayerCrouching()) {
-            return;
-        }
-        if (now < this.player.knockbackUntil) {
-            return;
-        }
-        const jumpBuffered = now - this.player.jumpPressedAt <= this.player.jumpBufferDuration;
-
-        const isOnBooster = this.player.onGroundType === "booster";
-        const leftBoosterRecently = this.player.lastGroundType === "booster";
-
-        const hasCoyoteTime =
-            now - this.player.lastGroundedAt <= this.player.coyoteDuration && !leftBoosterRecently;
-
-        const canGroundJump = !isOnBooster && (!this.player.airborne || hasCoyoteTime);
-
-        if (jumpBuffered && canGroundJump) {
-            this.player.vy = -this.player.jump;
-
-            this.handleElevatorJump(now);
-
-            this.player.airborne = true;
-            this.player.lastGroundedAt = 0;
-            this.player.onGroundId = null;
-            this.player.onGroundType = null;
-            this.player.jumpPressedByUser = true;
-            this.player.jumpPressedAt = 0;
-        }
-    }
-
-    handleElevatorJump(now) {
-        if (this.player.onGroundType === "elevator") {
-            const elev = this.elevatorController.findById(this.player.onGroundId);
-            this.playerPhysicsController.applyElevatorJumpBoost(now, this.player, elev);
-        }
+        this.playerPhysicsController.handleJumpInput(now, this.player, {
+            isCrouching: () => this.isPlayerCrouching(),
+            elevatorController: this.elevatorController,
+        });
     }
 
     handleEnterInput(now) {
@@ -681,7 +589,12 @@ export class LostDaysOfSpring {
             worldSize: this.worldSize,
             worldGroundId: this.worldGroundId,
             isCrouching: () => this.isPlayerCrouching(),
-            canStandUp: () => this.canStandUp(),
+            canStandUp: () =>
+                this.playerPostureController.canStandUp(
+                    this.player,
+                    this.solids,
+                    this.enemyController.getEnemies()
+                ),
             onStandUp: () => this.applyPosture(this.playerPostures.STANDING),
         });
     }
@@ -760,18 +673,14 @@ export class LostDaysOfSpring {
     }
 
     updateSpikesDamage(now) {
-        this.projectileController.updateSpikesDamage(
-            now,
-            this.player,
-            (now, spike, hitFromAbove) => {
-                this.applyDamageToPlayer(now, spike, hitFromAbove);
-            }
-        );
+        this.combatController.updateSpikesDamage(now, this.player, (now, spike, hitFromAbove) => {
+            this.applyDamageToPlayer(now, spike, hitFromAbove);
+        });
     }
 
     // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions
     updateBullets(now) {
-        this.projectileController.updateBullets(now, {
+        this.combatController.updateBullets(now, {
             worldSize: this.worldSize,
             enemies: this.enemyController.getEnemies(),
             solids: this.solids,
@@ -780,12 +689,12 @@ export class LostDaysOfSpring {
 
     // Trigger cannons to shoot based on shootFrequency
     updateCannons(now) {
-        this.projectileController.updateCannons(now);
+        this.combatController.updateCannons(now);
     }
 
     // Move cannon bullets and check collision with player only
     updateCannonBullets(now) {
-        this.projectileController.updateCannonBullets(now, this.player, (now, bullet) => {
+        this.combatController.updateCannonBullets(now, this.player, (now, bullet) => {
             this.applyDamageToPlayer(now, bullet);
             return this.gameOver;
         });
@@ -803,9 +712,7 @@ export class LostDaysOfSpring {
     }
 
     updateHiddenWalls() {
-        for (const wall of this.hiddenWalls) {
-            wall.entered = rectsCollide(this.player, wall);
-        }
+        this.hiddenWallController.update(this.player);
     }
 
     resetCameraToPlayerStart() {
@@ -918,21 +825,6 @@ export class LostDaysOfSpring {
 
     updateTeleports(now) {
         this.teleportController.update(now, this.player);
-    }
-
-    drawExitMessage() {
-        const exit = this.exitController.findActiveExit(this.player);
-        if (!exit) {
-            return;
-        }
-        const anchorX = exit.x - this.cameraController.camera.x + exit.dw / 2;
-        const anchorY = exit.y - this.cameraController.camera.y + exit.dh / 2;
-        const lines = getExitLevelLines(
-            this.hasEnoughCoins,
-            this.hasEnoughSplinters,
-            this.hasEnoughArtifacts
-        );
-        MessageRenderer.drawPanel(this.ctx, { lines }, anchorX, anchorY);
     }
 
     updateDebug() {
@@ -1058,7 +950,7 @@ export class LostDaysOfSpring {
 
         this.pauseController.adjustPlayerTimers(this.player, pauseDuration);
         this.messageController.adjustForPause(pauseDuration);
-        this.projectileController.adjustForPause(pauseDuration);
+        this.combatController.adjustForPause(pauseDuration);
         this.elevatorController.adjustForPause(pauseDuration);
         this.enemyController.adjustForPause(pauseDuration);
         this.teleportController.adjustForPause(pauseDuration);

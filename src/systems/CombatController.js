@@ -1,7 +1,7 @@
 import { rectsCollide } from "../utils/collision.js";
 
 // Owns player bullets, cannons + their bullets, and spike-contact damage checks.
-export class ProjectileController {
+export class CombatController {
     constructor() {
         this.bullets = [];
         this.nextBulletId = 0;
@@ -47,6 +47,35 @@ export class ProjectileController {
 
     spawnBullet(bulletData) {
         this.bullets.push({ ...bulletData, id: this.nextBulletId++ });
+    }
+
+    // Read shoot input and spawn a bullet once the weapon's cooldown has elapsed.
+    handlePlayerShootingInput(now, player, inputController, isCrouching) {
+        const offsetY = isCrouching ? player.shootingCrouchOffsetY : player.shootingOffsetY;
+        const offsetX = isCrouching ? player.shootingCrouchOffsetX : player.shootingOffsetX;
+
+        if (!(inputController.isDown("shoot") || inputController.isDown("shootAlt"))) {
+            player.shooting = false;
+            return;
+        }
+
+        player.shooting = true;
+        if (now - player.lastShootTime <= player.weapon.shootFrequency) {
+            return;
+        }
+
+        const bulletVx = player.facing === "left" ? -player.weapon.speed : player.weapon.speed;
+        this.spawnBullet({
+            ...player.weapon.ammo,
+            color: player.weapon.color,
+            x:
+                player.facing === "left"
+                    ? player.x - offsetX
+                    : player.x + player.w - player.weapon.ammo.w + offsetX,
+            y: player.y + player.h / 2 + offsetY,
+            vx: bulletVx,
+        });
+        player.lastShootTime = now;
     }
 
     resetCannonTimers(now) {

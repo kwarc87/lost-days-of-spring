@@ -11,10 +11,11 @@ export const LevelLoader = {
             elevatorController,
             enemyController,
             collectibleController,
-            projectileController,
+            combatController,
             messageController,
             exitController,
             teleportController,
+            hiddenWallController,
             checkpointManager,
         } = controllers;
 
@@ -24,15 +25,15 @@ export const LevelLoader = {
         elevatorController.setElevators(levelData.elevators);
         enemyController.setEnemies(levelData.enemies);
         collectibleController.setCollectibles(levelData.collectibles);
-        projectileController.setSpikes(levelData.spikes);
+        combatController.setSpikes(levelData.spikes);
         messageController.setMessages(levelData.messages);
         exitController.setExits(levelData.exits);
-        const hiddenWalls = levelData.hiddenWalls ?? [];
+        hiddenWallController.setHiddenWalls(levelData.hiddenWalls);
         const foregroundItems = levelData.foregroundItems ?? [];
         const backgroundItems = levelData.backgroundItems ?? [];
         const preBackgroundItems = levelData.preBackgroundItems ?? [];
         const parallaxItems = levelData.parallax ?? [];
-        projectileController.setCannons(levelData.cannons);
+        combatController.setCannons(levelData.cannons);
         teleportController.setTeleports(levelData.teleports);
 
         const currentLevelCoinsCount = collectibleController.getCoins().length;
@@ -71,7 +72,6 @@ export const LevelLoader = {
             mapDiscovery,
             platforms,
             solids,
-            hiddenWalls,
             foregroundItems,
             backgroundItems,
             preBackgroundItems,
