@@ -12,18 +12,23 @@ export class PlayerPostureController {
     }
 
     // Crouch is only allowed while grounded; stand back up as soon as there's room.
-    handleCrouchInput(player, solids, enemies, inputController) {
+    handleCrouchInput(player, solids, enemies, inputController, playerPhysicsController) {
         const crouchHeld = inputController.isDown("crouchAlt") || inputController.isDown("crouch");
 
         if (crouchHeld && !player.airborne) {
             if (!this.isCrouching(player)) {
                 const anchor = this.findCrouchAnchor(player, solids, enemies);
                 if (anchor !== null) {
-                    this.applyPosture(player, this.postures.CROUCH, anchor);
+                    this.applyPosture(
+                        player,
+                        this.postures.CROUCH,
+                        playerPhysicsController,
+                        anchor
+                    );
                 }
             }
         } else if (this.isCrouching(player) && this.canStandUp(player, solids, enemies)) {
-            this.applyPosture(player, this.postures.STANDING);
+            this.applyPosture(player, this.postures.STANDING, playerPhysicsController);
         }
     }
 
@@ -92,11 +97,11 @@ export class PlayerPostureController {
         return true;
     }
 
-    applyPosture(player, posture, anchor = "center") {
+    applyPosture(player, posture, playerPhysicsController, anchor = "center") {
         const hitbox = this.getHitboxForPosture(player, posture);
         player.posture = posture;
-        this.applyHeight(player, hitbox.h);
-        this.applyWidth(player, hitbox.w, anchor);
+        this.applyHeight(player, hitbox.h, playerPhysicsController);
+        this.applyWidth(player, hitbox.w, anchor, playerPhysicsController);
     }
 
     getHitboxForPosture(player, posture) {
@@ -113,14 +118,14 @@ export class PlayerPostureController {
         };
     }
 
-    applyHeight(player, nextHeight) {
+    applyHeight(player, nextHeight, playerPhysicsController) {
         // anchor should be always bottom
         const bottom = player.y + player.h;
         player.h = nextHeight;
-        player.y = bottom - nextHeight;
+        playerPhysicsController.setPosition(player, player.x, bottom - nextHeight);
     }
 
-    applyWidth(player, nextWidth, anchor = "center") {
+    applyWidth(player, nextWidth, anchor = "center", playerPhysicsController) {
         let nextX;
         if (anchor === "start") {
             nextX = player.x;
@@ -130,6 +135,6 @@ export class PlayerPostureController {
             nextX = player.x + player.w / 2 - nextWidth / 2;
         }
         player.w = nextWidth;
-        player.x = nextX;
+        playerPhysicsController.setPosition(player, nextX, player.y);
     }
 }

@@ -5,7 +5,16 @@ export class PlayerHealthController {
         this.verticalHitRecoilMultiplier = verticalHitRecoilMultiplier;
     }
 
-    applyDamage(now, player, source, hitFromAbove, hitFromBelow, onDeath, playerPhysicsController) {
+    applyDamage(
+        now,
+        player,
+        source,
+        hitFromAbove,
+        hitFromBelow,
+        onDeath,
+        playerPhysicsController,
+        combatController
+    ) {
         player.life -= source.damage;
         player.lastHitTime = now;
         player.isHit = true;
@@ -24,7 +33,7 @@ export class PlayerHealthController {
         const vy = hitFromBelow ? 0 : -recoilYForce;
         playerPhysicsController.applyKnockback(player, vx, vy);
 
-        this.checkDeath(now, player, onDeath, playerPhysicsController);
+        this.checkDeath(now, player, onDeath, playerPhysicsController, combatController);
     }
 
     canHeal(player) {
@@ -38,14 +47,14 @@ export class PlayerHealthController {
         }
     }
 
-    checkDeath(now, player, onDeath, playerPhysicsController) {
+    checkDeath(now, player, onDeath, playerPhysicsController, combatController) {
         if (player.life > 0) {
             return;
         }
         player.dying = true;
         player.dyingStartedAt = now;
         playerPhysicsController.stopMovement(player);
-        player.shooting = false;
+        combatController.stopShooting(player);
         player.isHit = false;
         onDeath();
     }
@@ -54,5 +63,11 @@ export class PlayerHealthController {
         if (player.isHit && now - player.lastHitTime >= player.hitCooldown) {
             player.isHit = false;
         }
+    }
+
+    // Completes the death animation, transitioning from dying to fully dead.
+    finishDying(player) {
+        player.dying = false;
+        player.dead = true;
     }
 }

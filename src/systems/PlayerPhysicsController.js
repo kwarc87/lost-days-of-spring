@@ -46,9 +46,31 @@ export class PlayerPhysicsController {
         player.vy = 0;
     }
 
+    // Repositions the player without touching velocity (e.g. enemy overlap push-back).
+    setPosition(player, x, y) {
+        player.x = x;
+        player.y = y;
+    }
+
+    // Halts upward motion (e.g. bumping an enemy's underside), leaving vx untouched.
+    stopUpwardVelocity(player) {
+        player.vy = 0;
+    }
+
     // Cancels the variable jump-height cut, used whenever an external force overrides player control.
     cancelJumpCut(player) {
         player.jumpPressedByUser = false;
+    }
+
+    // Records a buffered jump press, consumed later by handleJumpInput.
+    registerJumpPress(player, now) {
+        player.jumpPressedAt = now;
+    }
+
+    // Snapshots the current position, read back as the pre-move reference by movePlayerX/Y.
+    recordPreviousPosition(player) {
+        player.prevX = player.x;
+        player.prevY = player.y;
     }
 
     // Applies an external velocity impulse (e.g. damage/enemy-bump knockback).

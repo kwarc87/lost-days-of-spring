@@ -431,8 +431,7 @@ export class LostDaysOfSpring {
         // Player dying — play death animation, then trigger game over
         if (this.player.dying) {
             if (now - this.player.dyingStartedAt >= PLAYER_DYING_DURATION_MS) {
-                this.player.dying = false;
-                this.player.dead = true;
+                this.playerHealthController.finishDying(this.player);
                 this.gameOver = true;
                 this.gameOverAt = now;
                 if (this.checkpointManager.getRespawn() !== null) {
@@ -447,8 +446,7 @@ export class LostDaysOfSpring {
         this.applyPhysics();
         this.applyCarryDecay(now);
 
-        this.player.prevX = this.player.x;
-        this.player.prevY = this.player.y;
+        this.recordPreviousPosition();
 
         this.updateElevators(now);
 
@@ -477,7 +475,7 @@ export class LostDaysOfSpring {
     // Handle keyboard input: movement, crouch, shooting, jump
     handleInput(now) {
         if (this.inputController.consumeJumpBuffer()) {
-            this.player.jumpPressedAt = now;
+            this.playerPhysicsController.registerJumpPress(this.player, now);
         }
         if (this.player.frozenForTeleport) {
             return;
@@ -502,12 +500,18 @@ export class LostDaysOfSpring {
             this.player,
             this.solids,
             this.enemyController.getEnemies(),
-            this.inputController
+            this.inputController,
+            this.playerPhysicsController
         );
     }
 
     applyPosture(posture, anchor = "center") {
-        this.playerPostureController.applyPosture(this.player, posture, anchor);
+        this.playerPostureController.applyPosture(
+            this.player,
+            posture,
+            this.playerPhysicsController,
+            anchor
+        );
     }
 
     handleShootingInput(now) {
@@ -537,7 +541,7 @@ export class LostDaysOfSpring {
                 this.levelComplete = true;
                 this.levelCompleteAt = now;
                 this.playerPhysicsController.stopMovement(this.player);
-                this.player.shooting = false;
+                this.combatController.stopShooting(this.player);
                 this.playerPhysicsController.cancelJumpCut(this.player);
                 this.checkpointManager.clear();
                 this.galleryController.resetLastIndex();
@@ -555,6 +559,10 @@ export class LostDaysOfSpring {
     // Decay the carry velocity inherited from a moving elevator
     applyCarryDecay(now) {
         this.playerPhysicsController.applyCarryDecay(now, this.player);
+    }
+
+    recordPreviousPosition() {
+        this.playerPhysicsController.recordPreviousPosition(this.player);
     }
 
     // Move player along the X axis and resolve platform collisions
@@ -636,7 +644,8 @@ export class LostDaysOfSpring {
             () => {
                 this.deathCount++;
             },
-            this.playerPhysicsController
+            this.playerPhysicsController,
+            this.combatController
         );
     }
 

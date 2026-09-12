@@ -174,7 +174,7 @@ export class EnemyController {
             // Cooldown active: resolve overlap without damage.
             // No break — all colliding enemies are resolved so sandwiched
             // collisions (player between two enemies) are handled correctly.
-            this.resolveCollisionX(enemy, player, solids);
+            this.resolveCollisionX(enemy, player, solids, playerPhysicsController);
             this.resolveCollisionY(
                 enemy,
                 player,
@@ -185,7 +185,7 @@ export class EnemyController {
         }
     }
 
-    resolveCollisionX(enemy, player, solids) {
+    resolveCollisionX(enemy, player, solids, playerPhysicsController) {
         // Vertical entry — Y phase handles it.
         if (enemy.playerEnteredFromAbove || enemy.playerEnteredFromBelow) {
             return;
@@ -209,7 +209,7 @@ export class EnemyController {
             );
 
         if (!blocked) {
-            player.x = targetX;
+            playerPhysicsController.setPosition(player, targetX, player.y);
         } else if (enemy.dirX !== 0) {
             // No room for player — snap enemy clear and reverse.
             // Skip for vertical-only enemies (dirX === 0): snapping their X or
@@ -252,7 +252,7 @@ export class EnemyController {
                 enemy.direction = -enemy.direction;
             }
         } else if (!blocked) {
-            player.y = targetY;
+            playerPhysicsController.setPosition(player, player.x, targetY);
         }
 
         if (enemy.playerEnteredFromAbove && !blocked) {
@@ -265,7 +265,7 @@ export class EnemyController {
         }
 
         if (enemy.playerEnteredFromBelow && !blocked && player.vy < 0) {
-            player.vy = 0;
+            playerPhysicsController.stopUpwardVelocity(player);
         }
     }
 }

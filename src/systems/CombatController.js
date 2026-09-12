@@ -20,6 +20,11 @@ export class CombatController {
         player.weapon = weapon ?? player.weapon;
     }
 
+    // Forces shooting off (e.g. on player death), overriding input-driven state.
+    stopShooting(player) {
+        player.shooting = false;
+    }
+
     getCannons() {
         return this.cannons;
     }
