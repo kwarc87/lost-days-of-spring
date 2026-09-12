@@ -90,8 +90,9 @@ export class CombatController {
         }
     }
 
-    // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions
-    updateBullets(now, { worldSize, enemies, solids }) {
+    // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions.
+    // `onEnemyHit(now, enemy, damage)` applies the actual damage.
+    updateBullets(now, { worldSize, enemies, solids, onEnemyHit }) {
         for (let bulletIndex = this.bullets.length - 1; bulletIndex >= 0; bulletIndex--) {
             const bullet = this.bullets[bulletIndex];
             bullet.x += bullet.vx;
@@ -115,17 +116,7 @@ export class CombatController {
                     continue;
                 }
                 if (rectsCollide(bullet, enemies[i])) {
-                    const enemy = enemies[i];
-                    enemy.health -= bullet.damage;
-                    if (enemy.health <= 0) {
-                        enemy.health = 0;
-                        enemy.isDamaged = false;
-                        enemy.dying = true;
-                        enemy.dyingStartedAtMs = now;
-                    } else {
-                        enemy.isDamaged = true;
-                        enemy.damageTime = now;
-                    }
+                    onEnemyHit(now, enemies[i], bullet.damage);
                     consumedOnEnemy = true; // bullet consumed on hit
                     this.bullets.splice(bulletIndex, 1);
                     break;

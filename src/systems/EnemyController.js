@@ -15,6 +15,19 @@ export class EnemyController {
         return this.enemies;
     }
 
+    // Restores alive/dead state for enemies from a checkpoint memento.
+    restoreAliveState(aliveEnemyIds) {
+        if (!aliveEnemyIds) {
+            return;
+        }
+        for (const e of this.enemies) {
+            const isAlive = aliveEnemyIds.has(e.id);
+            e.dead = !isAlive;
+            e.dying = false;
+            e.dyingStartedAtMs = null;
+        }
+    }
+
     adjustForPause(pauseDuration) {
         for (const e of this.enemies) {
             if (e.dyingStartedAtMs) {
@@ -26,6 +39,20 @@ export class EnemyController {
     update(now, { player, solids, verticalHitRecoilMultiplier, onPlayerHit }) {
         this.patrol(now);
         this.resolvePlayerCollision(now, player, solids, verticalHitRecoilMultiplier, onPlayerHit);
+    }
+
+    // Applies damage to an enemy and transitions it into the dying state on death.
+    applyDamage(now, enemy, damage) {
+        enemy.health -= damage;
+        if (enemy.health <= 0) {
+            enemy.health = 0;
+            enemy.isDamaged = false;
+            enemy.dying = true;
+            enemy.dyingStartedAtMs = now;
+        } else {
+            enemy.isDamaged = true;
+            enemy.damageTime = now;
+        }
     }
 
     // Moves enemies along their patrol path and reverses direction at the endpoints.

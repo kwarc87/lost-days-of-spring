@@ -22,6 +22,18 @@ export class ElevatorController {
         return this.elevators.find((e) => e.id === id);
     }
 
+    // Marks elevators already triggered in a restored checkpoint memento.
+    restoreTriggered(triggeredElevatorIds) {
+        if (!triggeredElevatorIds) {
+            return;
+        }
+        for (const e of this.elevators) {
+            if (triggeredElevatorIds.has(e.id)) {
+                e.triggered = true;
+            }
+        }
+    }
+
     isPlayerOn(player, elevatorId) {
         return player.onGroundType === "elevator" && player.onGroundId === elevatorId;
     }

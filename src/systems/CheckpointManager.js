@@ -61,15 +61,13 @@ export class CheckpointManager {
         return { back, front, messages, platforms };
     }
 
+    // Interprets the respawn memento and delegates entity restoration to each
+    // owning controller instead of mutating their entities directly.
     restoreProgress({
-        coins,
-        splinters,
-        artifacts,
-        hearts,
-        weaponUpgrades,
-        enemies,
-        elevators,
-        messages,
+        collectibleController,
+        enemyController,
+        elevatorController,
+        messageController,
         mapDiscovery,
     }) {
         const cr = this.checkpointRespawn;
@@ -78,71 +76,10 @@ export class CheckpointManager {
         }
 
         mapDiscovery?.restore(cr.mapDiscoverySnapshot);
-
-        if (cr.collectedCoinIds) {
-            for (const coin of coins) {
-                if (cr.collectedCoinIds.has(coin.id)) {
-                    coin.collected = true;
-                }
-            }
-        }
-
-        if (cr.collectedSplinterIds) {
-            for (const splinter of splinters) {
-                if (cr.collectedSplinterIds.has(splinter.id)) {
-                    splinter.collected = true;
-                }
-            }
-        }
-
-        if (cr.collectedArtifactIds) {
-            for (const artifact of artifacts) {
-                if (cr.collectedArtifactIds.has(artifact.id)) {
-                    artifact.collected = true;
-                }
-            }
-        }
-
-        if (cr.collectedHeartIds) {
-            for (const heart of hearts) {
-                if (cr.collectedHeartIds.has(heart.id)) {
-                    heart.collected = true;
-                }
-            }
-        }
-
-        if (cr.shownMessageIds) {
-            for (const msg of messages) {
-                if (cr.shownMessageIds.has(msg.id)) {
-                    msg.shown = true;
-                }
-            }
-        }
-
-        if (cr.aliveEnemyIds) {
-            for (const e of enemies) {
-                const isAlive = cr.aliveEnemyIds.has(e.id);
-                e.dead = !isAlive;
-                e.dying = false;
-                e.dyingStartedAtMs = null;
-            }
-        }
-
-        if (cr.triggeredElevatorIds) {
-            for (const elev of elevators) {
-                if (cr.triggeredElevatorIds.has(elev.id)) {
-                    elev.triggered = true;
-                }
-            }
-        }
-
-        if (cr.collectedWeaponUpgradeIds) {
-            for (const u of weaponUpgrades) {
-                if (cr.collectedWeaponUpgradeIds.has(u.id)) {
-                    u.collected = true;
-                }
-            }
-        }
+        collectibleController.restoreCollected(cr);
+        enemyController.restoreAliveState(cr.aliveEnemyIds);
+        elevatorController.restoreTriggered(cr.triggeredElevatorIds);
+        messageController.restoreShown(cr.shownMessageIds);
 
         if (cr.reachedIds) {
             for (const cp of this.checkpoints) {

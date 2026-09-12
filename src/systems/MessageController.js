@@ -28,6 +28,18 @@ export class MessageController {
         return this.messages;
     }
 
+    // Marks messages already shown in a restored checkpoint memento.
+    restoreShown(shownMessageIds) {
+        if (!shownMessageIds) {
+            return;
+        }
+        for (const msg of this.messages) {
+            if (shownMessageIds.has(msg.id)) {
+                msg.shown = true;
+            }
+        }
+    }
+
     getActiveMessage() {
         return this.activeMessage;
     }

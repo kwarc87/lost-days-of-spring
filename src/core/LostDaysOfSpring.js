@@ -670,7 +670,12 @@ export class LostDaysOfSpring {
             worldSize: this.worldSize,
             enemies: this.enemyController.getEnemies(),
             solids: this.solids,
+            onEnemyHit: (hitNow, enemy, damage) => this.applyDamageToEnemy(hitNow, enemy, damage),
         });
+    }
+
+    applyDamageToEnemy(now, enemy, damage) {
+        this.enemyController.applyDamage(now, enemy, damage);
     }
 
     // Trigger cannons to shoot based on shootFrequency

@@ -56,14 +56,10 @@ export const LevelLoader = {
 
         // Restore checkpoint state (collected items, killed enemies, etc.)
         checkpointManager.restoreProgress({
-            coins: collectibleController.getCoins(),
-            splinters: collectibleController.getSplinters(),
-            artifacts: collectibleController.getArtifacts(),
-            hearts: collectibleController.getHearts(),
-            weaponUpgrades: collectibleController.getWeaponUpgrades(),
-            enemies: enemyController.getEnemies(),
-            elevators: elevatorController.getElevators(),
-            messages: messageController.getMessages(),
+            collectibleController,
+            enemyController,
+            elevatorController,
+            messageController,
             mapDiscovery,
         });
 

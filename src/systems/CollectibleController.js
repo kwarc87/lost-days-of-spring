@@ -39,6 +39,55 @@ export class CollectibleController {
         return this.weaponUpgrades;
     }
 
+    // Marks collectibles already collected in a restored checkpoint memento.
+    restoreCollected({
+        collectedCoinIds,
+        collectedSplinterIds,
+        collectedArtifactIds,
+        collectedHeartIds,
+        collectedWeaponUpgradeIds,
+    }) {
+        if (collectedCoinIds) {
+            for (const c of this.coins) {
+                if (collectedCoinIds.has(c.id)) {
+                    c.collected = true;
+                }
+            }
+        }
+
+        if (collectedSplinterIds) {
+            for (const s of this.splinters) {
+                if (collectedSplinterIds.has(s.id)) {
+                    s.collected = true;
+                }
+            }
+        }
+
+        if (collectedArtifactIds) {
+            for (const a of this.artifacts) {
+                if (collectedArtifactIds.has(a.id)) {
+                    a.collected = true;
+                }
+            }
+        }
+
+        if (collectedHeartIds) {
+            for (const h of this.hearts) {
+                if (collectedHeartIds.has(h.id)) {
+                    h.collected = true;
+                }
+            }
+        }
+
+        if (collectedWeaponUpgradeIds) {
+            for (const u of this.weaponUpgrades) {
+                if (collectedWeaponUpgradeIds.has(u.id)) {
+                    u.collected = true;
+                }
+            }
+        }
+    }
+
     // Checks player collision against every collectible type and applies pickup effects.
     update(now, { player, onArtifactMessage, onWeaponMessage }) {
         for (const c of this.coins) {
