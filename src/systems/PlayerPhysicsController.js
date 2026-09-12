@@ -43,6 +43,56 @@ export class PlayerPhysicsController {
         }
     }
 
+    // Ease vx toward targetVx using the acceleration/deceleration of the platform
+    // the player is standing on (or last stood on, while airborne).
+    applyHorizontalMovement(player, targetVx, solids) {
+        const groundPlatform = solids.find((p) => p.id === player.onGroundId);
+        const acceleration = groundPlatform?.acceleration ?? player.acceleration;
+        const deceleration = groundPlatform?.deceleration ?? player.deceleration;
+
+        const lastGroundPlatform = solids.find((p) => p.id === player.lastGroundId);
+        const lastGroundAcceleration = lastGroundPlatform?.airAcceleration;
+        const lastGroundDeceleration = lastGroundPlatform?.airDeceleration;
+
+        const delta =
+            targetVx === 0
+                ? player.airborne
+                    ? (lastGroundDeceleration ?? player.airDeceleration)
+                    : deceleration
+                : player.airborne
+                  ? (lastGroundAcceleration ?? player.airAcceleration)
+                  : acceleration;
+
+        if (player.vx < targetVx) {
+            player.vx = Math.min(player.vx + delta, targetVx);
+            return;
+        }
+
+        if (player.vx > targetVx) {
+            player.vx = Math.max(player.vx - delta, targetVx);
+        }
+    }
+
+    // Boost vy/carryVx when jumping off a moving elevator (upward lift, sideways carry).
+    applyElevatorJumpBoost(now, player, elevator) {
+        if (!elevator || !elevator.triggered || now < elevator.idleUntil) {
+            return;
+        }
+        const elevVx = elevator.dirX * elevator.speed * elevator.direction;
+        const elevVy = elevator.dirY * elevator.speed * elevator.direction;
+        // Upward elevator: subtle boost capped to 25%
+        if (elevVy < 0) {
+            player.vy += elevVy * 0.25;
+        }
+        // Downward elevator: no effect
+        // Sideways elevator: carry velocity
+        if (elevVx !== 0) {
+            player.carryVxInitial = elevVx;
+            player.carryVx = elevVx;
+            player.carryStartAt = now;
+        }
+    }
+
     // Move player along the X axis and resolve platform/enemy collisions
     movePlayerX(now, player, { solids, worldSize, enemies, onPlayerHit }) {
         const prevX = player.prevX ?? player.x;

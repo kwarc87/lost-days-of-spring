@@ -698,32 +698,7 @@ export class LostDaysOfSpring {
 
         this.player.movingByInput = targetVx !== 0;
 
-        const groundPlatform = this.solids.find((p) => p.id === this.player.onGroundId);
-        const acceleration = groundPlatform?.acceleration ?? this.player.acceleration;
-        const deceleration = groundPlatform?.deceleration ?? this.player.deceleration;
-
-        const lastGroundPlatform = this.solids.find((p) => p.id === this.player.lastGroundId);
-
-        const lastGroundAcceleration = lastGroundPlatform?.airAcceleration;
-        const lastGroundDeceleration = lastGroundPlatform?.airDeceleration;
-
-        const delta =
-            targetVx === 0
-                ? this.player.airborne
-                    ? (lastGroundDeceleration ?? this.player.airDeceleration)
-                    : deceleration
-                : this.player.airborne
-                  ? (lastGroundAcceleration ?? this.player.airAcceleration)
-                  : acceleration;
-
-        if (this.player.vx < targetVx) {
-            this.player.vx = Math.min(this.player.vx + delta, targetVx);
-            return;
-        }
-
-        if (this.player.vx > targetVx) {
-            this.player.vx = Math.max(this.player.vx - delta, targetVx);
-        }
+        this.playerPhysicsController.applyHorizontalMovement(this.player, targetVx, this.solids);
     }
 
     handleCrouchInput() {
@@ -814,21 +789,7 @@ export class LostDaysOfSpring {
     handleElevatorJump(now) {
         if (this.player.onGroundType === "elevator") {
             const elev = this.getElevatorById(this.player.onGroundId);
-            if (elev && elev.triggered && now >= elev.idleUntil) {
-                const elevVx = elev.dirX * elev.speed * elev.direction;
-                const elevVy = elev.dirY * elev.speed * elev.direction;
-                // Upward elevator: subtle boost capped to 25%
-                if (elevVy < 0) {
-                    this.player.vy += elevVy * 0.25;
-                }
-                // Downward elevator: no effect
-                // Sideways elevator: carry velocity
-                if (elevVx !== 0) {
-                    this.player.carryVxInitial = elevVx;
-                    this.player.carryVx = elevVx;
-                    this.player.carryStartAt = now;
-                }
-            }
+            this.playerPhysicsController.applyElevatorJumpBoost(now, this.player, elev);
         }
     }
 
