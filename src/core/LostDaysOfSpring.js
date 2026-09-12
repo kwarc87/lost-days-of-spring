@@ -748,6 +748,12 @@ export class LostDaysOfSpring {
 
     draw(now = performance.now()) {
         SceneRenderer.draw(this.ctx, this, now);
+        if (this.levelComplete) {
+            this.drawLevelComplete();
+        }
+        if (this.gameOver) {
+            this.drawGameOver(now);
+        }
     }
 
     // Shared coins/splinters/enemies/artifacts/time stats for the level-complete and game-over screens.
@@ -768,20 +774,7 @@ export class LostDaysOfSpring {
 
     drawLevelComplete() {
         const stats = this.buildLevelStats(this.levelCompleteAt);
-        DefaultLevelCompleteRenderer.draw(
-            this.ctx,
-            this.canvas,
-            stats.coinsCount,
-            stats.currentLevelCoinsCount,
-            stats.splintersCount,
-            stats.currentLevelSplintersCount,
-            stats.enemiesDefeated,
-            stats.currentLevelEnemiesCount,
-            stats.playTimeMs,
-            stats.deathCount,
-            stats.artifactsCount,
-            stats.currentLevelArtifactsCount
-        );
+        DefaultLevelCompleteRenderer.draw(this.ctx, this.canvas, stats);
     }
 
     drawGameOver(now) {
@@ -789,21 +782,7 @@ export class LostDaysOfSpring {
         const remaining = Math.max(0, Math.ceil((this.gameOverDelay - elapsed) / 1000));
         const stats = this.buildLevelStats(this.gameOverAt);
 
-        DefaultGameOverRenderer.draw(
-            this.ctx,
-            this.canvas,
-            stats.coinsCount,
-            stats.currentLevelCoinsCount,
-            stats.splintersCount,
-            stats.currentLevelSplintersCount,
-            stats.enemiesDefeated,
-            stats.currentLevelEnemiesCount,
-            remaining,
-            stats.playTimeMs,
-            stats.deathCount,
-            stats.artifactsCount,
-            stats.currentLevelArtifactsCount
-        );
+        DefaultGameOverRenderer.draw(this.ctx, this.canvas, stats, remaining);
     }
 
     getCurrentPlayTimeMs() {

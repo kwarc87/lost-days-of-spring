@@ -217,13 +217,5 @@ export const SceneRenderer = {
             game.currentLevelArtifactsCount,
             game.hasEnoughArtifacts
         );
-
-        if (game.levelComplete) {
-            game.drawLevelComplete();
-        }
-
-        if (game.gameOver) {
-            game.drawGameOver(now);
-        }
     },
 };
