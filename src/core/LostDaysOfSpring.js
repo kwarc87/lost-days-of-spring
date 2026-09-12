@@ -269,11 +269,15 @@ export class LostDaysOfSpring {
         this.mapView = false;
     }
 
-    startLevel(now) {
-        this.lastTime = now;
+    // `now` drives the simulation clock (cannon timers, simulatedTime resync); `wallNow` is the
+    // RAF/performance.now() timestamp used for lastTime and gameFadeIn, since those are only ever
+    // compared against wall-clock time in loop()/drawGameFadeIn(). Callers that already run on the
+    // wall clock (title screen fade, pause menu) can pass the same value for both.
+    startLevel(now, wallNow = performance.now()) {
+        this.lastTime = wallNow;
         this.simulatedTime = now; // sync simulation clock with wall clock at level start
         this.gameFadeIn.active = true;
-        this.gameFadeIn.startTime = now;
+        this.gameFadeIn.startTime = wallNow;
         this.combatController.resetCannonTimers(now);
     }
 
@@ -409,7 +413,8 @@ export class LostDaysOfSpring {
         if (this.pendingReset) {
             this.pendingReset = false;
             this.loadLevel(this.currentLevelId, now);
-            this.startLevel(now);
+            // `now` here is simulatedTime, not the wall clock loop() uses for lastTime/gameFadeIn.
+            this.startLevel(now, performance.now());
             return;
         }
 
@@ -863,7 +868,7 @@ export class LostDaysOfSpring {
                 this.levelStartAt = now;
                 this.pauseController.totalPausedTime = 0;
                 this.accumulatedPlayTime = this.checkpointManager.getRespawn()?.playTimeMs ?? 0;
-                this.startLevel(now);
+                this.startLevel(now, now);
             }
         }
     }
@@ -1007,7 +1012,8 @@ export class LostDaysOfSpring {
         }
 
         this.loadLevel(this.currentLevelId);
-        this.startLevel(performance.now());
+        const wallNow = performance.now();
+        this.startLevel(wallNow, wallNow);
         this.start();
     }
 
