@@ -12,7 +12,8 @@ import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
 import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
 import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
-import { DebugGridRenderer, DebugHudRenderer } from "../renderers/DebugRenderers.js";
+import { DebugHudRenderer } from "../renderers/DebugRenderers.js";
+import { SceneRenderer } from "../renderers/SceneRenderer.js";
 import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
@@ -37,7 +38,7 @@ import { MessageController } from "../systems/MessageController.js";
 import { PlayerPhysicsController } from "../systems/PlayerPhysicsController.js";
 import { PlayerPostureController } from "../systems/PlayerPostureController.js";
 import { PlayerHealthController } from "../systems/PlayerHealthController.js";
-import { MapDiscovery } from "../services/MapDiscovery.js";
+import { LevelLoader } from "../services/LevelLoader.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
 import { KEYS_MAP } from "../config/keysMap.js";
@@ -182,6 +183,7 @@ export class LostDaysOfSpring {
         this.mapCheckpointRenderer = MapCheckpointRenderer;
         this.mapExitRenderer = MapExitRenderer;
         this.galleryController = new ArtifactGalleryController(new ArtifactGalleryRenderer());
+        this.sceneRenderer = SceneRenderer;
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -273,54 +275,29 @@ export class LostDaysOfSpring {
 
         // Generate a fresh instance of the level data
         const levelData = LEVELS[levelId]();
-
-        this.worldSize = levelData.worldSize;
-        this.mapDiscovery = new MapDiscovery(this.worldSize, GameFactory.GRID * 3);
-        this.platforms = levelData.platforms ?? [];
-        this.elevatorController.setElevators(levelData.elevators);
-        this.enemyController.setEnemies(levelData.enemies);
-        this.collectibleController.setCollectibles(levelData.collectibles);
-        this.projectileController.setSpikes(levelData.spikes);
-        this.messageController.setMessages(levelData.messages);
-        this.exitController.setExits(levelData.exits);
-        this.hiddenWalls = levelData.hiddenWalls ?? [];
-        this.foregroundItems = levelData.foregroundItems ?? [];
-        this.backgroundItems = levelData.backgroundItems ?? [];
-        this.preBackgroundItems = levelData.preBackgroundItems ?? [];
-        this.parallaxItems = levelData.parallax ?? [];
-        this.projectileController.setCannons(levelData.cannons);
-        this.teleportController.setTeleports(levelData.teleports);
-
-        this.currentLevelCoinsCount = this.collectibleController.getCoins().length;
-        this.currentLevelSplintersCount = this.collectibleController.getSplinters().length;
-        this.currentLevelArtifactsCount = this.collectibleController.getArtifacts().length;
-        this.currentLevelEnemiesCount = this.enemyController.getEnemies().length;
-
-        // Load checkpoints and extract embedded visual layers / messages
-        this.checkpointManager.setCheckpoints(levelData.checkpoints ?? []);
-        const checkpointItems = this.checkpointManager.extractItems();
-        this.preBackgroundItems.push(...checkpointItems.back);
-        this.foregroundItems.push(...checkpointItems.front);
-        this.messageController.getMessages().push(...checkpointItems.messages);
-        this.platforms.push(...checkpointItems.platforms);
-        const teleportItems = this.teleportController.extractItems();
-        this.foregroundItems.push(...teleportItems.foreground);
-        this.platforms.push(...teleportItems.platforms);
-        // Elevators first: same priority order as movePlayerY collision resolution.
-        this.solids = [...this.elevatorController.getElevators(), ...this.platforms];
-
-        // Restore checkpoint state (collected items, killed enemies, etc.)
-        this.checkpointManager.restoreProgress({
-            coins: this.collectibleController.getCoins(),
-            splinters: this.collectibleController.getSplinters(),
-            artifacts: this.collectibleController.getArtifacts(),
-            hearts: this.collectibleController.getHearts(),
-            weaponUpgrades: this.collectibleController.getWeaponUpgrades(),
-            enemies: this.enemyController.getEnemies(),
-            elevators: this.elevatorController.getElevators(),
-            messages: this.messageController.getMessages(),
-            mapDiscovery: this.mapDiscovery,
+        const loaded = LevelLoader.load(levelData, {
+            elevatorController: this.elevatorController,
+            enemyController: this.enemyController,
+            collectibleController: this.collectibleController,
+            projectileController: this.projectileController,
+            messageController: this.messageController,
+            exitController: this.exitController,
+            teleportController: this.teleportController,
+            checkpointManager: this.checkpointManager,
         });
+        this.worldSize = loaded.worldSize;
+        this.mapDiscovery = loaded.mapDiscovery;
+        this.platforms = loaded.platforms;
+        this.solids = loaded.solids;
+        this.hiddenWalls = loaded.hiddenWalls;
+        this.foregroundItems = loaded.foregroundItems;
+        this.backgroundItems = loaded.backgroundItems;
+        this.preBackgroundItems = loaded.preBackgroundItems;
+        this.parallaxItems = loaded.parallaxItems;
+        this.currentLevelCoinsCount = loaded.currentLevelCoinsCount;
+        this.currentLevelSplintersCount = loaded.currentLevelSplintersCount;
+        this.currentLevelArtifactsCount = loaded.currentLevelArtifactsCount;
+        this.currentLevelEnemiesCount = loaded.currentLevelEnemiesCount;
 
         this.resetPlayerProperties(levelData);
 
@@ -1080,210 +1057,7 @@ export class LostDaysOfSpring {
     }
 
     draw(now = performance.now()) {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        this.ctx.save();
-
-        if (this.mapView) {
-            this.worldRenderer.drawMapBackground(this.ctx, this.canvas, this.worldSize);
-        } else {
-            this.drawWorld();
-            this.ctx.translate(-this.cameraController.camera.x, -this.cameraController.camera.y);
-        }
-
-        for (const i of this.parallaxItems) {
-            this.drawEnvParallaxItem(i);
-        }
-
-        for (const exit of this.exitController.getExits()) {
-            this.drawExit(exit);
-        }
-
-        for (const i of this.preBackgroundItems) {
-            this.drawEnvPreBackgroundItem(i);
-        }
-
-        for (const p of this.platforms) {
-            this.drawPlatform(p);
-        }
-
-        for (const i of this.backgroundItems) {
-            this.drawEnvBackgroundItem(i);
-        }
-
-        for (const w of this.projectileController.getBullets()) {
-            this.drawBullet(w);
-        }
-
-        for (const b of this.projectileController.getCannonBullets()) {
-            this.drawCannonBullet(b);
-        }
-
-        for (const c of this.collectibleController.getCoins()) {
-            if (!c.collected) {
-                this.drawCoin(c);
-            }
-        }
-
-        for (const s of this.collectibleController.getSplinters()) {
-            if (!s.collected) {
-                this.drawSplinter(s, now);
-            }
-        }
-
-        for (const a of this.collectibleController.getArtifacts()) {
-            if (!a.collected) {
-                this.drawArtifact(a, now);
-            }
-        }
-
-        for (const h of this.collectibleController.getHearts()) {
-            if (!h.collected) {
-                this.drawHeart(h, now);
-            }
-        }
-
-        for (const u of this.collectibleController.getWeaponUpgrades()) {
-            if (!u.collected) {
-                this.drawWeaponUpgrade(u, now);
-            }
-        }
-
-        for (const wall of this.hiddenWalls) {
-            this.drawHiddenWall(wall);
-        }
-
-        for (const e of this.elevatorController.getElevators()) {
-            this.drawElevator(e);
-        }
-
-        for (const spike of this.projectileController.getSpikes()) {
-            this.drawSpike(spike);
-        }
-
-        for (const e of this.enemyController.getEnemies()) {
-            if (e.dead) {
-                continue;
-            }
-            this.drawEnemy(e, now);
-        }
-
-        for (const cannon of this.projectileController.getCannons()) {
-            this.drawCannon(cannon);
-        }
-
-        if (!this.mapView) {
-            this.drawPlayer(now);
-        }
-
-        for (const cp of this.checkpointManager.checkpoints) {
-            this.drawCheckpointIndicator(cp);
-        }
-
-        for (const i of this.foregroundItems) {
-            this.drawEnvForegroundItem(i);
-        }
-
-        if (this.mapView) {
-            this.worldRenderer.drawMapUndiscoveredMask(this.ctx, this.worldSize, this.mapDiscovery);
-            this.drawPlayer(now);
-        }
-
-        if (this.showDebug && !this.mapView) {
-            DebugGridRenderer.draw(this.ctx, this.cameraController.camera, this.worldSize);
-            for (const t of this.teleportController.getTeleports()) {
-                this.ctx.save();
-                this.ctx.strokeStyle = "cyan";
-                this.ctx.lineWidth = 1;
-                this.ctx.strokeRect(t.x, t.y, t.w, t.h);
-                this.ctx.strokeRect(t.targetX, t.targetY, t.w, t.h);
-                this.ctx.restore();
-            }
-        }
-
-        this.ctx.restore();
-
-        if (
-            this.exitController.playerAtExit &&
-            !this.levelComplete &&
-            !this.gameOver &&
-            !this.galleryController.active
-        ) {
-            this.drawExitMessage();
-        }
-
-        const activeMessage = this.messageController.getActiveMessage();
-        if (
-            activeMessage &&
-            !this.levelComplete &&
-            !this.gameOver &&
-            !this.mapView &&
-            !this.pauseController.isPaused &&
-            !this.galleryController.active
-        ) {
-            this.messageRenderer.drawMessagePanel(
-                this.ctx,
-                this.canvas,
-                activeMessage,
-                this.cameraController.camera
-            );
-        }
-
-        const activeArtifactMessage = this.messageController.getActiveArtifactMessage();
-        if (
-            activeArtifactMessage &&
-            !this.levelComplete &&
-            !this.gameOver &&
-            !this.mapView &&
-            !this.pauseController.isPaused &&
-            !this.galleryController.active
-        ) {
-            const activeArtifactSource = this.messageController.getActiveArtifactSource();
-            this.messageRenderer.drawPanel(
-                this.ctx,
-                {
-                    title: activeArtifactMessage.title ?? null,
-                    lines: activeArtifactMessage.lines,
-                },
-                this.canvas.width / 2 + (activeArtifactMessage.offsetX ?? 0),
-                this.canvas.height - 8 + (activeArtifactMessage.offsetY ?? 0),
-                {
-                    anchorBottom: true,
-                    bg: "#533794",
-                    border: { color: "#fff", width: 2, steps: 3 },
-                    icon: activeArtifactSource
-                        ? {
-                              url: activeArtifactSource.url,
-                              sx: activeArtifactSource.cordX,
-                              sy: activeArtifactSource.cordY,
-                              sw: 16,
-                              sh: 16,
-                              size: 48,
-                          }
-                        : undefined,
-                }
-            );
-        }
-
-        this.hudRenderer.draw(
-            this.ctx,
-            this.canvas,
-            this.player,
-            this.currentLevelCoinsCount,
-            this.currentLevelSplintersCount,
-            this.hasEnoughCoins,
-            this.hasEnoughSplinters,
-            this.currentLevelArtifactsCount,
-            this.hasEnoughArtifacts
-        );
-
-        if (this.levelComplete) {
-            this.drawLevelComplete();
-        }
-
-        if (this.gameOver) {
-            this.drawGameOver(now);
-        }
+        this.sceneRenderer.draw(this.ctx, this, now);
     }
 
     drawLevelComplete() {
