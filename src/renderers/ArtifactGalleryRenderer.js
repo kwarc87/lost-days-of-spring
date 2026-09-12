@@ -53,11 +53,17 @@ function getBorderCanvas() {
 }
 
 function estimateDescHeight(artifact) {
-    if (!artifact?.collected || !artifact.message) {return 18;}
+    if (!artifact?.collected || !artifact.message) {
+        return 18;
+    }
     const { title, lines = [] } = artifact.message;
     let h = 0;
-    if (title) {h += 32 + 6;}
-    if (lines.length > 0) {h += lines.length * 18 + (lines.length - 1) * 6;}
+    if (title) {
+        h += 32 + 6;
+    }
+    if (lines.length > 0) {
+        h += lines.length * 18 + (lines.length - 1) * 6;
+    }
     return Math.max(h, 18);
 }
 
@@ -86,7 +92,9 @@ export class ArtifactGalleryRenderer {
     }
 
     navigateLeft() {
-        if (this.selectedIndex <= 0) {return;}
+        if (this.selectedIndex <= 0) {
+            return;
+        }
         this.selectedIndex--;
         this._animOffset = -(ICON_SLOT + ICON_GAP);
         this._animStartOffset = this._animOffset;
@@ -94,7 +102,9 @@ export class ArtifactGalleryRenderer {
     }
 
     navigateRight() {
-        if (this.selectedIndex >= this.artifacts.length - 1) {return;}
+        if (this.selectedIndex >= this.artifacts.length - 1) {
+            return;
+        }
         this.selectedIndex++;
         this._animOffset = ICON_SLOT + ICON_GAP;
         this._animStartOffset = this._animOffset;
@@ -102,12 +112,16 @@ export class ArtifactGalleryRenderer {
     }
 
     draw(ctx, canvas, now) {
-        if (!this.isOpen || this.artifacts.length === 0) {return;}
+        if (!this.isOpen || this.artifacts.length === 0) {
+            return;
+        }
 
         if (this._animOffset !== 0) {
             const t = Math.min((now - this._animStartAt) / ANIM_DURATION, 1);
             this._animOffset = this._animStartOffset * (1 - t);
-            if (t >= 1) {this._animOffset = 0;}
+            if (t >= 1) {
+                this._animOffset = 0;
+            }
         }
 
         const cw = canvas.width;
@@ -155,7 +169,9 @@ export class ArtifactGalleryRenderer {
 
         for (let slot = -1; slot <= VISIBLE; slot++) {
             const idx = this.selectedIndex - 3 + slot;
-            if (idx < 0 || idx >= this.artifacts.length) {continue;}
+            if (idx < 0 || idx >= this.artifacts.length) {
+                continue;
+            }
             const slotX = carouselX + slot * (ICON_SLOT + ICON_GAP) + this._animOffset;
             this._drawArtifactIcon(
                 ctx,
@@ -260,7 +276,9 @@ export class ArtifactGalleryRenderer {
 
     _drawArtifactIcon(ctx, artifact, slotX, slotY, isSelected) {
         const img = getImg("textures/icons.png");
-        if (!img) {return;}
+        if (!img) {
+            return;
+        }
 
         const outlineColor = isSelected ? "#fff" : "#7374b4";
         const [oc, octx] = getIconCanvas();

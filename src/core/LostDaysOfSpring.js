@@ -32,6 +32,7 @@ import { CollectibleController } from "../systems/CollectibleController.js";
 import { MessageController } from "../systems/MessageController.js";
 import { PlayerPhysicsController } from "../systems/PlayerPhysicsController.js";
 import { PlayerPostureController } from "../systems/PlayerPostureController.js";
+import { PlayerHealthController } from "../systems/PlayerHealthController.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
@@ -139,6 +140,9 @@ export class LostDaysOfSpring {
             CROUCH: "crouch",
         };
         this.playerPostureController = new PlayerPostureController(this.playerPostures);
+
+        // ====== PLAYER HEALTH ======
+        this.playerHealthController = new PlayerHealthController(this.verticalHitRecoilMultiplier);
 
         // ====== DEBUG ======
         this.debug = {
@@ -802,37 +806,16 @@ export class LostDaysOfSpring {
     }
 
     applyDamageToPlayer(now, source, hitFromAbove = false, hitFromBelow = false) {
-        this.player.life -= source.damage;
-        this.player.lastHitTime = now;
-        this.player.isHit = true;
-        this.player.knockbackUntil = now + this.player.knockbackControlLock;
-
-        const recoilXForce =
-            hitFromAbove || hitFromBelow
-                ? source.recoilX / this.verticalHitRecoilMultiplier
-                : source.recoilX;
-        const recoilYForce = hitFromAbove
-            ? source.recoilY * this.verticalHitRecoilMultiplier
-            : source.recoilY;
-
-        this.player.jumpPressedByUser = false;
-        const hitFromLeft = this.player.x + this.player.w / 2 < source.x + source.w / 2;
-        this.player.vx = hitFromLeft ? -recoilXForce : recoilXForce;
-        this.player.vy = hitFromBelow ? 0 : -recoilYForce;
-
-        this.checkPlayerIsDead(now);
-    }
-
-    checkPlayerIsDead(now) {
-        if (this.player.life <= 0) {
-            this.player.dying = true;
-            this.player.dyingStartedAt = now;
-            this.player.vx = 0;
-            this.player.vy = 0;
-            this.player.shooting = false;
-            this.player.isHit = false;
-            this.deathCount++;
-        }
+        this.playerHealthController.applyDamage(
+            now,
+            this.player,
+            source,
+            hitFromAbove,
+            hitFromBelow,
+            () => {
+                this.deathCount++;
+            }
+        );
     }
 
     // Gathers the game state CheckpointManager needs but has no direct access to.
@@ -1180,9 +1163,7 @@ export class LostDaysOfSpring {
     }
 
     updateDamageCooldown(now) {
-        if (this.player.isHit && now - this.player.lastHitTime >= this.player.hitCooldown) {
-            this.player.isHit = false;
-        }
+        this.playerHealthController.updateDamageCooldown(now, this.player);
     }
 
     drawPlayer(now) {
