@@ -29,6 +29,7 @@ import { ProjectileController } from "../systems/ProjectileController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
 import { EnemyController } from "../systems/EnemyController.js";
 import { MessageController } from "../systems/MessageController.js";
+import { PlayerPhysicsController } from "../systems/PlayerPhysicsController.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
@@ -125,6 +126,7 @@ export class LostDaysOfSpring {
 
         // ====== PHYSICS ======
         this.physics = PHYSICS;
+        this.playerPhysicsController = new PlayerPhysicsController(this.physics);
 
         // ====== POSTURES ======
         this.playerPostures = {
@@ -363,48 +365,22 @@ export class LostDaysOfSpring {
         const cr = this.getCheckpointRespawn();
         const respawnX = cr?.x ?? levelData?.playerStart?.x ?? 0;
         const respawnY = cr?.y ?? levelData?.playerStart?.y ?? 0;
-        const coinsCount = cr?.coinsCount ?? 0;
-        const splintersCount = cr?.splintersCount ?? 0;
-        const artifactsCount = cr?.artifactsCount ?? 0;
 
-        Object.assign(this.player, {
-            x: respawnX,
-            y: respawnY,
-            prevX: respawnX,
-            prevY: respawnY,
-            vx: 0,
-            vy: 0,
-            posture: this.playerPostures.STANDING,
-            h: this.player.originalHeight,
-            w: this.player.originalWidth,
-            life: this.player.maxLife,
-            airborne: true,
-            isHit: false,
-            lastHitTime: -Infinity,
-            onGroundId: null,
-            onGroundType: null,
-            lastGroundId: null,
-            lastGroundType: null,
-            coinsCount,
-            splintersCount,
-            artifactsCount,
-            weapon: cr?.weapon ?? GameFactory.weapon(),
-            facing: "right",
-            jumpPressedByUser: false,
-            shooting: false,
-            lastShootTime: 0,
-            jumpPressedAt: 0,
-            lastGroundedAt: 0,
-            carryVx: 0,
-            carryVxInitial: 0,
-            carryStartAt: 0,
-            frozenForTeleport: false,
-            knockbackUntil: 0,
-            movingByInput: false,
-            dying: false,
-            dyingStartedAt: 0,
-            dead: false,
-        });
+        Object.assign(
+            this.player,
+            GameFactory.playerRespawnState({
+                x: respawnX,
+                y: respawnY,
+                h: this.player.originalHeight,
+                w: this.player.originalWidth,
+                life: this.player.maxLife,
+                posture: this.playerPostures.STANDING,
+                weapon: cr?.weapon ?? GameFactory.weapon(),
+                coinsCount: cr?.coinsCount ?? 0,
+                splintersCount: cr?.splintersCount ?? 0,
+                artifactsCount: cr?.artifactsCount ?? 0,
+            })
+        );
     }
 
     initControls() {
@@ -878,228 +854,45 @@ export class LostDaysOfSpring {
 
     // Apply gravity and enforce terminal velocity
     applyPhysics() {
-        let currentGravity = this.physics.gravity;
-        const isAscending = this.player.vy < 0;
-        const isFalling = this.player.vy > 0;
         const jumpHeld = this.isKeyDown("jump") || this.isKeyDown("jumpAlt");
-
-        // Variable jump height: fall faster if jump key is released while ascending
-        if (isAscending && !jumpHeld && this.player.jumpPressedByUser) {
-            currentGravity *= this.physics.jumpCutGravityMultiplier;
-        } else if (isFalling) {
-            currentGravity *= this.physics.fallGravityMultiplier;
-        }
-
-        this.player.vy += currentGravity;
-
-        // Terminal velocity cap
-        if (this.player.vy > this.physics.maxFallSpeed) {
-            this.player.vy = this.physics.maxFallSpeed;
-        }
+        this.playerPhysicsController.applyPhysics(this.player, jumpHeld);
     }
 
     // Decay the carry velocity inherited from a moving elevator
     applyCarryDecay(now) {
-        if (this.player.carryVxInitial === 0) {
-            return;
-        }
-        const t = Math.max(0, 1 - (now - this.player.carryStartAt) / this.player.carryDuration);
-        this.player.carryVx = this.player.carryVxInitial * t;
-        if (t <= 0) {
-            this.player.carryVx = 0;
-            this.player.carryVxInitial = 0;
-        }
+        this.playerPhysicsController.applyCarryDecay(now, this.player);
     }
 
     // Move player along the X axis and resolve platform collisions
     movePlayerX(now) {
-        const prevX = this.player.prevX ?? this.player.x;
-
-        this.player.x += this.player.vx + this.player.carryVx;
-
-        // World bounds check (X axis)
-        if (this.player.x < 0) {
-            this.player.x = 0;
-            this.player.vx = 0;
-            this.player.carryVx = 0;
-            this.player.carryVxInitial = 0;
-            this.player.knockbackUntil = 0;
-        } else if (this.player.x + this.player.w > this.worldSize.width) {
-            this.player.x = this.worldSize.width - this.player.w;
-            this.player.vx = 0;
-            this.player.carryVx = 0;
-            this.player.carryVxInitial = 0;
-            this.player.knockbackUntil = 0;
-        }
-
-        for (const p of this.solids) {
-            if (p.type === "oneDirection") {
-                continue;
-            }
-            if (rectsCollide(this.player, p)) {
-                const platformPrevX = p.previousX ?? p.x;
-
-                const wasLeft = prevX + this.player.w <= Math.max(platformPrevX, p.x);
-                const wasRight = prevX >= Math.min(platformPrevX + p.w, p.x + p.w);
-
-                if (wasLeft) {
-                    this.player.x = p.x - this.player.w;
-                    this.player.vx = 0;
-                    this.player.carryVx = 0;
-                    this.player.carryVxInitial = 0;
-                    this.player.knockbackUntil = 0;
-                } else if (wasRight) {
-                    this.player.x = p.x + p.w;
-                    this.player.vx = 0;
-                    this.player.carryVx = 0;
-                    this.player.carryVxInitial = 0;
-                    this.player.knockbackUntil = 0;
-                }
-            }
-        }
-
-        // Resolve player against enemies on the X axis so that large knockback
-        // velocities cannot overshoot the player into a nearby enemy.
-        for (const e of this.getEnemies()) {
-            if (e.dead || e.dying) {
-                continue;
-            }
-            if (!rectsCollide(this.player, e)) {
-                continue;
-            }
-
-            const wasLeft = prevX + this.player.w <= e.x;
-            const wasRight = prevX >= e.x + e.w;
-
-            if (wasLeft) {
-                this.player.x = e.x - this.player.w;
-                this.player.vx = 0;
-                this.player.carryVx = 0;
-                this.player.carryVxInitial = 0;
-            } else if (wasRight) {
-                this.player.x = e.x + e.w;
-                this.player.vx = 0;
-                this.player.carryVx = 0;
-                this.player.carryVxInitial = 0;
-            }
-
-            if (wasLeft || wasRight) {
-                const cooldownIsActive = now - this.player.lastHitTime < this.player.hitCooldown;
-                if (!cooldownIsActive) {
-                    this.applyDamageToPlayer(now, e);
-                }
-            }
-        }
+        this.playerPhysicsController.movePlayerX(now, this.player, {
+            solids: this.solids,
+            worldSize: this.worldSize,
+            enemies: this.getEnemies(),
+            onPlayerHit: (hitNow, e) => this.applyDamageToPlayer(hitNow, e),
+        });
     }
 
     // Move player along the Y axis, resolve platform collisions, and check fall-off
     movePlayerY(now) {
-        const previousY = this.player.prevY ?? this.player.y;
-        const previousH = this.player.h;
-
-        this.player.y += this.player.vy;
-        this.player.onGroundId = null;
-        this.player.onGroundType = null;
-        this.player.airborne = true;
-
-        // Worlds bounds collisions
-        if (this.player.y < 0) {
-            this.handleWorldCeilHit();
-        } else if (this.player.y + this.player.h > this.worldSize.height) {
-            this.handleWorldGroundLanding(now);
-        }
-
-        //Platforms collisions
-        for (const p of this.solids) {
-            if (rectsCollide(this.player, p)) {
-                const platformPrevY = p.previousY ?? p.y;
-
-                const wasAbove = previousY + previousH <= Math.max(platformPrevY, p.y);
-                const wasBelow = previousY >= Math.min(platformPrevY, p.y) + p.h;
-
-                // oneDirection platforms: only block when landing from above
-                if (p.type === "oneDirection" && !wasAbove) {
-                    continue;
-                }
-
-                // Landing on top of platform
-                if (wasAbove) {
-                    this.handlePlatformLanding(p, now);
-                    this.handlePlatformLandingResponse(p);
-                    continue;
-                }
-
-                if (wasBelow) {
-                    // Hit ceiling
-                    this.handleCeilingHit(p);
-                }
-            }
-        }
-
-        // Crouch is only allowed while grounded
-        if (this.isPlayerCrouching() && this.player.airborne && this.canStandUp()) {
-            this.applyPosture(this.playerPostures.STANDING);
-        }
+        this.playerPhysicsController.movePlayerY(now, this.player, {
+            solids: this.solids,
+            worldSize: this.worldSize,
+            worldGroundId: this.worldGroundId,
+            isCrouching: () => this.isPlayerCrouching(),
+            canStandUp: () => this.canStandUp(),
+            onStandUp: () => this.applyPosture(this.playerPostures.STANDING),
+        });
     }
 
-    handleWorldGroundLanding(now) {
-        this.player.y = this.worldSize.height - this.player.h;
-        this.player.vy = 0;
-        this.player.jumpPressedByUser = false;
-        this.player.lastGroundedAt = now;
-
-        this.player.airborne = false;
-        this.player.onGroundId = this.worldGroundId;
-        this.player.onGroundType = "solid";
-        this.player.lastGroundId = this.worldGroundId;
-        this.player.lastGroundType = "solid";
-
-        this.player.carryVx = 0;
-        this.player.carryVxInitial = 0;
-    }
-
-    handleWorldCeilHit() {
-        this.player.y = 0;
-        this.player.vy = 0;
-    }
-
+    // Also used by updateElevators() when the player lands on a moving elevator.
     handlePlatformLanding(platform, now) {
-        this.player.y = platform.y - this.player.h;
-        this.player.airborne = false;
-        this.player.onGroundId = platform.id;
-        this.player.onGroundType = platform.type;
-        this.player.lastGroundedAt = now;
-        this.player.jumpPressedByUser = false;
-        this.player.lastGroundType = platform.type;
-        this.player.lastGroundId = platform.id;
-
-        this.player.carryVx = 0;
-        this.player.carryVxInitial = 0;
-
-        if (platform.type === "elevator" && !platform.triggered) {
-            platform.triggered = true;
-        }
+        this.playerPhysicsController.handlePlatformLanding(platform, now, this.player);
     }
 
+    // Also used by updateElevators() when the player lands on a moving elevator.
     handlePlatformLandingResponse(platform) {
-        if (platform.type === "booster") {
-            this.player.vy = -platform.boostSpeed;
-            return;
-        }
-
-        if (
-            platform.type === "solid" ||
-            platform.type === "elevator" ||
-            platform.type === "oneDirection"
-        ) {
-            this.player.vy = 0;
-            return;
-        }
-    }
-
-    handleCeilingHit(platform) {
-        this.player.y = platform.y + platform.h;
-        this.player.vy = 0;
+        this.playerPhysicsController.handlePlatformLandingResponse(platform, this.player);
     }
 
     updateElevators(now) {
