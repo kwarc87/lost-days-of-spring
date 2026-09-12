@@ -536,8 +536,7 @@ export class LostDaysOfSpring {
             ) {
                 this.levelComplete = true;
                 this.levelCompleteAt = now;
-                this.player.vx = 0;
-                this.player.vy = 0;
+                this.playerPhysicsController.stopMovement(this.player);
                 this.player.shooting = false;
                 this.player.jumpPressedByUser = false;
                 this.checkpointManager.clear();
@@ -582,12 +581,18 @@ export class LostDaysOfSpring {
                     this.enemyController.getEnemies()
                 ),
             onStandUp: () => this.applyPosture(this.playerPostures.STANDING),
+            elevatorController: this.elevatorController,
         });
     }
 
     // Also used by updateElevators() when the player lands on a moving elevator.
     handlePlatformLanding(platform, now) {
-        this.playerPhysicsController.handlePlatformLanding(platform, now, this.player);
+        this.playerPhysicsController.handlePlatformLanding(
+            platform,
+            now,
+            this.player,
+            this.elevatorController
+        );
     }
 
     // Also used by updateElevators() when the player lands on a moving elevator.
@@ -629,7 +634,8 @@ export class LostDaysOfSpring {
             hitFromBelow,
             () => {
                 this.deathCount++;
-            }
+            },
+            this.playerPhysicsController
         );
     }
 
@@ -699,6 +705,9 @@ export class LostDaysOfSpring {
                 this.messageController.showArtifactMessage(message, source, msgNow),
             onWeaponMessage: (message, msgNow) =>
                 this.messageController.showWeaponMessage(message, msgNow),
+            onWeaponPickup: (weapon) => this.combatController.equipWeapon(this.player, weapon),
+            onHeartPickup: () => this.playerHealthController.heal(this.player),
+            canHeal: () => this.playerHealthController.canHeal(this.player),
         });
     }
 
@@ -829,7 +838,7 @@ export class LostDaysOfSpring {
     }
 
     updateTeleports(now) {
-        this.teleportController.update(now, this.player);
+        this.teleportController.update(now, this.player, this.playerPhysicsController);
     }
 
     updateDebug() {

@@ -22,6 +22,14 @@ export class ElevatorController {
         return this.elevators.find((e) => e.id === id);
     }
 
+    // Activates an elevator the first time the player lands on it.
+    trigger(elevatorId) {
+        const elevator = this.findById(elevatorId);
+        if (elevator && !elevator.triggered) {
+            elevator.triggered = true;
+        }
+    }
+
     // Marks elevators already triggered in a restored checkpoint memento.
     restoreTriggered(triggeredElevatorIds) {
         if (!triggeredElevatorIds) {

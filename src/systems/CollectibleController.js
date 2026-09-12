@@ -89,7 +89,10 @@ export class CollectibleController {
     }
 
     // Checks player collision against every collectible type and applies pickup effects.
-    update(now, { player, onArtifactMessage, onWeaponMessage }) {
+    update(
+        now,
+        { player, onArtifactMessage, onWeaponMessage, onWeaponPickup, onHeartPickup, canHeal }
+    ) {
         for (const c of this.coins) {
             if (!c.collected && rectsCollide(player, c)) {
                 c.collected = true;
@@ -117,7 +120,7 @@ export class CollectibleController {
         for (const u of this.weaponUpgrades) {
             if (!u.collected && rectsCollide(player, u)) {
                 u.collected = true;
-                player.weapon = u?.weapon ?? player.weapon;
+                onWeaponPickup(u?.weapon);
                 if (u.message) {
                     onWeaponMessage(u.message, now);
                 }
@@ -125,9 +128,9 @@ export class CollectibleController {
         }
 
         for (const h of this.hearts) {
-            if (!h.collected && rectsCollide(player, h) && player.life < player.maxLife) {
+            if (!h.collected && rectsCollide(player, h) && canHeal()) {
                 h.collected = true;
-                player.life++;
+                onHeartPickup();
             }
         }
     }

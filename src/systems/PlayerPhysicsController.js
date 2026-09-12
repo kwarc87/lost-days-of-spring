@@ -30,6 +30,22 @@ export class PlayerPhysicsController {
         }
     }
 
+    // Zeroes velocity/carry without moving the player (e.g. freezing for a teleport).
+    stopMovement(player) {
+        player.vx = 0;
+        player.vy = 0;
+        player.carryVx = 0;
+        player.carryVxInitial = 0;
+    }
+
+    // Instantly repositions the player (e.g. teleport exit) and clears momentum.
+    warpTo(player, x, y) {
+        player.x = x;
+        player.y = y;
+        player.vx = 0;
+        player.vy = 0;
+    }
+
     // Decay the carry velocity inherited from a moving elevator
     applyCarryDecay(now, player) {
         if (player.carryVxInitial === 0) {
@@ -241,7 +257,7 @@ export class PlayerPhysicsController {
     movePlayerY(
         now,
         player,
-        { solids, worldSize, worldGroundId, isCrouching, canStandUp, onStandUp }
+        { solids, worldSize, worldGroundId, isCrouching, canStandUp, onStandUp, elevatorController }
     ) {
         const previousY = player.prevY ?? player.y;
         const previousH = player.h;
@@ -273,7 +289,7 @@ export class PlayerPhysicsController {
 
                 // Landing on top of platform
                 if (wasAbove) {
-                    this.handlePlatformLanding(p, now, player);
+                    this.handlePlatformLanding(p, now, player, elevatorController);
                     this.handlePlatformLandingResponse(p, player);
                     continue;
                 }
@@ -313,7 +329,7 @@ export class PlayerPhysicsController {
     }
 
     // Also called externally when the player lands on a moving elevator.
-    handlePlatformLanding(platform, now, player) {
+    handlePlatformLanding(platform, now, player, elevatorController) {
         player.y = platform.y - player.h;
         player.airborne = false;
         player.onGroundId = platform.id;
@@ -326,8 +342,8 @@ export class PlayerPhysicsController {
         player.carryVx = 0;
         player.carryVxInitial = 0;
 
-        if (platform.type === "elevator" && !platform.triggered) {
-            platform.triggered = true;
+        if (platform.type === "elevator") {
+            elevatorController.trigger(platform.id);
         }
     }
 

@@ -39,7 +39,7 @@ export class TeleportController {
         return { foreground, platforms };
     }
 
-    update(now, player) {
+    update(now, player, playerPhysicsController) {
         player.isInTeleport = false;
         for (const t of this.teleports) {
             const targetZone = { x: t.targetX, y: t.targetY, w: t.w, h: t.h };
@@ -70,19 +70,17 @@ export class TeleportController {
             if (t.playerEnteredAt !== null && now - t.playerEnteredAt >= t.delay) {
                 t.frozenAt = now;
                 t.playerEnteredAt = null;
-                player.vx = 0;
-                player.vy = 0;
-                player.carryVx = 0;
-                player.carryVxInitial = 0;
+                playerPhysicsController.stopMovement(player);
                 player.frozenForTeleport = true;
             }
 
             if (t.frozenAt !== null && now - t.frozenAt >= t.frozenDelay) {
                 const [dx, dy] = t.enteredOrigin ? [t.targetX, t.targetY] : [t.x, t.y];
-                player.x = dx + t.w / 2 - player.w / 2;
-                player.y = dy + t.h - player.h;
-                player.vx = 0;
-                player.vy = 0;
+                playerPhysicsController.warpTo(
+                    player,
+                    dx + t.w / 2 - player.w / 2,
+                    dy + t.h - player.h
+                );
                 player.frozenForTeleport = false;
                 t.originItem.cordX = 64;
                 t.targetItem.cordX = 64;

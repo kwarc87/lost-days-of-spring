@@ -5,7 +5,7 @@ export class PlayerHealthController {
         this.verticalHitRecoilMultiplier = verticalHitRecoilMultiplier;
     }
 
-    applyDamage(now, player, source, hitFromAbove, hitFromBelow, onDeath) {
+    applyDamage(now, player, source, hitFromAbove, hitFromBelow, onDeath, playerPhysicsController) {
         player.life -= source.damage;
         player.lastHitTime = now;
         player.isHit = true;
@@ -24,17 +24,27 @@ export class PlayerHealthController {
         player.vx = hitFromLeft ? -recoilXForce : recoilXForce;
         player.vy = hitFromBelow ? 0 : -recoilYForce;
 
-        this.checkDeath(now, player, onDeath);
+        this.checkDeath(now, player, onDeath, playerPhysicsController);
     }
 
-    checkDeath(now, player, onDeath) {
+    canHeal(player) {
+        return player.life < player.maxLife;
+    }
+
+    // Heals the player by one life point, capped at maxLife.
+    heal(player) {
+        if (this.canHeal(player)) {
+            player.life++;
+        }
+    }
+
+    checkDeath(now, player, onDeath, playerPhysicsController) {
         if (player.life > 0) {
             return;
         }
         player.dying = true;
         player.dyingStartedAt = now;
-        player.vx = 0;
-        player.vy = 0;
+        playerPhysicsController.stopMovement(player);
         player.shooting = false;
         player.isHit = false;
         onDeath();

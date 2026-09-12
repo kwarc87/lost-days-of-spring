@@ -15,6 +15,11 @@ export class CombatController {
         this.cannons = cannons ?? [];
     }
 
+    // Equips a new weapon load-out picked up by the player.
+    equipWeapon(player, weapon) {
+        player.weapon = weapon ?? player.weapon;
+    }
+
     getCannons() {
         return this.cannons;
     }
