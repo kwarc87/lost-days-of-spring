@@ -115,6 +115,21 @@ export const GameFactory = {
         dyingStartedAt: 0,
         dead: false,
     }),
+    // Resolves respawn position/weapon/counters from a checkpoint (or level start
+    // as fallback) and builds the full respawn state for the given player/posture.
+    playerRespawn: ({ player, checkpoint, levelData, posture }) =>
+        GameFactory.playerRespawnState({
+            x: checkpoint?.x ?? levelData?.playerStart?.x ?? 0,
+            y: checkpoint?.y ?? levelData?.playerStart?.y ?? 0,
+            h: player.originalHeight,
+            w: player.originalWidth,
+            life: player.maxLife,
+            posture,
+            weapon: checkpoint?.weapon ?? GameFactory.weapon(),
+            coinsCount: checkpoint?.coinsCount ?? 0,
+            splintersCount: checkpoint?.splintersCount ?? 0,
+            artifactsCount: checkpoint?.artifactsCount ?? 0,
+        }),
     solid: ({ id, x, y, w, h, layout = "ground", color } = {}) => ({
         id,
         x,

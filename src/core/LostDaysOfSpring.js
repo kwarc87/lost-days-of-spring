@@ -2,7 +2,11 @@ import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
 import { CameraController } from "../systems/CameraController.js";
 import { adjustAnimStartTime, PLAYER_DYING_DURATION_MS } from "../renderers/PlayerRenderers.js";
-import { DefaultPauseRenderer, MENU_ITEMS } from "../renderers/PauseRenderers.js";
+import {
+    DefaultPauseRenderer,
+    MENU_ITEMS,
+    PAUSE_MENU_ACTION,
+} from "../renderers/PauseRenderers.js";
 import { DebugHudRenderer } from "../renderers/DebugRenderers.js";
 import { SceneRenderer } from "../renderers/SceneRenderer.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
@@ -135,11 +139,7 @@ export class LostDaysOfSpring {
 
         this.mouse = new DebugMouseTracker(this.canvas, () => this.cameraController.camera);
         if (this.showDebug) {
-            this.mouse.attach(() => {
-                if (!this.isRunning) {
-                    this.updateDebug();
-                }
-            });
+            this.mouse.attach(() => this.updateDebugIfStopped());
         }
         this.inputHandlers = {
             title: (e) => this.handleTitleScreenKeyDown(e),
@@ -263,23 +263,13 @@ export class LostDaysOfSpring {
     }
 
     resetPlayerProperties(levelData) {
-        const cr = this.checkpointManager.getRespawn();
-        const respawnX = cr?.x ?? levelData?.playerStart?.x ?? 0;
-        const respawnY = cr?.y ?? levelData?.playerStart?.y ?? 0;
-
         Object.assign(
             this.player,
-            GameFactory.playerRespawnState({
-                x: respawnX,
-                y: respawnY,
-                h: this.player.originalHeight,
-                w: this.player.originalWidth,
-                life: this.player.maxLife,
+            GameFactory.playerRespawn({
+                player: this.player,
+                checkpoint: this.checkpointManager.getRespawn(),
+                levelData,
                 posture: this.playerPostures.STANDING,
-                weapon: cr?.weapon ?? GameFactory.weapon(),
-                coinsCount: cr?.coinsCount ?? 0,
-                splintersCount: cr?.splintersCount ?? 0,
-                artifactsCount: cr?.artifactsCount ?? 0,
             })
         );
     }
@@ -321,11 +311,7 @@ export class LostDaysOfSpring {
         if (e.code === this.keysMap.debugToggle && !e.repeat) {
             this.showDebug = !this.showDebug;
             if (this.showDebug) {
-                this.mouse.attach(() => {
-                    if (!this.isRunning) {
-                        this.updateDebug();
-                    }
-                });
+                this.mouse.attach(() => this.updateDebugIfStopped());
             } else {
                 this.mouse.detach();
             }
@@ -746,51 +732,65 @@ export class LostDaysOfSpring {
         SceneRenderer.draw(this.ctx, this, now);
     }
 
-    drawLevelComplete() {
+    // Shared coins/splinters/enemies/artifacts/time stats for the level-complete and game-over screens.
+    buildLevelStats(completedAt) {
         const playTimeMs =
-            this.levelCompleteAt -
+            completedAt -
             this.levelStartAt -
             this.pauseController.totalPausedTime +
             this.accumulatedPlayTime;
+        return {
+            coinsCount: this.player.coinsCount,
+            currentLevelCoinsCount: this.currentLevelCoinsCount,
+            splintersCount: this.player.splintersCount,
+            currentLevelSplintersCount: this.currentLevelSplintersCount,
+            enemiesDefeated: this.enemyController.getEnemies().filter((e) => e.dead || e.dying)
+                .length,
+            currentLevelEnemiesCount: this.currentLevelEnemiesCount,
+            playTimeMs,
+            deathCount: this.deathCount,
+            artifactsCount: this.player.artifactsCount,
+            currentLevelArtifactsCount: this.currentLevelArtifactsCount,
+        };
+    }
+
+    drawLevelComplete() {
+        const stats = this.buildLevelStats(this.levelCompleteAt);
         DefaultLevelCompleteRenderer.draw(
             this.ctx,
             this.canvas,
-            this.player.coinsCount,
-            this.currentLevelCoinsCount,
-            this.player.splintersCount,
-            this.currentLevelSplintersCount,
-            this.enemyController.getEnemies().filter((e) => e.dead || e.dying).length,
-            this.currentLevelEnemiesCount,
-            playTimeMs,
-            this.deathCount,
-            this.player.artifactsCount,
-            this.currentLevelArtifactsCount
+            stats.coinsCount,
+            stats.currentLevelCoinsCount,
+            stats.splintersCount,
+            stats.currentLevelSplintersCount,
+            stats.enemiesDefeated,
+            stats.currentLevelEnemiesCount,
+            stats.playTimeMs,
+            stats.deathCount,
+            stats.artifactsCount,
+            stats.currentLevelArtifactsCount
         );
     }
 
     drawGameOver(now) {
         const elapsed = now - this.gameOverAt;
         const remaining = Math.max(0, Math.ceil((this.gameOverDelay - elapsed) / 1000));
-        const playTimeMs =
-            this.gameOverAt -
-            this.levelStartAt -
-            this.pauseController.totalPausedTime +
-            this.accumulatedPlayTime;
+        const stats = this.buildLevelStats(this.gameOverAt);
 
         DefaultGameOverRenderer.draw(
             this.ctx,
             this.canvas,
-            this.player.coinsCount,
-            this.currentLevelCoinsCount,
-            this.player.splintersCount,
-            this.currentLevelSplintersCount,
-            this.enemyController.getEnemies().filter((e) => e.dead || e.dying).length,
-            this.currentLevelEnemiesCount,
+            stats.coinsCount,
+            stats.currentLevelCoinsCount,
+            stats.splintersCount,
+            stats.currentLevelSplintersCount,
+            stats.enemiesDefeated,
+            stats.currentLevelEnemiesCount,
             remaining,
-            playTimeMs,
-            this.deathCount,
-            this.player.artifactsCount,
-            this.currentLevelArtifactsCount
+            stats.playTimeMs,
+            stats.deathCount,
+            stats.artifactsCount,
+            stats.currentLevelArtifactsCount
         );
     }
 
@@ -829,6 +829,13 @@ export class LostDaysOfSpring {
 
     updateDebug() {
         DebugHudRenderer.update(this.canvas, this.showDebug, this.debug, this.player, this.mouse);
+    }
+
+    // Mouse-move debug refresh only matters while the game loop itself isn't already updating it.
+    updateDebugIfStopped() {
+        if (!this.isRunning) {
+            this.updateDebug();
+        }
     }
 
     drawGameFadeIn(now) {
@@ -968,12 +975,14 @@ export class LostDaysOfSpring {
     }
 
     confirmPauseMenuItem() {
-        if (this.pauseController.menuIndex === 0) {
+        const action = this.pauseController.menuIndex;
+
+        if (action === PAUSE_MENU_ACTION.RESUME) {
             this.closePauseMenu();
             return;
         }
 
-        if (this.pauseController.menuIndex === 1) {
+        if (action === PAUSE_MENU_ACTION.GALLERY) {
             // Artifact gallery — account for pause time, then open gallery
             this.pauseController.close();
             this.resumeFromPause();
@@ -985,23 +994,29 @@ export class LostDaysOfSpring {
         this.pauseController.resetClock();
         this.levelStartAt = performance.now();
 
-        if (this.pauseController.menuIndex === 2) {
-            // Reset progress — clear all saves
-            this.checkpointManager.clear();
-            this.deathCount = 0;
-            this.accumulatedPlayTime = 0;
-            this.galleryController.resetLastIndex();
-        } else if (this.pauseController.menuIndex === 3) {
-            // Return to main screen — restore time and deaths from checkpoint
-            const cr = this.checkpointManager.getRespawn();
-            this.accumulatedPlayTime = cr?.playTimeMs ?? 0;
-            this.deathCount = cr?.deathCount ?? 0;
-            this.titleScreenController.active = true;
+        if (action === PAUSE_MENU_ACTION.RESET_PROGRESS) {
+            this.resetProgress();
+        } else if (action === PAUSE_MENU_ACTION.RETURN_TO_TITLE) {
+            this.returnToTitleScreen();
         }
 
         this.loadLevel(this.currentLevelId);
         this.startLevel(performance.now());
         this.start();
+    }
+
+    resetProgress() {
+        this.checkpointManager.clear();
+        this.deathCount = 0;
+        this.accumulatedPlayTime = 0;
+        this.galleryController.resetLastIndex();
+    }
+
+    returnToTitleScreen() {
+        const cr = this.checkpointManager.getRespawn();
+        this.accumulatedPlayTime = cr?.playTimeMs ?? 0;
+        this.deathCount = cr?.deathCount ?? 0;
+        this.titleScreenController.active = true;
     }
 
     toggleMapView() {
@@ -1022,8 +1037,7 @@ export class LostDaysOfSpring {
         this.pauseController.beginFreeze(performance.now());
         this.stop();
         this.draw(this.simulatedTime);
-        this.galleryController.captureFrame(this.canvas);
-        this.galleryController.openGallery(this.collectibleController.getArtifacts());
+        this.galleryController.present(this.canvas, this.collectibleController.getArtifacts());
         this.drawGallery();
     }
 

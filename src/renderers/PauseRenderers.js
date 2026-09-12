@@ -18,6 +18,14 @@ export const MENU_ITEMS = [
     "Return to main screen",
 ];
 
+// Indices into MENU_ITEMS, named to avoid magic numbers at call sites.
+export const PAUSE_MENU_ACTION = {
+    RESUME: 0,
+    GALLERY: 1,
+    RESET_PROGRESS: 2,
+    RETURN_TO_TITLE: 3,
+};
+
 const PAD_X = 24;
 const PAD_Y = 18;
 

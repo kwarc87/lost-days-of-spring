@@ -17,17 +17,15 @@ export class ArtifactGalleryController {
     }
 
     // Snapshots the current canvas into an offscreen frame reused as the
-    // static background behind the gallery overlay.
-    captureFrame(canvas) {
+    // static background behind the gallery overlay, then opens the carousel.
+    // Call once the facade has drawn the current frame onto `canvas`.
+    present(canvas, artifacts) {
         if (!this.frozenFrame) {
             this.frozenFrame = document.createElement("canvas");
         }
         this.frozenFrame.width = canvas.width;
         this.frozenFrame.height = canvas.height;
         this.frozenFrame.getContext("2d").drawImage(canvas, 0, 0);
-    }
-
-    openGallery(artifacts) {
         this.gallery.open(artifacts, this.lastIndex);
     }
 
