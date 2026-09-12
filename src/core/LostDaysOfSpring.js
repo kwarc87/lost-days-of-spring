@@ -538,7 +538,7 @@ export class LostDaysOfSpring {
                 this.levelCompleteAt = now;
                 this.playerPhysicsController.stopMovement(this.player);
                 this.player.shooting = false;
-                this.player.jumpPressedByUser = false;
+                this.playerPhysicsController.cancelJumpCut(this.player);
                 this.checkpointManager.clear();
                 this.galleryController.resetLastIndex();
             }
@@ -622,6 +622,7 @@ export class LostDaysOfSpring {
             verticalHitRecoilMultiplier: this.verticalHitRecoilMultiplier,
             onPlayerHit: (hitNow, enemy, hitFromAbove, hitFromBelow) =>
                 this.applyDamageToPlayer(hitNow, enemy, hitFromAbove, hitFromBelow),
+            playerPhysicsController: this.playerPhysicsController,
         });
     }
 

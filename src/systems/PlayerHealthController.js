@@ -19,10 +19,10 @@ export class PlayerHealthController {
             ? source.recoilY * this.verticalHitRecoilMultiplier
             : source.recoilY;
 
-        player.jumpPressedByUser = false;
         const hitFromLeft = player.x + player.w / 2 < source.x + source.w / 2;
-        player.vx = hitFromLeft ? -recoilXForce : recoilXForce;
-        player.vy = hitFromBelow ? 0 : -recoilYForce;
+        const vx = hitFromLeft ? -recoilXForce : recoilXForce;
+        const vy = hitFromBelow ? 0 : -recoilYForce;
+        playerPhysicsController.applyKnockback(player, vx, vy);
 
         this.checkDeath(now, player, onDeath, playerPhysicsController);
     }

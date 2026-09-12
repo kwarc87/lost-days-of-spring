@@ -36,9 +36,19 @@ export class EnemyController {
         }
     }
 
-    update(now, { player, solids, verticalHitRecoilMultiplier, onPlayerHit }) {
+    update(
+        now,
+        { player, solids, verticalHitRecoilMultiplier, onPlayerHit, playerPhysicsController }
+    ) {
         this.patrol(now);
-        this.resolvePlayerCollision(now, player, solids, verticalHitRecoilMultiplier, onPlayerHit);
+        this.resolvePlayerCollision(
+            now,
+            player,
+            solids,
+            verticalHitRecoilMultiplier,
+            onPlayerHit,
+            playerPhysicsController
+        );
     }
 
     // Applies damage to an enemy and transitions it into the dying state on death.
@@ -116,7 +126,14 @@ export class EnemyController {
         }
     }
 
-    resolvePlayerCollision(now, player, solids, verticalHitRecoilMultiplier, onPlayerHit) {
+    resolvePlayerCollision(
+        now,
+        player,
+        solids,
+        verticalHitRecoilMultiplier,
+        onPlayerHit,
+        playerPhysicsController
+    ) {
         const cooldownIsActive = now - player.lastHitTime < player.hitCooldown;
 
         // Pass 1: mark ALL colliding enemies and record entry side.
@@ -158,7 +175,13 @@ export class EnemyController {
             // No break — all colliding enemies are resolved so sandwiched
             // collisions (player between two enemies) are handled correctly.
             this.resolveCollisionX(enemy, player, solids);
-            this.resolveCollisionY(enemy, player, solids, verticalHitRecoilMultiplier);
+            this.resolveCollisionY(
+                enemy,
+                player,
+                solids,
+                verticalHitRecoilMultiplier,
+                playerPhysicsController
+            );
         }
     }
 
@@ -198,7 +221,7 @@ export class EnemyController {
         }
     }
 
-    resolveCollisionY(enemy, player, solids, verticalHitRecoilMultiplier) {
+    resolveCollisionY(enemy, player, solids, verticalHitRecoilMultiplier, playerPhysicsController) {
         if (!enemy.playerEnteredFromAbove && !enemy.playerEnteredFromBelow) {
             return;
         }
@@ -233,9 +256,12 @@ export class EnemyController {
         }
 
         if (enemy.playerEnteredFromAbove && !blocked) {
-            player.vy = -enemy.recoilY * verticalHitRecoilMultiplier;
-            player.airborne = true;
-            player.jumpPressedByUser = false;
+            playerPhysicsController.applyKnockback(
+                player,
+                player.vx,
+                -enemy.recoilY * verticalHitRecoilMultiplier,
+                true
+            );
         }
 
         if (enemy.playerEnteredFromBelow && !blocked && player.vy < 0) {

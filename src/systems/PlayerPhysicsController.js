@@ -46,6 +46,21 @@ export class PlayerPhysicsController {
         player.vy = 0;
     }
 
+    // Cancels the variable jump-height cut, used whenever an external force overrides player control.
+    cancelJumpCut(player) {
+        player.jumpPressedByUser = false;
+    }
+
+    // Applies an external velocity impulse (e.g. damage/enemy-bump knockback).
+    applyKnockback(player, vx, vy, becomesAirborne = false) {
+        player.vx = vx;
+        player.vy = vy;
+        this.cancelJumpCut(player);
+        if (becomesAirborne) {
+            player.airborne = true;
+        }
+    }
+
     // Decay the carry velocity inherited from a moving elevator
     applyCarryDecay(now, player) {
         if (player.carryVxInitial === 0) {
