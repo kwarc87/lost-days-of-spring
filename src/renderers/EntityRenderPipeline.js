@@ -72,12 +72,12 @@ export const ENTITY_RENDERERS = {
     },
     weaponUpgrade: {
         draw: DefaultCollectibleRenderer.drawWeaponUpgrade.bind(DefaultCollectibleRenderer),
-        mapDraw: null,
+        mapDraw: () => null,
         cull: true,
     },
     bullet: {
         draw: DefaultWeaponRenderer.draw.bind(DefaultWeaponRenderer),
-        mapDraw: null,
+        mapDraw: () => null,
         cull: true,
     },
     cannon: {
@@ -87,7 +87,7 @@ export const ENTITY_RENDERERS = {
     },
     cannonBullet: {
         draw: CannonBulletRenderer.draw.bind(CannonBulletRenderer),
-        mapDraw: null,
+        mapDraw: () => null,
         cull: true,
     },
     spike: {
@@ -97,22 +97,22 @@ export const ENTITY_RENDERERS = {
     },
     envPreBackground: {
         draw: DefaultWorldRenderer.drawEnvironmentItem.bind(DefaultWorldRenderer),
-        mapDraw: null,
+        mapDraw: () => null,
         cull: true,
     },
     envBackground: {
         draw: DefaultWorldRenderer.drawEnvironmentItem.bind(DefaultWorldRenderer),
-        mapDraw: null,
+        mapDraw: () => null,
         cull: true,
     },
     envForeground: {
         draw: DefaultWorldRenderer.drawEnvironmentItem.bind(DefaultWorldRenderer),
-        mapDraw: null,
+        mapDraw: () => null,
         cull: true,
     },
     envParallax: {
         draw: DefaultWorldRenderer.drawParallaxEnvironmentItem.bind(DefaultWorldRenderer),
-        mapDraw: null,
+        mapDraw: () => null,
         cull: false,
     },
     exit: {
@@ -123,7 +123,7 @@ export const ENTITY_RENDERERS = {
     checkpoint: {
         draw: CheckpointRenderer.draw.bind(CheckpointRenderer),
         mapDraw: MapCheckpointRenderer.draw.bind(MapCheckpointRenderer),
-        cull: false,
+        cull: true,
     },
     player: {
         draw: DefaultPlayerRenderer.draw.bind(DefaultPlayerRenderer),
@@ -143,7 +143,7 @@ export function drawEntity(ctx, game, key, obj, now) {
         player: game.player,
         type: obj.sprite,
     };
-    if (game.mapView && e.mapDraw) {
+    if (game.mapView) {
         e.mapDraw(ctx, obj, opts);
         return;
     }
