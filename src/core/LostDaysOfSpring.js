@@ -34,6 +34,7 @@ import { TeleportController } from "../systems/TeleportController.js";
 import { ProjectileController } from "../systems/ProjectileController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
 import { EnemyController } from "../systems/EnemyController.js";
+import { MessageController } from "../systems/MessageController.js";
 import { MapDiscovery } from "../services/MapDiscovery.js";
 import { rectsCollide } from "../utils/collision.js";
 import { InputController } from "../systems/InputController.js";
@@ -117,6 +118,9 @@ export class LostDaysOfSpring {
 
         // ====== ENEMIES ======
         this.enemyController = new EnemyController();
+
+        // ====== MESSAGES ======
+        this.messageController = new MessageController();
 
         // ====== TELEPORTS ======
         this.teleportController = new TeleportController();
@@ -278,14 +282,7 @@ export class LostDaysOfSpring {
         this.hearts = levelData.collectibles?.hearts ?? [];
         this.weaponUpgrades = levelData?.collectibles?.weaponUpgrades ?? [];
         this.setSpikes(levelData.spikes);
-        this.messages = levelData.messages ?? [];
-        this.activeMessage = null;
-        this.messageShownAt = null;
-        this.messagePending = null;
-        this.messagePendingAt = null;
-        this.activeArtifactMessage = null;
-        this.artifactMessageShownAt = null;
-        this.activeArtifactSource = null;
+        this.setMessages(levelData.messages);
         this.exits = levelData.exits ?? [];
         this.hiddenWalls = levelData.hiddenWalls ?? [];
         this.foregroundItems = levelData.foregroundItems ?? [];
@@ -305,7 +302,7 @@ export class LostDaysOfSpring {
         const checkpointItems = this.extractCheckpointItems();
         this.preBackgroundItems.push(...checkpointItems.back);
         this.foregroundItems.push(...checkpointItems.front);
-        this.messages.push(...checkpointItems.messages);
+        this.getMessages().push(...checkpointItems.messages);
         this.platforms.push(...checkpointItems.platforms);
         const teleportItems = this.extractTeleportItems();
         this.foregroundItems.push(...teleportItems.foreground);
@@ -322,7 +319,7 @@ export class LostDaysOfSpring {
             weaponUpgrades: this.weaponUpgrades,
             enemies: this.getEnemies(),
             elevators: this.getElevators(),
-            messages: this.messages,
+            messages: this.getMessages(),
             mapDiscovery: this.mapDiscovery,
         });
 
@@ -1259,7 +1256,7 @@ export class LostDaysOfSpring {
             weaponUpgrades: this.weaponUpgrades,
             enemies: this.getEnemies(),
             elevators: this.getElevators(),
-            messages: this.messages,
+            messages: this.getMessages(),
             mapDiscovery: this.mapDiscovery,
             levelStartAt: this.levelStartAt,
             totalPausedTime: this.totalPausedTime,
@@ -1329,9 +1326,7 @@ export class LostDaysOfSpring {
                 a.collected = true;
                 this.player.artifactsCount++;
                 if (a.message) {
-                    this.activeArtifactMessage = a.message;
-                    this.artifactMessageShownAt = now;
-                    this.activeArtifactSource = a;
+                    this.showArtifactMessage(a.message, a, now);
                 }
             }
         }
@@ -1341,8 +1336,7 @@ export class LostDaysOfSpring {
                 u.collected = true;
                 this.player.weapon = u?.weapon ?? this.player.weapon;
                 if (u.message) {
-                    this.activeMessage = u.message;
-                    this.messageShownAt = now;
+                    this.showWeaponMessage(u.message, now);
                 }
             }
         }
@@ -1576,6 +1570,39 @@ export class LostDaysOfSpring {
 
     adjustEnemiesForPause(pauseDuration) {
         this.enemyController.adjustForPause(pauseDuration);
+    }
+
+    // Single access point for messages — keeps ownership at MessageController.
+    getMessages() {
+        return this.messageController.getMessages();
+    }
+
+    setMessages(messages) {
+        this.messageController.setMessages(messages);
+    }
+
+    getActiveMessage() {
+        return this.messageController.getActiveMessage();
+    }
+
+    getActiveArtifactMessage() {
+        return this.messageController.getActiveArtifactMessage();
+    }
+
+    getActiveArtifactSource() {
+        return this.messageController.getActiveArtifactSource();
+    }
+
+    showWeaponMessage(message, now) {
+        this.messageController.showWeaponMessage(message, now);
+    }
+
+    showArtifactMessage(message, source, now) {
+        this.messageController.showArtifactMessage(message, source, now);
+    }
+
+    adjustMessagesForPause(pauseDuration) {
+        this.messageController.adjustForPause(pauseDuration);
     }
 
     updateDamageCooldown(now) {
@@ -1896,8 +1923,9 @@ export class LostDaysOfSpring {
             this.drawExitMessage();
         }
 
+        const activeMessage = this.getActiveMessage();
         if (
-            this.activeMessage &&
+            activeMessage &&
             !this.levelComplete &&
             !this.gameOver &&
             !this.mapView &&
@@ -1907,39 +1935,38 @@ export class LostDaysOfSpring {
             this.messageRenderer.drawMessagePanel(
                 this.ctx,
                 this.canvas,
-                this.activeMessage,
+                activeMessage,
                 this.getCamera(),
             );
         }
 
+        const activeArtifactMessage = this.getActiveArtifactMessage();
         if (
-            this.activeArtifactMessage &&
+            activeArtifactMessage &&
             !this.levelComplete &&
             !this.gameOver &&
             !this.mapView &&
             !this.isPaused &&
             !this.isArtifactGallery
         ) {
+            const activeArtifactSource = this.getActiveArtifactSource();
             this.messageRenderer.drawPanel(
                 this.ctx,
                 {
-                    title: this.activeArtifactMessage.title ?? null,
-                    lines: this.activeArtifactMessage.lines,
+                    title: activeArtifactMessage.title ?? null,
+                    lines: activeArtifactMessage.lines,
                 },
-                this.canvas.width / 2 +
-                    (this.activeArtifactMessage.offsetX ?? 0),
-                this.canvas.height -
-                    8 +
-                    (this.activeArtifactMessage.offsetY ?? 0),
+                this.canvas.width / 2 + (activeArtifactMessage.offsetX ?? 0),
+                this.canvas.height - 8 + (activeArtifactMessage.offsetY ?? 0),
                 {
                     anchorBottom: true,
                     bg: "#533794",
                     border: { color: "#fff", width: 2, steps: 3 },
-                    icon: this.activeArtifactSource
+                    icon: activeArtifactSource
                         ? {
-                              url: this.activeArtifactSource.url,
-                              sx: this.activeArtifactSource.cordX,
-                              sy: this.activeArtifactSource.cordY,
+                              url: activeArtifactSource.url,
+                              sx: activeArtifactSource.cordX,
+                              sy: activeArtifactSource.cordY,
                               sw: 16,
                               sh: 16,
                               size: 48,
@@ -2055,80 +2082,11 @@ export class LostDaysOfSpring {
     }
 
     updateArtifactMessage(now) {
-        if (
-            !this.activeArtifactMessage ||
-            this.artifactMessageShownAt === null
-        ) {
-            return;
-        }
-        if (
-            now - this.artifactMessageShownAt >=
-            this.activeArtifactMessage.displayTime
-        ) {
-            this.activeArtifactMessage = null;
-            this.artifactMessageShownAt = null;
-            this.activeArtifactSource = null;
-        }
+        this.messageController.updateArtifactMessage(now);
     }
 
     updateMessages(now) {
-        // State machine with two tracks:
-        // TIMED: activeMessage has displayTime — shown for a fixed duration, then auto-dismissed.
-        //   - while timer runs: only new (different) hit dismisses current and falls through to PROXIMITY
-        //   - on expiry: mark shown, clear, return
-        // PROXIMITY: no displayTime — shown while player is inside hitbox, with optional entry delay.
-        //   - messagePending tracks the current candidate; delay starts on first entry
-        //   - activeMessage is set once delay elapses
-        const hit =
-            this.messages.find((message) => {
-                if (message.strategy === "single" && message.shown) {
-                    return false;
-                }
-                return rectsCollide(this.player, message);
-            }) ?? null;
-
-        if (this.activeMessage?.displayTime && this.messageShownAt !== null) {
-            if (hit && hit !== this.activeMessage) {
-                // New message triggered — dismiss current and fall through to delay handling.
-                this.activeMessage.shown = true;
-                this.activeMessage = null;
-                this.messageShownAt = null;
-                // Do NOT return — fall through so the pending/delay system processes the new hit.
-            } else if (
-                now - this.messageShownAt <
-                this.activeMessage.displayTime
-            ) {
-                return;
-            } else {
-                // Timer expired — mark shown and clear.
-                this.activeMessage.shown = true;
-                this.activeMessage = null;
-                this.messageShownAt = null;
-                return;
-            }
-        }
-
-        if (this.activeMessage && !hit) {
-            // player just left the hitbox (no displayTime)
-            this.activeMessage.shown = true;
-        }
-
-        // Track when the player first entered the current message hitbox
-        if (hit !== this.messagePending) {
-            this.messagePending = hit;
-            this.messagePendingAt = hit ? now : null;
-        }
-
-        const wasActive = this.activeMessage === hit;
-        if (hit && now - this.messagePendingAt >= (hit.delay ?? 0)) {
-            this.activeMessage = hit;
-            if (hit.displayTime && !wasActive) {
-                this.messageShownAt = now;
-            }
-        } else {
-            this.activeMessage = null;
-            this.messageShownAt = null;
-        }
+        this.messageController.updateMessages(now, this.player);
     }
 
     updateCheckpoints(now) {
@@ -2337,6 +2295,20 @@ export class LostDaysOfSpring {
         const pauseDuration = performance.now() - this.pauseStartAt;
         this.totalPausedTime += pauseDuration;
 
+        this.adjustPlayerForPause(pauseDuration);
+        this.adjustMessagesForPause(pauseDuration);
+        this.adjustCannonsForPause(pauseDuration);
+        this.adjustElevatorsForPause(pauseDuration);
+        this.adjustEnemiesForPause(pauseDuration);
+        this.adjustTeleportsForPause(pauseDuration);
+        adjustAnimStartTime(pauseDuration);
+        this.simulatedTime += pauseDuration;
+        if (this.gameFadeIn.active) {
+            this.gameFadeIn.startTime += pauseDuration;
+        }
+    }
+
+    adjustPlayerForPause(pauseDuration) {
         if (this.player.lastHitTime) {
             this.player.lastHitTime += pauseDuration;
         }
@@ -2352,27 +2324,8 @@ export class LostDaysOfSpring {
         if (this.player.carryStartAt) {
             this.player.carryStartAt += pauseDuration;
         }
-        if (this.messageShownAt) {
-            this.messageShownAt += pauseDuration;
-        }
-        if (this.artifactMessageShownAt) {
-            this.artifactMessageShownAt += pauseDuration;
-        }
-        if (this.messagePendingAt) {
-            this.messagePendingAt += pauseDuration;
-        }
         if (this.player.knockbackUntil) {
             this.player.knockbackUntil += pauseDuration;
-        }
-
-        this.adjustCannonsForPause(pauseDuration);
-        this.adjustElevatorsForPause(pauseDuration);
-        this.adjustEnemiesForPause(pauseDuration);
-        this.adjustTeleportsForPause(pauseDuration);
-        adjustAnimStartTime(pauseDuration);
-        this.simulatedTime += pauseDuration;
-        if (this.gameFadeIn.active) {
-            this.gameFadeIn.startTime += pauseDuration;
         }
     }
 
