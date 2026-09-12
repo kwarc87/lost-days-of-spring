@@ -14,7 +14,7 @@ export const DefaultHubRenderer = {
         hasEnoughCoins,
         hasEnoughSplinters,
         currentLevelArtifactsCount,
-        hasEnoughArtifacts,
+        hasEnoughArtifacts
     ) {
         const collected = player.coinsCount;
         const total = currentLevelCollectiblesCount;
@@ -29,8 +29,7 @@ export const DefaultHubRenderer = {
         const heartGap = 8;
         const heartPadX = 14;
         const heartPadY = 10;
-        const heartsPanelW =
-            heartPadX * 2 + maxLife * heartW + (maxLife - 1) * heartGap;
+        const heartsPanelW = heartPadX * 2 + maxLife * heartW + (maxLife - 1) * heartGap;
         const heartsPanelH = heartPadY * 2 + heartH;
         const heartsPanelX = 12;
         const heartsPanelY = 12;
@@ -42,7 +41,7 @@ export const DefaultHubRenderer = {
             heartsPanelW,
             heartsPanelH,
             { color: "#3b1158", width: 2, steps: 3 },
-            "#3b1158",
+            "#3b1158"
         );
 
         for (let i = 0; i < maxLife; i++) {
@@ -53,7 +52,7 @@ export const DefaultHubRenderer = {
                 ctx,
                 { x: hx, y: hy, id: 0, w: heartW, h: heartH },
                 false,
-                0,
+                0
             );
         }
         ctx.globalAlpha = 1;
@@ -79,34 +78,23 @@ export const DefaultHubRenderer = {
 
         ctx.font = `24px "Silkscreen", monospace`;
 
-        const coinTextW = Math.ceil(
-            ctx.measureText(`${total} / ${total}`).width,
-        );
+        const coinTextW = Math.ceil(ctx.measureText(`${total} / ${total}`).width);
         const splinterTextW = Math.ceil(
-            ctx.measureText(
-                `${currentLevelSplintersCount} / ${currentLevelSplintersCount}`,
-            ).width,
+            ctx.measureText(`${currentLevelSplintersCount} / ${currentLevelSplintersCount}`).width
         );
         const artifactTextW = Math.ceil(
-            ctx.measureText(
-                `${currentLevelArtifactsCount} / ${currentLevelArtifactsCount}`,
-            ).width,
+            ctx.measureText(`${currentLevelArtifactsCount} / ${currentLevelArtifactsCount}`).width
         );
         const hasArtifacts = (currentLevelArtifactsCount ?? 0) > 0;
         const rowW = Math.max(
             ICON_SIZE + 8 + coinTextW,
             ICON_SIZE + 8 + splinterTextW,
-            ...(hasArtifacts ? [ICON_SIZE + 8 + artifactTextW] : []),
+            ...(hasArtifacts ? [ICON_SIZE + 8 + artifactTextW] : [])
         );
         const rowGap = 12;
         const boxW = panelPadX * 2 + rowW;
         const boxH = hasArtifacts
-            ? panelPadY * 2 +
-              ICON_SIZE +
-              rowGap +
-              ICON_SIZE +
-              rowGap +
-              ICON_SIZE
+            ? panelPadY * 2 + ICON_SIZE + rowGap + ICON_SIZE + rowGap + ICON_SIZE
             : panelPadY * 2 + ICON_SIZE + rowGap + ICON_SIZE;
         const boxX = Math.round(canvas.width - boxW - 12);
         const boxY = 12;
@@ -118,7 +106,7 @@ export const DefaultHubRenderer = {
             boxW,
             boxH,
             { color: "#3b1158", width: 2, steps: 3 },
-            "#3b1158",
+            "#3b1158"
         );
 
         ctx.textBaseline = "middle";
@@ -137,13 +125,11 @@ export const DefaultHubRenderer = {
         ctx.textAlign = "right";
         ctx.fillStyle = "#f0cc8b";
         ctx.fillText(coinSuffix, textRightX, coinIconY + ICON_SIZE / 2);
-        ctx.fillStyle = hasEnoughCoins
-            ? COLLECTED_OK_COLOR
-            : MESSAGES.STATS.ENEMIES_COLOR;
+        ctx.fillStyle = hasEnoughCoins ? COLLECTED_OK_COLOR : MESSAGES.STATS.ENEMIES_COLOR;
         ctx.fillText(
             String(collected),
             textRightX - ctx.measureText(coinSuffix).width,
-            coinIconY + ICON_SIZE / 2,
+            coinIconY + ICON_SIZE / 2
         );
 
         // Splinter row
@@ -155,13 +141,11 @@ export const DefaultHubRenderer = {
         ctx.fillStyle = "#f0cc8b";
         const splinterSuffix = ` / ${currentLevelSplintersCount ?? 0}`;
         ctx.fillText(splinterSuffix, textRightX, splinterIconY + ICON_SIZE / 2);
-        ctx.fillStyle = hasEnoughSplinters
-            ? COLLECTED_OK_COLOR
-            : MESSAGES.STATS.ENEMIES_COLOR;
+        ctx.fillStyle = hasEnoughSplinters ? COLLECTED_OK_COLOR : MESSAGES.STATS.ENEMIES_COLOR;
         ctx.fillText(
             String(player.splintersCount ?? 0),
             textRightX - ctx.measureText(splinterSuffix).width,
-            splinterIconY + ICON_SIZE / 2,
+            splinterIconY + ICON_SIZE / 2
         );
 
         // Artifact row
@@ -176,22 +160,16 @@ export const DefaultHubRenderer = {
                     cordY: 48,
                 },
                 false,
-                0,
+                0
             );
             ctx.fillStyle = "#f0cc8b";
             const artifactSuffix = ` / ${currentLevelArtifactsCount ?? 0}`;
-            ctx.fillText(
-                artifactSuffix,
-                textRightX,
-                artifactIconY + ICON_SIZE / 2,
-            );
-            ctx.fillStyle = hasEnoughArtifacts
-                ? COLLECTED_OK_COLOR
-                : MESSAGES.STATS.ENEMIES_COLOR;
+            ctx.fillText(artifactSuffix, textRightX, artifactIconY + ICON_SIZE / 2);
+            ctx.fillStyle = hasEnoughArtifacts ? COLLECTED_OK_COLOR : MESSAGES.STATS.ENEMIES_COLOR;
             ctx.fillText(
                 String(player.artifactsCount ?? 0),
                 textRightX - ctx.measureText(artifactSuffix).width,
-                artifactIconY + ICON_SIZE / 2,
+                artifactIconY + ICON_SIZE / 2
             );
         }
 

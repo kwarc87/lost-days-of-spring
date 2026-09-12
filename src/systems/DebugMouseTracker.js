@@ -13,12 +13,8 @@ export class DebugMouseTracker {
             const rect = this.canvas.getBoundingClientRect();
             const scaleX = this.canvas.width / rect.width;
             const scaleY = this.canvas.height / rect.height;
-            this.worldX = Math.round(
-                (e.clientX - rect.left) * scaleX + this.getCamera().x,
-            );
-            this.worldY = Math.round(
-                (e.clientY - rect.top) * scaleY + this.getCamera().y,
-            );
+            this.worldX = Math.round((e.clientX - rect.left) * scaleX + this.getCamera().x);
+            this.worldY = Math.round((e.clientY - rect.top) * scaleY + this.getCamera().y);
             onMove?.();
         };
         this.canvas.addEventListener("mousemove", this.mouseMoveHandler);

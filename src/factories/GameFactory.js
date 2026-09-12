@@ -126,15 +126,7 @@ export const GameFactory = {
         layout,
         ...(color !== undefined && { color }),
     }),
-    oneDirection: ({
-        id,
-        x,
-        y,
-        w,
-        h,
-        layout = "boardOneDirection",
-        ...rest
-    } = {}) => ({
+    oneDirection: ({ id, x, y, w, h, layout = "boardOneDirection", ...rest } = {}) => ({
         id,
         x,
         y,
@@ -202,16 +194,7 @@ export const GameFactory = {
             layout,
         };
     },
-    enemy: ({
-        id,
-        startX,
-        targetX,
-        startY,
-        targetY,
-        speed = 1.5,
-        health = 15,
-        ...rest
-    } = {}) => {
+    enemy: ({ id, startX, targetX, startY, targetY, speed = 1.5, health = 15, ...rest } = {}) => {
         const dx = targetX - startX;
         const dy = targetY - startY;
         const length = Math.hypot(dx, dy);
@@ -363,13 +346,7 @@ export const GameFactory = {
             ...rest,
         });
         if (message && typeof message === "object") {
-            const {
-                offsetX = 0,
-                offsetY = 0,
-                title,
-                lines,
-                displayTime = 7000,
-            } = message;
+            const { offsetX = 0, offsetY = 0, title, lines, displayTime = 7000 } = message;
             base.message = GameFactory.message({
                 id: `artifact-${id}-msg`,
                 x,
@@ -431,7 +408,7 @@ export const GameFactory = {
                 id: startId + i,
                 x: startX + i * gap,
                 y,
-            }),
+            })
         ),
     columnOfCollectibles: ({ startId, count, x, startY, gap } = {}) =>
         Array.from({ length: count }, (_, i) =>
@@ -439,26 +416,16 @@ export const GameFactory = {
                 id: startId + i,
                 x,
                 y: startY + i * gap,
-            }),
+            })
         ),
-    rowOfSpikes: ({
-        startId,
-        count,
-        startX,
-        y,
-        position = "down",
-        damage = 1,
-    } = {}) => {
+    rowOfSpikes: ({ startId, count, startX, y, position = "down", damage = 1 } = {}) => {
         return Array.from({ length: count }, (_, i) => {
             const firstItemAdditionalMargin = i === 0 ? 12 : 0;
             const lastItemAdditionalMargin = i === count - 1 ? 12 : 0;
             const spikeW = 16 * GameFactory.SCALE;
             const variant = (i % 2) + 1;
-            const isLastUpVariant2 =
-                position === "up" && i === count - 1 && variant === 2;
-            const extraOffsetX = isLastUpVariant2
-                ? -lastItemAdditionalMargin
-                : 0;
+            const isLastUpVariant2 = position === "up" && i === count - 1 && variant === 2;
+            const extraOffsetX = isLastUpVariant2 ? -lastItemAdditionalMargin : 0;
             return GameFactory.spike({
                 id: startId + i,
                 x: startX + i * spikeW + firstItemAdditionalMargin,
@@ -466,10 +433,7 @@ export const GameFactory = {
                 variant,
                 position,
                 damage,
-                w:
-                    spikeW -
-                    firstItemAdditionalMargin -
-                    lastItemAdditionalMargin,
+                w: spikeW - firstItemAdditionalMargin - lastItemAdditionalMargin,
                 offsetX: -firstItemAdditionalMargin + extraOffsetX,
             });
         });
@@ -750,7 +714,7 @@ export const GameFactory = {
                     x,
                     y: y + i * 16 * GameFactory.SCALE,
                     ...rest,
-                }),
+                })
             ),
         wallSharpRightTop: ({ x, y, ...rest } = {}) => ({
             x,
@@ -838,7 +802,7 @@ export const GameFactory = {
                     x,
                     y: y + i * 16 * GameFactory.SCALE,
                     ...rest,
-                }),
+                })
             ),
         wallSharpHole: ({ x, y, ...rest } = {}) => ({
             x,
@@ -944,16 +908,7 @@ export const GameFactory = {
             },
             ...rest,
         }),
-        enemy: ({
-            id,
-            startX,
-            targetX,
-            startY,
-            targetY,
-            speed,
-            health,
-            ...rest
-        } = {}) =>
+        enemy: ({ id, startX, targetX, startY, targetY, speed, health, ...rest } = {}) =>
             GameFactory.enemy({
                 id,
                 startX: startX * GameFactory.GRID,
@@ -964,16 +919,7 @@ export const GameFactory = {
                 health,
                 ...rest,
             }),
-        slime: ({
-            id,
-            startX,
-            targetX,
-            startY,
-            targetY,
-            speed,
-            health,
-            ...rest
-        } = {}) =>
+        slime: ({ id, startX, targetX, startY, targetY, speed, health, ...rest } = {}) =>
             GameFactory.slime({
                 id,
                 startX: startX * GameFactory.GRID,
@@ -984,16 +930,7 @@ export const GameFactory = {
                 health,
                 ...rest,
             }),
-        evilEye: ({
-            id,
-            startX,
-            targetX,
-            startY,
-            targetY,
-            speed,
-            health,
-            ...rest
-        } = {}) =>
+        evilEye: ({ id, startX, targetX, startY, targetY, speed, health, ...rest } = {}) =>
             GameFactory.evilEye({
                 id,
                 startX: startX * GameFactory.GRID,
@@ -1108,15 +1045,7 @@ export const GameFactory = {
                 airDeceleration,
                 layout,
             }),
-        oneDirection: ({
-            id,
-            x,
-            y,
-            w,
-            h,
-            layout = "boardOneDirection",
-            ...rest
-        } = {}) =>
+        oneDirection: ({ id, x, y, w, h, layout = "boardOneDirection", ...rest } = {}) =>
             GameFactory.oneDirection({
                 id,
                 x: x * GameFactory.GRID,
@@ -1206,10 +1135,8 @@ export const GameFactory = {
                     ? {
                           message: {
                               ...message,
-                              offsetX:
-                                  (message.offsetX ?? 0) * GameFactory.GRID,
-                              offsetY:
-                                  (message.offsetY ?? 0) * GameFactory.GRID,
+                              offsetX: (message.offsetX ?? 0) * GameFactory.GRID,
+                              offsetY: (message.offsetY ?? 0) * GameFactory.GRID,
                           },
                       }
                     : message !== undefined && { message }),
@@ -1245,14 +1172,7 @@ export const GameFactory = {
                 startY: y * GameFactory.GRID + 8,
                 gap: gap * GameFactory.GRID,
             }).map((c) => ({ ...c, w: 48, h: 48 })),
-        rowOfSpikes: ({
-            startId,
-            count,
-            x,
-            y,
-            position = "down",
-            damage = 1,
-        } = {}) =>
+        rowOfSpikes: ({ startId, count, x, y, position = "down", damage = 1 } = {}) =>
             GameFactory.rowOfSpikes({
                 startId,
                 count,
@@ -1281,15 +1201,7 @@ export const GameFactory = {
                 offsetX,
                 offsetY,
             }),
-        checkpoint: ({
-            id,
-            x,
-            y,
-            w,
-            h,
-            reached = false,
-            message = {},
-        } = {}) => {
+        checkpoint: ({ id, x, y, w, h, reached = false, message = {} } = {}) => {
             const cp = {
                 ...GameFactory.checkpoint({
                     id,

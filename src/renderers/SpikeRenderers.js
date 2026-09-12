@@ -25,12 +25,7 @@ export const DefaultSpikeRenderer = {
         if (up) {
             ctx.translate(
                 Math.round(spike.x + (SPIKE_SW * SPIKE_SCALE) / 2 + ox),
-                Math.round(
-                    spike.y +
-                        (SPIKE_SH * SPIKE_SCALE) / 2 -
-                        3 * GameFactory.SCALE +
-                        oy,
-                ),
+                Math.round(spike.y + (SPIKE_SH * SPIKE_SCALE) / 2 - 3 * GameFactory.SCALE + oy)
             );
             ctx.rotate(Math.PI);
             ctx.drawImage(
@@ -42,7 +37,7 @@ export const DefaultSpikeRenderer = {
                 (-SPIKE_SW * SPIKE_SCALE) / 2,
                 (-SPIKE_SH * SPIKE_SCALE) / 2,
                 SPIKE_SW * SPIKE_SCALE,
-                SPIKE_SH * SPIKE_SCALE,
+                SPIKE_SH * SPIKE_SCALE
             );
         } else {
             ctx.drawImage(
@@ -54,7 +49,7 @@ export const DefaultSpikeRenderer = {
                 Math.round(spike.x + ox),
                 Math.round(spike.y + oy) - 4,
                 SPIKE_SW * SPIKE_SCALE,
-                SPIKE_SH * SPIKE_SCALE,
+                SPIKE_SH * SPIKE_SCALE
             );
         }
 

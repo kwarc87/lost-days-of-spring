@@ -12,15 +12,7 @@ const OUTLINE_COLOR = "#3b1158";
 const TITLE_OUTLINE_WIDTH = 18;
 const TEXT_OUTLINE_WIDTH = 8;
 
-function drawOutlinedText(
-    ctx,
-    text,
-    x,
-    y,
-    fillColor,
-    outlineColor,
-    outlineWidth,
-) {
+function drawOutlinedText(ctx, text, x, y, fillColor, outlineColor, outlineWidth) {
     ctx.strokeStyle = outlineColor;
     ctx.lineWidth = outlineWidth;
     ctx.lineJoin = "mitel";
@@ -48,9 +40,7 @@ export const TitleScreenRenderer = {
         const bgBack = getImg("textures/background/background.png");
         if (bgBack.complete && bgBack.naturalWidth > 0) {
             const drawH = h;
-            const drawW = Math.round(
-                bgBack.naturalWidth * (h / bgBack.naturalHeight),
-            );
+            const drawW = Math.round(bgBack.naturalWidth * (h / bgBack.naturalHeight));
             const ox = ((offsetBack % drawW) + drawW) % drawW;
             for (let x = ox - drawW; x < w; x += drawW) {
                 ctx.drawImage(bgBack, x, 0, drawW, drawH);
@@ -81,7 +71,7 @@ export const TitleScreenRenderer = {
             titleY,
             TITLE_COLOR,
             OUTLINE_COLOR,
-            TITLE_OUTLINE_WIDTH,
+            TITLE_OUTLINE_WIDTH
         );
 
         // ── Press Enter prompt (blinking) ──────────────────────
@@ -89,9 +79,7 @@ export const TitleScreenRenderer = {
         const visible = Math.floor(performance.now() / BLINK_PERIOD) % 2 === 0;
 
         if (visible) {
-            const promptText = hasSave
-                ? "Press Enter to continue"
-                : "Press Enter to start";
+            const promptText = hasSave ? "Press Enter to continue" : "Press Enter to start";
             ctx.font = PROMPT_FONT;
             ctx.textBaseline = "middle";
             const promptY = Math.round(h * 0.54);
@@ -118,7 +106,7 @@ export const TitleScreenRenderer = {
             creditsY,
             CREDITS_COLOR,
             OUTLINE_COLOR,
-            TEXT_OUTLINE_WIDTH / 2,
+            TEXT_OUTLINE_WIDTH / 2
         );
 
         // ── Skull decorations ──────────────────────────────────
@@ -162,7 +150,7 @@ export const TitleScreenRenderer = {
                 width: h + TILE * 2,
                 height: TILE * 3,
                 margin: 0,
-            },
+            }
         );
         ctx.restore();
 
@@ -185,7 +173,7 @@ export const TitleScreenRenderer = {
                 width: h + TILE * 2,
                 height: TILE * 3,
                 margin: 0,
-            },
+            }
         );
         ctx.restore();
 

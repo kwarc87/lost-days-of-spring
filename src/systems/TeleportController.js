@@ -62,19 +62,12 @@ export class TeleportController {
             player.isInTeleport = true;
             (inOrigin ? t.originItem : t.targetItem).cordX = 96;
 
-            if (
-                t.playerEnteredAt === null &&
-                !t.justTeleported &&
-                t.frozenAt === null
-            ) {
+            if (t.playerEnteredAt === null && !t.justTeleported && t.frozenAt === null) {
                 t.playerEnteredAt = now;
                 t.enteredOrigin = inOrigin;
             }
 
-            if (
-                t.playerEnteredAt !== null &&
-                now - t.playerEnteredAt >= t.delay
-            ) {
+            if (t.playerEnteredAt !== null && now - t.playerEnteredAt >= t.delay) {
                 t.frozenAt = now;
                 t.playerEnteredAt = null;
                 player.vx = 0;
@@ -85,9 +78,7 @@ export class TeleportController {
             }
 
             if (t.frozenAt !== null && now - t.frozenAt >= t.frozenDelay) {
-                const [dx, dy] = t.enteredOrigin
-                    ? [t.targetX, t.targetY]
-                    : [t.x, t.y];
+                const [dx, dy] = t.enteredOrigin ? [t.targetX, t.targetY] : [t.x, t.y];
                 player.x = dx + t.w / 2 - player.w / 2;
                 player.y = dy + t.h - player.h;
                 player.vx = 0;

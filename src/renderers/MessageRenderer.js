@@ -63,19 +63,11 @@ export const MessageRenderer = {
             ctx,
             { title: message.title ?? null, lines: message.lines },
             anchorX,
-            anchorY,
+            anchorY
         );
     },
 
-    drawBackground(
-        ctx,
-        panelX,
-        panelY,
-        panelW,
-        panelH,
-        border = null,
-        bg = BG_COLOR,
-    ) {
+    drawBackground(ctx, panelX, panelY, panelW, panelH, border = null, bg = BG_COLOR) {
         if (border) {
             const { color, width: b, steps: s } = border;
             pixelRoundRectPath(ctx, panelX, panelY, panelW, panelH, b, s);
@@ -89,7 +81,7 @@ export const MessageRenderer = {
                     panelW - b * 2,
                     panelH - b * 2,
                     b,
-                    s,
+                    s
                 );
                 ctx.fillStyle = bg;
                 ctx.fill();
@@ -118,10 +110,7 @@ export const MessageRenderer = {
         ctx.font = FONT_BODY;
         for (const l of lines) {
             const w = l.segments
-                ? l.segments.reduce(
-                      (s, seg) => s + ctx.measureText(seg.text).width,
-                      0,
-                  )
+                ? l.segments.reduce((s, seg) => s + ctx.measureText(seg.text).width, 0)
                 : ctx.measureText(l.text).width;
             maxW = Math.max(maxW, w);
         }
@@ -156,7 +145,7 @@ export const MessageRenderer = {
                 width: BORDER_WIDTH,
                 steps: CORNER_STEPS,
             },
-            opts.bg ?? BG_COLOR,
+            opts.bg ?? BG_COLOR
         );
 
         if (icon) {
@@ -175,7 +164,7 @@ export const MessageRenderer = {
                     iconX,
                     iconY,
                     icon.size,
-                    icon.size,
+                    icon.size
                 );
                 ctx.restore();
             }
@@ -199,11 +188,7 @@ export const MessageRenderer = {
             ctx.font = FONT_TITLE;
             ctx.textAlign = "center";
             ctx.fillStyle = SHADOW_COLOR;
-            ctx.fillText(
-                title.text,
-                textAnchorX + SHADOW_OFFSET,
-                curY + SHADOW_OFFSET,
-            );
+            ctx.fillText(title.text, textAnchorX + SHADOW_OFFSET, curY + SHADOW_OFFSET);
             ctx.fillStyle = title.color ?? "#fff";
             ctx.fillText(title.text, textAnchorX, curY);
             curY += TITLE_H + GAP_AFTER_TITLE;
@@ -213,10 +198,7 @@ export const MessageRenderer = {
         for (let i = 0; i < lines.length; i++) {
             const l = lines[i];
             if (l.segments) {
-                const lineW = l.segments.reduce(
-                    (s, seg) => s + ctx.measureText(seg.text).width,
-                    0,
-                );
+                const lineW = l.segments.reduce((s, seg) => s + ctx.measureText(seg.text).width, 0);
                 let cx = Math.round(textAnchorX - lineW / 2);
                 ctx.textAlign = "left";
                 for (const { text, color } of l.segments) {
@@ -227,11 +209,7 @@ export const MessageRenderer = {
             } else {
                 ctx.textAlign = "center";
                 ctx.fillStyle = SHADOW_COLOR;
-                ctx.fillText(
-                    l.text,
-                    textAnchorX + SHADOW_OFFSET,
-                    curY + SHADOW_OFFSET,
-                );
+                ctx.fillText(l.text, textAnchorX + SHADOW_OFFSET, curY + SHADOW_OFFSET);
                 ctx.fillStyle = l.color ?? "#fff";
                 ctx.fillText(l.text, textAnchorX, curY);
             }

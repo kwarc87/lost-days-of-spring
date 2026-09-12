@@ -23,10 +23,7 @@ export class ElevatorController {
     }
 
     isPlayerOn(player, elevatorId) {
-        return (
-            player.onGroundType === "elevator" &&
-            player.onGroundId === elevatorId
-        );
+        return player.onGroundType === "elevator" && player.onGroundId === elevatorId;
     }
 
     adjustForPause(pauseDuration) {
@@ -37,17 +34,7 @@ export class ElevatorController {
         }
     }
 
-    update(
-        now,
-        {
-            player,
-            platforms,
-            enemies,
-            isVisibleInCamera,
-            onPlatformLanding,
-            onPlayerHit,
-        },
-    ) {
+    update(now, { player, platforms, enemies, isVisibleInCamera, onPlatformLanding, onPlayerHit }) {
         for (const e of this.elevators) {
             e.previousX = e.x;
             e.previousY = e.y;
@@ -61,22 +48,14 @@ export class ElevatorController {
             const offScreen = !isVisibleInCamera(e, this.cameraMargin);
             const speed = offScreen ? this.speedOutsideCamera : e.speed;
 
-            const playerIsOnElevator = offScreen
-                ? false
-                : this.isPlayerOn(player, e.id);
+            const playerIsOnElevator = offScreen ? false : this.isPlayerOn(player, e.id);
 
             const moveX = e.dirX * speed * e.direction;
             const moveY = e.dirY * speed * e.direction;
 
             const { shouldSkip, picksUp } = offScreen
                 ? { shouldSkip: false, picksUp: false }
-                : this.checkPlayerBlock(
-                      e,
-                      player,
-                      moveX,
-                      moveY,
-                      playerIsOnElevator,
-                  );
+                : this.checkPlayerBlock(e, player, moveX, moveY, playerIsOnElevator);
             if (shouldSkip) {
                 continue;
             }
@@ -85,16 +64,12 @@ export class ElevatorController {
             const previousY = e.y;
 
             this.move(e, moveX, moveY, now);
-            this.applyToPlayer(
-                e,
-                player,
-                previousX,
-                previousY,
-                picksUp,
-                playerIsOnElevator,
-                now,
-                { platforms, enemies, onPlatformLanding, onPlayerHit },
-            );
+            this.applyToPlayer(e, player, previousX, previousY, picksUp, playerIsOnElevator, now, {
+                platforms,
+                enemies,
+                onPlatformLanding,
+                onPlayerHit,
+            });
         }
     }
 
@@ -112,16 +87,12 @@ export class ElevatorController {
             h: e.h + Math.abs(moveY),
         };
 
-        const playerBlocksElevator =
-            !playerIsOnElevator && rectsCollide(player, sweptElevator);
+        const playerBlocksElevator = !playerIsOnElevator && rectsCollide(player, sweptElevator);
 
         // Elevator moving upward reaches a player standing just above it —
         // instead of bouncing, pick the player up.
         const picksUp =
-            playerBlocksElevator &&
-            moveY < 0 &&
-            !player.airborne &&
-            player.y + player.h <= e.y;
+            playerBlocksElevator && moveY < 0 && !player.airborne && player.y + player.h <= e.y;
 
         if (playerBlocksElevator && !picksUp) {
             if (!player.airborne) {
@@ -144,12 +115,12 @@ export class ElevatorController {
         const passedX = hasPassedTarget(
             e.x,
             e.direction === 1 ? e.targetX : e.startX,
-            e.direction === 1 ? signX : -signX,
+            e.direction === 1 ? signX : -signX
         );
         const passedY = hasPassedTarget(
             e.y,
             e.direction === 1 ? e.targetY : e.startY,
-            e.direction === 1 ? signY : -signY,
+            e.direction === 1 ? signY : -signY
         );
 
         if (passedX && passedY) {
@@ -176,7 +147,7 @@ export class ElevatorController {
         picksUp,
         playerIsOnElevator,
         now,
-        { platforms, enemies, onPlatformLanding, onPlayerHit },
+        { platforms, enemies, onPlatformLanding, onPlayerHit }
     ) {
         const actualMoveX = e.x - previousX;
         const actualMoveY = e.y - previousY;
@@ -188,22 +159,16 @@ export class ElevatorController {
                 w: player.w,
                 h: player.h,
             };
-            const wouldHitPlatform = platforms.some((p) =>
-                rectsCollide(nextPlayer, p),
-            );
+            const wouldHitPlatform = platforms.some((p) => rectsCollide(nextPlayer, p));
             const blockingEnemy = enemies.find(
-                (enemy) =>
-                    !enemy.dead &&
-                    !enemy.dying &&
-                    rectsCollide(nextPlayer, enemy),
+                (enemy) => !enemy.dead && !enemy.dying && rectsCollide(nextPlayer, enemy)
             );
             if ((wouldHitPlatform || blockingEnemy) && actualMoveY < 0) {
                 e.x = previousX;
                 e.y = previousY;
                 e.direction = -e.direction;
                 if (blockingEnemy) {
-                    const cooldownIsActive =
-                        now - player.lastHitTime < player.hitCooldown;
+                    const cooldownIsActive = now - player.lastHitTime < player.hitCooldown;
                     if (!cooldownIsActive) {
                         onPlayerHit(now, blockingEnemy);
                     }

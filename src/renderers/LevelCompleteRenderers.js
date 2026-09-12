@@ -28,7 +28,7 @@ export const DefaultLevelCompleteRenderer = {
         playTime,
         deathCount,
         artifactsCount,
-        totalArtifacts,
+        totalArtifacts
     ) => {
         const w = canvas.width;
         const h = canvas.height;
@@ -37,10 +37,7 @@ export const DefaultLevelCompleteRenderer = {
         const splinterCountText = `${splintersCount} / ${totalSplinters}`;
         const artifactCountText = `${artifactsCount ?? 0} / ${totalArtifacts ?? 0}`;
         const hasArtifacts = (totalArtifacts ?? 0) > 0;
-        const enemiesText = MESSAGES.STATS.ENEMIES_TEXT(
-            enemiesCount,
-            totalEnemies,
-        );
+        const enemiesText = MESSAGES.STATS.ENEMIES_TEXT(enemiesCount, totalEnemies);
         const deathsText = MESSAGES.LEVEL_COMPLETE.DEATHS_TEXT(deathCount);
         const timeText = MESSAGES.STATS.TIME_TEXT(formatPlayTime(playTime));
         const hintText = MESSAGES.LEVEL_COMPLETE.RESTART_HINT.text;
@@ -48,29 +45,16 @@ export const DefaultLevelCompleteRenderer = {
         ctx.save();
 
         ctx.font = TITLE_FONT;
-        const titleW = Math.ceil(
-            ctx.measureText(MESSAGES.LEVEL_COMPLETE.TITLE).width,
-        );
+        const titleW = Math.ceil(ctx.measureText(MESSAGES.LEVEL_COMPLETE.TITLE).width);
 
         ctx.font = SUB_FONT;
-        const subtitleW = Math.ceil(
-            ctx.measureText(MESSAGES.LEVEL_COMPLETE.SUBTITLE).width,
-        );
-        const subtitle2W = Math.ceil(
-            ctx.measureText(MESSAGES.LEVEL_COMPLETE.SUBTITLE2).width,
-        );
-        const coinRowW =
-            ICON_SIZE +
-            ICON_GAP +
-            Math.ceil(ctx.measureText(coinCountText).width);
+        const subtitleW = Math.ceil(ctx.measureText(MESSAGES.LEVEL_COMPLETE.SUBTITLE).width);
+        const subtitle2W = Math.ceil(ctx.measureText(MESSAGES.LEVEL_COMPLETE.SUBTITLE2).width);
+        const coinRowW = ICON_SIZE + ICON_GAP + Math.ceil(ctx.measureText(coinCountText).width);
         const splinterRowW =
-            ICON_SIZE +
-            ICON_GAP +
-            Math.ceil(ctx.measureText(splinterCountText).width);
+            ICON_SIZE + ICON_GAP + Math.ceil(ctx.measureText(splinterCountText).width);
         const artifactRowW =
-            ICON_SIZE +
-            ICON_GAP +
-            Math.ceil(ctx.measureText(artifactCountText).width);
+            ICON_SIZE + ICON_GAP + Math.ceil(ctx.measureText(artifactCountText).width);
 
         const panelW =
             Math.max(
@@ -83,7 +67,7 @@ export const DefaultLevelCompleteRenderer = {
                 Math.ceil(ctx.measureText(enemiesText).width),
                 Math.ceil(ctx.measureText(deathsText).width),
                 Math.ceil(ctx.measureText(timeText).width),
-                Math.ceil(ctx.measureText(hintText).width),
+                Math.ceil(ctx.measureText(hintText).width)
             ) +
             PAD_X * 2;
 
@@ -122,54 +106,34 @@ export const DefaultLevelCompleteRenderer = {
             panelW,
             panelH,
             { color: "#fff", width: 2, steps: 3 },
-            "#3b1158",
+            "#3b1158"
         );
 
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         ctx.font = TITLE_FONT;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillText(
-            MESSAGES.LEVEL_COMPLETE.TITLE,
-            w / 2 + 1,
-            panelY + PAD_Y + 1,
-        );
+        ctx.fillText(MESSAGES.LEVEL_COMPLETE.TITLE, w / 2 + 1, panelY + PAD_Y + 1);
         ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.TITLE_COLOR;
         ctx.fillText(MESSAGES.LEVEL_COMPLETE.TITLE, w / 2, panelY + PAD_Y);
 
         ctx.font = SUB_FONT;
         const subtitleY = panelY + PAD_Y + TITLE_H + SUB_GAP;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillText(
-            MESSAGES.LEVEL_COMPLETE.SUBTITLE,
-            w / 2 + 1,
-            subtitleY + 1,
-        );
+        ctx.fillText(MESSAGES.LEVEL_COMPLETE.SUBTITLE, w / 2 + 1, subtitleY + 1);
         ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.SUBTITLE_COLOR;
         ctx.fillText(MESSAGES.LEVEL_COMPLETE.SUBTITLE, w / 2, subtitleY);
 
         const subtitle2Y = subtitleY + LINE_H + SUB_GAP;
         ctx.fillStyle = "rgba(0,0,0,0.55)";
-        ctx.fillText(
-            MESSAGES.LEVEL_COMPLETE.SUBTITLE2,
-            w / 2 + 1,
-            subtitle2Y + 1,
-        );
+        ctx.fillText(MESSAGES.LEVEL_COMPLETE.SUBTITLE2, w / 2 + 1, subtitle2Y + 1);
         ctx.fillStyle = MESSAGES.LEVEL_COMPLETE.SUBTITLE_COLOR;
         ctx.fillText(MESSAGES.LEVEL_COMPLETE.SUBTITLE2, w / 2, subtitle2Y);
 
         ctx.imageSmoothingEnabled = false;
         const textOffY = Math.round((ICON_SIZE - LINE_H) / 2);
 
-        const coinsRowY =
-            panelY +
-            PAD_Y +
-            TITLE_H +
-            SUB_GAP +
-            LINE_H +
-            SUB_GAP +
-            LINE_H +
-            GAP;
+        const coinsRowY = panelY + PAD_Y + TITLE_H + SUB_GAP + LINE_H + SUB_GAP + LINE_H + GAP;
         const coinsRowX = Math.round(w / 2 - coinRowW / 2);
         DefaultCollectibleRenderer.drawCoin(ctx, {
             x: coinsRowX,
@@ -179,11 +143,7 @@ export const DefaultLevelCompleteRenderer = {
         });
         ctx.textAlign = "left";
         ctx.fillStyle = MESSAGES.STATS.COINS_COLOR;
-        ctx.fillText(
-            coinCountText,
-            coinsRowX + ICON_SIZE + ICON_GAP,
-            coinsRowY + textOffY,
-        );
+        ctx.fillText(coinCountText, coinsRowX + ICON_SIZE + ICON_GAP, coinsRowY + textOffY);
 
         const splinterRowY = coinsRowY + ICON_SIZE + GAP;
         const splinterRowX = Math.round(w / 2 - splinterRowW / 2);
@@ -197,7 +157,7 @@ export const DefaultLevelCompleteRenderer = {
         ctx.fillText(
             splinterCountText,
             splinterRowX + ICON_SIZE + ICON_GAP,
-            splinterRowY + textOffY,
+            splinterRowY + textOffY
         );
 
         let artifactBaseY = splinterRowY + ICON_SIZE;
@@ -215,14 +175,14 @@ export const DefaultLevelCompleteRenderer = {
                     cordY: 48,
                 },
                 false,
-                0,
+                0
             );
             ctx.fillStyle = MESSAGES.STATS.ARTIFACTS_COLOR;
             ctx.textAlign = "left";
             ctx.fillText(
                 artifactCountText,
                 artifactRowX + ICON_SIZE + ICON_GAP,
-                artifactRowY + textOffY,
+                artifactRowY + textOffY
             );
             artifactBaseY = artifactRowY + ICON_SIZE;
         }

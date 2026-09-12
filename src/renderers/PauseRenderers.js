@@ -11,12 +11,7 @@ const TRIANGLE_COLOR = "#f5c542";
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
 const SHADOW_OFFSET = 1;
 
-const MENU_ITEMS = [
-    "Resume game",
-    "Artifact gallery",
-    "Reset progress",
-    "Return to main screen",
-];
+const MENU_ITEMS = ["Resume game", "Artifact gallery", "Reset progress", "Return to main screen"];
 
 const PAD_X = 24;
 const PAD_Y = 18;
@@ -67,7 +62,7 @@ export const DefaultPauseRenderer = {
         const titleW = ctx.measureText("PAUSED").width;
         ctx.font = FONT_BODY;
         const timeW = ctx.measureText(timeText).width;
-        const panelW = Math.ceil(Math.max(contentW, titleW)) + PAD_X * 2;
+        const panelW = Math.ceil(Math.max(contentW, titleW, timeW)) + PAD_X * 2;
         const panelH =
             PAD_Y +
             TITLE_H +
@@ -88,7 +83,7 @@ export const DefaultPauseRenderer = {
             panelW,
             panelH,
             { color: "#fff", width: 2, steps: 3 },
-            "#3b1158",
+            "#3b1158"
         );
 
         // Title
@@ -96,11 +91,7 @@ export const DefaultPauseRenderer = {
         ctx.textBaseline = "top";
         ctx.textAlign = "center";
         ctx.fillStyle = SHADOW_COLOR;
-        ctx.fillText(
-            "PAUSED",
-            w / 2 + SHADOW_OFFSET,
-            panelY + PAD_Y + SHADOW_OFFSET,
-        );
+        ctx.fillText("PAUSED", w / 2 + SHADOW_OFFSET, panelY + PAD_Y + SHADOW_OFFSET);
         ctx.fillStyle = TITLE_COLOR;
         ctx.fillText("PAUSED", w / 2, panelY + PAD_Y);
 
@@ -117,12 +108,10 @@ export const DefaultPauseRenderer = {
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
 
-        const itemsStartY =
-            panelY + PAD_Y + TITLE_H + TIME_GAP + TIME_H + TITLE_GAP;
+        const itemsStartY = panelY + PAD_Y + TITLE_H + TIME_GAP + TIME_H + TITLE_GAP;
 
         for (let i = 0; i < MENU_ITEMS.length; i++) {
-            const itemCenterY =
-                itemsStartY + i * (ITEM_H + ITEM_GAP) + ITEM_H / 2;
+            const itemCenterY = itemsStartY + i * (ITEM_H + ITEM_GAP) + ITEM_H / 2;
             const isSelected = i === selectedIndex;
             const textX = panelX + PAD_X + TRIANGLE_W + TRIANGLE_PAD;
 
@@ -138,11 +127,7 @@ export const DefaultPauseRenderer = {
             }
 
             ctx.fillStyle = SHADOW_COLOR;
-            ctx.fillText(
-                MENU_ITEMS[i],
-                textX + SHADOW_OFFSET,
-                itemCenterY + SHADOW_OFFSET,
-            );
+            ctx.fillText(MENU_ITEMS[i], textX + SHADOW_OFFSET, itemCenterY + SHADOW_OFFSET);
             ctx.fillStyle = isSelected ? ITEM_COLOR : ITEM_DIMMED_COLOR;
             ctx.fillText(MENU_ITEMS[i], textX, itemCenterY);
         }

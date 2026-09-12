@@ -1,13 +1,7 @@
 import { GameFactory } from "../factories/GameFactory.js";
 
 export const DebugGridRenderer = {
-    draw(
-        ctx,
-        camera,
-        worldSize,
-        gapX = GameFactory.GRID,
-        gapY = GameFactory.GRID,
-    ) {
+    draw(ctx, camera, worldSize, gapX = GameFactory.GRID, gapY = GameFactory.GRID) {
         ctx.save();
         ctx.strokeStyle = "white";
         ctx.lineWidth = 0.5;
@@ -79,14 +73,9 @@ export const DebugHudRenderer = {
             label.textContent = key;
             row.appendChild(label);
 
-            const isRounded =
-                key === "x" ||
-                key === "y" ||
-                key === "prevX" ||
-                key === "prevY";
+            const isRounded = key === "x" || key === "y" || key === "prevX" || key === "prevY";
             const isFixed3 = key === "vx" || key === "vy";
-            const isRoundedMs =
-                key === "jumpPressedAt" || key === "lastShootTime";
+            const isRoundedMs = key === "jumpPressedAt" || key === "lastShootTime";
             const display = isRounded
                 ? String(Math.round(value))
                 : isFixed3
@@ -131,9 +120,7 @@ export const DebugHudRenderer = {
         lx.textContent = "x";
         rowX.appendChild(lx);
         rowX.appendChild(
-            document.createTextNode(
-                " " + Math.floor(mouse.worldX / GameFactory.GRID),
-            ),
+            document.createTextNode(" " + Math.floor(mouse.worldX / GameFactory.GRID))
         );
         cp.appendChild(rowX);
         const rowY = document.createElement("div");
@@ -141,9 +128,7 @@ export const DebugHudRenderer = {
         ly.textContent = "y";
         rowY.appendChild(ly);
         rowY.appendChild(
-            document.createTextNode(
-                " " + Math.floor(mouse.worldY / GameFactory.GRID),
-            ),
+            document.createTextNode(" " + Math.floor(mouse.worldY / GameFactory.GRID))
         );
         cp.appendChild(rowY);
     },

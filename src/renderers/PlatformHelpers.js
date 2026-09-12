@@ -110,14 +110,7 @@ export function topRightEdgeCap3x3({ tLeft, tMid, tRight, left, mid, right }) {
     };
 }
 
-export function bottomLeftEdgeCap3x3({
-    left,
-    mid,
-    right,
-    bLeft,
-    bMid,
-    bRight,
-}) {
+export function bottomLeftEdgeCap3x3({ left, mid, right, bLeft, bMid, bRight }) {
     return {
         tLeft: left,
         tMid: mid,
@@ -131,14 +124,7 @@ export function bottomLeftEdgeCap3x3({
     };
 }
 
-export function bottomRightEdgeCap3x3({
-    left,
-    mid,
-    right,
-    bLeft,
-    bMid,
-    bRight,
-}) {
+export function bottomRightEdgeCap3x3({ left, mid, right, bLeft, bMid, bRight }) {
     return {
         tLeft: mid,
         tMid: mid,
@@ -180,14 +166,7 @@ export function leftTopEdgeCap3x3({ tLeft, tMid, left, mid, bLeft, bMid }) {
     };
 }
 
-export function rightBottomEdgeCap3x3({
-    tMid,
-    tRight,
-    mid,
-    right,
-    bMid,
-    bRight,
-}) {
+export function rightBottomEdgeCap3x3({ tMid, tRight, mid, right, bMid, bRight }) {
     return {
         tLeft: mid,
         tMid,

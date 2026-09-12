@@ -8,9 +8,7 @@ function drawLayer(ctx, img, cw, ch, cameraX, parallax) {
     }
     const drawH = ch;
     const drawW = Math.round(img.naturalWidth * (ch / img.naturalHeight));
-    const ox = Math.floor(
-        ((((-cameraX * parallax) % drawW) + drawW) % drawW) - drawW,
-    );
+    const ox = Math.floor(((((-cameraX * parallax) % drawW) + drawW) % drawW) - drawW);
     for (let x = ox; x < cw; x += drawW) {
         ctx.drawImage(img, x, 0, drawW, drawH);
     }
@@ -122,30 +120,10 @@ function drawEnvironmentItem(ctx, item) {
                 ctx.save();
                 ctx.translate(dx + drawW / 2, dy + drawH / 2);
                 ctx.rotate((rotate * Math.PI) / 180);
-                ctx.drawImage(
-                    img,
-                    srcX,
-                    srcY,
-                    srcW,
-                    srcH,
-                    -drawW / 2,
-                    -drawH / 2,
-                    drawW,
-                    drawH,
-                );
+                ctx.drawImage(img, srcX, srcY, srcW, srcH, -drawW / 2, -drawH / 2, drawW, drawH);
                 ctx.restore();
             } else {
-                ctx.drawImage(
-                    img,
-                    srcX,
-                    srcY,
-                    srcW,
-                    srcH,
-                    dx,
-                    dy,
-                    drawW,
-                    drawH,
-                );
+                ctx.drawImage(img, srcX, srcY, srcW, srcH, dx, dy, drawW, drawH);
             }
         }
     }
@@ -212,10 +190,7 @@ export const DefaultWorldRenderer = {
         ctx.fillStyle = "#000";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const scale = Math.min(
-            canvas.width / worldSize.width,
-            canvas.height / worldSize.height,
-        );
+        const scale = Math.min(canvas.width / worldSize.width, canvas.height / worldSize.height);
         const offsetX = (canvas.width - worldSize.width * scale) / 2;
         const offsetY = (canvas.height - worldSize.height * scale) / 2;
         ctx.translate(offsetX, offsetY);

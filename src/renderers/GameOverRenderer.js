@@ -28,7 +28,7 @@ export const DefaultGameOverRenderer = {
         playTime,
         deathCount,
         artifactsCount,
-        totalArtifacts,
+        totalArtifacts
     ) {
         const w = canvas.width;
         const h = canvas.height;
@@ -37,10 +37,7 @@ export const DefaultGameOverRenderer = {
         const splinterCountText = `${splintersCount} / ${totalSplinters}`;
         const artifactCountText = `${artifactsCount ?? 0} / ${totalArtifacts ?? 0}`;
         const hasArtifacts = (totalArtifacts ?? 0) > 0;
-        const enemiesText = MESSAGES.STATS.ENEMIES_TEXT(
-            enemiesCount,
-            totalEnemies,
-        );
+        const enemiesText = MESSAGES.STATS.ENEMIES_TEXT(enemiesCount, totalEnemies);
         const deathsText = MESSAGES.GAME_OVER.DEATHS_TEXT(deathCount);
         const timeText = MESSAGES.STATS.TIME_TEXT(formatPlayTime(playTime));
         const countdownText = MESSAGES.STATS.COUNTDOWN_TEXT(remaining);
@@ -48,29 +45,16 @@ export const DefaultGameOverRenderer = {
         ctx.save();
 
         ctx.font = TITLE_FONT;
-        const titleW = Math.ceil(
-            ctx.measureText(MESSAGES.GAME_OVER.TITLE).width,
-        );
+        const titleW = Math.ceil(ctx.measureText(MESSAGES.GAME_OVER.TITLE).width);
 
         ctx.font = SUB_FONT;
-        const subtitle1W = Math.ceil(
-            ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE).width,
-        );
-        const subtitle2W = Math.ceil(
-            ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE2).width,
-        );
-        const coinRowW =
-            ICON_SIZE +
-            ICON_GAP +
-            Math.ceil(ctx.measureText(coinCountText).width);
+        const subtitle1W = Math.ceil(ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE).width);
+        const subtitle2W = Math.ceil(ctx.measureText(MESSAGES.GAME_OVER.SUBTITLE2).width);
+        const coinRowW = ICON_SIZE + ICON_GAP + Math.ceil(ctx.measureText(coinCountText).width);
         const splinterRowW =
-            ICON_SIZE +
-            ICON_GAP +
-            Math.ceil(ctx.measureText(splinterCountText).width);
+            ICON_SIZE + ICON_GAP + Math.ceil(ctx.measureText(splinterCountText).width);
         const artifactRowW =
-            ICON_SIZE +
-            ICON_GAP +
-            Math.ceil(ctx.measureText(artifactCountText).width);
+            ICON_SIZE + ICON_GAP + Math.ceil(ctx.measureText(artifactCountText).width);
 
         const panelW =
             Math.max(
@@ -83,7 +67,7 @@ export const DefaultGameOverRenderer = {
                 Math.ceil(ctx.measureText(enemiesText).width),
                 Math.ceil(ctx.measureText(deathsText).width),
                 Math.ceil(ctx.measureText(timeText).width),
-                Math.ceil(ctx.measureText(countdownText).width),
+                Math.ceil(ctx.measureText(countdownText).width)
             ) +
             PAD_X * 2;
 
@@ -122,7 +106,7 @@ export const DefaultGameOverRenderer = {
             panelW,
             panelH,
             { color: "#fff", width: 2, steps: 3 },
-            "#3b1158",
+            "#3b1158"
         );
 
         // ── Title ────────────────────────────────────────────────────────────
@@ -162,11 +146,7 @@ export const DefaultGameOverRenderer = {
         });
         ctx.textAlign = "left";
         ctx.fillStyle = MESSAGES.STATS.COINS_COLOR;
-        ctx.fillText(
-            coinCountText,
-            coinsRowX + ICON_SIZE + ICON_GAP,
-            coinsRowY + textOffY,
-        );
+        ctx.fillText(coinCountText, coinsRowX + ICON_SIZE + ICON_GAP, coinsRowY + textOffY);
 
         const splinterRowY = coinsRowY + ICON_SIZE + GAP;
         const splinterRowX = Math.round(w / 2 - splinterRowW / 2);
@@ -180,7 +160,7 @@ export const DefaultGameOverRenderer = {
         ctx.fillText(
             splinterCountText,
             splinterRowX + ICON_SIZE + ICON_GAP,
-            splinterRowY + textOffY,
+            splinterRowY + textOffY
         );
 
         let artifactBaseY = splinterRowY + ICON_SIZE;
@@ -198,14 +178,14 @@ export const DefaultGameOverRenderer = {
                     cordY: 48,
                 },
                 false,
-                0,
+                0
             );
             ctx.fillStyle = MESSAGES.STATS.ARTIFACTS_COLOR;
             ctx.textAlign = "left";
             ctx.fillText(
                 artifactCountText,
                 artifactRowX + ICON_SIZE + ICON_GAP,
-                artifactRowY + textOffY,
+                artifactRowY + textOffY
             );
             artifactBaseY = artifactRowY + ICON_SIZE;
         }

@@ -53,13 +53,9 @@ export class CameraController {
             if (!elevator || elevator.dirY === 0 || now < elevator.idleUntil) {
                 return 0;
             }
-            const elevatorVy =
-                elevator.dirY * elevator.speed * elevator.direction;
+            const elevatorVy = elevator.dirY * elevator.speed * elevator.direction;
             if (elevatorVy < 0) {
-                const upRatio = Math.min(
-                    Math.abs(elevatorVy) / physics.maxFallSpeed,
-                    1,
-                );
+                const upRatio = Math.min(Math.abs(elevatorVy) / physics.maxFallSpeed, 1);
                 return -this.camera.lookAheadYTargetUp * upRatio * upRatio;
             }
             const downRatio = Math.min(elevatorVy / physics.maxFallSpeed, 1);
@@ -76,23 +72,15 @@ export class CameraController {
                 : -this.camera.lookAheadXTarget;
 
         this.camera.lookAheadX +=
-            (desiredLookAheadX - this.camera.lookAheadX) *
-            this.camera.lookAheadXSmoothing;
+            (desiredLookAheadX - this.camera.lookAheadX) * this.camera.lookAheadXSmoothing;
 
         const targetX = player.x + player.w / 2 - this.camera.width / 2;
 
-        this.camera.x +=
-            (targetX + this.camera.lookAheadX - this.camera.x) *
-            this.camera.smoothing;
+        this.camera.x += (targetX + this.camera.lookAheadX - this.camera.x) * this.camera.smoothing;
     }
 
     updateCameraY(now, player, elevators, physics, isCrouching) {
-        let desiredLookAheadY = this.calcDesiredLookAheadY(
-            now,
-            player,
-            elevators,
-            physics,
-        );
+        let desiredLookAheadY = this.calcDesiredLookAheadY(now, player, elevators, physics);
 
         if (isCrouching) {
             desiredLookAheadY += this.camera.lookAheadYTargetDownCrouch;
@@ -103,47 +91,30 @@ export class CameraController {
                 ? this.camera.lookAheadYSmoothingDown
                 : this.camera.lookAheadYSmoothing;
 
-        this.camera.lookAheadY +=
-            (desiredLookAheadY - this.camera.lookAheadY) * ySmoothing;
+        this.camera.lookAheadY += (desiredLookAheadY - this.camera.lookAheadY) * ySmoothing;
 
         const playerFootY = player.y + player.h;
-        const targetY =
-            playerFootY - player.originalHeight / 2 - this.camera.height / 2;
+        const targetY = playerFootY - player.originalHeight / 2 - this.camera.height / 2;
 
-        this.camera.y +=
-            (targetY + this.camera.lookAheadY - this.camera.y) *
-            this.camera.smoothing;
+        this.camera.y += (targetY + this.camera.lookAheadY - this.camera.y) * this.camera.smoothing;
     }
 
     clampCameraToWorld(worldSize) {
         const snap = this.camera.snapStep;
         this.camera.x =
             Math.round(
-                Math.max(
-                    0,
-                    Math.min(
-                        this.camera.x,
-                        worldSize.width - this.camera.width,
-                    ),
-                ) / snap,
+                Math.max(0, Math.min(this.camera.x, worldSize.width - this.camera.width)) / snap
             ) * snap;
         this.camera.y =
             Math.round(
-                Math.max(
-                    0,
-                    Math.min(
-                        this.camera.y,
-                        worldSize.height - this.camera.height,
-                    ),
-                ) / snap,
+                Math.max(0, Math.min(this.camera.y, worldSize.height - this.camera.height)) / snap
             ) * snap;
     }
 
     resetToPlayerStart(player, worldSize) {
         const targetX = player.x + player.w / 2 - this.camera.width / 2;
         const playerFootY = player.y + player.h;
-        const targetY =
-            playerFootY - player.originalHeight / 2 - this.camera.height / 2;
+        const targetY = playerFootY - player.originalHeight / 2 - this.camera.height / 2;
 
         this.camera.x = targetX;
         this.camera.y = targetY;

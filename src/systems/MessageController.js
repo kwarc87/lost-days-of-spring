@@ -64,16 +64,10 @@ export class MessageController {
     }
 
     updateArtifactMessage(now) {
-        if (
-            !this.activeArtifactMessage ||
-            this.artifactMessageShownAt === null
-        ) {
+        if (!this.activeArtifactMessage || this.artifactMessageShownAt === null) {
             return;
         }
-        if (
-            now - this.artifactMessageShownAt >=
-            this.activeArtifactMessage.displayTime
-        ) {
+        if (now - this.artifactMessageShownAt >= this.activeArtifactMessage.displayTime) {
             this.activeArtifactMessage = null;
             this.artifactMessageShownAt = null;
             this.activeArtifactSource = null;
@@ -103,10 +97,7 @@ export class MessageController {
                 this.activeMessage = null;
                 this.messageShownAt = null;
                 // Do NOT return — fall through so the pending/delay system processes the new hit.
-            } else if (
-                now - this.messageShownAt <
-                this.activeMessage.displayTime
-            ) {
+            } else if (now - this.messageShownAt < this.activeMessage.displayTime) {
                 return;
             } else {
                 // Timer expired — mark shown and clear.

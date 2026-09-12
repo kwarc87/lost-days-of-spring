@@ -2,6 +2,7 @@ import js from "@eslint/js";
 import globals from "globals";
 
 export default [
+    { ignores: ["dist/**"] },
     js.configs.recommended,
     {
         languageOptions: {
@@ -22,6 +23,14 @@ export default [
 
             // style (niekonfliktowe z Prettierem)
             "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+        },
+    },
+    {
+        files: ["cache-bust.js"],
+        languageOptions: {
+            globals: {
+                ...globals.node,
+            },
         },
     },
 ];

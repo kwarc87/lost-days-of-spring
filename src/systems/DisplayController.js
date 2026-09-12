@@ -74,17 +74,11 @@ export class DisplayController {
             }
         };
         window.addEventListener("resize", this.resizeHandler);
-        document.addEventListener(
-            "fullscreenchange",
-            this.fullscreenChangeHandler,
-        );
+        document.addEventListener("fullscreenchange", this.fullscreenChangeHandler);
     }
 
     detach() {
         window.removeEventListener("resize", this.resizeHandler);
-        document.removeEventListener(
-            "fullscreenchange",
-            this.fullscreenChangeHandler,
-        );
+        document.removeEventListener("fullscreenchange", this.fullscreenChangeHandler);
     }
 }

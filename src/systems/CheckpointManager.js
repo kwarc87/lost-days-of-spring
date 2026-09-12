@@ -171,7 +171,7 @@ export class CheckpointManager {
             totalPausedTime,
             accumulatedPlayTime,
             deathCount,
-        },
+        }
     ) {
         this.checkpointRespawn = {
             ...this.checkpointRespawn,
@@ -181,33 +181,20 @@ export class CheckpointManager {
             splintersCount: player.splintersCount,
             artifactsCount: player.artifactsCount,
             weapon: player.weapon,
-            collectedCoinIds: new Set(
-                coins.filter((c) => c.collected).map((c) => c.id),
-            ),
-            collectedSplinterIds: new Set(
-                splinters.filter((s) => s.collected).map((s) => s.id),
-            ),
-            collectedArtifactIds: new Set(
-                artifacts.filter((a) => a.collected).map((a) => a.id),
-            ),
-            collectedHeartIds: new Set(
-                hearts.filter((h) => h.collected).map((h) => h.id),
-            ),
+            collectedCoinIds: new Set(coins.filter((c) => c.collected).map((c) => c.id)),
+            collectedSplinterIds: new Set(splinters.filter((s) => s.collected).map((s) => s.id)),
+            collectedArtifactIds: new Set(artifacts.filter((a) => a.collected).map((a) => a.id)),
+            collectedHeartIds: new Set(hearts.filter((h) => h.collected).map((h) => h.id)),
             collectedWeaponUpgradeIds: new Set(
-                weaponUpgrades.filter((u) => u.collected).map((u) => u.id),
+                weaponUpgrades.filter((u) => u.collected).map((u) => u.id)
             ),
-            aliveEnemyIds: new Set(
-                enemies.filter((e) => !e.dead && !e.dying).map((e) => e.id),
-            ),
-            triggeredElevatorIds: new Set(
-                elevators.filter((e) => e.triggered).map((e) => e.id),
-            ),
+            aliveEnemyIds: new Set(enemies.filter((e) => !e.dead && !e.dying).map((e) => e.id)),
+            triggeredElevatorIds: new Set(elevators.filter((e) => e.triggered).map((e) => e.id)),
             shownMessageIds: new Set([
                 ...(this.checkpointRespawn?.shownMessageIds ?? []),
                 ...messages.filter((m) => m.shown).map((m) => m.id),
             ]),
-            playTimeMs:
-                now - levelStartAt - totalPausedTime + accumulatedPlayTime,
+            playTimeMs: now - levelStartAt - totalPausedTime + accumulatedPlayTime,
             deathCount,
         };
         CheckpointStorage.save(this.checkpointRespawn);
@@ -225,10 +212,7 @@ export class CheckpointManager {
                 ...this.checkpointRespawn,
                 x: cp.x,
                 y: cp.y,
-                reachedIds: new Set([
-                    ...(this.checkpointRespawn?.reachedIds ?? []),
-                    cp.id,
-                ]),
+                reachedIds: new Set([...(this.checkpointRespawn?.reachedIds ?? []), cp.id]),
                 shownMessageIds: new Set([
                     ...(this.checkpointRespawn?.shownMessageIds ?? []),
                     ...(cp.message ? [cp.message.id] : []),

@@ -10,9 +10,7 @@ const SPLINTER_SW = 12;
 const SPLINTER_SH = 12;
 const SPLINTER_SCALE = GameFactory.SCALE;
 
-const SPLINTER_FRAMES = [
-    ...Array.from({ length: 7 }, (_, i) => ({ sx: 66 + i * 16, sy: 34 })),
-];
+const SPLINTER_FRAMES = [...Array.from({ length: 7 }, (_, i) => ({ sx: 66 + i * 16, sy: 34 }))];
 
 const WEAPON_IMG_PATH = "textures/tilesets.png";
 const WEAPON_FRAME_MS = 250;
@@ -21,9 +19,7 @@ const WEAPON_SH = 16;
 // Weapon pickup rendered at scale 3 (rounded from 2 × 4/3 to stay crisp).
 const WEAPON_SCALE = 4;
 
-const WEAPON_FRAMES = [
-    ...Array.from({ length: 5 }, (_, i) => ({ sx: i * 80, sy: 324 })),
-];
+const WEAPON_FRAMES = [...Array.from({ length: 5 }, (_, i) => ({ sx: i * 80, sy: 324 }))];
 
 // 8×8 pixel art heart with outline — rendered at scale=3 → 24×24px
 // 0=transparent  1=outline  2=body  3=highlight  4=shadow
@@ -53,9 +49,7 @@ const COIN_SW = 12;
 const COIN_SH = 12;
 const COIN_SCALE = GameFactory.SCALE;
 
-const COIN_FRAMES = [
-    ...Array.from({ length: 7 }, (_, i) => ({ sx: 450 + i * 16, sy: 34 })),
-];
+const COIN_FRAMES = [...Array.from({ length: 7 }, (_, i) => ({ sx: 450 + i * 16, sy: 34 }))];
 
 const WEAPON_OUTLINE = 4;
 const WEAPON_OUTLINE_COLOR = "#51b9db";
@@ -91,21 +85,14 @@ const HEART_BOB_AMPLITUDE = 4;
 function getHeartBobOffset(collectible, now) {
     const phase = (collectible.id ?? 0) * 1.1;
     return Math.round(
-        Math.sin((now / HEART_BOB_PERIOD) * Math.PI * 2 + phase) *
-            HEART_BOB_AMPLITUDE,
+        Math.sin((now / HEART_BOB_PERIOD) * Math.PI * 2 + phase) * HEART_BOB_AMPLITUDE
     );
 }
 
 export const DefaultCollectibleRenderer = {
-    drawCoin: (
-        ctx,
-        collectible,
-        showDebug = false,
-        now = performance.now(),
-    ) => {
+    drawCoin: (ctx, collectible, showDebug = false, now = performance.now()) => {
         const img = getImg(GEMS_IMG_PATH);
-        const { sx, sy } =
-            COIN_FRAMES[Math.floor(now / COIN_FRAME_MS) % COIN_FRAMES.length];
+        const { sx, sy } = COIN_FRAMES[Math.floor(now / COIN_FRAME_MS) % COIN_FRAMES.length];
 
         const dw = collectible.w ?? COIN_SW * COIN_SCALE;
         const dh = collectible.h ?? COIN_SH * COIN_SCALE;
@@ -121,7 +108,7 @@ export const DefaultCollectibleRenderer = {
             Math.round(collectible.x),
             Math.round(collectible.y),
             dw,
-            dh,
+            dh
         );
         ctx.restore();
 
@@ -129,26 +116,14 @@ export const DefaultCollectibleRenderer = {
             ctx.save();
             ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
-            ctx.strokeRect(
-                collectible.x,
-                collectible.y,
-                collectible.w,
-                collectible.h,
-            );
+            ctx.strokeRect(collectible.x, collectible.y, collectible.w, collectible.h);
             ctx.restore();
         }
     },
-    drawSplinter: (
-        ctx,
-        collectible,
-        showDebug = false,
-        now = performance.now(),
-    ) => {
+    drawSplinter: (ctx, collectible, showDebug = false, now = performance.now()) => {
         const img = getImg(GEMS_IMG_PATH);
         const { sx, sy } =
-            SPLINTER_FRAMES[
-                Math.floor(now / SPLINTER_FRAME_MS) % SPLINTER_FRAMES.length
-            ];
+            SPLINTER_FRAMES[Math.floor(now / SPLINTER_FRAME_MS) % SPLINTER_FRAMES.length];
 
         const dw = collectible.w ?? SPLINTER_SW * SPLINTER_SCALE;
         const dh = collectible.h ?? SPLINTER_SH * SPLINTER_SCALE;
@@ -164,7 +139,7 @@ export const DefaultCollectibleRenderer = {
             Math.round(collectible.x),
             Math.round(collectible.y),
             dw,
-            dh,
+            dh
         );
         ctx.restore();
 
@@ -172,26 +147,13 @@ export const DefaultCollectibleRenderer = {
             ctx.save();
             ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
-            ctx.strokeRect(
-                collectible.x,
-                collectible.y,
-                collectible.w,
-                collectible.h,
-            );
+            ctx.strokeRect(collectible.x, collectible.y, collectible.w, collectible.h);
             ctx.restore();
         }
     },
-    drawWeaponUpgrade: (
-        ctx,
-        collectible,
-        showDebug = false,
-        now = performance.now(),
-    ) => {
+    drawWeaponUpgrade: (ctx, collectible, showDebug = false, now = performance.now()) => {
         const img = getImg(WEAPON_IMG_PATH);
-        const { sx, sy } =
-            WEAPON_FRAMES[
-                Math.floor(now / WEAPON_FRAME_MS) % WEAPON_FRAMES.length
-            ];
+        const { sx, sy } = WEAPON_FRAMES[Math.floor(now / WEAPON_FRAME_MS) % WEAPON_FRAMES.length];
 
         const dw = WEAPON_SW * WEAPON_SCALE;
         const dh = WEAPON_SH * WEAPON_SCALE;
@@ -219,25 +181,14 @@ export const DefaultCollectibleRenderer = {
             ctx.save();
             ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
-            ctx.strokeRect(
-                collectible.x,
-                collectible.y,
-                collectible.w,
-                collectible.h,
-            );
+            ctx.strokeRect(collectible.x, collectible.y, collectible.w, collectible.h);
             ctx.restore();
         }
     },
-    drawHeart: (
-        ctx,
-        collectible,
-        showDebug = false,
-        now = performance.now(),
-    ) => {
+    drawHeart: (ctx, collectible, showDebug = false, now = performance.now()) => {
         ctx.save();
         const x = Math.round(collectible.x);
-        const y =
-            Math.round(collectible.y) + getHeartBobOffset(collectible, now);
+        const y = Math.round(collectible.y) + getHeartBobOffset(collectible, now);
 
         for (let row = 0; row < HEART_PIXELS.length; row++) {
             for (let col = 0; col < HEART_PIXELS[row].length; col++) {
@@ -250,7 +201,7 @@ export const DefaultCollectibleRenderer = {
                     x + col * HEART_SCALE,
                     y + row * HEART_SCALE,
                     HEART_SCALE,
-                    HEART_SCALE,
+                    HEART_SCALE
                 );
             }
         }
@@ -261,22 +212,12 @@ export const DefaultCollectibleRenderer = {
             ctx.save();
             ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
-            ctx.strokeRect(
-                collectible.x,
-                collectible.y,
-                collectible.w,
-                collectible.h,
-            );
+            ctx.strokeRect(collectible.x, collectible.y, collectible.w, collectible.h);
             ctx.restore();
         }
     },
 
-    drawArtifact: (
-        ctx,
-        collectible,
-        showDebug = false,
-        now = performance.now(),
-    ) => {
+    drawArtifact: (ctx, collectible, showDebug = false, now = performance.now()) => {
         const img = getImg("textures/icons.png");
         const sx = collectible.cordX ?? 0;
         const sy = collectible.cordY ?? 0;
@@ -297,7 +238,7 @@ export const DefaultCollectibleRenderer = {
             Math.round(collectible.x),
             Math.round(collectible.y) + bobY,
             dw,
-            dh,
+            dh
         );
         ctx.restore();
 
@@ -305,12 +246,7 @@ export const DefaultCollectibleRenderer = {
             ctx.save();
             ctx.strokeStyle = "red";
             ctx.lineWidth = 1;
-            ctx.strokeRect(
-                collectible.x,
-                collectible.y,
-                collectible.w,
-                collectible.h,
-            );
+            ctx.strokeRect(collectible.x, collectible.y, collectible.w, collectible.h);
             ctx.restore();
         }
     },

@@ -100,8 +100,7 @@ const ANIMS = {
     },
 };
 
-export const PLAYER_DYING_DURATION_MS =
-    (ANIMS.die.frames.length / ANIMS.die.fps) * 1000;
+export const PLAYER_DYING_DURATION_MS = (ANIMS.die.frames.length / ANIMS.die.fps) * 1000;
 
 import { getImg } from "../utils/imgCache.js";
 
@@ -147,9 +146,7 @@ function getAnimKey(player) {
     }
 
     if (player.shooting) {
-        return Math.abs(player.vx) > 0.5 && player.movingByInput
-            ? "walkShoot"
-            : "shoot";
+        return Math.abs(player.vx) > 0.5 && player.movingByInput ? "walkShoot" : "shoot";
     }
 
     if (Math.abs(player.vx) > 0.5) {
@@ -210,26 +207,13 @@ export const DefaultPlayerRenderer = {
 
         ctx.save();
         ctx.imageSmoothingEnabled = false;
-        ctx.translate(
-            Math.round(player.x + player.w / 2),
-            Math.round(player.y + player.h),
-        );
+        ctx.translate(Math.round(player.x + player.w / 2), Math.round(player.y + player.h));
 
         if (player.facing === "left") {
             ctx.scale(-1, 1);
         }
 
-        ctx.drawImage(
-            img,
-            spriteFrame * FW,
-            0,
-            FW,
-            frameH,
-            drawX,
-            drawY,
-            dw,
-            dh,
-        );
+        ctx.drawImage(img, spriteFrame * FW, 0, FW, frameH, drawX, drawY, dw, dh);
 
         if (player.isHit) {
             const outlineSize = 4;
@@ -237,17 +221,7 @@ export const DefaultPlayerRenderer = {
 
             offCtx.clearRect(0, 0, dw, dh);
             offCtx.imageSmoothingEnabled = false;
-            offCtx.drawImage(
-                img,
-                spriteFrame * FW,
-                0,
-                FW,
-                frameH,
-                0,
-                0,
-                dw,
-                dh,
-            );
+            offCtx.drawImage(img, spriteFrame * FW, 0, FW, frameH, 0, 0, dw, dh);
             offCtx.globalCompositeOperation = "source-atop";
             offCtx.fillStyle = "red";
             offCtx.fillRect(0, 0, dw, dh);
@@ -268,34 +242,14 @@ export const DefaultPlayerRenderer = {
                 ctx.drawImage(offCanvas, drawX + ox, drawY + oy);
             }
 
-            ctx.drawImage(
-                img,
-                spriteFrame * FW,
-                0,
-                FW,
-                frameH,
-                drawX,
-                drawY,
-                dw,
-                dh,
-            );
+            ctx.drawImage(img, spriteFrame * FW, 0, FW, frameH, drawX, drawY, dw, dh);
         } else if (player.frozenForTeleport) {
             const outlineSize = 4;
             const { canvas: offCanvas, ctx: offCtx } = getOffCanvas(dw, dh);
 
             offCtx.clearRect(0, 0, dw, dh);
             offCtx.imageSmoothingEnabled = false;
-            offCtx.drawImage(
-                img,
-                spriteFrame * FW,
-                0,
-                FW,
-                frameH,
-                0,
-                0,
-                dw,
-                dh,
-            );
+            offCtx.drawImage(img, spriteFrame * FW, 0, FW, frameH, 0, 0, dw, dh);
             offCtx.globalCompositeOperation = "source-atop";
             offCtx.fillStyle = "#51b9db";
             offCtx.fillRect(0, 0, dw, dh);
@@ -316,17 +270,7 @@ export const DefaultPlayerRenderer = {
                 ctx.drawImage(offCanvas, drawX + ox, drawY + oy);
             }
 
-            ctx.drawImage(
-                img,
-                spriteFrame * FW,
-                0,
-                FW,
-                frameH,
-                drawX,
-                drawY,
-                dw,
-                dh,
-            );
+            ctx.drawImage(img, spriteFrame * FW, 0, FW, frameH, drawX, drawY, dw, dh);
         }
 
         ctx.restore();

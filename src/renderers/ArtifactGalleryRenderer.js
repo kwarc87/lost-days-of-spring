@@ -21,10 +21,7 @@ const SHADOW_COLOR = "rgba(0,0,0,0.55)";
 const OUTLINE_OFFSETS = [];
 for (let ox = -ICON_OUTLINE; ox <= ICON_OUTLINE; ox++) {
     for (let oy = -ICON_OUTLINE; oy <= ICON_OUTLINE; oy++) {
-        if (
-            ox * ox + oy * oy <= ICON_OUTLINE * ICON_OUTLINE &&
-            (ox !== 0 || oy !== 0)
-        ) {
+        if (ox * ox + oy * oy <= ICON_OUTLINE * ICON_OUTLINE && (ox !== 0 || oy !== 0)) {
             OUTLINE_OFFSETS.push([ox, oy]);
         }
     }
@@ -56,11 +53,11 @@ function getBorderCanvas() {
 }
 
 function estimateDescHeight(artifact) {
-    if (!artifact?.collected || !artifact.message) return 18;
+    if (!artifact?.collected || !artifact.message) {return 18;}
     const { title, lines = [] } = artifact.message;
     let h = 0;
-    if (title) h += 32 + 6;
-    if (lines.length > 0) h += lines.length * 18 + (lines.length - 1) * 6;
+    if (title) {h += 32 + 6;}
+    if (lines.length > 0) {h += lines.length * 18 + (lines.length - 1) * 6;}
     return Math.max(h, 18);
 }
 
@@ -78,16 +75,10 @@ export class ArtifactGalleryRenderer {
     open(artifacts, startIndex = 0) {
         this.isOpen = true;
         this.artifacts = artifacts;
-        this.selectedIndex = Math.min(
-            Math.max(startIndex, 0),
-            Math.max(artifacts.length - 1, 0),
-        );
+        this.selectedIndex = Math.min(Math.max(startIndex, 0), Math.max(artifacts.length - 1, 0));
         this._animOffset = 0;
         this._animStartOffset = 0;
-        this._maxDescH =
-            artifacts.length > 0
-                ? Math.max(...artifacts.map(estimateDescHeight))
-                : 54;
+        this._maxDescH = artifacts.length > 0 ? Math.max(...artifacts.map(estimateDescHeight)) : 54;
     }
 
     close() {
@@ -95,7 +86,7 @@ export class ArtifactGalleryRenderer {
     }
 
     navigateLeft() {
-        if (this.selectedIndex <= 0) return;
+        if (this.selectedIndex <= 0) {return;}
         this.selectedIndex--;
         this._animOffset = -(ICON_SLOT + ICON_GAP);
         this._animStartOffset = this._animOffset;
@@ -103,7 +94,7 @@ export class ArtifactGalleryRenderer {
     }
 
     navigateRight() {
-        if (this.selectedIndex >= this.artifacts.length - 1) return;
+        if (this.selectedIndex >= this.artifacts.length - 1) {return;}
         this.selectedIndex++;
         this._animOffset = ICON_SLOT + ICON_GAP;
         this._animStartOffset = this._animOffset;
@@ -111,12 +102,12 @@ export class ArtifactGalleryRenderer {
     }
 
     draw(ctx, canvas, now) {
-        if (!this.isOpen || this.artifacts.length === 0) return;
+        if (!this.isOpen || this.artifacts.length === 0) {return;}
 
         if (this._animOffset !== 0) {
             const t = Math.min((now - this._animStartAt) / ANIM_DURATION, 1);
             this._animOffset = this._animStartOffset * (1 - t);
-            if (t >= 1) this._animOffset = 0;
+            if (t >= 1) {this._animOffset = 0;}
         }
 
         const cw = canvas.width;
@@ -128,11 +119,7 @@ export class ArtifactGalleryRenderer {
         const SECTION_GAP = 16;
         const ESC_H = 18;
         const CAROUSEL_SECTION =
-            INDICATOR_H +
-            INDICATOR_GAP +
-            ICON_SLOT +
-            INDICATOR_GAP +
-            INDICATOR_H;
+            INDICATOR_H + INDICATOR_GAP + ICON_SLOT + INDICATOR_GAP + INDICATOR_H;
         const PANEL_H =
             PANEL_PAD +
             CAROUSEL_SECTION +
@@ -157,31 +144,25 @@ export class ArtifactGalleryRenderer {
             PANEL_W,
             PANEL_H,
             { color: "#fff", width: 2, steps: 3 },
-            "#3b1158",
+            "#3b1158"
         );
 
         // Carousel clipped region (extended vertically to show icon border)
         ctx.save();
         ctx.beginPath();
-        ctx.rect(
-            carouselX,
-            carouselY - ICON_OUTLINE,
-            CAROUSEL_W,
-            ICON_SLOT + ICON_OUTLINE * 2,
-        );
+        ctx.rect(carouselX, carouselY - ICON_OUTLINE, CAROUSEL_W, ICON_SLOT + ICON_OUTLINE * 2);
         ctx.clip();
 
         for (let slot = -1; slot <= VISIBLE; slot++) {
             const idx = this.selectedIndex - 3 + slot;
-            if (idx < 0 || idx >= this.artifacts.length) continue;
-            const slotX =
-                carouselX + slot * (ICON_SLOT + ICON_GAP) + this._animOffset;
+            if (idx < 0 || idx >= this.artifacts.length) {continue;}
+            const slotX = carouselX + slot * (ICON_SLOT + ICON_GAP) + this._animOffset;
             this._drawArtifactIcon(
                 ctx,
                 this.artifacts[idx],
                 slotX,
                 carouselY,
-                idx === this.selectedIndex,
+                idx === this.selectedIndex
             );
         }
         ctx.restore();
@@ -235,8 +216,7 @@ export class ArtifactGalleryRenderer {
         }
 
         // Description — plain text inside panel, no sub-panel border
-        const descY =
-            carouselY + ICON_SLOT + INDICATOR_GAP + INDICATOR_H + SECTION_GAP;
+        const descY = carouselY + ICON_SLOT + INDICATOR_GAP + INDICATOR_H + SECTION_GAP;
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
 
@@ -273,18 +253,14 @@ export class ArtifactGalleryRenderer {
         ctx.textAlign = "center";
         ctx.textBaseline = "top";
         ctx.fillStyle = HINT_COLOR;
-        ctx.fillText(
-            "ESC \u2013 return to game",
-            centerX,
-            panelY + PANEL_H - PANEL_PAD - ESC_H,
-        );
+        ctx.fillText("ESC \u2013 return to game", centerX, panelY + PANEL_H - PANEL_PAD - ESC_H);
 
         ctx.restore();
     }
 
     _drawArtifactIcon(ctx, artifact, slotX, slotY, isSelected) {
         const img = getImg("textures/icons.png");
-        if (!img) return;
+        if (!img) {return;}
 
         const outlineColor = isSelected ? "#fff" : "#7374b4";
         const [oc, octx] = getIconCanvas();
@@ -300,7 +276,7 @@ export class ArtifactGalleryRenderer {
             ICON_OUTLINE,
             ICON_OUTLINE,
             ICON_SIZE,
-            ICON_SIZE,
+            ICON_SIZE
         );
 
         if (!artifact.collected) {

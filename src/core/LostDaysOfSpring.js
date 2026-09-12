@@ -12,10 +12,7 @@ import { DefaultWorldRenderer } from "../renderers/WorldRenderers.js";
 import { DefaultPauseRenderer } from "../renderers/PauseRenderers.js";
 import { DefaultCollectibleRenderer } from "../renderers/CollectibleRenderers.js";
 import { DefaultWeaponRenderer } from "../renderers/WeaponRenderers.js";
-import {
-    DebugGridRenderer,
-    DebugHudRenderer,
-} from "../renderers/DebugRenderers.js";
+import { DebugGridRenderer, DebugHudRenderer } from "../renderers/DebugRenderers.js";
 import { DefaultHubRenderer } from "../renderers/HudRenderers.js";
 import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderers.js";
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
@@ -23,10 +20,7 @@ import { DefaultSpikeRenderer } from "../renderers/SpikeRenderers.js";
 import { CheckpointRenderer } from "../renderers/CheckpointRenderer.js";
 import { DefaultExitRenderer } from "../renderers/ExitRenderers.js";
 import { MessageRenderer } from "../renderers/MessageRenderer.js";
-import {
-    CannonRenderer,
-    CannonBulletRenderer,
-} from "../renderers/CannonRenderers.js";
+import { CannonRenderer, CannonBulletRenderer } from "../renderers/CannonRenderers.js";
 import { getExitLevelLines } from "../messages.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
@@ -126,14 +120,8 @@ export class LostDaysOfSpring {
         this.teleportController = new TeleportController();
 
         // ====== CAMERA ======
-        this.cameraController = new CameraController(
-            this.canvas.width,
-            this.canvas.height,
-        );
-        this.displayController = new DisplayController(
-            this.canvas,
-            this.cameraController,
-        );
+        this.cameraController = new CameraController(this.canvas.width, this.canvas.height);
+        this.displayController = new DisplayController(this.canvas, this.cameraController);
 
         // ====== PHYSICS ======
         this.physics = PHYSICS;
@@ -210,6 +198,18 @@ export class LostDaysOfSpring {
         this.displayController.attach();
     }
 
+    get hasEnoughCoins() {
+        return this.player.coinsCount >= this.currentLevelCoinsCount / 2;
+    }
+
+    get hasEnoughSplinters() {
+        return this.player.splintersCount >= this.currentLevelSplintersCount / 2;
+    }
+
+    get hasEnoughArtifacts() {
+        return this.player.artifactsCount >= this.currentLevelArtifactsCount / 2;
+    }
+
     decorateDrawMethods() {
         this.drawPlatform = this.withCameraCulling(this.drawPlatform);
         this.drawElevator = this.withCameraCulling(this.drawElevator);
@@ -221,15 +221,9 @@ export class LostDaysOfSpring {
         this.drawBullet = this.withCameraCulling(this.drawBullet);
         this.drawCannon = this.withCameraCulling(this.drawCannon);
         this.drawCannonBullet = this.withCameraCulling(this.drawCannonBullet);
-        this.drawEnvPreBackgroundItem = this.withCameraCulling(
-            this.drawEnvPreBackgroundItem,
-        );
-        this.drawEnvBackgroundItem = this.withCameraCulling(
-            this.drawEnvBackgroundItem,
-        );
-        this.drawEnvForegroundItem = this.withCameraCulling(
-            this.drawEnvForegroundItem,
-        );
+        this.drawEnvPreBackgroundItem = this.withCameraCulling(this.drawEnvPreBackgroundItem);
+        this.drawEnvBackgroundItem = this.withCameraCulling(this.drawEnvBackgroundItem);
+        this.drawEnvForegroundItem = this.withCameraCulling(this.drawEnvForegroundItem);
         this.drawSpike = this.withCameraCulling(this.drawSpike);
         this.drawHeart = this.withCameraCulling(this.drawHeart);
         this.drawHiddenWall = this.withCameraCulling(this.drawHiddenWall);
@@ -259,8 +253,7 @@ export class LostDaysOfSpring {
         if (this.levelComplete) {
             this.deathCount = 0;
         } else {
-            this.deathCount =
-                this.getCheckpointRespawn()?.deathCount ?? this.deathCount;
+            this.deathCount = this.getCheckpointRespawn()?.deathCount ?? this.deathCount;
         }
 
         this.currentLevelId = levelId;
@@ -269,10 +262,7 @@ export class LostDaysOfSpring {
         const levelData = LEVELS[levelId]();
 
         this.worldSize = levelData.worldSize;
-        this.mapDiscovery = new MapDiscovery(
-            this.worldSize,
-            GameFactory.GRID * 3,
-        );
+        this.mapDiscovery = new MapDiscovery(this.worldSize, GameFactory.GRID * 3);
         this.platforms = levelData.platforms ?? [];
         this.setElevators(levelData.elevators);
         this.setEnemies(levelData.enemies);
@@ -350,8 +340,7 @@ export class LostDaysOfSpring {
         if (wasLevelComplete) {
             this.levelStartAt = now;
             this.totalPausedTime = 0;
-            this.accumulatedPlayTime =
-                this.getCheckpointRespawn()?.playTimeMs ?? 0;
+            this.accumulatedPlayTime = this.getCheckpointRespawn()?.playTimeMs ?? 0;
         } else if (wasGameOver) {
             this.totalPausedTime += now - gameOverAt;
         }
@@ -507,12 +496,7 @@ export class LostDaysOfSpring {
 
     handleGameplayKeyDown(e) {
         if (e.code === this.keysMap.gallery && !e.repeat) {
-            if (
-                !this.levelComplete &&
-                !this.gameOver &&
-                !this.mapView &&
-                !this.player.dying
-            ) {
+            if (!this.levelComplete && !this.gameOver && !this.mapView && !this.player.dying) {
                 this.openArtifactGallery();
                 return;
             }
@@ -528,30 +512,11 @@ export class LostDaysOfSpring {
             this.toggleMapView();
         }
 
-        if (
-            (e.code === this.keysMap.jump || e.code === this.keysMap.jumpAlt) &&
-            !e.repeat
-        ) {
+        if ((e.code === this.keysMap.jump || e.code === this.keysMap.jumpAlt) && !e.repeat) {
             this.markJumpJustPressed();
         }
 
         this.markKeyDown(e.code);
-    }
-
-    get hasEnoughCoins() {
-        return this.player.coinsCount >= this.currentLevelCoinsCount / 2;
-    }
-
-    get hasEnoughSplinters() {
-        return (
-            this.player.splintersCount >= this.currentLevelSplintersCount / 2
-        );
-    }
-
-    get hasEnoughArtifacts() {
-        return (
-            this.player.artifactsCount >= this.currentLevelArtifactsCount / 2
-        );
     }
 
     canApplyPosture(height, width, anchor = "center") {
@@ -608,10 +573,7 @@ export class LostDaysOfSpring {
     }
 
     canStandUp() {
-        return this.canApplyPosture(
-            this.player.originalHeight,
-            this.player.originalWidth,
-        );
+        return this.canApplyPosture(this.player.originalHeight, this.player.originalWidth);
     }
 
     isPlayerCrouching() {
@@ -748,9 +710,7 @@ export class LostDaysOfSpring {
 
         let targetVx = 0;
 
-        const speed = this.isPlayerCrouching()
-            ? this.player.crouchSpeed
-            : this.player.speed;
+        const speed = this.isPlayerCrouching() ? this.player.crouchSpeed : this.player.speed;
 
         if (this.isKeyDown("left") && !this.isKeyDown("right")) {
             targetVx = -speed;
@@ -762,17 +722,11 @@ export class LostDaysOfSpring {
 
         this.player.movingByInput = targetVx !== 0;
 
-        const groundPlatform = this.solids.find(
-            (p) => p.id === this.player.onGroundId,
-        );
-        const acceleration =
-            groundPlatform?.acceleration ?? this.player.acceleration;
-        const deceleration =
-            groundPlatform?.deceleration ?? this.player.deceleration;
+        const groundPlatform = this.solids.find((p) => p.id === this.player.onGroundId);
+        const acceleration = groundPlatform?.acceleration ?? this.player.acceleration;
+        const deceleration = groundPlatform?.deceleration ?? this.player.deceleration;
 
-        const lastGroundPlatform = this.solids.find(
-            (p) => p.id === this.player.lastGroundId,
-        );
+        const lastGroundPlatform = this.solids.find((p) => p.id === this.player.lastGroundId);
 
         const lastGroundAcceleration = lastGroundPlatform?.airAcceleration;
         const lastGroundDeceleration = lastGroundPlatform?.airDeceleration;
@@ -797,10 +751,7 @@ export class LostDaysOfSpring {
     }
 
     handleCrouchInput() {
-        if (
-            (this.isKeyDown("crouchAlt") || this.isKeyDown("crouch")) &&
-            !this.player.airborne
-        ) {
+        if ((this.isKeyDown("crouchAlt") || this.isKeyDown("crouch")) && !this.player.airborne) {
             if (!this.isPlayerCrouching()) {
                 const anchor = this.findCrouchAnchor();
                 if (anchor !== null) {
@@ -828,10 +779,7 @@ export class LostDaysOfSpring {
             : this.player.shootingOffsetX;
         if (this.isKeyDown("shoot") || this.isKeyDown("shootAlt")) {
             this.player.shooting = true;
-            if (
-                now - this.player.lastShootTime >
-                this.player.weapon.shootFrequency
-            ) {
+            if (now - this.player.lastShootTime > this.player.weapon.shootFrequency) {
                 const bulletVx =
                     this.player.facing === "left"
                         ? -this.player.weapon.speed
@@ -846,10 +794,7 @@ export class LostDaysOfSpring {
                               this.player.w -
                               this.player.weapon.ammo.w +
                               customShootingOffsetX,
-                    y:
-                        this.player.y +
-                        this.player.h / 2 +
-                        customShootingOffsetY,
+                    y: this.player.y + this.player.h / 2 + customShootingOffsetY,
                     vx: bulletVx,
                 });
                 this.player.lastShootTime = now;
@@ -866,18 +811,15 @@ export class LostDaysOfSpring {
         if (now < this.player.knockbackUntil) {
             return;
         }
-        const jumpBuffered =
-            now - this.player.jumpPressedAt <= this.player.jumpBufferDuration;
+        const jumpBuffered = now - this.player.jumpPressedAt <= this.player.jumpBufferDuration;
 
         const isOnBooster = this.player.onGroundType === "booster";
         const leftBoosterRecently = this.player.lastGroundType === "booster";
 
         const hasCoyoteTime =
-            now - this.player.lastGroundedAt <= this.player.coyoteDuration &&
-            !leftBoosterRecently;
+            now - this.player.lastGroundedAt <= this.player.coyoteDuration && !leftBoosterRecently;
 
-        const canGroundJump =
-            !isOnBooster && (!this.player.airborne || hasCoyoteTime);
+        const canGroundJump = !isOnBooster && (!this.player.airborne || hasCoyoteTime);
 
         if (jumpBuffered && canGroundJump) {
             this.player.vy = -this.player.jump;
@@ -961,10 +903,7 @@ export class LostDaysOfSpring {
         if (this.player.carryVxInitial === 0) {
             return;
         }
-        const t = Math.max(
-            0,
-            1 - (now - this.player.carryStartAt) / this.player.carryDuration,
-        );
+        const t = Math.max(0, 1 - (now - this.player.carryStartAt) / this.player.carryDuration);
         this.player.carryVx = this.player.carryVxInitial * t;
         if (t <= 0) {
             this.player.carryVx = 0;
@@ -1000,10 +939,8 @@ export class LostDaysOfSpring {
             if (rectsCollide(this.player, p)) {
                 const platformPrevX = p.previousX ?? p.x;
 
-                const wasLeft =
-                    prevX + this.player.w <= Math.max(platformPrevX, p.x);
-                const wasRight =
-                    prevX >= Math.min(platformPrevX + p.w, p.x + p.w);
+                const wasLeft = prevX + this.player.w <= Math.max(platformPrevX, p.x);
+                const wasRight = prevX >= Math.min(platformPrevX + p.w, p.x + p.w);
 
                 if (wasLeft) {
                     this.player.x = p.x - this.player.w;
@@ -1047,8 +984,7 @@ export class LostDaysOfSpring {
             }
 
             if (wasLeft || wasRight) {
-                const cooldownIsActive =
-                    now - this.player.lastHitTime < this.player.hitCooldown;
+                const cooldownIsActive = now - this.player.lastHitTime < this.player.hitCooldown;
                 if (!cooldownIsActive) {
                     this.applyDamageToPlayer(now, e);
                 }
@@ -1078,10 +1014,8 @@ export class LostDaysOfSpring {
             if (rectsCollide(this.player, p)) {
                 const platformPrevY = p.previousY ?? p.y;
 
-                const wasAbove =
-                    previousY + previousH <= Math.max(platformPrevY, p.y);
-                const wasBelow =
-                    previousY >= Math.min(platformPrevY, p.y) + p.h;
+                const wasAbove = previousY + previousH <= Math.max(platformPrevY, p.y);
+                const wasBelow = previousY >= Math.min(platformPrevY, p.y) + p.h;
 
                 // oneDirection platforms: only block when landing from above
                 if (p.type === "oneDirection" && !wasAbove) {
@@ -1103,11 +1037,7 @@ export class LostDaysOfSpring {
         }
 
         // Crouch is only allowed while grounded
-        if (
-            this.isPlayerCrouching() &&
-            this.player.airborne &&
-            this.canStandUp()
-        ) {
+        if (this.isPlayerCrouching() && this.player.airborne && this.canStandUp()) {
             this.applyPosture(this.playerPostures.STANDING);
         }
     }
@@ -1177,14 +1107,12 @@ export class LostDaysOfSpring {
             player: this.player,
             platforms: this.platforms,
             enemies: this.getEnemies(),
-            isVisibleInCamera: (obj, margin) =>
-                this.isVisibleInCamera(obj, margin),
+            isVisibleInCamera: (obj, margin) => this.isVisibleInCamera(obj, margin),
             onPlatformLanding: (elevator, landingNow) => {
                 this.handlePlatformLanding(elevator, landingNow);
                 this.handlePlatformLandingResponse(elevator);
             },
-            onPlayerHit: (hitNow, enemy) =>
-                this.applyDamageToPlayer(hitNow, enemy),
+            onPlayerHit: (hitNow, enemy) => this.applyDamageToPlayer(hitNow, enemy),
         });
     }
 
@@ -1195,21 +1123,11 @@ export class LostDaysOfSpring {
             solids: this.solids,
             verticalHitRecoilMultiplier: this.verticalHitRecoilMultiplier,
             onPlayerHit: (hitNow, enemy, hitFromAbove, hitFromBelow) =>
-                this.applyDamageToPlayer(
-                    hitNow,
-                    enemy,
-                    hitFromAbove,
-                    hitFromBelow,
-                ),
+                this.applyDamageToPlayer(hitNow, enemy, hitFromAbove, hitFromBelow),
         });
     }
 
-    applyDamageToPlayer(
-        now,
-        source,
-        hitFromAbove = false,
-        hitFromBelow = false,
-    ) {
+    applyDamageToPlayer(now, source, hitFromAbove = false, hitFromBelow = false) {
         this.player.life -= source.damage;
         this.player.lastHitTime = now;
         this.player.isHit = true;
@@ -1224,8 +1142,7 @@ export class LostDaysOfSpring {
             : source.recoilY;
 
         this.player.jumpPressedByUser = false;
-        const hitFromLeft =
-            this.player.x + this.player.w / 2 < source.x + source.w / 2;
+        const hitFromLeft = this.player.x + this.player.w / 2 < source.x + source.w / 2;
         this.player.vx = hitFromLeft ? -recoilXForce : recoilXForce;
         this.player.vy = hitFromBelow ? 0 : -recoilYForce;
 
@@ -1275,7 +1192,7 @@ export class LostDaysOfSpring {
             this.player,
             (now, spike, hitFromAbove) => {
                 this.applyDamageToPlayer(now, spike, hitFromAbove);
-            },
+            }
         );
     }
 
@@ -1295,14 +1212,10 @@ export class LostDaysOfSpring {
 
     // Move cannon bullets and check collision with player only
     updateCannonBullets(now) {
-        this.projectileController.updateCannonBullets(
-            now,
-            this.player,
-            (now, bullet) => {
-                this.applyDamageToPlayer(now, bullet);
-                return this.gameOver;
-            },
-        );
+        this.projectileController.updateCannonBullets(now, this.player, (now, bullet) => {
+            this.applyDamageToPlayer(now, bullet);
+            return this.gameOver;
+        });
     }
 
     // Check player-collectible collisions and mark collected items
@@ -1606,118 +1519,68 @@ export class LostDaysOfSpring {
     }
 
     updateDamageCooldown(now) {
-        if (
-            this.player.isHit &&
-            now - this.player.lastHitTime >= this.player.hitCooldown
-        ) {
+        if (this.player.isHit && now - this.player.lastHitTime >= this.player.hitCooldown) {
             this.player.isHit = false;
         }
     }
 
     drawPlayer(now) {
         this.renderByMode(this.player, this.mapPlayerRenderer, () =>
-            this.playerRenderer.draw(
-                this.ctx,
-                this.player,
-                this.showDebug,
-                now,
-            ),
+            this.playerRenderer.draw(this.ctx, this.player, this.showDebug, now)
         );
     }
 
     drawPlatform(p) {
         this.renderByMode(p, this.mapPlatformRenderer, () =>
-            this.platformRenderer.draw(
-                this.ctx,
-                p,
-                this.showDebug,
-                this.getCamera(),
-            ),
+            this.platformRenderer.draw(this.ctx, p, this.showDebug, this.getCamera())
         );
     }
 
     drawElevator(e) {
         this.renderByMode(e, this.mapPlatformRenderer, () =>
-            this.platformRenderer.draw(
-                this.ctx,
-                e,
-                this.showDebug,
-                this.getCamera(),
-            ),
+            this.platformRenderer.draw(this.ctx, e, this.showDebug, this.getCamera())
         );
     }
 
     drawHiddenWall(w) {
         this.renderByMode(w, this.mapPlatformRenderer, () =>
-            this.platformRenderer.drawHiddenWall(
-                this.ctx,
-                w,
-                this.showDebug,
-                this.getCamera(),
-            ),
+            this.platformRenderer.drawHiddenWall(this.ctx, w, this.showDebug, this.getCamera())
         );
     }
 
     drawEnemy(e, now) {
         this.renderByMode(e, this.mapEnemyRenderer, () =>
-            this.enemyRenderer.draw(
-                this.ctx,
-                e,
-                e.sprite,
-                this.showDebug,
-                now,
-                this.player,
-            ),
+            this.enemyRenderer.draw(this.ctx, e, e.sprite, this.showDebug, now, this.player)
         );
     }
 
     drawCoin(c) {
         this.renderByMode(c, this.mapCoinRenderer, () =>
-            this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug),
+            this.collectibleRenderer.drawCoin(this.ctx, c, this.showDebug)
         );
     }
 
     drawSplinter(s, now) {
         this.renderByMode(s, this.mapSplinterRenderer, () =>
-            this.collectibleRenderer.drawSplinter(
-                this.ctx,
-                s,
-                this.showDebug,
-                now,
-            ),
+            this.collectibleRenderer.drawSplinter(this.ctx, s, this.showDebug, now)
         );
     }
 
     drawArtifact(a, now) {
         this.renderByMode(a, this.mapArtifactRenderer, () =>
-            this.collectibleRenderer.drawArtifact(
-                this.ctx,
-                a,
-                this.showDebug,
-                now,
-            ),
+            this.collectibleRenderer.drawArtifact(this.ctx, a, this.showDebug, now)
         );
     }
 
     drawHeart(s, now) {
         this.renderByMode(s, this.mapHeartRenderer, () =>
-            this.collectibleRenderer.drawHeart(
-                this.ctx,
-                s,
-                this.showDebug,
-                now,
-            ),
+            this.collectibleRenderer.drawHeart(this.ctx, s, this.showDebug, now)
         );
     }
 
     drawWeaponUpgrade(s, now) {
         this.renderByMode(s, NOOP_RENDERER, () =>
-            this.collectibleRenderer.drawWeaponUpgrade(
-                this.ctx,
-                s,
-                this.showDebug,
-                now,
-            ),
+            this.collectibleRenderer.drawWeaponUpgrade(this.ctx, s, this.showDebug, now)
         );
     }
 
@@ -1727,7 +1590,7 @@ export class LostDaysOfSpring {
 
     drawCannon(cannon) {
         this.renderByMode(cannon, this.mapCannonRenderer, () =>
-            this.cannonRenderer.draw(this.ctx, cannon, this.showDebug),
+            this.cannonRenderer.draw(this.ctx, cannon, this.showDebug)
         );
     }
 
@@ -1737,29 +1600,25 @@ export class LostDaysOfSpring {
 
     drawSpike(spike) {
         this.renderByMode(spike, this.mapSpikeRenderer, () =>
-            this.spikeRenderer.draw(this.ctx, spike, this.showDebug),
+            this.spikeRenderer.draw(this.ctx, spike, this.showDebug)
         );
     }
 
     drawEnvPreBackgroundItem(i) {
         this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawEnvironmentItem(this.ctx, i),
+            this.worldRenderer.drawEnvironmentItem(this.ctx, i)
         );
     }
 
     drawEnvBackgroundItem(i) {
         this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawEnvironmentItem(this.ctx, i),
+            this.worldRenderer.drawEnvironmentItem(this.ctx, i)
         );
     }
 
     drawEnvParallaxItem(i) {
         this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawParallaxEnvironmentItem(
-                this.ctx,
-                i,
-                this.getCamera(),
-            ),
+            this.worldRenderer.drawParallaxEnvironmentItem(this.ctx, i, this.getCamera())
         );
     }
 
@@ -1769,16 +1628,12 @@ export class LostDaysOfSpring {
     }
 
     drawWorld() {
-        this.worldRenderer.drawBackground(
-            this.ctx,
-            this.canvas,
-            this.getCamera(),
-        );
+        this.worldRenderer.drawBackground(this.ctx, this.canvas, this.getCamera());
     }
 
     drawEnvForegroundItem(i) {
         this.renderByMode(i, NOOP_RENDERER, () =>
-            this.worldRenderer.drawEnvironmentItem(this.ctx, i),
+            this.worldRenderer.drawEnvironmentItem(this.ctx, i)
         );
     }
 
@@ -1788,11 +1643,7 @@ export class LostDaysOfSpring {
         this.ctx.save();
 
         if (this.mapView) {
-            this.worldRenderer.drawMapBackground(
-                this.ctx,
-                this.canvas,
-                this.worldSize,
-            );
+            this.worldRenderer.drawMapBackground(this.ctx, this.canvas, this.worldSize);
         } else {
             this.drawWorld();
             this.ctx.translate(-this.getCamera().x, -this.getCamera().y);
@@ -1892,11 +1743,7 @@ export class LostDaysOfSpring {
         }
 
         if (this.mapView) {
-            this.worldRenderer.drawMapUndiscoveredMask(
-                this.ctx,
-                this.worldSize,
-                this.mapDiscovery,
-            );
+            this.worldRenderer.drawMapUndiscoveredMask(this.ctx, this.worldSize, this.mapDiscovery);
             this.drawPlayer(now);
         }
 
@@ -1914,12 +1761,7 @@ export class LostDaysOfSpring {
 
         this.ctx.restore();
 
-        if (
-            this.playerAtExit &&
-            !this.levelComplete &&
-            !this.gameOver &&
-            !this.isArtifactGallery
-        ) {
+        if (this.playerAtExit && !this.levelComplete && !this.gameOver && !this.isArtifactGallery) {
             this.drawExitMessage();
         }
 
@@ -1936,7 +1778,7 @@ export class LostDaysOfSpring {
                 this.ctx,
                 this.canvas,
                 activeMessage,
-                this.getCamera(),
+                this.getCamera()
             );
         }
 
@@ -1972,7 +1814,7 @@ export class LostDaysOfSpring {
                               size: 48,
                           }
                         : undefined,
-                },
+                }
             );
         }
 
@@ -1985,7 +1827,7 @@ export class LostDaysOfSpring {
             this.hasEnoughCoins,
             this.hasEnoughSplinters,
             this.currentLevelArtifactsCount,
-            this.hasEnoughArtifacts,
+            this.hasEnoughArtifacts
         );
 
         if (this.levelComplete) {
@@ -2015,21 +1857,15 @@ export class LostDaysOfSpring {
             playTimeMs,
             this.deathCount,
             this.player.artifactsCount,
-            this.currentLevelArtifactsCount,
+            this.currentLevelArtifactsCount
         );
     }
 
     drawGameOver(now) {
         const elapsed = now - this.gameOverAt;
-        const remaining = Math.max(
-            0,
-            Math.ceil((this.gameOverDelay - elapsed) / 1000),
-        );
+        const remaining = Math.max(0, Math.ceil((this.gameOverDelay - elapsed) / 1000));
         const playTimeMs =
-            this.gameOverAt -
-            this.levelStartAt -
-            this.totalPausedTime +
-            this.accumulatedPlayTime;
+            this.gameOverAt - this.levelStartAt - this.totalPausedTime + this.accumulatedPlayTime;
 
         this.gameOverRenderer.drawGameOverScreen(
             this.ctx,
@@ -2044,16 +1880,13 @@ export class LostDaysOfSpring {
             playTimeMs,
             this.deathCount,
             this.player.artifactsCount,
-            this.currentLevelArtifactsCount,
+            this.currentLevelArtifactsCount
         );
     }
 
     getCurrentPlayTimeMs() {
         return (
-            this.simulatedTime -
-            this.levelStartAt -
-            this.totalPausedTime +
-            this.accumulatedPlayTime
+            this.simulatedTime - this.levelStartAt - this.totalPausedTime + this.accumulatedPlayTime
         );
     }
 
@@ -2068,16 +1901,12 @@ export class LostDaysOfSpring {
     }
 
     findActiveExit() {
-        return (
-            this.exits.find((e) =>
-                rectsCollide(this.player, this.exitHitbox(e)),
-            ) ?? null
-        );
+        return this.exits.find((e) => rectsCollide(this.player, this.exitHitbox(e))) ?? null;
     }
 
     updateExit() {
         this.playerAtExit = this.exits.some((exit) =>
-            rectsCollide(this.player, this.exitHitbox(exit)),
+            rectsCollide(this.player, this.exitHitbox(exit))
         );
     }
 
@@ -2093,7 +1922,7 @@ export class LostDaysOfSpring {
         this.checkpointManager.checkForNewlyReached(
             now,
             this.player,
-            this.buildCheckpointContext(),
+            this.buildCheckpointContext()
         );
     }
 
@@ -2103,13 +1932,13 @@ export class LostDaysOfSpring {
 
     drawCheckpointIndicator(cp) {
         this.renderByMode(cp, this.mapCheckpointRenderer, () =>
-            this.checkpointRenderer.draw(this.ctx, cp, this.showDebug),
+            this.checkpointRenderer.draw(this.ctx, cp, this.showDebug)
         );
     }
 
     drawExit(exit) {
         this.renderByMode(exit, this.mapExitRenderer, () =>
-            this.exitRenderer.draw(this.ctx, exit, this.showDebug),
+            this.exitRenderer.draw(this.ctx, exit, this.showDebug)
         );
     }
 
@@ -2123,7 +1952,7 @@ export class LostDaysOfSpring {
         const lines = getExitLevelLines(
             this.hasEnoughCoins,
             this.hasEnoughSplinters,
-            this.hasEnoughArtifacts,
+            this.hasEnoughArtifacts
         );
         MessageRenderer.drawPanel(this.ctx, { lines }, anchorX, anchorY);
     }
@@ -2134,7 +1963,7 @@ export class LostDaysOfSpring {
             this.showDebug,
             this.debug,
             this.player,
-            this.getMouse(),
+            this.getMouse()
         );
     }
 
@@ -2157,18 +1986,13 @@ export class LostDaysOfSpring {
         if (this.titleFadeOut.active) {
             const elapsed = now - this.titleFadeOut.startTime;
             const progress = Math.min(elapsed / this.titleFadeOut.duration, 1);
-            this.transitionRenderer.drawFadeOut(
-                this.ctx,
-                this.canvas,
-                progress,
-            );
+            this.transitionRenderer.drawFadeOut(this.ctx, this.canvas, progress);
             if (progress >= 1) {
                 this.titleFadeOut.active = false;
                 this.isTitleScreen = false;
                 this.levelStartAt = now;
                 this.totalPausedTime = 0;
-                this.accumulatedPlayTime =
-                    this.getCheckpointRespawn()?.playTimeMs ?? 0;
+                this.accumulatedPlayTime = this.getCheckpointRespawn()?.playTimeMs ?? 0;
                 this.startLevel(now);
             }
         }
@@ -2207,10 +2031,7 @@ export class LostDaysOfSpring {
             this.drawGameFadeIn(now);
         }
 
-        if (
-            this.gameOver &&
-            this.simulatedTime - this.gameOverAt >= this.gameOverDelay
-        ) {
+        if (this.gameOver && this.simulatedTime - this.gameOverAt >= this.gameOverDelay) {
             this.resetGame();
         }
 
@@ -2256,13 +2077,12 @@ export class LostDaysOfSpring {
             case this.keysMap.menuDown: {
                 const count = this.pauseRenderer.menuItemCount;
                 const dir = code === this.keysMap.menuUp ? -1 : 1;
-                this.pauseMenuIndex =
-                    (this.pauseMenuIndex + dir + count) % count;
+                this.pauseMenuIndex = (this.pauseMenuIndex + dir + count) % count;
                 this.pauseRenderer.drawPausePanel(
                     this.ctx,
                     this.canvas,
                     this.pauseMenuIndex,
-                    this.getCurrentPlayTimeMs(),
+                    this.getCurrentPlayTimeMs()
                 );
                 break;
             }
@@ -2287,7 +2107,7 @@ export class LostDaysOfSpring {
             this.ctx,
             this.canvas,
             this.pauseMenuIndex,
-            this.getCurrentPlayTimeMs(),
+            this.getCurrentPlayTimeMs()
         );
     }
 

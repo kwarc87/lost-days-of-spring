@@ -38,16 +38,7 @@ export const MapPlayerRenderer = {
 
         // Shoulders — top half of an ellipse
         ctx.beginPath();
-        ctx.ellipse(
-            screenCx,
-            shoulderCY,
-            shoulderRx,
-            shoulderRy,
-            0,
-            Math.PI,
-            0,
-            true,
-        );
+        ctx.ellipse(screenCx, shoulderCY, shoulderRx, shoulderRy, 0, Math.PI, 0, true);
         ctx.closePath();
         ctx.fillStyle = fill;
         ctx.fill();
@@ -105,12 +96,7 @@ export const MapCoinRenderer = {
             return;
         }
         ctx.fillStyle = "#ffd700";
-        ctx.fillRect(
-            collectible.x,
-            collectible.y,
-            collectible.w,
-            collectible.h,
-        );
+        ctx.fillRect(collectible.x, collectible.y, collectible.w, collectible.h);
     },
 };
 
@@ -120,12 +106,7 @@ export const MapSplinterRenderer = {
             return;
         }
         ctx.fillStyle = "#68eef2";
-        ctx.fillRect(
-            collectible.x,
-            collectible.y,
-            collectible.w,
-            collectible.h,
-        );
+        ctx.fillRect(collectible.x, collectible.y, collectible.w, collectible.h);
     },
 };
 
@@ -135,12 +116,7 @@ export const MapArtifactRenderer = {
             return;
         }
         ctx.fillStyle = "#4772da";
-        ctx.fillRect(
-            collectible.x,
-            collectible.y,
-            collectible.w,
-            collectible.h,
-        );
+        ctx.fillRect(collectible.x, collectible.y, collectible.w, collectible.h);
     },
 };
 

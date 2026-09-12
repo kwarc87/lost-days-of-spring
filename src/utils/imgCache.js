@@ -21,13 +21,11 @@ export function preloadImages(paths) {
                         img.onload = () => resolve(img);
                         img.onerror = () => resolve(img);
                     }
-                }),
-        ),
+                })
+        )
     );
 }
 
 export function preloadFonts(fontSpecs) {
-    return Promise.all(
-        fontSpecs.map((spec) => document.fonts.load(spec).catch(() => null)),
-    );
+    return Promise.all(fontSpecs.map((spec) => document.fonts.load(spec).catch(() => null)));
 }

@@ -63,11 +63,7 @@ export class ProjectileController {
 
     // Move bullets, remove out-of-bounds ones, and check bullet-enemy collisions
     updateBullets(now, { worldSize, enemies, solids }) {
-        for (
-            let bulletIndex = this.bullets.length - 1;
-            bulletIndex >= 0;
-            bulletIndex--
-        ) {
+        for (let bulletIndex = this.bullets.length - 1; bulletIndex >= 0; bulletIndex--) {
             const bullet = this.bullets[bulletIndex];
             bullet.x += bullet.vx;
             bullet.y += bullet.vy;
@@ -169,8 +165,7 @@ export class ProjectileController {
 
             if (rectsCollide(bullet, player)) {
                 this.cannonBullets.splice(i, 1);
-                const cooldownIsActive =
-                    now - player.lastHitTime < player.hitCooldown;
+                const cooldownIsActive = now - player.lastHitTime < player.hitCooldown;
                 if (!cooldownIsActive) {
                     const gameOver = onPlayerHit(now, bullet);
                     if (gameOver) {
@@ -186,8 +181,7 @@ export class ProjectileController {
     updateSpikesDamage(now, player, onPlayerHit) {
         for (const spike of this.spikes) {
             if (rectsCollide(player, spike)) {
-                const cooldownIsActive =
-                    now - player.lastHitTime < player.hitCooldown;
+                const cooldownIsActive = now - player.lastHitTime < player.hitCooldown;
 
                 if (!cooldownIsActive) {
                     const hitFromAbove = player.prevY + player.h <= spike.y;

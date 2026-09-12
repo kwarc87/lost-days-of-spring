@@ -8,10 +8,7 @@
             name="description"
             content="Colin La Mehr wakes up on a strange, unfamiliar planet and pieces together his story in this pixel-art 2D platformer / metroidvania. Play the free browser demo — a full, completable level built in vanilla JavaScript."
         />
-        <link
-            rel="canonical"
-            href="https://kwarc87.github.io/lost-days-of-spring/"
-        />
+        <link rel="canonical" href="https://kwarc87.github.io/lost-days-of-spring/" />
 
         <!-- Favicon -->
         <link rel="icon" type="image/png" href="img/favicon.png" />
@@ -19,10 +16,7 @@
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website" />
-        <meta
-            property="og:url"
-            content="https://kwarc87.github.io/lost-days-of-spring/"
-        />
+        <meta property="og:url" content="https://kwarc87.github.io/lost-days-of-spring/" />
         <meta property="og:site_name" content="Lost Days of Spring" />
         <meta property="og:locale" content="en_US" />
         <meta
@@ -81,10 +75,7 @@
         </div>
         <script type="module">
             import { LostDaysOfSpring } from "./src/core/LostDaysOfSpring.js";
-            import {
-                preloadImages,
-                preloadFonts,
-            } from "./src/utils/imgCache.js";
+            import { preloadImages, preloadFonts } from "./src/utils/imgCache.js";
 
             const ASSETS = [
                 "textures/all-props.png",
@@ -124,18 +115,14 @@
 
             const initialHpParam = Number(params.get("initialHp"));
             const initialHp =
-                Number.isFinite(initialHpParam) && initialHpParam > 0
-                    ? initialHpParam
-                    : 6;
+                Number.isFinite(initialHpParam) && initialHpParam > 0 ? initialHpParam : 6;
 
-            Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(
-                () => {
-                    document.getElementById("loading").classList.add("done");
-                    const game = new LostDaysOfSpring("game", debug, initialHp);
-                    game.loadLevel(startLevel);
-                    game.start();
-                },
-            );
+            Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
+                document.getElementById("loading").classList.add("done");
+                const game = new LostDaysOfSpring("game", debug, initialHp);
+                game.loadLevel(startLevel);
+                game.start();
+            });
         </script>
     </body>
 </html>

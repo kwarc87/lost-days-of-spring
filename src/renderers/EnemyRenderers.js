@@ -91,16 +91,10 @@ function drawEnemy(ctx, enemy, cfg, debug, now, player, onAfterDraw) {
 
     ctx.save();
     ctx.imageSmoothingEnabled = false;
-    ctx.translate(
-        Math.round(enemy.x + enemy.w / 2),
-        Math.round(enemy.y + enemy.h),
-    );
+    ctx.translate(Math.round(enemy.x + enemy.w / 2), Math.round(enemy.y + enemy.h));
 
     if (enemy.dying) {
-        ctx.globalAlpha = Math.max(
-            0,
-            1 - (now - enemy.dyingStartedAtMs) / enemy.dyingDurationMs,
-        );
+        ctx.globalAlpha = Math.max(0, 1 - (now - enemy.dyingStartedAtMs) / enemy.dyingDurationMs);
     }
     if (enemy.dirX * enemy.direction > 0) {
         ctx.scale(-1, 1);
@@ -198,14 +192,7 @@ function drawEvilEyeEnemy(ctx, enemy, debug, now, player) {
 }
 
 export const DefaultEnemyRenderer = {
-    draw: (
-        ctx,
-        enemy,
-        type = "slime",
-        debug = false,
-        now = performance.now(),
-        player = {},
-    ) => {
+    draw: (ctx, enemy, type = "slime", debug = false, now = performance.now(), player = {}) => {
         switch (type) {
             case "evilEye":
                 drawEvilEyeEnemy(ctx, enemy, debug, now, player);

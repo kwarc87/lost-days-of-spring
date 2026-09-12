@@ -329,11 +329,7 @@ const platformCaves = {
     },
     board: {
         ...BASE_TILESET,
-        sprites: repeatHorizontal3x3(
-            { x: 32, y: 16 },
-            { x: 128, y: 16 },
-            { x: 96, y: 16 },
-        ),
+        sprites: repeatHorizontal3x3({ x: 32, y: 16 }, { x: 128, y: 16 }, { x: 96, y: 16 }),
     },
     boardOneDirection: {
         ...BASE_TILESET,
@@ -343,24 +339,16 @@ const platformCaves = {
                 { x: 72, y: 16 },
                 { x: 56, y: 16 },
             ],
-            { x: 96, y: 16 },
+            { x: 96, y: 16 }
         ),
     },
     boardRightCap: {
         ...BASE_TILESET,
-        sprites: repeatHorizontal3x3(
-            { x: 128, y: 16 },
-            { x: 128, y: 16 },
-            { x: 96, y: 16 },
-        ),
+        sprites: repeatHorizontal3x3({ x: 128, y: 16 }, { x: 128, y: 16 }, { x: 96, y: 16 }),
     },
     boardLeftCap: {
         ...BASE_TILESET,
-        sprites: repeatHorizontal3x3(
-            { x: 32, y: 16 },
-            { x: 128, y: 16 },
-            { x: 128, y: 16 },
-        ),
+        sprites: repeatHorizontal3x3({ x: 32, y: 16 }, { x: 128, y: 16 }, { x: 128, y: 16 }),
     },
     boardConnector: {
         ...BASE_TILESET,
@@ -368,11 +356,7 @@ const platformCaves = {
     },
     ice: {
         ...BASE_TILESET,
-        sprites: repeatHorizontal3x3(
-            { x: 208, y: 356 },
-            { x: 304, y: 356 },
-            { x: 272, y: 356 },
-        ),
+        sprites: repeatHorizontal3x3({ x: 208, y: 356 }, { x: 304, y: 356 }, { x: 272, y: 356 }),
     },
     iceOneDirection: {
         ...BASE_TILESET,
@@ -382,7 +366,7 @@ const platformCaves = {
                 { x: 248, y: 356 },
                 { x: 232, y: 356 },
             ],
-            { x: 272, y: 356 },
+            { x: 272, y: 356 }
         ),
     },
     booster: {
@@ -390,7 +374,7 @@ const platformCaves = {
         sprites: repeatHorizontal3x3(
             { x: 208, y: 16, padLeft: 6 },
             { x: 208, y: 16 },
-            { x: 272, y: 16, padRight: 6 },
+            { x: 272, y: 16, padRight: 6 }
         ),
     },
     pipe: {
@@ -406,7 +390,7 @@ const platformCaves = {
                 { x: 64, y: 0 },
                 { x: 80, y: 0 },
             ],
-            { x: 80, y: 0 },
+            { x: 80, y: 0 }
         ),
     },
     // only 2 units size is allowed
@@ -485,27 +469,17 @@ function drawSprite(ctx, img, sprite, def, dxBase, dyBase) {
         dxBase - pL * scale,
         dyBase - pT * scale,
         (tileWidthSrc + pL + pR) * scale,
-        (tileHeightSrc + pT + pB) * scale,
+        (tileHeightSrc + pT + pB) * scale
     );
 }
 
 // Returns the first and last tile indices (inclusive) visible in the viewport
 // for a given axis. Expands by camera.margin on each side.
-function cullRange(
-    cameraPos,
-    cameraSize,
-    margin,
-    platformPos,
-    tileSize,
-    count,
-) {
+function cullRange(cameraPos, cameraSize, margin, platformPos, tileSize, count) {
     const viewMin = cameraPos - margin;
     const viewMax = cameraPos + cameraSize + margin;
     const start = Math.max(0, Math.floor((viewMin - platformPos) / tileSize));
-    const end = Math.min(
-        count - 1,
-        Math.floor((viewMax - platformPos) / tileSize) + 1,
-    );
+    const end = Math.min(count - 1, Math.floor((viewMax - platformPos) / tileSize) + 1);
     return { start, end };
 }
 
@@ -529,22 +503,8 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
     const camW = camera?.width ?? ctx.canvas.width;
     const camH = camera?.height ?? ctx.canvas.height;
 
-    const { start: startCol, end: endCol } = cullRange(
-        camX,
-        camW,
-        margin,
-        x,
-        tileWidth,
-        cols,
-    );
-    const { start: startRow, end: endRow } = cullRange(
-        camY,
-        camH,
-        margin,
-        y,
-        tileHeight,
-        rows,
-    );
+    const { start: startCol, end: endCol } = cullRange(camX, camW, margin, x, tileWidth, cols);
+    const { start: startRow, end: endRow } = cullRange(camY, camH, margin, y, tileHeight, rows);
 
     const img = getImg(def.path);
     const imgReady = img.complete && img.naturalWidth > 0;
@@ -568,7 +528,7 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
                 x + c0 * tileWidth,
                 y + r0 * tileHeight,
                 (c1 - c0 + 1) * tileWidth,
-                (r1 - r0 + 1) * tileHeight,
+                (r1 - r0 + 1) * tileHeight
             );
         }
     }
@@ -592,14 +552,7 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
                     continue;
                 }
 
-                drawSprite(
-                    ctx,
-                    img,
-                    sprite,
-                    def,
-                    x + col * tileWidth,
-                    y + row * tileHeight,
-                );
+                drawSprite(ctx, img, sprite, def, x + col * tileWidth, y + row * tileHeight);
             }
         }
     }
@@ -644,7 +597,7 @@ export const DefaultPlatformRenderer = {
             platform,
             platformCaves[platform.layout] ?? platformCaves.ground,
             showDebug,
-            camera,
+            camera
         );
     },
     drawHiddenWall(ctx, wall, showDebug, camera) {
@@ -655,9 +608,7 @@ export const DefaultPlatformRenderer = {
         if (wall.entered !== prevEntered) {
             wall.opacityFrom =
                 wall.opacityCurrent ??
-                (prevEntered
-                    ? HIDDEN_WALL_OPACITY_ENTERED
-                    : HIDDEN_WALL_OPACITY_DEFAULT);
+                (prevEntered ? HIDDEN_WALL_OPACITY_ENTERED : HIDDEN_WALL_OPACITY_DEFAULT);
             wall.opacityTransitionStart = performance.now();
             wall._prevEntered = wall.entered;
         }
@@ -669,13 +620,7 @@ export const DefaultPlatformRenderer = {
 
         const prev = ctx.globalAlpha;
         ctx.globalAlpha = prev * opacity;
-        drawTiled(
-            ctx,
-            wall,
-            platformCaves[wall.layout] ?? platformCaves.ground,
-            showDebug,
-            camera,
-        );
+        drawTiled(ctx, wall, platformCaves[wall.layout] ?? platformCaves.ground, showDebug, camera);
         ctx.globalAlpha = prev;
     },
 };

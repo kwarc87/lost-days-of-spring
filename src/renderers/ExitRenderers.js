@@ -17,7 +17,7 @@ export const DefaultExitRenderer = {
             Math.round(exit.x),
             Math.round(exit.y),
             exit.dw,
-            exit.dh,
+            exit.dh
         );
         ctx.restore();
         if (debug) {
@@ -27,12 +27,7 @@ export const DefaultExitRenderer = {
             ctx.lineWidth = 1;
             ctx.strokeRect(exit.x, exit.y, exit.dw, exit.dh);
             ctx.strokeStyle = "cyan";
-            ctx.strokeRect(
-                exit.x - m,
-                exit.y - m,
-                exit.dw + m * 2,
-                exit.dh + m,
-            );
+            ctx.strokeRect(exit.x - m, exit.y - m, exit.dw + m * 2, exit.dh + m);
             ctx.restore();
         }
     },

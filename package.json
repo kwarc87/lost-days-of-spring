@@ -1,17 +1,13 @@
 {
     "name": "lost-days-of-spring",
     "version": "1.0.1",
-    "main": "game.js",
     "scripts": {
         "dev": "vite",
         "build": "vite build",
         "bust-cache": "node cache-bust.js",
-        "lint": "eslint game.js",
-        "lint:fix": "eslint game.js --fix",
-        "format": "prettier --write game.js style.css index.html"
-    },
-    "prettier": {
-        "files": "{**/*,*}.{js,ts,jsx,tsx,json,css,html}"
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write \"src/**/*.js\" *.js *.css *.html"
     },
     "author": "",
     "license": "ISC",

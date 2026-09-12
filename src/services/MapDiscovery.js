@@ -17,18 +17,15 @@ export class MapDiscovery {
     }
 
     markFromPlayer(player) {
-        const minX = Math.max(
-            0,
-            player.x - GameFactory.GRID * HORIZONTAL_MARGIN,
-        );
+        const minX = Math.max(0, player.x - GameFactory.GRID * HORIZONTAL_MARGIN);
         const minY = Math.max(0, player.y - GameFactory.GRID * VERTICAL_MARGIN);
         const maxX = Math.min(
             this.worldSize.width,
-            player.x + player.w + GameFactory.GRID * HORIZONTAL_MARGIN,
+            player.x + player.w + GameFactory.GRID * HORIZONTAL_MARGIN
         );
         const maxY = Math.min(
             this.worldSize.height,
-            player.y + player.h + GameFactory.GRID * VERTICAL_MARGIN,
+            player.y + player.h + GameFactory.GRID * VERTICAL_MARGIN
         );
 
         this.markRect(minX, minY, maxX, maxY);
@@ -40,15 +37,9 @@ export class MapDiscovery {
         }
 
         const startCol = Math.max(0, Math.floor(minX / this.cellSize));
-        const endCol = Math.min(
-            this.cols - 1,
-            Math.floor((maxX - 1) / this.cellSize),
-        );
+        const endCol = Math.min(this.cols - 1, Math.floor((maxX - 1) / this.cellSize));
         const startRow = Math.max(0, Math.floor(minY / this.cellSize));
-        const endRow = Math.min(
-            this.rows - 1,
-            Math.floor((maxY - 1) / this.cellSize),
-        );
+        const endRow = Math.min(this.rows - 1, Math.floor((maxY - 1) / this.cellSize));
 
         for (let row = startRow; row <= endRow; row++) {
             const rowOffset = row * this.cols;

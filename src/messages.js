@@ -43,8 +43,7 @@ export const MESSAGES = {
         TIME_COLOR: "#a0c4ff",
         COINS_TEXT: (count, total) => `Coins: ${count} / ${total}`,
         ENEMIES_TEXT: (count, total) => `Enemies: ${count} / ${total}`,
-        SPLINTERS_TEXT: (count, total) =>
-            `Splinters: ${count} / ${total}  \u2756 hidden`,
+        SPLINTERS_TEXT: (count, total) => `Splinters: ${count} / ${total}  \u2756 hidden`,
         COUNTDOWN_TEXT: (remaining) => `Restart in ${remaining}s  \u2013  ESC`,
         TIME_TEXT: (formatted) => `Time: ${formatted}`,
     },
@@ -331,10 +330,7 @@ export const MESSAGES = {
                 displayTime: 5000,
             },
             DICE001: {
-                lines: [
-                    { text: "A die. Some adventures" },
-                    { text: "begin with a single roll." },
-                ],
+                lines: [{ text: "A die. Some adventures" }, { text: "begin with a single roll." }],
             },
             HOCKEYSTICK: {
                 lines: [
@@ -378,9 +374,7 @@ export const MESSAGES = {
                 ],
             },
             SCREWDRIVER: {
-                lines: [
-                    { text: "Dad had an amazing collection of screwdrivers." },
-                ],
+                lines: [{ text: "Dad had an amazing collection of screwdrivers." }],
                 displayTime: 5000,
             },
             BONE: {
@@ -419,10 +413,7 @@ export const MESSAGES = {
                 offsetY: -10,
             },
             NOTE002: {
-                lines: [
-                    { text: "What remains of our restless youth..." },
-                    { text: "- J." },
-                ],
+                lines: [{ text: "What remains of our restless youth..." }, { text: "- J." }],
                 offsetY: -10,
             },
             NOTE003: {
@@ -622,10 +613,7 @@ export const MESSAGES = {
                 displayTime: 5000,
             },
             TSHIRT_WITH_SKULL: {
-                lines: [
-                    { text: "A T-shirt with a skull." },
-                    { text: "My favorite one." },
-                ],
+                lines: [{ text: "A T-shirt with a skull." }, { text: "My favorite one." }],
                 displayTime: 5000,
             },
             KITTIE: {
@@ -645,10 +633,7 @@ export const MESSAGES = {
                 displayTime: 5000,
             },
             BANDAGE: {
-                lines: [
-                    { text: "The ultimate cure" },
-                    { text: "for playground battle wounds." },
-                ],
+                lines: [{ text: "The ultimate cure" }, { text: "for playground battle wounds." }],
                 displayTime: 5000,
             },
             MICROPHONE: {
@@ -677,10 +662,7 @@ export const MESSAGES = {
                 displayTime: 5000,
             },
             FIZZY_DRINK: {
-                lines: [
-                    { text: "A fizzy drink." },
-                    { text: "I practically lived on this stuff." },
-                ],
+                lines: [{ text: "A fizzy drink." }, { text: "I practically lived on this stuff." }],
                 displayTime: 5000,
             },
             TEDDY_BEAR: {
@@ -717,10 +699,7 @@ export const MESSAGES = {
                 ],
             },
             CALENDAR: {
-                lines: [
-                    { text: "July and August rule." },
-                    { text: "Obviously." },
-                ],
+                lines: [{ text: "July and August rule." }, { text: "Obviously." }],
                 displayTime: 5000,
             },
             SUITCASE: {
@@ -808,10 +787,7 @@ export const MESSAGES = {
                 ],
             },
             MAGNET: {
-                lines: [
-                    { text: '"Science Beach"' },
-                    { text: "We thought it was hilarious." },
-                ],
+                lines: [{ text: '"Science Beach"' }, { text: "We thought it was hilarious." }],
                 displayTime: 5000,
             },
             DRAWING_PIN: {
@@ -851,11 +827,7 @@ export const MESSAGES = {
     },
 };
 
-export function getExitLevelLines(
-    hasEnoughCoins,
-    hasEnoughSplinters,
-    hasEnoughArtifacts,
-) {
+export function getExitLevelLines(hasEnoughCoins, hasEnoughSplinters, hasEnoughArtifacts) {
     if (hasEnoughCoins && hasEnoughSplinters && hasEnoughArtifacts) {
         return MESSAGES.EXIT.READY;
     }

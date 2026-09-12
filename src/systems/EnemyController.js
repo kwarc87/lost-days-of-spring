@@ -25,13 +25,7 @@ export class EnemyController {
 
     update(now, { player, solids, verticalHitRecoilMultiplier, onPlayerHit }) {
         this.patrol(now);
-        this.resolvePlayerCollision(
-            now,
-            player,
-            solids,
-            verticalHitRecoilMultiplier,
-            onPlayerHit,
-        );
+        this.resolvePlayerCollision(now, player, solids, verticalHitRecoilMultiplier, onPlayerHit);
     }
 
     // Moves enemies along their patrol path and reverses direction at the endpoints.
@@ -72,13 +66,13 @@ export class EnemyController {
             const passedX = hasPassedTarget(
                 enemy.x,
                 enemy.direction === 1 ? enemy.targetX : enemy.startX,
-                enemy.direction === 1 ? signX : -signX,
+                enemy.direction === 1 ? signX : -signX
             );
 
             const passedY = hasPassedTarget(
                 enemy.y,
                 enemy.direction === 1 ? enemy.targetY : enemy.startY,
-                enemy.direction === 1 ? signY : -signY,
+                enemy.direction === 1 ? signY : -signY
             );
 
             if (passedX && passedY) {
@@ -95,13 +89,7 @@ export class EnemyController {
         }
     }
 
-    resolvePlayerCollision(
-        now,
-        player,
-        solids,
-        verticalHitRecoilMultiplier,
-        onPlayerHit,
-    ) {
+    resolvePlayerCollision(now, player, solids, verticalHitRecoilMultiplier, onPlayerHit) {
         const cooldownIsActive = now - player.lastHitTime < player.hitCooldown;
 
         // Pass 1: mark ALL colliding enemies and record entry side.
@@ -119,12 +107,9 @@ export class EnemyController {
 
             // Record entry side once at first frame of contact.
             if (!enemy.wasCollidingWithPlayer) {
-                enemy.playerEnteredFromLeft =
-                    player.prevX + player.w <= enemy.prevX;
-                enemy.playerEnteredFromAbove =
-                    player.prevY + player.h <= enemy.prevY;
-                enemy.playerEnteredFromBelow =
-                    player.prevY >= enemy.prevY + enemy.h;
+                enemy.playerEnteredFromLeft = player.prevX + player.w <= enemy.prevX;
+                enemy.playerEnteredFromAbove = player.prevY + player.h <= enemy.prevY;
+                enemy.playerEnteredFromBelow = player.prevY >= enemy.prevY + enemy.h;
             }
         }
 
@@ -138,12 +123,7 @@ export class EnemyController {
             }
 
             if (!cooldownIsActive) {
-                onPlayerHit(
-                    now,
-                    enemy,
-                    enemy.playerEnteredFromAbove,
-                    enemy.playerEnteredFromBelow,
-                );
+                onPlayerHit(now, enemy, enemy.playerEnteredFromAbove, enemy.playerEnteredFromBelow);
                 break;
             }
 
@@ -151,12 +131,7 @@ export class EnemyController {
             // No break — all colliding enemies are resolved so sandwiched
             // collisions (player between two enemies) are handled correctly.
             this.resolveCollisionX(enemy, player, solids);
-            this.resolveCollisionY(
-                enemy,
-                player,
-                solids,
-                verticalHitRecoilMultiplier,
-            );
+            this.resolveCollisionY(enemy, player, solids, verticalHitRecoilMultiplier);
         }
     }
 
@@ -180,11 +155,7 @@ export class EnemyController {
         const blocked =
             solids.some((p) => rectsCollide(playerAtTarget, p)) ||
             this.enemies.some(
-                (e) =>
-                    e !== enemy &&
-                    !e.dead &&
-                    !e.dying &&
-                    rectsCollide(playerAtTarget, e),
+                (e) => e !== enemy && !e.dead && !e.dying && rectsCollide(playerAtTarget, e)
             );
 
         if (!blocked) {
@@ -193,9 +164,7 @@ export class EnemyController {
             // No room for player — snap enemy clear and reverse.
             // Skip for vertical-only enemies (dirX === 0): snapping their X or
             // reversing direction would corrupt their vertical patrol.
-            enemy.x = enemy.playerEnteredFromLeft
-                ? player.x + player.w
-                : player.x - enemy.w;
+            enemy.x = enemy.playerEnteredFromLeft ? player.x + player.w : player.x - enemy.w;
             if (!enemy.dying) {
                 enemy.direction = -enemy.direction;
             }
@@ -207,9 +176,7 @@ export class EnemyController {
             return;
         }
 
-        const targetY = enemy.playerEnteredFromAbove
-            ? enemy.y - player.h
-            : enemy.y + enemy.h;
+        const targetY = enemy.playerEnteredFromAbove ? enemy.y - player.h : enemy.y + enemy.h;
 
         const playerAtTarget = {
             x: player.x,
@@ -221,11 +188,7 @@ export class EnemyController {
         const blocked =
             solids.some((p) => rectsCollide(playerAtTarget, p)) ||
             this.enemies.some(
-                (e) =>
-                    e !== enemy &&
-                    !e.dead &&
-                    !e.dying &&
-                    rectsCollide(playerAtTarget, e),
+                (e) => e !== enemy && !e.dead && !e.dying && rectsCollide(playerAtTarget, e)
             );
 
         if (blocked && enemy.dirY !== 0) {
