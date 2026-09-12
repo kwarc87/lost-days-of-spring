@@ -26,6 +26,8 @@ import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
 import { PauseController } from "../systems/PauseController.js";
 import { ExitController } from "../systems/ExitController.js";
+import { TitleScreenController } from "../systems/TitleScreenController.js";
+import { ArtifactGalleryController } from "../systems/ArtifactGalleryController.js";
 import { TeleportController } from "../systems/TeleportController.js";
 import { ProjectileController } from "../systems/ProjectileController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
@@ -80,13 +82,7 @@ export class LostDaysOfSpring {
         this.mapView = false;
         this.levelComplete = false;
         this.gameOver = false;
-        this.isTitleScreen = true;
-        this.titleFadeOut = {
-            active: false,
-            pending: false,
-            startTime: 0,
-            duration: 750,
-        };
+        this.titleScreenController = new TitleScreenController();
         this.gameFadeIn = { active: false, startTime: 0, duration: 750 };
         this.levelCompleteAt = 0; // timestamp (ms) when level was completed
         this.gameOverAt = 0; // timestamp (ms) when game over occurred
@@ -96,9 +92,6 @@ export class LostDaysOfSpring {
         this.worldGroundId = "world-ground";
         this.verticalHitRecoilMultiplier = 1.5;
         this.mapDiscovery = null;
-        this.isArtifactGallery = false;
-        this.frozenFrame = null; // offscreen canvas reused for frozen-world overlays
-        this.galleryLastIndex = 0; // remembers carousel position between gallery openings within a run
 
         // ====== PLAYER (Base static attributes set by factory) ======
         this.player = GameFactory.player({
@@ -188,7 +181,7 @@ export class LostDaysOfSpring {
         this.mapSpikeRenderer = MapSpikeRenderer;
         this.mapCheckpointRenderer = MapCheckpointRenderer;
         this.mapExitRenderer = MapExitRenderer;
-        this.artifactGallery = new ArtifactGalleryRenderer();
+        this.galleryController = new ArtifactGalleryController(new ArtifactGalleryRenderer());
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -204,6 +197,12 @@ export class LostDaysOfSpring {
                 }
             });
         }
+        this.inputHandlers = {
+            title: (e) => this.handleTitleScreenKeyDown(e),
+            gallery: (e) => this.handleGalleryKeyDown(e),
+            pause: (e) => this.handlePauseMenuKey(e.code),
+            gameplay: (e) => this.handleGameplayKeyDown(e),
+        };
         this.initControls();
 
         this.decorateDrawMethods();
@@ -258,7 +257,7 @@ export class LostDaysOfSpring {
 
         // On first load or page reload, restore checkpoint from localStorage
         if (this.checkpointManager.loadSaved(levelId)) {
-            this.galleryLastIndex = 0;
+            this.galleryController.resetLastIndex();
         }
 
         // Reset death counter only when completing a level (starting fresh).
@@ -399,23 +398,25 @@ export class LostDaysOfSpring {
     handleKeyDown(e) {
         this.handleGlobalToggles(e);
 
-        if (this.isTitleScreen) {
-            this.handleTitleScreenKeyDown(e);
+        const mode = this.currentInputMode();
+        if (mode === "pause" && e.repeat) {
             return;
         }
+        this.inputHandlers[mode]?.(e);
+    }
 
-        if (this.isArtifactGallery) {
-            this.handleGalleryKeyDown(e);
-            return;
+    // The mode currently receiving keyboard input; drives InputRouter dispatch.
+    currentInputMode() {
+        if (this.titleScreenController.active) {
+            return "title";
         }
-
-        const wasPaused = this.pauseController.isPaused;
-        this.handlePauseMenuInput(e);
-        if (wasPaused || this.pauseController.isPaused) {
-            return;
+        if (this.galleryController.active) {
+            return "gallery";
         }
-
-        this.handleGameplayKeyDown(e);
+        if (this.pauseController.isPaused) {
+            return "pause";
+        }
+        return "gameplay";
     }
 
     // Toggles active regardless of game mode (title screen, gallery, pause, gameplay).
@@ -443,8 +444,8 @@ export class LostDaysOfSpring {
         if (
             e.code === this.keysMap.enter &&
             !e.repeat &&
-            !this.titleFadeOut.active &&
-            !this.titleFadeOut.pending
+            !this.titleScreenController.fadeOut.active &&
+            !this.titleScreenController.fadeOut.pending
         ) {
             if (!document.fullscreenElement) {
                 this.canvas
@@ -454,7 +455,7 @@ export class LostDaysOfSpring {
                     })
                     .catch(() => {});
             }
-            this.titleFadeOut.pending = true;
+            this.titleScreenController.requestFadeOut();
             this.inputController.clear();
         }
     }
@@ -467,15 +468,27 @@ export class LostDaysOfSpring {
         if (e.code === this.keysMap.escape || e.code === this.keysMap.gallery) {
             this.closeArtifactGallery();
         } else if (e.code === this.keysMap.left) {
-            this.artifactGallery.navigateLeft();
+            this.galleryController.navigateLeft();
             this.animateGallery();
         } else if (e.code === this.keysMap.right) {
-            this.artifactGallery.navigateRight();
+            this.galleryController.navigateRight();
             this.animateGallery();
         }
     }
 
     handleGameplayKeyDown(e) {
+        if (
+            (e.code === this.keysMap.escape || e.code === this.keysMap.pause) &&
+            !e.repeat &&
+            !this.levelComplete &&
+            !this.gameOver &&
+            !this.player.dying &&
+            !this.mapView
+        ) {
+            this.openPauseMenu();
+            return;
+        }
+
         if (e.code === this.keysMap.gallery && !e.repeat) {
             if (!this.levelComplete && !this.gameOver && !this.mapView && !this.player.dying) {
                 this.openArtifactGallery();
@@ -686,7 +699,7 @@ export class LostDaysOfSpring {
     }
 
     handleJumpInput(now) {
-        if (this.player.posture === this.playerPostures.CROUCH) {
+        if (this.isPlayerCrouching()) {
             return;
         }
         if (now < this.player.knockbackUntil) {
@@ -738,7 +751,7 @@ export class LostDaysOfSpring {
                 this.player.shooting = false;
                 this.player.jumpPressedByUser = false;
                 this.checkpointManager.clear();
-                this.galleryLastIndex = 0;
+                this.galleryController.resetLastIndex();
             }
         }
     }
@@ -1194,7 +1207,7 @@ export class LostDaysOfSpring {
             this.exitController.playerAtExit &&
             !this.levelComplete &&
             !this.gameOver &&
-            !this.isArtifactGallery
+            !this.galleryController.active
         ) {
             this.drawExitMessage();
         }
@@ -1206,7 +1219,7 @@ export class LostDaysOfSpring {
             !this.gameOver &&
             !this.mapView &&
             !this.pauseController.isPaused &&
-            !this.isArtifactGallery
+            !this.galleryController.active
         ) {
             this.messageRenderer.drawMessagePanel(
                 this.ctx,
@@ -1223,7 +1236,7 @@ export class LostDaysOfSpring {
             !this.gameOver &&
             !this.mapView &&
             !this.pauseController.isPaused &&
-            !this.isArtifactGallery
+            !this.galleryController.active
         ) {
             const activeArtifactSource = this.messageController.getActiveArtifactSource();
             this.messageRenderer.drawPanel(
@@ -1396,18 +1409,10 @@ export class LostDaysOfSpring {
 
     loopTitleScreen(now) {
         this.drawTitleScreen();
-        if (this.titleFadeOut.pending) {
-            this.titleFadeOut.active = true;
-            this.titleFadeOut.startTime = now;
-            this.titleFadeOut.pending = false;
-        }
-        if (this.titleFadeOut.active) {
-            const elapsed = now - this.titleFadeOut.startTime;
-            const progress = Math.min(elapsed / this.titleFadeOut.duration, 1);
-            this.transitionRenderer.drawFadeOut(this.ctx, this.canvas, progress);
-            if (progress >= 1) {
-                this.titleFadeOut.active = false;
-                this.isTitleScreen = false;
+        const fade = this.titleScreenController.update(now);
+        if (fade) {
+            this.transitionRenderer.drawFadeOut(this.ctx, this.canvas, fade.progress);
+            if (fade.justFinished) {
                 this.levelStartAt = now;
                 this.pauseController.totalPausedTime = 0;
                 this.accumulatedPlayTime = this.checkpointManager.getRespawn()?.playTimeMs ?? 0;
@@ -1421,7 +1426,7 @@ export class LostDaysOfSpring {
             return;
         }
 
-        if (this.isTitleScreen) {
+        if (this.titleScreenController.active) {
             this.loopTitleScreen(now);
             window.requestAnimationFrame(this.loop);
             return;
@@ -1467,26 +1472,6 @@ export class LostDaysOfSpring {
 
     stop() {
         this.isRunning = false;
-    }
-
-    handlePauseMenuInput(e) {
-        if (this.pauseController.isPaused) {
-            if (!e.repeat) {
-                this.handlePauseMenuKey(e.code);
-            }
-            return;
-        }
-
-        if (
-            (e.code === this.keysMap.escape || e.code === this.keysMap.pause) &&
-            !e.repeat &&
-            !this.levelComplete &&
-            !this.gameOver &&
-            !this.player.dying &&
-            !this.mapView
-        ) {
-            this.openPauseMenu();
-        }
     }
 
     handlePauseMenuKey(code) {
@@ -1572,13 +1557,13 @@ export class LostDaysOfSpring {
             this.checkpointManager.clear();
             this.deathCount = 0;
             this.accumulatedPlayTime = 0;
-            this.galleryLastIndex = 0;
+            this.galleryController.resetLastIndex();
         } else if (this.pauseController.menuIndex === 3) {
             // Return to main screen — restore time and deaths from checkpoint
             const cr = this.checkpointManager.getRespawn();
             this.accumulatedPlayTime = cr?.playTimeMs ?? 0;
             this.deathCount = cr?.deathCount ?? 0;
-            this.isTitleScreen = true;
+            this.titleScreenController.active = true;
         }
 
         this.loadLevel(this.currentLevelId);
@@ -1599,43 +1584,30 @@ export class LostDaysOfSpring {
         }
     }
 
-    // Copies the current canvas into _frozenFrame (lazy-created offscreen canvas).
-    // Used whenever a semi-transparent overlay needs a stable world background.
-    captureFrame() {
-        if (!this.frozenFrame) {
-            this.frozenFrame = document.createElement("canvas");
-        }
-        this.frozenFrame.width = this.canvas.width;
-        this.frozenFrame.height = this.canvas.height;
-        this.frozenFrame.getContext("2d").drawImage(this.canvas, 0, 0);
-    }
-
     openArtifactGallery() {
-        this.isArtifactGallery = true;
+        this.galleryController.activate();
         this.pauseController.beginFreeze(performance.now());
         this.stop();
         this.draw(this.simulatedTime);
-        this.captureFrame();
-        this.artifactGallery.open(this.collectibleController.getArtifacts(), this.galleryLastIndex);
+        this.galleryController.captureFrame(this.canvas);
+        this.galleryController.openGallery(this.collectibleController.getArtifacts());
         this.drawGallery();
     }
 
     drawGallery() {
-        this.ctx.drawImage(this.frozenFrame, 0, 0);
-        this.artifactGallery.draw(this.ctx, this.canvas, performance.now());
+        this.galleryController.draw(this.ctx, this.canvas, performance.now());
     }
 
     // Burst RAF — runs only while the carousel is sliding (~150ms), then stops.
     animateGallery() {
         this.drawGallery();
-        if (this.artifactGallery._animOffset !== 0) {
+        if (this.galleryController.isAnimating()) {
             requestAnimationFrame(() => this.animateGallery());
         }
     }
 
     closeArtifactGallery() {
-        this.isArtifactGallery = false;
-        this.galleryLastIndex = this.artifactGallery.selectedIndex;
+        this.galleryController.deactivate();
         this.resumeFromPause();
         this.lastTime = performance.now();
         this.start();
