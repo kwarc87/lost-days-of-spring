@@ -29,6 +29,7 @@ import { PlayerPostureController } from "../systems/PlayerPostureController.js";
 import { PlayerHealthController } from "../systems/PlayerHealthController.js";
 import { LevelLoader } from "../services/LevelLoader.js";
 import { InputController } from "../systems/InputController.js";
+import { InputRouter } from "../systems/InputRouter.js";
 import { KEYS_MAP } from "../config/keysMap.js";
 import { PHYSICS } from "../config/physics.js";
 import { DisplayController } from "../systems/DisplayController.js";
@@ -36,6 +37,7 @@ import { DebugMouseTracker } from "../systems/DebugMouseTracker.js";
 import { TitleScreenRenderer } from "../renderers/TitleScreenRenderer.js";
 import { TransitionRenderer } from "../renderers/TransitionRenderer.js";
 import { ArtifactGalleryRenderer } from "../renderers/ArtifactGalleryRenderer.js";
+import { buildLevelStats, computePlayTimeMs } from "../utils/levelStats.js";
 
 export class LostDaysOfSpring {
     constructor(canvasId, showDebug = true, initialHp = 6) {
@@ -137,6 +139,12 @@ export class LostDaysOfSpring {
         };
 
         this.galleryController = new ArtifactGalleryController(new ArtifactGalleryRenderer());
+        this.inputRouter = new InputRouter(
+            this.keysMap,
+            this.titleScreenController,
+            this.galleryController,
+            this.pauseController
+        );
 
         this.lastTime = performance.now();
         this.accumulator = 0;
@@ -290,44 +298,27 @@ export class LostDaysOfSpring {
     }
 
     handleKeyDown(e) {
-        this.handleGlobalToggles(e);
+        this.inputRouter.handleGlobalToggles(
+            e,
+            () => this.toggleDebug(),
+            () => this.displayController.toggleFullscreen()
+        );
 
-        const mode = this.currentInputMode();
+        const mode = this.inputRouter.currentMode();
         if (mode === "pause" && e.repeat) {
             return;
         }
         this.inputHandlers[mode]?.(e);
     }
 
-    // The mode currently receiving keyboard input; drives InputRouter dispatch.
-    currentInputMode() {
-        if (this.titleScreenController.active) {
-            return "title";
+    toggleDebug() {
+        this.showDebug = !this.showDebug;
+        if (this.showDebug) {
+            this.mouse.attach(() => this.updateDebugIfStopped());
+        } else {
+            this.mouse.detach();
         }
-        if (this.galleryController.active) {
-            return "gallery";
-        }
-        if (this.pauseController.isPaused) {
-            return "pause";
-        }
-        return "gameplay";
-    }
-
-    // Toggles active regardless of game mode (title screen, gallery, pause, gameplay).
-    handleGlobalToggles(e) {
-        if (e.code === this.keysMap.debugToggle && !e.repeat) {
-            this.showDebug = !this.showDebug;
-            if (this.showDebug) {
-                this.mouse.attach(() => this.updateDebugIfStopped());
-            } else {
-                this.mouse.detach();
-            }
-            this.updateDebug();
-        }
-
-        if (e.code === this.keysMap.fullscreen && !e.repeat) {
-            this.displayController.toggleFullscreen();
-        }
+        this.updateDebug();
     }
 
     handleTitleScreenKeyDown(e) {
@@ -756,24 +747,18 @@ export class LostDaysOfSpring {
 
     // Shared coins/splinters/enemies/artifacts/time stats for the level-complete and game-over screens.
     buildLevelStats(completedAt) {
-        const playTimeMs =
-            completedAt -
-            this.levelStartAt -
-            this.pauseController.totalPausedTime +
-            this.accumulatedPlayTime;
-        return {
-            coinsCount: this.player.coinsCount,
+        return buildLevelStats(completedAt, {
+            player: this.player,
+            enemies: this.enemyController.getEnemies(),
             currentLevelCoinsCount: this.currentLevelCoinsCount,
-            splintersCount: this.player.splintersCount,
             currentLevelSplintersCount: this.currentLevelSplintersCount,
-            enemiesDefeated: this.enemyController.getEnemies().filter((e) => e.dead || e.dying)
-                .length,
-            currentLevelEnemiesCount: this.currentLevelEnemiesCount,
-            playTimeMs,
-            deathCount: this.deathCount,
-            artifactsCount: this.player.artifactsCount,
             currentLevelArtifactsCount: this.currentLevelArtifactsCount,
-        };
+            currentLevelEnemiesCount: this.currentLevelEnemiesCount,
+            levelStartAt: this.levelStartAt,
+            totalPausedTime: this.pauseController.totalPausedTime,
+            accumulatedPlayTime: this.accumulatedPlayTime,
+            deathCount: this.deathCount,
+        });
     }
 
     drawLevelComplete() {
@@ -817,10 +802,10 @@ export class LostDaysOfSpring {
     }
 
     getCurrentPlayTimeMs() {
-        return (
-            this.simulatedTime -
-            this.levelStartAt -
-            this.pauseController.totalPausedTime +
+        return computePlayTimeMs(
+            this.simulatedTime,
+            this.levelStartAt,
+            this.pauseController.totalPausedTime,
             this.accumulatedPlayTime
         );
     }
@@ -975,14 +960,13 @@ export class LostDaysOfSpring {
     }
 
     resumeFromPause() {
-        const pauseDuration = this.pauseController.endFreeze(performance.now());
-
-        this.pauseController.adjustPlayerTimers(this.player, pauseDuration);
-        this.messageController.adjustForPause(pauseDuration);
-        this.combatController.adjustForPause(pauseDuration);
-        this.elevatorController.adjustForPause(pauseDuration);
-        this.enemyController.adjustForPause(pauseDuration);
-        this.teleportController.adjustForPause(pauseDuration);
+        const pauseDuration = this.pauseController.resumeAll(performance.now(), this.player, [
+            this.messageController,
+            this.combatController,
+            this.elevatorController,
+            this.enemyController,
+            this.teleportController,
+        ]);
         adjustAnimStartTime(pauseDuration);
         this.simulatedTime += pauseDuration;
         if (this.gameFadeIn.active) {

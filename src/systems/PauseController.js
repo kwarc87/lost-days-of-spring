@@ -68,4 +68,15 @@ export class PauseController {
             player.knockbackUntil += pauseDuration;
         }
     }
+
+    // Ends the freeze window and propagates its duration to the player plus every
+    // other pause-sensitive system (each expected to expose adjustForPause).
+    resumeAll(now, player, pausables) {
+        const pauseDuration = this.endFreeze(now);
+        this.adjustPlayerTimers(player, pauseDuration);
+        for (const pausable of pausables) {
+            pausable.adjustForPause(pauseDuration);
+        }
+        return pauseDuration;
+    }
 }
