@@ -4,7 +4,7 @@ import { CameraController } from "../systems/CameraController.js";
 import { PLAYER_DYING_DURATION_MS } from "../renderers/PlayerRenderers.js";
 import {
     DefaultPauseRenderer,
-    MENU_ITEMS,
+    getMenuItems,
     PAUSE_MENU_ACTION,
 } from "../renderers/PauseRenderers.js";
 import { DebugHudRenderer } from "../renderers/DebugRenderers.js";
@@ -165,7 +165,23 @@ export class LostDaysOfSpring {
         this.initControls();
 
         this.displayController.resizeCanvasToFit();
-        this.displayController.attach();
+        this.displayController.attach(() => this.redrawPausePanelIfPaused());
+    }
+
+    redrawPausePanelIfPaused() {
+        if (this.pauseController.isPaused) {
+            this.drawPausePanel();
+        }
+    }
+
+    drawPausePanel() {
+        DefaultPauseRenderer.drawPausePanel(
+            this.ctx,
+            this.canvas,
+            this.pauseController.menuIndex,
+            this.getCurrentPlayTimeMs(),
+            this.displayController.isFullscreen
+        );
     }
 
     get hasEnoughCoins() {
@@ -909,15 +925,10 @@ export class LostDaysOfSpring {
         switch (code) {
             case this.keysMap.menuUp:
             case this.keysMap.menuDown: {
-                const count = MENU_ITEMS.length;
+                const count = getMenuItems(false).length;
                 const dir = code === this.keysMap.menuUp ? -1 : 1;
                 this.pauseController.moveMenuIndex(dir, count);
-                DefaultPauseRenderer.drawPausePanel(
-                    this.ctx,
-                    this.canvas,
-                    this.pauseController.menuIndex,
-                    this.getCurrentPlayTimeMs()
-                );
+                this.drawPausePanel();
                 break;
             }
             case this.keysMap.menuConfirm:
@@ -939,7 +950,8 @@ export class LostDaysOfSpring {
             this.ctx,
             this.canvas,
             this.pauseController.menuIndex,
-            this.getCurrentPlayTimeMs()
+            this.getCurrentPlayTimeMs(),
+            this.displayController.isFullscreen
         );
     }
 
@@ -976,6 +988,12 @@ export class LostDaysOfSpring {
             this.pauseController.close();
             this.resumeFromPause();
             this.openArtifactGallery();
+            return;
+        }
+
+        if (action === PAUSE_MENU_ACTION.TOGGLE_FULLSCREEN) {
+            // Stay in the pause menu; the label is redrawn on the "fullscreenchange" event.
+            this.displayController.toggleFullscreen();
             return;
         }
 

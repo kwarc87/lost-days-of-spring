@@ -11,19 +11,23 @@ const TRIANGLE_COLOR = "#f5c542";
 const SHADOW_COLOR = "rgba(0, 0, 0, 0.55)";
 const SHADOW_OFFSET = 1;
 
-export const MENU_ITEMS = [
-    "Resume game",
-    "Artifact gallery",
-    "Reset progress",
-    "Return to main screen",
-];
+export function getMenuItems(isFullscreen) {
+    return [
+        "Resume game",
+        "Artifact gallery",
+        isFullscreen ? "Exit fullscreen" : "Enter fullscreen",
+        "Reset progress",
+        "Return to main screen",
+    ];
+}
 
-// Indices into MENU_ITEMS, named to avoid magic numbers at call sites.
+// Indices into getMenuItems(), named to avoid magic numbers at call sites.
 export const PAUSE_MENU_ACTION = {
     RESUME: 0,
     GALLERY: 1,
-    RESET_PROGRESS: 2,
-    RETURN_TO_TITLE: 3,
+    TOGGLE_FULLSCREEN: 2,
+    RESET_PROGRESS: 3,
+    RETURN_TO_TITLE: 4,
 };
 
 const PAD_X = 24;
@@ -40,9 +44,9 @@ const TRIANGLE_PAD = 12;
 
 export const DefaultPauseRenderer = {
     // Full pause screen: dark overlay + panel. Call once when pausing.
-    drawPauseScreen(ctx, canvas, selectedIndex = 0, playTimeMs = 0) {
+    drawPauseScreen(ctx, canvas, selectedIndex = 0, playTimeMs = 0, isFullscreen = false) {
         this.drawPauseBackground(ctx, canvas);
-        this.drawPausePanel(ctx, canvas, selectedIndex, playTimeMs);
+        this.drawPausePanel(ctx, canvas, selectedIndex, playTimeMs, isFullscreen);
     },
 
     // Full-screen dark overlay only.
@@ -55,16 +59,17 @@ export const DefaultPauseRenderer = {
 
     // Panel + items only. Background is fully opaque so redrawing cleanly
     // replaces the previous panel without blending issues — no snapshot needed.
-    drawPausePanel(ctx, canvas, selectedIndex = 0, playTimeMs = 0) {
+    drawPausePanel(ctx, canvas, selectedIndex = 0, playTimeMs = 0, isFullscreen = false) {
         const w = canvas.width;
         const h = canvas.height;
+        const menuItems = getMenuItems(isFullscreen);
         const timeText = `Time: ${formatPlayTime(playTimeMs)}`;
 
         ctx.save();
 
         ctx.font = FONT_BODY;
         let maxItemW = 0;
-        for (const item of MENU_ITEMS) {
+        for (const item of menuItems) {
             maxItemW = Math.max(maxItemW, ctx.measureText(item).width);
         }
 
@@ -80,8 +85,8 @@ export const DefaultPauseRenderer = {
             TIME_GAP +
             TIME_H +
             TITLE_GAP +
-            MENU_ITEMS.length * ITEM_H +
-            (MENU_ITEMS.length - 1) * ITEM_GAP +
+            menuItems.length * ITEM_H +
+            (menuItems.length - 1) * ITEM_GAP +
             PAD_Y;
 
         const panelX = Math.round(w / 2 - panelW / 2);
@@ -121,7 +126,7 @@ export const DefaultPauseRenderer = {
 
         const itemsStartY = panelY + PAD_Y + TITLE_H + TIME_GAP + TIME_H + TITLE_GAP;
 
-        for (let i = 0; i < MENU_ITEMS.length; i++) {
+        for (let i = 0; i < menuItems.length; i++) {
             const itemCenterY = itemsStartY + i * (ITEM_H + ITEM_GAP) + ITEM_H / 2;
             const isSelected = i === selectedIndex;
             const textX = panelX + PAD_X + TRIANGLE_W + TRIANGLE_PAD;
@@ -138,9 +143,9 @@ export const DefaultPauseRenderer = {
             }
 
             ctx.fillStyle = SHADOW_COLOR;
-            ctx.fillText(MENU_ITEMS[i], textX + SHADOW_OFFSET, itemCenterY + SHADOW_OFFSET);
+            ctx.fillText(menuItems[i], textX + SHADOW_OFFSET, itemCenterY + SHADOW_OFFSET);
             ctx.fillStyle = isSelected ? ITEM_COLOR : ITEM_DIMMED_COLOR;
-            ctx.fillText(MENU_ITEMS[i], textX, itemCenterY);
+            ctx.fillText(menuItems[i], textX, itemCenterY);
         }
 
         ctx.restore();

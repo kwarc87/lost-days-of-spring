@@ -63,7 +63,7 @@ export class DisplayController {
         }
     }
 
-    attach() {
+    attach(onFullscreenChange) {
         this.resizeHandler = () => this.resizeCanvasToFit();
         this.fullscreenChangeHandler = () => {
             this.isFullscreen = !!document.fullscreenElement;
@@ -72,6 +72,7 @@ export class DisplayController {
             if (!this.isFullscreen) {
                 navigator.keyboard?.unlock?.();
             }
+            onFullscreenChange?.(this.isFullscreen);
         };
         window.addEventListener("resize", this.resizeHandler);
         document.addEventListener("fullscreenchange", this.fullscreenChangeHandler);
