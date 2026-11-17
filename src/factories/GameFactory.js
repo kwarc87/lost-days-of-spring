@@ -2,6 +2,7 @@
 
 let _nextCheckpointPlatformId = 9001;
 let _nextTeleportPlatformId = 8001;
+let _nextPoolPlatformId = 7001;
 
 export const GameFactory = {
     // Sprite/world scale. Single source of truth: every world-pixel quantity
@@ -143,6 +144,29 @@ export const GameFactory = {
         type: "solid",
         layout,
         ...(color !== undefined && { color }),
+    }),
+    // Behaves like a solid, but slows the player down and lowers their jump.
+    underWater: ({
+        id,
+        x,
+        y,
+        w,
+        h,
+        layout = "ground",
+        color,
+        speedMultiplier = 0.35,
+        jumpMultiplier = 0.65,
+    } = {}) => ({
+        id,
+        x,
+        y,
+        w,
+        h,
+        type: "solid",
+        layout,
+        ...(color !== undefined && { color }),
+        speedMultiplier,
+        jumpMultiplier,
     }),
     ice: ({
         id,
@@ -944,6 +968,47 @@ export const GameFactory = {
             h: 16 * GameFactory.SCALE,
             ...rest,
         }),
+        water: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 352,
+            cordY: 48,
+            w: 16 * GameFactory.SCALE,
+            h: 16 * GameFactory.SCALE,
+            opacity: 0.75,
+            ...rest,
+        }),
+        poolEdgeLeft: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 288,
+            cordY: 260,
+            w: 16 * GameFactory.SCALE,
+            h: 32 * GameFactory.SCALE,
+            ...rest,
+        }),
+        poolEdgeRight: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 336,
+            cordY: 260,
+            w: 16 * GameFactory.SCALE,
+            h: 32 * GameFactory.SCALE,
+            ...rest,
+        }),
+        poolGround: ({ x, y, ...rest } = {}) => ({
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 288,
+            cordY: 294,
+            w: 16 * GameFactory.SCALE,
+            h: 12 * GameFactory.SCALE,
+            ...rest,
+        }),
     },
     grid: {
         teleport: ({ id, x, y, targetX, targetY, ...rest } = {}) => ({
@@ -1058,7 +1123,7 @@ export const GameFactory = {
                 displayTime,
                 delay,
             }),
-        solid: ({ id, x, y, w, h, layout = "ground" } = {}) =>
+        solid: ({ id, x, y, w, h, layout = "ground", color } = {}) =>
             GameFactory.solid({
                 id,
                 x: x * GameFactory.GRID,
@@ -1066,6 +1131,29 @@ export const GameFactory = {
                 w: w * GameFactory.GRID,
                 h: h * GameFactory.GRID,
                 layout,
+                color,
+            }),
+        underWater: ({
+            id,
+            x,
+            y,
+            w,
+            h,
+            layout = "ground",
+            color,
+            speedMultiplier,
+            jumpMultiplier,
+        } = {}) =>
+            GameFactory.underWater({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
+                layout,
+                color,
+                speedMultiplier,
+                jumpMultiplier,
             }),
         ice: ({
             id,
@@ -1325,6 +1413,45 @@ export const GameFactory = {
             }
             return cp;
         },
+        // x/y is the top-left corner of the left edge; w is the total width in tiles (edges included).
+        // The pool body is a solid color by default (renderer fallback); pass a tile layout (e.g. "groundOnlyBottomClean") to texture it.
+        pool: ({ id, x, y, w, h = 1, layout = "simple", color } = {}) => ({
+            id,
+            foreground: [
+                GameFactory.grid.environment.poolEdgeLeft({ x, y }),
+                GameFactory.grid.environment.poolEdgeRight({ x: x + w - 1, y }),
+                GameFactory.grid.environment.poolGround({ x: x + 1, y: y + 1, repeatX: w - 2 }),
+                GameFactory.grid.environment.water({ x: x + 1, y, repeatX: w - 2 }),
+            ],
+            platforms: [
+                GameFactory.grid.underWater({
+                    id: _nextPoolPlatformId++,
+                    x,
+                    y: y + 1,
+                    w,
+                    h,
+                    layout,
+                    color,
+                }),
+                // Edge collision boxes; hidden behind the edge textures
+                GameFactory.grid.solid({
+                    id: _nextPoolPlatformId++,
+                    x,
+                    y,
+                    w: 1,
+                    h: 2,
+                    layout: "simple",
+                }),
+                GameFactory.grid.solid({
+                    id: _nextPoolPlatformId++,
+                    x: x + w - 1,
+                    y,
+                    w: 1,
+                    h: 2,
+                    layout: "simple",
+                }),
+            ],
+        }),
         environment: {
             teleport: ({ x, y, ...rest } = {}) =>
                 GameFactory.teleport({
@@ -1574,6 +1701,30 @@ export const GameFactory = {
                 }),
             electronic003: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.electronic003({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            water: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.water({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID,
+                    ...rest,
+                }),
+            poolEdgeLeft: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.poolEdgeLeft({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 4 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            poolEdgeRight: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.poolEdgeRight({
+                    x: x * GameFactory.GRID,
+                    y: y * GameFactory.GRID - 4 * GameFactory.SCALE,
+                    ...rest,
+                }),
+            poolGround: ({ x, y, ...rest } = {}) =>
+                GameFactory.environment.poolGround({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID,
                     ...rest,

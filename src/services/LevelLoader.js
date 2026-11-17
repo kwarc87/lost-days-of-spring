@@ -51,6 +51,10 @@ export const LevelLoader = {
         const teleportItems = teleportController.extractItems();
         foregroundItems.push(...teleportItems.foreground);
         platforms.push(...teleportItems.platforms);
+        for (const pool of levelData.pools ?? []) {
+            foregroundItems.push(...pool.foreground);
+            platforms.push(...pool.platforms);
+        }
         // Elevators first: same priority order as movePlayerY collision resolution.
         const solids = [...elevatorController.getElevators(), ...platforms];
 

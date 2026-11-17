@@ -104,7 +104,13 @@ export class PlayerPhysicsController {
         }
 
         let targetVx = 0;
-        const speed = isCrouching() ? player.crouchSpeed : player.speed;
+        // While airborne, the speed limit of the platform the player left still applies
+        const speedPlatform = solids.find(
+            (p) => p.id === (player.airborne ? player.lastGroundId : player.onGroundId)
+        );
+        const speed =
+            (isCrouching() ? player.crouchSpeed : player.speed) *
+            (speedPlatform?.speedMultiplier ?? 1);
 
         if (inputController.isDown("left") && !inputController.isDown("right")) {
             targetVx = -speed;
@@ -117,6 +123,11 @@ export class PlayerPhysicsController {
         player.movingByInput = targetVx !== 0;
 
         this.applyHorizontalMovement(player, targetVx, solids);
+
+        // Momentum carried onto a slowing platform must not exceed its speed limit
+        if (speedPlatform?.speedMultiplier !== undefined) {
+            player.vx = Math.max(-speed, Math.min(speed, player.vx));
+        }
     }
 
     // Ease vx toward targetVx using the acceleration/deceleration of the platform
@@ -171,7 +182,7 @@ export class PlayerPhysicsController {
 
     // Consume a buffered jump press (respecting crouch, knockback, coyote time,
     // and boosters) and apply the resulting vy/elevator boost.
-    handleJumpInput(now, player, { isCrouching, elevatorController }) {
+    handleJumpInput(now, player, { isCrouching, elevatorController, solids }) {
         if (isCrouching()) {
             return;
         }
@@ -189,7 +200,9 @@ export class PlayerPhysicsController {
         const canGroundJump = !isOnBooster && (!player.airborne || hasCoyoteTime);
 
         if (jumpBuffered && canGroundJump) {
-            player.vy = -player.jump;
+            // lastGroundId stays valid during coyote time, when onGroundId is already null
+            const groundPlatform = solids.find((p) => p.id === player.lastGroundId);
+            player.vy = -player.jump * (groundPlatform?.jumpMultiplier ?? 1);
 
             this.handleElevatorJump(now, player, elevatorController);
 

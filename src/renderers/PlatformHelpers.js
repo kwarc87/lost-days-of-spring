@@ -26,6 +26,15 @@ export function repeatAllTiles3x3(tile) {
     };
 }
 
+// Only the top row gets a sprite; the remaining tiles are left empty.
+export function repeatTopRowOnly3x3(tile) {
+    return {
+        tLeft: tile,
+        tMid: tile,
+        tRight: tile,
+    };
+}
+
 export function topCap3x3({ tLeft, tMid, tRight, left, mid, right }) {
     return {
         tLeft,

@@ -1,6 +1,7 @@
 ﻿import {
     repeatHorizontal3x3,
     repeatAllTiles3x3,
+    repeatTopRowOnly3x3,
     topCap3x3,
     bottomCap3x3,
     leftCap3x3,
@@ -331,6 +332,13 @@ const platformCaves = {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3({ x: 32, y: 16 }, { x: 128, y: 16 }, { x: 96, y: 16 }),
     },
+    water: {
+        ...BASE_TILESET,
+        tileWidthSrc: 16,
+        tileHeightSrc: 16,
+        bodyFill: "#2a6091",
+        sprites: repeatTopRowOnly3x3({ x: 352, y: 48 }),
+    },
     boardOneDirection: {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3(
@@ -508,7 +516,7 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
 
     const img = getImg(def.path);
     const imgReady = img.complete && img.naturalWidth > 0;
-    if (!def.midFill && !imgReady) {
+    if (!def.midFill && !def.bodyFill && !imgReady) {
         return;
     }
 
@@ -529,6 +537,20 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
                 y + r0 * tileHeight,
                 (c1 - c0 + 1) * tileWidth,
                 (r1 - r0 + 1) * tileHeight
+            );
+        }
+    }
+
+    // --- Body fill: everything below the top row ---
+    if (def.bodyFill && rows >= 2) {
+        const r0 = Math.max(1, startRow);
+        if (r0 <= endRow) {
+            ctx.fillStyle = def.bodyFill;
+            ctx.fillRect(
+                x + startCol * tileWidth,
+                y + r0 * tileHeight,
+                (endCol - startCol + 1) * tileWidth,
+                (endRow - r0 + 1) * tileHeight
             );
         }
     }
@@ -574,11 +596,10 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
     }
 }
 
+const SIMPLE_PLATFORM_DEFAULT_COLOR = "#3b1158";
+
 function drawSimpleTiled(ctx, platform) {
-    if (!platform.color) {
-        return;
-    }
-    ctx.fillStyle = platform.color;
+    ctx.fillStyle = platform.color ?? SIMPLE_PLATFORM_DEFAULT_COLOR;
     ctx.fillRect(platform.x, platform.y, platform.w, platform.h);
 }
 

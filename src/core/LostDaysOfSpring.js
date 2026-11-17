@@ -540,6 +540,7 @@ export class LostDaysOfSpring {
         this.playerPhysicsController.handleJumpInput(now, this.player, {
             isCrouching: () => this.isPlayerCrouching(),
             elevatorController: this.elevatorController,
+            solids: this.solids,
         });
     }
 

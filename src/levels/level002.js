@@ -137,6 +137,10 @@ export const LEVEL_002 = {
         //custom
         GameFactory.grid.solid({ id: 120, x: 36, y: 109, w: 3, h: 2, layout: "groundTopCap" }),
         GameFactory.grid.solid({ id: 121, x: 41, y: 109, w: 2, h: 2, layout: "groundTopCap" }),
+
+        //additional pool
+        GameFactory.grid.solid({ id: 122, x: 81, y: 108, w: 2, h: 3, layout: "groundTopCap" }),
+        GameFactory.grid.solid({ id: 123, x: 91, y: 108, w: 2, h: 3, layout: "groundTopCap" }),
     ],
     elevators: [
         GameFactory.grid.elevator({ id: 1001, startX: 166, startY: 109, w: 4, h: 1, targetX: 166, targetY: 70, speed: 10.5, waitTime: 1500 }),
@@ -330,6 +334,10 @@ export const LEVEL_002 = {
             GameFactory.grid.hearts({ id: 6, x: 95.5, y: 103 }),
         ],
     },
+    pools: [
+        GameFactory.grid.pool({ id: 1, x: 82, y: 108, w: 10, h: 2 }),
+        GameFactory.grid.pool({ id: 2, x: 37, y: 88, w: 8, h: 3, layout: "ground" }),
+    ],
     spikes: [
         GameFactory.grid.spike({ id: 1, x: 103, y: 109, variant: 1 }),
         GameFactory.grid.spike({ id: 2, x: 104, y: 109, variant: 2 }),
