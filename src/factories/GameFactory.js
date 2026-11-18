@@ -48,6 +48,8 @@ export const GameFactory = {
             jumpBufferDuration: 80,
             lastGroundedAt: 0,
             coyoteDuration: 80,
+            jetPack: false,
+            jetPackCooldown: 3000,
             onGroundId: null,
             onGroundType: null,
             lastGroundId: null,
@@ -108,6 +110,7 @@ export const GameFactory = {
         lastShootTime: 0,
         jumpPressedAt: 0,
         lastGroundedAt: 0,
+        jetPackReadyAt: 0,
         carryVx: 0,
         carryVxInitial: 0,
         carryStartAt: 0,
@@ -230,7 +233,7 @@ export const GameFactory = {
         layout,
         ...rest,
     }),
-    cracks: ({ id, x, y, w, h, layout = "cracks" } = {}) => ({
+    cracks: ({ id, x, y, w, h, layout = "cracks", group = null } = {}) => ({
         id,
         x,
         y,
@@ -238,6 +241,7 @@ export const GameFactory = {
         h,
         type: "solid",
         layout,
+        group,
     }),
     booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) => ({
         id,
@@ -1213,7 +1217,7 @@ export const GameFactory = {
                 layout,
                 ...rest,
             }),
-        cracks: ({ id, x, y, w, h, layout = "cracks" } = {}) =>
+        cracks: ({ id, x, y, w, h, layout = "cracks", group = null } = {}) =>
             GameFactory.cracks({
                 id,
                 x: x * GameFactory.GRID,
@@ -1221,6 +1225,7 @@ export const GameFactory = {
                 w: w * GameFactory.GRID,
                 h: h * GameFactory.GRID,
                 layout,
+                group,
             }),
         booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) =>
             GameFactory.booster({

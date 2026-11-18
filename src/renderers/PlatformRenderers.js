@@ -328,6 +328,10 @@ const platformCaves = {
         ...BASE_CRACKS_TILESET,
         sprites: onlyTop(CRACKS_FULL),
     },
+    cracksSimple: {
+        ...BASE_CRACKS_TILESET,
+        sprites: repeatAllTiles3x3(CRACKS_FULL.mid),
+    },
     board: {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3({ x: 32, y: 16 }, { x: 128, y: 16 }, { x: 96, y: 16 }),

@@ -40,6 +40,7 @@ const DEBUG_PLAYER_ENTRIES = [
     "airborne",
     "jumpPressedByUser",
     "jumpPressedAt",
+    "jetPackReadyAt",
     "facing",
     "shooting",
     "lastShootTime",
@@ -75,7 +76,8 @@ export const DebugHudRenderer = {
 
             const isRounded = key === "x" || key === "y" || key === "prevX" || key === "prevY";
             const isFixed3 = key === "vx" || key === "vy";
-            const isRoundedMs = key === "jumpPressedAt" || key === "lastShootTime";
+            const isRoundedMs =
+                key === "jumpPressedAt" || key === "jetPackReadyAt" || key === "lastShootTime";
             const display = isRounded
                 ? String(Math.round(value))
                 : isFixed3

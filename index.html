@@ -111,7 +111,7 @@
             const debug = params.get("debug") === "true";
 
             const levelParam = parseInt(params.get("level"), 10);
-            const startLevel = levelParam === 2 ? 2 : 1;
+            const startLevel = [2, 3].includes(levelParam) ? levelParam : 1;
 
             const initialHpParam = Number(params.get("initialHp"));
             const initialHp =

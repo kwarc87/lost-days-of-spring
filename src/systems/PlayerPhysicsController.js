@@ -212,7 +212,19 @@ export class PlayerPhysicsController {
             player.onGroundType = null;
             player.jumpPressedByUser = true;
             player.jumpPressedAt = 0;
+        } else if (jumpBuffered && this.canJetPackJump(now, player)) {
+            player.vy = -player.jump;
+            player.jetPackReadyAt = now + player.jetPackCooldown;
+            // Detach from the last platform so its air acceleration/deceleration (e.g. ice) no longer applies
+            player.lastGroundId = null;
+            player.jumpPressedByUser = true;
+            player.jumpPressedAt = 0;
         }
+    }
+
+    // Mid-air jump; the cooldown restarts after each use and is cleared on landing.
+    canJetPackJump(now, player) {
+        return player.jetPack && player.airborne && now >= player.jetPackReadyAt;
     }
 
     handleElevatorJump(now, player, elevatorController) {
@@ -362,6 +374,7 @@ export class PlayerPhysicsController {
         player.vy = 0;
         player.jumpPressedByUser = false;
         player.lastGroundedAt = now;
+        player.jetPackReadyAt = 0;
 
         player.airborne = false;
         player.onGroundId = worldGroundId;
@@ -385,6 +398,7 @@ export class PlayerPhysicsController {
         player.onGroundId = platform.id;
         player.onGroundType = platform.type;
         player.lastGroundedAt = now;
+        player.jetPackReadyAt = 0;
         player.jumpPressedByUser = false;
         player.lastGroundType = platform.type;
         player.lastGroundId = platform.id;

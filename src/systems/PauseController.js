@@ -61,6 +61,9 @@ export class PauseController {
         if (player.lastGroundedAt) {
             player.lastGroundedAt += pauseDuration;
         }
+        if (player.jetPackReadyAt) {
+            player.jetPackReadyAt += pauseDuration;
+        }
         if (player.carryStartAt) {
             player.carryStartAt += pauseDuration;
         }
