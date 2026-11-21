@@ -13,6 +13,7 @@ export const KEYS_MAP = {
     enter: "Enter",
     debugToggle: "Backspace",
     fullscreen: "KeyF",
+    hack: "ArrowUp",
     // Menu navigation
     menuUp: "ArrowUp",
     menuDown: "ArrowDown",

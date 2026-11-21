@@ -20,6 +20,7 @@ import { DefaultSpikeRenderer } from "./SpikeRenderers.js";
 import { DefaultWorldRenderer } from "./WorldRenderers.js";
 import { DefaultExitRenderer } from "./ExitRenderers.js";
 import { CheckpointRenderer } from "./CheckpointRenderer.js";
+import { HackPanelRenderer } from "./HackPanelRenderer.js";
 import { DefaultPlayerRenderer } from "./PlayerRenderers.js";
 
 // Declarative table replacing the game's former per-entity drawX()/decorateDrawMethods()
@@ -38,6 +39,11 @@ export const ENTITY_RENDERERS = {
     elevator: {
         draw: DefaultPlatformRenderer.draw.bind(DefaultPlatformRenderer),
         mapDraw: MapPlatformRenderer.draw.bind(MapPlatformRenderer),
+        cull: true,
+    },
+    temporaryPlatform: {
+        draw: DefaultPlatformRenderer.drawTemporaryPlatform.bind(DefaultPlatformRenderer),
+        mapDraw: () => null,
         cull: true,
     },
     hiddenWall: {
@@ -118,6 +124,11 @@ export const ENTITY_RENDERERS = {
     exit: {
         draw: DefaultExitRenderer.draw.bind(DefaultExitRenderer),
         mapDraw: MapExitRenderer.draw.bind(MapExitRenderer),
+        cull: true,
+    },
+    hackPanel: {
+        draw: HackPanelRenderer.draw.bind(HackPanelRenderer),
+        mapDraw: () => null,
         cull: true,
     },
     checkpoint: {

@@ -78,6 +78,16 @@ export const MESSAGES = {
         RESTART: { text: "Restart", color: "#ffffff" },
     },
     CHECKPOINT: [{ text: "CHECKPOINT", color: "#f5c542" }],
+    HACK_PANEL: [
+        { text: "Terminal", color: "#5ce8d0" },
+        {
+            segments: [
+                { text: "To hack hold the ", color: "#fff" },
+                { text: "up arrow", color: "#f5c542" },
+                { text: " key", color: "#fff" },
+            ],
+        },
+    ],
     WEAPON_UPGRADED: [{ text: "Weapon has been upgraded", color: "#ffffff" }],
 
     // ── Level 1 ───────────────────────────────────────────────────────────────

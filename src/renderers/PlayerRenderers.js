@@ -98,6 +98,12 @@ const ANIMS = {
         fps: 6,
         loop: false,
     },
+    hack: {
+        src: "textures/player/hack.png",
+        frames: [0],
+        fps: 1,
+        loop: false,
+    },
 };
 
 export const PLAYER_DYING_DURATION_MS = (ANIMS.die.frames.length / ANIMS.die.fps) * 1000;
@@ -126,6 +132,9 @@ function getAnimKey(player) {
         return "die";
     }
 
+    if (player.hacking) {
+        return "hack";
+    }
     if (player.posture === "crouch") {
         if (Math.abs(player.vx) > 0.5) {
             if (!player.movingByInput) {

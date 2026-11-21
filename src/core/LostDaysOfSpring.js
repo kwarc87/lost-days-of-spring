@@ -19,6 +19,8 @@ import { TitleScreenController } from "../systems/TitleScreenController.js";
 import { ArtifactGalleryController } from "../systems/ArtifactGalleryController.js";
 import { TeleportController } from "../systems/TeleportController.js";
 import { HiddenWallController } from "../systems/HiddenWallController.js";
+import { HackPanelController } from "../systems/HackPanelController.js";
+import { TemporaryPlatformController } from "../systems/TemporaryPlatformController.js";
 import { CombatController } from "../systems/CombatController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
 import { EnemyController } from "../systems/EnemyController.js";
@@ -104,6 +106,12 @@ export class LostDaysOfSpring {
 
         // ====== HIDDEN WALLS ======
         this.hiddenWallController = new HiddenWallController();
+
+        // ====== TEMPORARY PLATFORMS ======
+        this.temporaryPlatformController = new TemporaryPlatformController();
+
+        // ====== HACK PANELS ======
+        this.hackPanelController = new HackPanelController(this.temporaryPlatformController);
 
         // ====== CAMERA ======
         this.cameraController = new CameraController(this.canvas.width, this.canvas.height);
@@ -235,6 +243,8 @@ export class LostDaysOfSpring {
             exitController: this.exitController,
             teleportController: this.teleportController,
             hiddenWallController: this.hiddenWallController,
+            hackPanelController: this.hackPanelController,
+            temporaryPlatformController: this.temporaryPlatformController,
             checkpointManager: this.checkpointManager,
         });
         this.worldSize = loaded.worldSize;
@@ -482,6 +492,7 @@ export class LostDaysOfSpring {
         this.updateCheckpoints(now);
         this.updateTeleports(now);
         this.updateHiddenWalls();
+        this.updateHackPanels(now);
         this.updateExit();
         this.updateMessages(now);
         this.updateArtifactMessage(now);
@@ -493,7 +504,13 @@ export class LostDaysOfSpring {
 
     // Handle keyboard input: movement, crouch, shooting, jump
     handleInput(now) {
-        if (this.inputController.consumeJumpBuffer()) {
+        const jumpPressed = this.inputController.consumeJumpBuffer();
+        this.player.hacking = this.isPlayerHacking();
+        // Hacking locks the player: drop the buffered jump so it doesn't fire afterwards.
+        if (this.player.hacking) {
+            return;
+        }
+        if (jumpPressed) {
             this.playerPhysicsController.registerJumpPress(this.player, now);
         }
         if (this.player.frozenForTeleport) {
@@ -736,6 +753,17 @@ export class LostDaysOfSpring {
         this.hiddenWallController.update(this.player);
     }
 
+    updateHackPanels(now) {
+        this.hackPanelController.update(now, {
+            player: this.player,
+            isHackKeyDown: this.inputController.isDown("hack"),
+        });
+    }
+
+    isPlayerHacking() {
+        return this.hackPanelController.isHacking(this.player, this.inputController.isDown("hack"));
+    }
+
     resetCameraToPlayerStart() {
         this.cameraController.resetToPlayerStart(this.player, this.worldSize);
     }
@@ -963,6 +991,7 @@ export class LostDaysOfSpring {
             this.elevatorController,
             this.enemyController,
             this.teleportController,
+            this.hackPanelController,
         ]);
         this.simulatedTime += pauseDuration;
         if (this.gameFadeIn.active) {

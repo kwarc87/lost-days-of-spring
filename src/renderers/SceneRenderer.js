@@ -37,8 +37,16 @@ export const SceneRenderer = {
             drawEntity(ctx, game, "platform", p, now);
         }
 
+        for (const p of game.temporaryPlatformController.getTemporaryPlatforms()) {
+            drawEntity(ctx, game, "temporaryPlatform", p, now);
+        }
+
         for (const i of game.backgroundItems) {
             drawEntity(ctx, game, "envBackground", i, now);
+        }
+
+        for (const panel of game.hackPanelController.getHackPanels()) {
+            drawEntity(ctx, game, "hackPanel", panel, now);
         }
 
         for (const w of game.combatController.getBullets()) {

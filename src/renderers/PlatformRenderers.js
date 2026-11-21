@@ -17,6 +17,8 @@
     horizontalConnector3x3,
     horizontalConnectorRightClean3x3,
     horizontalConnectorLeftClean3x3,
+    horizontalConnectorTopClean3x3,
+    horizontalConnectorBottomClean3x3,
     horizontalConnectorBothClean3x3,
     verticalConnector3x3,
     verticalConnector3x3TopClean,
@@ -28,6 +30,8 @@
     onlyTop,
     onlyBottomClean,
     onlyTopClean,
+    onlyTopLeftClean,
+    onlyTopRightClean,
     onlyLeftClean,
     onlyRightClean,
     verticalConnector3x3RightClean,
@@ -167,6 +171,22 @@ const platformCaves = {
     groundHorizontalConnector: {
         ...BASE_TILESET,
         sprites: horizontalConnector3x3(GROUND_FULL),
+    },
+    groundHorizontalConnectorLeftClean: {
+        ...BASE_TILESET,
+        sprites: horizontalConnectorLeftClean3x3(GROUND_FULL),
+    },
+    groundHorizontalConnectorRightClean: {
+        ...BASE_TILESET,
+        sprites: horizontalConnectorRightClean3x3(GROUND_FULL),
+    },
+    groundHorizontalConnectorTopClean: {
+        ...BASE_TILESET,
+        sprites: horizontalConnectorTopClean3x3(GROUND_FULL),
+    },
+    groundHorizontalConnectorBottomClean: {
+        ...BASE_TILESET,
+        sprites: horizontalConnectorBottomClean3x3(GROUND_FULL),
     },
     groundHorizontalConnectorBothClean: {
         ...BASE_TILESET,
@@ -320,6 +340,10 @@ const platformCaves = {
         ...BASE_CRACKS_TILESET,
         sprites: onlyRight(CRACKS_FULL),
     },
+    cracksOnlyRightBothClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyRightClean(CRACKS_FULL),
+    },
     cracksOnlyBottom: {
         ...BASE_CRACKS_TILESET,
         sprites: onlyBottom(CRACKS_FULL),
@@ -327,6 +351,14 @@ const platformCaves = {
     cracksOnlyTop: {
         ...BASE_CRACKS_TILESET,
         sprites: onlyTop(CRACKS_FULL),
+    },
+    cracksOnlyTopLeftClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyTopLeftClean(CRACKS_FULL),
+    },
+    cracksOnlyTopRightClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyTopRightClean(CRACKS_FULL),
     },
     cracksSimple: {
         ...BASE_CRACKS_TILESET,
@@ -610,6 +642,7 @@ function drawSimpleTiled(ctx, platform) {
 const HIDDEN_WALL_OPACITY_ENTERED = 0.25;
 const HIDDEN_WALL_OPACITY_DEFAULT = 1;
 const HIDDEN_WALL_TRANSITION_DURATION = 150;
+const TEMPORARY_PLATFORM_OPACITY_INACTIVE = 0.5;
 
 export const DefaultPlatformRenderer = {
     draw(ctx, platform, { debug: showDebug = false, camera } = {}) {
@@ -646,6 +679,16 @@ export const DefaultPlatformRenderer = {
         const prev = ctx.globalAlpha;
         ctx.globalAlpha = prev * opacity;
         drawTiled(ctx, wall, platformCaves[wall.layout] ?? platformCaves.ground, showDebug, camera);
+        ctx.globalAlpha = prev;
+    },
+    drawTemporaryPlatform(ctx, platform, opts) {
+        if (platform.active) {
+            this.draw(ctx, platform, opts);
+            return;
+        }
+        const prev = ctx.globalAlpha;
+        ctx.globalAlpha = prev * TEMPORARY_PLATFORM_OPACITY_INACTIVE;
+        this.draw(ctx, platform, opts);
         ctx.globalAlpha = prev;
     },
 };

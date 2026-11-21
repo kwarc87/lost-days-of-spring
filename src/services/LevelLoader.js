@@ -16,6 +16,8 @@ export const LevelLoader = {
             exitController,
             teleportController,
             hiddenWallController,
+            hackPanelController,
+            temporaryPlatformController,
             checkpointManager,
         } = controllers;
 
@@ -29,6 +31,8 @@ export const LevelLoader = {
         messageController.setMessages(levelData.messages);
         exitController.setExits(levelData.exits);
         hiddenWallController.setHiddenWalls(levelData.hiddenWalls);
+        hackPanelController.setHackPanels(levelData.hackPanels);
+        messageController.getMessages().push(...hackPanelController.extractMessages());
         const foregroundItems = levelData.foregroundItems ?? [];
         const backgroundItems = levelData.backgroundItems ?? [];
         const preBackgroundItems = levelData.preBackgroundItems ?? [];
@@ -57,6 +61,7 @@ export const LevelLoader = {
         }
         // Elevators first: same priority order as movePlayerY collision resolution.
         const solids = [...elevatorController.getElevators(), ...platforms];
+        temporaryPlatformController.setTemporaryPlatforms(levelData.temporaryPlatforms, solids);
 
         // Restore checkpoint state (collected items, killed enemies, etc.)
         checkpointManager.restoreProgress({

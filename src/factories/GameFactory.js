@@ -59,6 +59,7 @@ export const GameFactory = {
             artifactsCount: 0,
             facing: "right",
             shooting: false,
+            hacking: false,
             lastShootTime: 0,
             shootingOffsetY: -3 * S,
             shootingCrouchOffsetY: 5,
@@ -107,6 +108,7 @@ export const GameFactory = {
         facing: "right",
         jumpPressedByUser: false,
         shooting: false,
+        hacking: false,
         lastShootTime: 0,
         jumpPressedAt: 0,
         lastGroundedAt: 0,
@@ -242,6 +244,12 @@ export const GameFactory = {
         type: "solid",
         layout,
         group,
+    }),
+    // A solid that is only "real" while active. Activation is driven by a hack panel
+    // (see HackPanelController), which lists the platform ids it controls.
+    temporaryPlatform: ({ active = false, ...rest } = {}) => ({
+        ...GameFactory.solid(rest),
+        active,
     }),
     booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) => ({
         id,
@@ -576,6 +584,55 @@ export const GameFactory = {
         frozenDelay,
         ...rest,
     }),
+    // hackDuration: ms the player must hold the key; activationDuration: ms the linked
+    // temporary platforms stay active afterwards; platformIds: ids of the platforms it controls.
+    // hackProgress (0..1 fill) and activeRatio (1..0 remaining) are runtime state for the screens.
+    hackPanel: ({
+        id,
+        x,
+        y,
+        hackDuration = 3000,
+        activationDuration = 5000,
+        platformIds = [],
+        ...rest
+    } = {}) => {
+        const w = 28 * GameFactory.SCALE;
+        const h = 36 * GameFactory.SCALE;
+        const zoneMargin = GameFactory.GRID * 2;
+        return {
+            id,
+            x,
+            y,
+            url: "textures/tilesets.png",
+            cordX: 336,
+            cordY: 356,
+            w,
+            h,
+            // Area where the player can hack the panel (and see its message).
+            hackZone: {
+                x: x - zoneMargin,
+                y: y - zoneMargin,
+                w: w + zoneMargin * 2,
+                h: h + zoneMargin * 2,
+            },
+            hackDuration,
+            activationDuration,
+            platformIds,
+            active: false,
+            hackStartedAt: null,
+            activeUntil: null,
+            hackProgress: 0,
+            activeRatio: 0,
+            // Screen rects in unscaled sprite pixels (inside the lighter left/top border).
+            statusScreen: { x: 3, y: 3, w: 7, h: 8 },
+            progressScreen: { x: 13, y: 3, w: 7, h: 8 },
+            offColor: "#ffbf00",
+            onColor: "#39ff6a",
+            barColor: "#39ff6a",
+            blinkMs: 500,
+            ...rest,
+        };
+    },
     checkpoint: ({ id, x, y, w, h, reached = false } = {}) => ({
         id,
         x,
@@ -678,6 +735,14 @@ export const GameFactory = {
             h: 22 * GameFactory.SCALE,
             ...rest,
         }),
+        // Pixel units: a row of tiles alternating plant003 / plant004 (starting with plant003);
+        // w is the row width in pixels. Returns an array, spread it into the items list.
+        grass: ({ x, y, w = GameFactory.GRID, ...rest } = {}) =>
+            Array.from({ length: Math.floor(w / GameFactory.GRID) }, (_, i) =>
+                i % 2 === 0
+                    ? GameFactory.environment.plant003({ x: x + i * GameFactory.GRID, y, ...rest })
+                    : GameFactory.environment.plant004({ x: x + i * GameFactory.GRID, y, ...rest })
+            ),
         plant005: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -1097,6 +1162,33 @@ export const GameFactory = {
                 h,
                 ...rest,
             }),
+        // The message is shown whenever the player is in the panel's hackZone: "multiple"
+        // strategy plus no displayTime (proximity track in MessageController).
+        hackPanel: ({ id, x, y, message = {}, ...rest } = {}) => {
+            const panel = GameFactory.hackPanel({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                ...rest,
+            });
+            const {
+                offsetX = 0,
+                offsetY = -2,
+                lines = MESSAGES.HACK_PANEL,
+                relatedTo = "hitBox",
+            } = message;
+            panel.message = GameFactory.message({
+                id: `hackPanel-${id}-msg`,
+                ...panel.hackZone,
+                offsetX: offsetX * GameFactory.GRID,
+                offsetY: offsetY * GameFactory.GRID,
+                lines,
+                relatedTo,
+                strategy: "multiple",
+                displayTime: null,
+            });
+            return panel;
+        },
         message: ({
             id,
             x,
@@ -1226,6 +1318,15 @@ export const GameFactory = {
                 h: h * GameFactory.GRID,
                 layout,
                 group,
+            }),
+        temporaryPlatform: ({ id, x, y, w, h, ...rest } = {}) =>
+            GameFactory.temporaryPlatform({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: w * GameFactory.GRID,
+                h: h * GameFactory.GRID,
+                ...rest,
             }),
         booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) =>
             GameFactory.booster({
@@ -1548,6 +1649,14 @@ export const GameFactory = {
                     y: y * GameFactory.GRID - 1 * GameFactory.SCALE,
                     ...rest,
                 }),
+            // Row of `w` tiles alternating plant003 / plant004 (starting with plant003).
+            // Returns an array: spread it into the items list, e.g. ...grass({ x: 3, y: 124, w: 6 }).
+            grass: ({ x, y, w = 1, ...rest } = {}) =>
+                Array.from({ length: Math.floor(w) }, (_, i) =>
+                    i % 2 === 0
+                        ? GameFactory.grid.environment.plant003({ x: x + i, y, ...rest })
+                        : GameFactory.grid.environment.plant004({ x: x + i, y, ...rest })
+                ),
             wallPlant001: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.wallPlant001({
                     x: x * GameFactory.GRID,
@@ -1737,3 +1846,9 @@ export const GameFactory = {
         },
     },
 };
+
+// Aliases: grass001 === plant003, grass002 === plant004 (same function, pixel and grid variants).
+GameFactory.environment.grass001 = GameFactory.environment.plant003;
+GameFactory.environment.grass002 = GameFactory.environment.plant004;
+GameFactory.grid.environment.grass001 = GameFactory.grid.environment.plant003;
+GameFactory.grid.environment.grass002 = GameFactory.grid.environment.plant004;
