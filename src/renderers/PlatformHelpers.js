@@ -427,6 +427,62 @@ export function onlyRightClean({ mid, right }) {
     };
 }
 
+export function onlyRightTopClean({ mid, right }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left: mid,
+        mid,
+        right,
+        bLeft: mid,
+        bMid: mid,
+        bRight: right,
+    };
+}
+
+export function onlyRightBottomClean({ mid, right }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: right,
+        left: mid,
+        mid,
+        right,
+        bLeft: mid,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
+export function onlyLeftTopClean({ left, mid }) {
+    return {
+        tLeft: mid,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right: mid,
+        bLeft: left,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
+export function onlyLeftBottomClean({ left, mid }) {
+    return {
+        tLeft: left,
+        tMid: mid,
+        tRight: mid,
+        left,
+        mid,
+        right: mid,
+        bLeft: mid,
+        bMid: mid,
+        bRight: mid,
+    };
+}
+
 export function onlyBottom({ mid, bMid }) {
     return {
         tLeft: mid,

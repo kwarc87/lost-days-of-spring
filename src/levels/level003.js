@@ -86,7 +86,7 @@ export const LEVEL_003 = {
 
         //fountainA
         GameFactory.grid.cracks({ id: 2002, x: 42, y: 133, w: 4, h: 10, layout: "cracksOnlyTop", group: "fountainA" }),
-        GameFactory.grid.cracks({ id: 2003, x: 46, y: 138, w: 40, h: 5, layout: "cracksOnlyRight", group: "fountainA" }),
+        GameFactory.grid.cracks({ id: 2003, x: 46, y: 138, w: 40, h: 5, layout: "cracksOnlyRightBottomClean", group: "fountainA" }),
 
         //L shape cave
         GameFactory.grid.cracks({ id: 2004, x: 109, y: 133, w: 4, h: 10, layout: "cracksOnlyTopLeftClean", group: "caveA" }),

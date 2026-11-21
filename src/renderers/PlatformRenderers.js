@@ -34,6 +34,10 @@
     onlyTopRightClean,
     onlyLeftClean,
     onlyRightClean,
+    onlyRightTopClean,
+    onlyRightBottomClean,
+    onlyLeftTopClean,
+    onlyLeftBottomClean,
     verticalConnector3x3RightClean,
     verticalConnector3x3LeftClean,
 } from "./PlatformHelpers.js";
@@ -343,6 +347,26 @@ const platformCaves = {
     cracksOnlyRightBothClean: {
         ...BASE_CRACKS_TILESET,
         sprites: onlyRightClean(CRACKS_FULL),
+    },
+    cracksOnlyRightTopClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyRightTopClean(CRACKS_FULL),
+    },
+    cracksOnlyRightBottomClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyRightBottomClean(CRACKS_FULL),
+    },
+    cracksOnlyLeftBothClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyLeftClean(CRACKS_FULL),
+    },
+    cracksOnlyLeftTopClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyLeftTopClean(CRACKS_FULL),
+    },
+    cracksOnlyLeftBottomClean: {
+        ...BASE_CRACKS_TILESET,
+        sprites: onlyLeftBottomClean(CRACKS_FULL),
     },
     cracksOnlyBottom: {
         ...BASE_CRACKS_TILESET,
