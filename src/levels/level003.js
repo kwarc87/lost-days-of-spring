@@ -48,12 +48,12 @@ export const LEVEL_003 = {
         GameFactory.grid.solid({ id: 24, x: 39, y: 137, w: 2, h: 4, layout: "groundLeftCap" }),
 
         //after the fountain
-        GameFactory.grid.solid({ id: 28, x: 46, y: 133, w: 40, h: 6 }),
+        GameFactory.grid.solid({ id: 28, x: 45, y: 133, w: 41, h: 6 }),
         GameFactory.grid.solid({ id: 30, x: 52, y: 124, w: 20, h: 5 }),
         GameFactory.grid.solid({ id: 31, x: 90, y: 133, w: 20, h: 10, layout: "groundTopCap" }),
         GameFactory.grid.oneDirection({ id: 32, x: 86, y: 133, w: 4, h: 1 }),
         GameFactory.grid.oneDirection({ id: 33, x: 86, y: 138, w: 4, h: 1 }),
-        GameFactory.grid.solid({ id: 34, x: 76, y: 129, w: 6, h: 6, layout: "groundTopCap" }),
+        GameFactory.grid.solid({ id: 34, x: 76, y: 129, w: 6, h: 5, layout: "groundTopCap" }),
         GameFactory.grid.solid({ id: 35, x: 76, y: 116, w: 50, h: 8 }),
 
         // inverted L cave
@@ -85,8 +85,8 @@ export const LEVEL_003 = {
         GameFactory.grid.cracks({ id: 2001, x: 3, y: 127, w: 9, h: 5, layout: "cracksOnlyRight" }),
 
         //fountainA
-        GameFactory.grid.cracks({ id: 2002, x: 42, y: 133, w: 5, h: 10, layout: "cracksOnlyTop", group: "fountainA" }),
-        GameFactory.grid.cracks({ id: 2003, x: 47, y: 138, w: 39, h: 5, layout: "cracksOnlyRight", group: "fountainA" }),
+        GameFactory.grid.cracks({ id: 2002, x: 42, y: 133, w: 4, h: 10, layout: "cracksOnlyTop", group: "fountainA" }),
+        GameFactory.grid.cracks({ id: 2003, x: 46, y: 138, w: 40, h: 5, layout: "cracksOnlyRight", group: "fountainA" }),
 
         //L shape cave
         GameFactory.grid.cracks({ id: 2004, x: 109, y: 133, w: 4, h: 10, layout: "cracksOnlyTopLeftClean", group: "caveA" }),
@@ -206,8 +206,8 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.plant007({ x: 40, y: 133 }),
 
         //grass
-        ...GameFactory.grid.environment.grass({ x: 41, y: 133, w: 2 }),
-        ...GameFactory.grid.environment.grass({ x: 46, y: 133, w: 2 }),
+        GameFactory.grid.environment.grass001({ x: 42, y: 133 }),
+        ...GameFactory.grid.environment.grass({ x: 45, y: 133, w: 3 }),
 
         //wall plants (fountain)
         GameFactory.grid.environment.wallPlant001({ x: 6, y: 134, repeatX: 2 }),
