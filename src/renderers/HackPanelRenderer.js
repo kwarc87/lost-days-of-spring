@@ -23,6 +23,23 @@ function drawProgressScreen(ctx, panel) {
     }
 }
 
+// Status (left) screen: blinks red when idle, glows steady yellow while being hacked,
+// blinks green while active.
+function drawStatusScreen(ctx, panel, now) {
+    const isHacking = !panel.active && panel.hackStartedAt !== null;
+    const blinkOn = Math.floor(now / panel.blinkMs) % 2 === 0;
+    if (!isHacking && !blinkOn) {
+        return;
+    }
+    let color = panel.idleColor;
+    if (panel.active) {
+        color = panel.onColor;
+    } else if (isHacking) {
+        color = panel.hackingColor;
+    }
+    fillScreen(ctx, panel, panel.statusScreen, color);
+}
+
 export const HackPanelRenderer = {
     draw(ctx, panel, { debug = false, now = 0 } = {}) {
         const img = getImg(panel.url);
@@ -43,14 +60,7 @@ export const HackPanelRenderer = {
             panel.w,
             panel.h
         );
-        if (Math.floor(now / panel.blinkMs) % 2 === 0) {
-            fillScreen(
-                ctx,
-                panel,
-                panel.statusScreen,
-                panel.active ? panel.onColor : panel.offColor
-            );
-        }
+        drawStatusScreen(ctx, panel, now);
         drawProgressScreen(ctx, panel);
         ctx.restore();
         if (debug) {

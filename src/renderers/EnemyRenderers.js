@@ -24,6 +24,15 @@ const CFG2 = {
     sh: 36,
     frames: 4,
 };
+const CFG3 = {
+    src: "textures/enemies/enemy004.png",
+    fw: 32,
+    sx: 5,
+    sy: 8,
+    sw: 24,
+    sh: 24,
+    frames: 5,
+};
 
 const OUTLINE_OFFSETS = [
     [-OUTLINE, 0],
@@ -191,6 +200,34 @@ function drawEvilEyeEnemy(ctx, enemy, debug, now, player) {
     });
 }
 
+// sludge — eye pixel patterns per frame ("X" = recolored pixel), anchored at the top-left of
+// the eye in sprite pixels relative to the cropped frame (CFG3)
+const SLUDGE_EYE_DATA = [
+    { x: 5, y: 8, rows: [".XX.", "XX.X", "XXXX", ".XX."] },
+    { x: 4, y: 10, rows: [".XX.", "XX.X", "XXXX", ".XX."] },
+    { x: 6, y: 10, rows: [".XX.", "XX.X", "XXXX", ".XX."] },
+    { x: 7, y: 7, rows: [".XX..", "XXXX.", "XXX.X", "XXXXX", ".XXX."] },
+    { x: 7, y: 5, rows: [".XX.", "XXX.", "XXXX", "XX.X", ".XXX", ".XX."] },
+];
+
+function drawSludgeEye(ctx, drawX, drawY, f, eyeColor) {
+    const { x, y, rows } = SLUDGE_EYE_DATA[f];
+    ctx.fillStyle = eyeColor;
+    for (let row = 0; row < rows.length; row++) {
+        for (let col = 0; col < rows[row].length; col++) {
+            if (rows[row][col] === "X") {
+                ctx.fillRect(drawX + (x + col) * S, drawY + (y + row) * S, S, S);
+            }
+        }
+    }
+}
+
+function drawSludgeEnemy(ctx, enemy, debug, now, player) {
+    drawEnemy(ctx, enemy, CFG3, debug, now, player, (ctx, drawX, drawY, f) => {
+        drawSludgeEye(ctx, drawX, drawY, f, enemy.mainColor);
+    });
+}
+
 export const DefaultEnemyRenderer = {
     draw: (
         ctx,
@@ -200,6 +237,9 @@ export const DefaultEnemyRenderer = {
         switch (type) {
             case "evilEye":
                 drawEvilEyeEnemy(ctx, enemy, debug, now, player);
+                break;
+            case "sludge":
+                drawSludgeEnemy(ctx, enemy, debug, now, player);
                 break;
             default:
                 drawSlimeEnemy(ctx, enemy, debug, now, player);

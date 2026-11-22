@@ -245,10 +245,12 @@ export const GameFactory = {
         layout,
         group,
     }),
-    // A solid that is only "real" while active. Activation is driven by a hack panel
-    // (see HackPanelController), which lists the platform ids it controls.
-    temporaryPlatform: ({ active = false, ...rest } = {}) => ({
+    // A platform that is only "real" while active (solid by default, or e.g. "oneDirection").
+    // Activation is driven by a hack panel (see HackPanelController), which lists the platform
+    // ids it controls.
+    temporaryPlatform: ({ active = false, type = "solid", ...rest } = {}) => ({
         ...GameFactory.solid(rest),
+        type,
         active,
     }),
     booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) => ({
@@ -382,6 +384,30 @@ export const GameFactory = {
             h,
             offsetX: 20,
             offsetY: 44,
+        };
+    },
+    // Slow ground walker (cannot fly), so its default speed is lower than other enemies'.
+    sludge: ({ speed = 1, ...args } = {}) => {
+        const w = 80;
+        const h = 88;
+        const { startX, targetX, startY, targetY } = args;
+        const goingLeft = startX > targetX;
+        const goingRight = targetX > startX;
+        const goingUp = startY > targetY;
+        const goingDown = targetY > startY;
+        return {
+            ...GameFactory.enemy({
+                ...args,
+                speed,
+                startX: goingLeft ? startX - w : startX,
+                targetX: goingRight ? targetX - w : targetX,
+                startY: goingUp ? startY - h : startY,
+                targetY: goingDown ? targetY - h : targetY,
+            }),
+            ...(goingLeft || goingUp ? { direction: -1 } : {}),
+            sprite: "sludge",
+            w,
+            h,
         };
     },
     exit: ({ id, x, y, w, h, ...rest } = {}) => ({
@@ -626,7 +652,8 @@ export const GameFactory = {
             // Screen rects in unscaled sprite pixels (inside the lighter left/top border).
             statusScreen: { x: 3, y: 3, w: 7, h: 8 },
             progressScreen: { x: 13, y: 3, w: 7, h: 8 },
-            offColor: "#ffbf00",
+            idleColor: "#ffbf00",
+            hackingColor: "#ffbf00",
             onColor: "#39ff6a",
             barColor: "#39ff6a",
             blinkMs: 500,
@@ -1131,6 +1158,18 @@ export const GameFactory = {
                 targetX: targetX * GameFactory.GRID,
                 startY: startY * GameFactory.GRID - 40,
                 targetY: targetY * GameFactory.GRID - 40,
+                speed,
+                health,
+                ...rest,
+            }),
+        // Same placement as slime: startY/targetY are the tile row of a 2-tile box, feet rest on row y + 2.
+        sludge: ({ id, startX, targetX, startY, targetY, speed, health, ...rest } = {}) =>
+            GameFactory.sludge({
+                id,
+                startX: startX * GameFactory.GRID,
+                targetX: targetX * GameFactory.GRID,
+                startY: startY * GameFactory.GRID + 40,
+                targetY: targetY * GameFactory.GRID + 40,
                 speed,
                 health,
                 ...rest,
