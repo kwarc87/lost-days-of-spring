@@ -24,6 +24,9 @@ export class HiddenWallController {
                 this.enteredGroups.add(wall.group);
             }
         }
+        if (this.enteredGroups.size === 0) {
+            return;
+        }
         for (const wall of this.hiddenWalls) {
             if (wall.group && this.enteredGroups.has(wall.group)) {
                 wall.entered = true;

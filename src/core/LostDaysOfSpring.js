@@ -320,6 +320,7 @@ export class LostDaysOfSpring {
                 checkpoint: this.checkpointManager.getRespawn(),
                 levelData,
                 posture: this.playerPostures.STANDING,
+                baseMaxLife: this.initialHp,
             })
         );
     }
@@ -692,6 +693,7 @@ export class LostDaysOfSpring {
             splinters: this.collectibleController.getSplinters(),
             artifacts: this.collectibleController.getArtifacts(),
             hearts: this.collectibleController.getHearts(),
+            heartContainers: this.collectibleController.getHeartContainers(),
             weaponUpgrades: this.collectibleController.getWeaponUpgrades(),
             enemies: this.enemyController.getEnemies(),
             elevators: this.elevatorController.getElevators(),
@@ -747,10 +749,11 @@ export class LostDaysOfSpring {
             player: this.player,
             onArtifactMessage: (message, source, msgNow) =>
                 this.messageController.showArtifactMessage(message, source, msgNow),
-            onWeaponMessage: (message, msgNow) =>
-                this.messageController.showWeaponMessage(message, msgNow),
+            onPickupMessage: (message, msgNow) =>
+                this.messageController.showPickupMessage(message, msgNow),
             onWeaponPickup: (weapon) => this.combatController.equipWeapon(this.player, weapon),
             onHeartPickup: () => this.playerHealthController.heal(this.player),
+            onHeartContainerPickup: () => this.playerHealthController.increaseMaxLife(this.player),
             canHeal: () => this.playerHealthController.canHeal(this.player),
         });
     }

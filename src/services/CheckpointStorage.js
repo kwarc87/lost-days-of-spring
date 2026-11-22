@@ -7,6 +7,7 @@ const SET_FIELDS = [
     "collectedSplinterIds",
     "collectedArtifactIds",
     "collectedHeartIds",
+    "collectedHeartContainerIds",
     "collectedWeaponUpgradeIds",
     "aliveEnemyIds",
     "triggeredElevatorIds",

@@ -52,7 +52,7 @@ export class MessageController {
         return this.activeArtifactSource;
     }
 
-    showWeaponMessage(message, now) {
+    showPickupMessage(message, now) {
         this.activeMessage = message;
         this.messageShownAt = now;
     }

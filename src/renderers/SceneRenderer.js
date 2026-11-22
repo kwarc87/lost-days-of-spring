@@ -81,6 +81,12 @@ export const SceneRenderer = {
             }
         }
 
+        for (const c of game.collectibleController.getHeartContainers()) {
+            if (!c.collected) {
+                drawEntity(ctx, game, "heartContainer", c, now);
+            }
+        }
+
         for (const u of game.collectibleController.getWeaponUpgrades()) {
             if (!u.collected) {
                 drawEntity(ctx, game, "weaponUpgrade", u, now);

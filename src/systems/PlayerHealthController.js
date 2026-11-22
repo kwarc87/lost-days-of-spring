@@ -40,6 +40,12 @@ export class PlayerHealthController {
         }
     }
 
+    // Permanently adds one heart slot and fills it.
+    increaseMaxLife(player) {
+        player.maxLife++;
+        player.life++;
+    }
+
     checkDeath(now, player, onDeath) {
         if (player.life > 0) {
             return;

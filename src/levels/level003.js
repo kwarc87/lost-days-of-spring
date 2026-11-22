@@ -8,7 +8,7 @@ export const LEVEL_003 = {
         height: GameFactory.GRID * 144,
     },
     playerStart: {
-        x: GameFactory.GRID * 82,
+        x: GameFactory.GRID * 2,
         y: GameFactory.GRID * 121.75,
     },
     platforms: [
@@ -130,8 +130,6 @@ export const LEVEL_003 = {
         GameFactory.grid.solid({ id: 95, x: 87, y: 124, w: 7, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 96, x: 88, y: 125, w: 6, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 97, x: 89, y: 126, w: 5, h: 2, layout: "groundBottomRightEdgeCap" }),
-
-        
     ],
     hackPanels: [
         GameFactory.grid.hackPanel({ id: 1, x: 6, y: 139.5, activationDuration: 5000, platformIds: [3001, 3002, 3003, 3004, 3005] }),
@@ -238,8 +236,6 @@ export const LEVEL_003 = {
             //underground 001
             ...GameFactory.grid.rowOfCollectibles({ startId: 104, count: 35, x: 50, y: 140 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 139, count: 7, x: 60, y: 131 }),
-
-
         ],
         splinters: [
             GameFactory.grid.splinters({ id: 1, x: 37, y: 115 }),
@@ -251,12 +247,16 @@ export const LEVEL_003 = {
             GameFactory.grid.splinters({ id: 7, x: 50, y: 110 }),
             GameFactory.grid.splinters({ id: 8, x: 118, y: 115 }),
             GameFactory.grid.splinters({ id: 9, x: 102.5, y: 108 }),
+            GameFactory.grid.splinters({ id: 10, x: 87.5, y: 140, }),
+        ],
+        heartContainers: [
+            GameFactory.grid.heartContainers({ id: 1, x: 60.5, y: 108.5 }),
         ],
         artifacts: [
             GameFactory.grid.artifact({ id: 1, x: 26, y: 139, cordX: 0, cordY: 0, message: MESSAGES.LEVEL_1.ARTIFACTS.CDROM }), //CD
             GameFactory.grid.artifact({ id: 2, x: 87.5, y: 135.5, cordX: 11, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.EIGHTBALL }), //eight ball
             GameFactory.grid.artifact({ id: 3, x: 40, y: 101, cordX: 15, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.DICE001 }), //dice
-            GameFactory.grid.artifact({ id: 4, x: 60.5, y: 108.5, cordX: 5, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.PENDRIVE }), //pendrive
+            GameFactory.grid.artifact({ id: 4, x: 154, y: 137, cordX: 5, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.PENDRIVE }), //pendrive
             GameFactory.grid.artifact({ id: 5, x: 102.5, y: 114, cordX: 4, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.CASH }), //cash
             GameFactory.grid.artifact({ id: 6, x: 117, y: 108, cordX: 15, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.FLOWER }), //flower
         ]
@@ -358,7 +358,6 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallClean({ x: 82, y: 126, w: 9, h: 4 }),
         GameFactory.grid.environment.wallClean({ x: 81, y: 130, w: 6, h: 4 }),
         GameFactory.grid.environment.wallClean({ x: 89, y: 130, w: 2, h: 3 }),
-
         GameFactory.grid.environment.wallSharpHole({ x: 80, y: 126 }),
         GameFactory.grid.environment.wallSharpHole({ x: 87, y: 130 }),
     ],
@@ -482,6 +481,5 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.flower002({ x: 90, y: 109 }),
         GameFactory.grid.environment.flower002({ x: 113, y: 105 }),
         GameFactory.grid.environment.plant008({ x: 106, y: 113 }),
-    ]
-    
+    ] 
 };

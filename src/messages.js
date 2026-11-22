@@ -89,6 +89,7 @@ export const MESSAGES = {
         },
     ],
     WEAPON_UPGRADED: [{ text: "Weapon has been upgraded", color: "#ffffff" }],
+    HEART_CONTAINER_COLLECTED: [{ text: "Max life increased", color: "#ffffff" }],
 
     // ── Level 1 ───────────────────────────────────────────────────────────────
     LEVEL_1: {

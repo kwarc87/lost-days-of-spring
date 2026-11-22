@@ -8,6 +8,7 @@ export class CollectibleController {
         this.splinters = [];
         this.artifacts = [];
         this.hearts = [];
+        this.heartContainers = [];
         this.weaponUpgrades = [];
     }
 
@@ -16,6 +17,7 @@ export class CollectibleController {
         this.splinters = collectibles?.splinters ?? [];
         this.artifacts = collectibles?.artifacts ?? [];
         this.hearts = collectibles?.hearts ?? [];
+        this.heartContainers = collectibles?.heartContainers ?? [];
         this.weaponUpgrades = collectibles?.weaponUpgrades ?? [];
     }
 
@@ -35,6 +37,10 @@ export class CollectibleController {
         return this.hearts;
     }
 
+    getHeartContainers() {
+        return this.heartContainers;
+    }
+
     getWeaponUpgrades() {
         return this.weaponUpgrades;
     }
@@ -45,6 +51,7 @@ export class CollectibleController {
         collectedSplinterIds,
         collectedArtifactIds,
         collectedHeartIds,
+        collectedHeartContainerIds,
         collectedWeaponUpgradeIds,
     }) {
         if (collectedCoinIds) {
@@ -79,6 +86,14 @@ export class CollectibleController {
             }
         }
 
+        if (collectedHeartContainerIds) {
+            for (const c of this.heartContainers) {
+                if (collectedHeartContainerIds.has(c.id)) {
+                    c.collected = true;
+                }
+            }
+        }
+
         if (collectedWeaponUpgradeIds) {
             for (const u of this.weaponUpgrades) {
                 if (collectedWeaponUpgradeIds.has(u.id)) {
@@ -91,7 +106,15 @@ export class CollectibleController {
     // Checks player collision against every collectible type and applies pickup effects.
     update(
         now,
-        { player, onArtifactMessage, onWeaponMessage, onWeaponPickup, onHeartPickup, canHeal }
+        {
+            player,
+            onArtifactMessage,
+            onPickupMessage,
+            onWeaponPickup,
+            onHeartPickup,
+            onHeartContainerPickup,
+            canHeal,
+        }
     ) {
         for (const c of this.coins) {
             if (!c.collected && rectsCollide(player, c)) {
@@ -122,7 +145,7 @@ export class CollectibleController {
                 u.collected = true;
                 onWeaponPickup(u?.weapon);
                 if (u.message) {
-                    onWeaponMessage(u.message, now);
+                    onPickupMessage(u.message, now);
                 }
             }
         }
@@ -131,6 +154,16 @@ export class CollectibleController {
             if (!h.collected && rectsCollide(player, h) && canHeal()) {
                 h.collected = true;
                 onHeartPickup();
+            }
+        }
+
+        for (const c of this.heartContainers) {
+            if (!c.collected && rectsCollide(player, c)) {
+                c.collected = true;
+                onHeartContainerPickup();
+                if (c.message) {
+                    onPickupMessage(c.message, now);
+                }
             }
         }
     }

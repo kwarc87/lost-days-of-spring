@@ -4,6 +4,7 @@ const SPLASH_EXTRA_DROPS = 6;
 const SPLASH_REFERENCE_SPEED = 20; // player speed (px/tick) that produces a full-size splash
 const SPLASH_SPREAD = 48; // horizontal spread of drop spawn points (px)
 const DROP_GRAVITY = 0.4; // px/tick^2, same per-tick units as player physics
+const FLOOR_TOLERANCE = 1; // px; keeps a player standing on the pool floor inside the zone
 
 // Owns the water zones of the level and the splash drops spawned when the player enters or
 // leaves them. Drops live in a fixed pool (no per-frame allocations) and have no timers: each one
@@ -56,7 +57,7 @@ export class WaterController {
         for (const zone of this.zones) {
             if (
                 feetY > zone.y &&
-                feetY <= zone.y + zone.h &&
+                feetY <= zone.y + zone.h + FLOOR_TOLERANCE &&
                 centerX >= zone.x &&
                 centerX <= zone.x + zone.w
             ) {

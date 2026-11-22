@@ -77,6 +77,11 @@ export const ENTITY_RENDERERS = {
         mapDraw: MapHeartRenderer.draw.bind(MapHeartRenderer),
         cull: true,
     },
+    heartContainer: {
+        draw: DefaultCollectibleRenderer.drawHeartContainer.bind(DefaultCollectibleRenderer),
+        mapDraw: () => null,
+        cull: true,
+    },
     weaponUpgrade: {
         draw: DefaultCollectibleRenderer.drawWeaponUpgrade.bind(DefaultCollectibleRenderer),
         mapDraw: () => null,

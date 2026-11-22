@@ -99,6 +99,7 @@ export class CheckpointManager {
             splinters,
             artifacts,
             hearts,
+            heartContainers,
             weaponUpgrades,
             enemies,
             elevators,
@@ -118,10 +119,14 @@ export class CheckpointManager {
             splintersCount: player.splintersCount,
             artifactsCount: player.artifactsCount,
             weapon: player.weapon,
+            maxLife: player.maxLife,
             collectedCoinIds: new Set(coins.filter((c) => c.collected).map((c) => c.id)),
             collectedSplinterIds: new Set(splinters.filter((s) => s.collected).map((s) => s.id)),
             collectedArtifactIds: new Set(artifacts.filter((a) => a.collected).map((a) => a.id)),
             collectedHeartIds: new Set(hearts.filter((h) => h.collected).map((h) => h.id)),
+            collectedHeartContainerIds: new Set(
+                heartContainers.filter((c) => c.collected).map((c) => c.id)
+            ),
             collectedWeaponUpgradeIds: new Set(
                 weaponUpgrades.filter((u) => u.collected).map((u) => u.id)
             ),

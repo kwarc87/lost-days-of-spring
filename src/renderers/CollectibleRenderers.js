@@ -89,6 +89,76 @@ function getHeartBobOffset(collectible, now) {
     );
 }
 
+function drawHeartPixels(ctx, x, y, scale, pixels = HEART_PIXELS) {
+    for (let row = 0; row < pixels.length; row++) {
+        for (let col = 0; col < pixels[row].length; col++) {
+            const ci = pixels[row][col];
+            if (!ci) {
+                continue;
+            }
+            ctx.fillStyle = HEART_COLORS[ci];
+            ctx.fillRect(x + col * scale, y + row * scale, scale, scale);
+        }
+    }
+}
+
+// Heart container = a dedicated 16×16 pixel-art heart (one full tile at SCALE 4, same palette)
+// with the weapon-upgrade outline. The sprite is static, so it is rendered once to an
+// offscreen canvas and reused.
+const HEART_CONTAINER_PIXELS = [
+    [0, 0, 0, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+    [0, 0, 1, 3, 3, 2, 2, 1, 1, 3, 3, 2, 2, 1, 0, 0],
+    [0, 1, 2, 3, 3, 2, 2, 2, 2, 3, 3, 2, 2, 2, 1, 0],
+    [1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1],
+    [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 0],
+    [0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 0],
+    [0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 4, 1, 0, 0],
+    [0, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 4, 1, 0, 0, 0],
+    [0, 0, 0, 0, 1, 2, 2, 2, 2, 2, 4, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 2, 2, 2, 4, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 1, 2, 4, 1, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+];
+const HEART_CONTAINER_SIZE = HEART_CONTAINER_PIXELS.length * HEART_SCALE;
+let heartContainerSprite = null;
+
+function getHeartContainerSprite() {
+    if (heartContainerSprite) {
+        return heartContainerSprite;
+    }
+
+    const body = document.createElement("canvas");
+    body.width = HEART_CONTAINER_SIZE;
+    body.height = HEART_CONTAINER_SIZE;
+    const bodyCtx = body.getContext("2d");
+    drawHeartPixels(bodyCtx, 0, 0, HEART_SCALE, HEART_CONTAINER_PIXELS);
+
+    const tint = document.createElement("canvas");
+    tint.width = HEART_CONTAINER_SIZE;
+    tint.height = HEART_CONTAINER_SIZE;
+    const tintCtx = tint.getContext("2d");
+    tintCtx.drawImage(body, 0, 0);
+    tintCtx.globalCompositeOperation = "source-atop";
+    tintCtx.fillStyle = WEAPON_OUTLINE_COLOR;
+    tintCtx.fillRect(0, 0, HEART_CONTAINER_SIZE, HEART_CONTAINER_SIZE);
+
+    const sprite = document.createElement("canvas");
+    sprite.width = HEART_CONTAINER_SIZE + WEAPON_OUTLINE * 2;
+    sprite.height = HEART_CONTAINER_SIZE + WEAPON_OUTLINE * 2;
+    const spriteCtx = sprite.getContext("2d");
+    for (const [ox, oy] of WEAPON_OUTLINE_OFFSETS) {
+        spriteCtx.drawImage(tint, WEAPON_OUTLINE + ox, WEAPON_OUTLINE + oy);
+    }
+    spriteCtx.drawImage(body, WEAPON_OUTLINE, WEAPON_OUTLINE);
+
+    heartContainerSprite = sprite;
+    return heartContainerSprite;
+}
+
 export const DefaultCollectibleRenderer = {
     drawCoin: (ctx, collectible, { debug: showDebug = false, now = performance.now() } = {}) => {
         const img = getImg(GEMS_IMG_PATH);
@@ -198,22 +268,29 @@ export const DefaultCollectibleRenderer = {
         const x = Math.round(collectible.x);
         const y = Math.round(collectible.y) + getHeartBobOffset(collectible, now);
 
-        for (let row = 0; row < HEART_PIXELS.length; row++) {
-            for (let col = 0; col < HEART_PIXELS[row].length; col++) {
-                const ci = HEART_PIXELS[row][col];
-                if (!ci) {
-                    continue;
-                }
-                ctx.fillStyle = HEART_COLORS[ci];
-                ctx.fillRect(
-                    x + col * HEART_SCALE,
-                    y + row * HEART_SCALE,
-                    HEART_SCALE,
-                    HEART_SCALE
-                );
-            }
-        }
+        drawHeartPixels(ctx, x, y, HEART_SCALE);
 
+        ctx.restore();
+
+        if (showDebug) {
+            ctx.save();
+            ctx.strokeStyle = "red";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(collectible.x, collectible.y, collectible.w, collectible.h);
+            ctx.restore();
+        }
+    },
+    drawHeartContainer: (
+        ctx,
+        collectible,
+        { debug: showDebug = false, now = performance.now() } = {}
+    ) => {
+        const x = Math.round(collectible.x) - WEAPON_OUTLINE;
+        const y = Math.round(collectible.y) + getHeartBobOffset(collectible, now) - WEAPON_OUTLINE;
+
+        ctx.save();
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(getHeartContainerSprite(), x, y);
         ctx.restore();
 
         if (showDebug) {

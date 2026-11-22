@@ -78,6 +78,7 @@ export const GameFactory = {
         h,
         w,
         life,
+        maxLife,
         posture,
         weapon,
         coinsCount = 0,
@@ -94,6 +95,7 @@ export const GameFactory = {
         h,
         w,
         life,
+        maxLife,
         airborne: true,
         isHit: false,
         lastHitTime: -Infinity,
@@ -127,19 +129,23 @@ export const GameFactory = {
     }),
     // Resolves respawn position/weapon/counters from a checkpoint (or level start
     // as fallback) and builds the full respawn state for the given player/posture.
-    playerRespawn: ({ player, checkpoint, levelData, posture }) =>
-        GameFactory.playerRespawnState({
+    // maxLife comes from the checkpoint (permanent heart upgrades) or falls back to baseMaxLife.
+    playerRespawn: ({ player, checkpoint, levelData, posture, baseMaxLife }) => {
+        const maxLife = checkpoint?.maxLife ?? baseMaxLife;
+        return GameFactory.playerRespawnState({
             x: checkpoint?.x ?? levelData?.playerStart?.x ?? 0,
             y: checkpoint?.y ?? levelData?.playerStart?.y ?? 0,
             h: player.originalHeight,
             w: player.originalWidth,
-            life: player.maxLife,
+            life: maxLife,
+            maxLife,
             posture,
             weapon: checkpoint?.weapon ?? GameFactory.weapon(),
             coinsCount: checkpoint?.coinsCount ?? 0,
             splintersCount: checkpoint?.splintersCount ?? 0,
             artifactsCount: checkpoint?.artifactsCount ?? 0,
-        }),
+        });
+    },
     solid: ({ id, x, y, w, h, layout = "ground", color } = {}) => ({
         id,
         x,
@@ -1417,6 +1423,20 @@ export const GameFactory = {
                 id,
                 x: x * GameFactory.GRID + GameFactory.GRID / 4,
                 y: y * GameFactory.GRID + GameFactory.GRID / 4,
+                ...rest,
+            }),
+        heartContainers: ({ id, x, y, ...rest } = {}) =>
+            GameFactory.collectible({
+                id,
+                x: x * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: 64,
+                h: 64,
+                message: {
+                    lines: MESSAGES.HEART_CONTAINER_COLLECTED,
+                    relatedTo: "viewPort",
+                    displayTime: 3000,
+                },
                 ...rest,
             }),
         splinters: ({ id, x, y, ...rest } = {}) =>
