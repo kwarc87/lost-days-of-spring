@@ -115,8 +115,9 @@
             const startLevel = [2, 3].includes(levelParam) ? levelParam : 1;
 
             const initialHpParam = Number(params.get("initialHp"));
+            // undefined falls back to the constructor default (GameFactory.DEFAULT_MAX_LIFE)
             const initialHp =
-                Number.isFinite(initialHpParam) && initialHpParam > 0 ? initialHpParam : 6;
+                Number.isFinite(initialHpParam) && initialHpParam > 0 ? initialHpParam : undefined;
 
             Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
                 document.getElementById("loading").classList.add("done");

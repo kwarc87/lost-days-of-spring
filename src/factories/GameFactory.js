@@ -9,6 +9,7 @@ export const GameFactory = {
     // derives from this. GRID = 16px tile * SCALE.
     SCALE: 4,
     GRID: 64,
+    DEFAULT_MAX_LIFE: 6,
     player: (overrides = {}) => {
         const S = GameFactory.SCALE;
         return {
@@ -20,8 +21,8 @@ export const GameFactory = {
             h: 36 * S,
             vx: 0,
             vy: 0,
-            life: 6,
-            maxLife: 6,
+            life: GameFactory.DEFAULT_MAX_LIFE,
+            maxLife: GameFactory.DEFAULT_MAX_LIFE,
             isHit: false,
             lastHitTime: 0,
             hitCooldown: 1000,

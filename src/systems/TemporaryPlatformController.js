@@ -30,7 +30,10 @@ export class TemporaryPlatformController {
             if (active) {
                 this.solids.push(platform);
             } else {
-                this.solids.splice(this.solids.indexOf(platform), 1);
+                const index = this.solids.indexOf(platform);
+                if (index !== -1) {
+                    this.solids.splice(index, 1);
+                }
             }
         }
     }

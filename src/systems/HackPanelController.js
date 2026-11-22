@@ -51,8 +51,14 @@ export class HackPanelController {
 
     // Hacking can only start while standing still on the ground; once started it continues
     // (the player is locked in place) for as long as the key is held inside the zone.
+    // Getting hit (isHit covers the knockback window) interrupts it.
     canHack(panel, player, isHackKeyDown) {
-        if (panel.active || !isHackKeyDown || !rectsCollide(player, panel.hackZone)) {
+        if (
+            panel.active ||
+            player.isHit ||
+            !isHackKeyDown ||
+            !rectsCollide(player, panel.hackZone)
+        ) {
             return false;
         }
         return panel.hackStartedAt !== null || (!player.airborne && player.vx === 0);

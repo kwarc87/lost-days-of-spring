@@ -23,7 +23,7 @@ export const DefaultHubRenderer = {
 
         // ── Hearts panel (top-left) ──────────────────────────────────────────
         const life = player.life ?? 0;
-        const maxLife = player.maxLife ?? 6;
+        const maxLife = player.maxLife;
         const heartW = 32; // 8px × HEART_SCALE 4
         const heartH = 32;
         const heartGap = 8;

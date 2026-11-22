@@ -30,6 +30,8 @@ export const PAUSE_MENU_ACTION = {
     RETURN_TO_TITLE: 4,
 };
 
+export const PAUSE_MENU_ITEM_COUNT = Object.keys(PAUSE_MENU_ACTION).length;
+
 const PAD_X = 24;
 const PAD_Y = 18;
 

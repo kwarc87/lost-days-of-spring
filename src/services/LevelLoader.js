@@ -29,11 +29,9 @@ export const LevelLoader = {
         enemyController.setEnemies(levelData.enemies);
         collectibleController.setCollectibles(levelData.collectibles);
         combatController.setSpikes(levelData.spikes);
-        messageController.setMessages(levelData.messages);
         exitController.setExits(levelData.exits);
         hiddenWallController.setHiddenWalls(levelData.hiddenWalls);
         hackPanelController.setHackPanels(levelData.hackPanels);
-        messageController.getMessages().push(...hackPanelController.extractMessages());
         const foregroundItems = levelData.foregroundItems ?? [];
         const backgroundItems = levelData.backgroundItems ?? [];
         const preBackgroundItems = levelData.preBackgroundItems ?? [];
@@ -46,12 +44,16 @@ export const LevelLoader = {
         const currentLevelArtifactsCount = collectibleController.getArtifacts().length;
         const currentLevelEnemiesCount = enemyController.getEnemies().length;
 
-        // Load checkpoints and extract embedded visual layers / messages
+        // Load checkpoints and extract embedded visual layers; all level messages are set below
         checkpointManager.setCheckpoints(levelData.checkpoints ?? []);
         const checkpointItems = checkpointManager.extractItems();
         preBackgroundItems.push(...checkpointItems.back);
         foregroundItems.push(...checkpointItems.front);
-        messageController.getMessages().push(...checkpointItems.messages);
+        messageController.setMessages([
+            ...(levelData.messages ?? []),
+            ...hackPanelController.extractMessages(),
+            ...checkpointItems.messages,
+        ]);
         platforms.push(...checkpointItems.platforms);
         const teleportItems = teleportController.extractItems();
         foregroundItems.push(...teleportItems.foreground);

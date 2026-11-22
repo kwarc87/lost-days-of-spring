@@ -4,8 +4,8 @@ import { CameraController } from "../systems/CameraController.js";
 import { PLAYER_DYING_DURATION_MS } from "../renderers/PlayerRenderers.js";
 import {
     DefaultPauseRenderer,
-    getMenuItems,
     PAUSE_MENU_ACTION,
+    PAUSE_MENU_ITEM_COUNT,
 } from "../renderers/PauseRenderers.js";
 import { DebugHudRenderer } from "../renderers/DebugRenderers.js";
 import { SceneRenderer } from "../renderers/SceneRenderer.js";
@@ -43,7 +43,7 @@ import { ArtifactGalleryRenderer } from "../renderers/ArtifactGalleryRenderer.js
 import { buildLevelStats, computePlayTimeMs } from "../utils/levelStats.js";
 
 export class LostDaysOfSpring {
-    constructor(canvasId, showDebug = true, initialHp = 6) {
+    constructor(canvasId, showDebug = true, initialHp = GameFactory.DEFAULT_MAX_LIFE) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
         this.showDebug = showDebug;
@@ -963,7 +963,7 @@ export class LostDaysOfSpring {
         switch (code) {
             case this.keysMap.menuUp:
             case this.keysMap.menuDown: {
-                const count = getMenuItems(false).length;
+                const count = PAUSE_MENU_ITEM_COUNT;
                 const dir = code === this.keysMap.menuUp ? -1 : 1;
                 this.pauseController.moveMenuIndex(dir, count);
                 this.drawPausePanel();

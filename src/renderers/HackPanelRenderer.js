@@ -23,8 +23,8 @@ function drawProgressScreen(ctx, panel) {
     }
 }
 
-// Status (left) screen: blinks red when idle, glows steady yellow while being hacked,
-// blinks green while active.
+// Status (left) screen: blinks amber when idle, glows steady amber while being hacked,
+// blinks green while active (colors come from the panel: idleColor / hackingColor / onColor).
 function drawStatusScreen(ctx, panel, now) {
     const isHacking = !panel.active && panel.hackStartedAt !== null;
     const blinkOn = Math.floor(now / panel.blinkMs) % 2 === 0;
