@@ -133,6 +133,63 @@ function drawEnvironmentItem(ctx, item) {
     ctx.imageSmoothingEnabled = prev;
 }
 
+const WAVE_AMPLITUDE_SRC_PX = 1;
+// Two waves travelling in opposite directions (different speed and length) cancel out each
+// other's net drift, so the surface looks like a pool instead of a flowing river.
+const WAVE_A = { speed: 0.003, frequency: 0.4 }; // speed: radians per ms; frequency: radians per source pixel column
+const WAVE_B = { speed: -0.002, frequency: 0.27 };
+
+// Draws a repeated tile as 1-source-pixel-wide strips, each shifted vertically by the average of
+// two sines (time + world column). Because the phase depends on the world column, the wave is
+// continuous across tiles. Only strips inside the camera view are drawn.
+function drawWaveItem(ctx, item, now, camera) {
+    const img = getImg(item.url);
+    if (!img.complete || img.naturalWidth === 0) {
+        return;
+    }
+
+    const scale = GameFactory.SCALE;
+    const baseX = Math.round(item.x);
+    const baseY = Math.round(item.y);
+    const tileSrcW = Math.round(item.w / scale);
+    const tileSrcH = Math.round(item.h / scale);
+    const totalCols = tileSrcW * (item.repeatX ?? 1);
+    const worldColOffset = Math.round(baseX / scale);
+    const firstCol = Math.max(0, Math.floor((camera.x - baseX) / scale));
+    const lastCol = Math.min(totalCols - 1, Math.ceil((camera.x + camera.width - baseX) / scale));
+
+    const prevSmoothing = ctx.imageSmoothingEnabled;
+    const prevAlpha = ctx.globalAlpha;
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = prevAlpha * (item.opacity ?? 1);
+
+    const srcX = item.cordX ?? 0;
+    const srcY = item.cordY ?? 0;
+    for (let col = firstCol; col <= lastCol; col++) {
+        const worldCol = worldColOffset + col;
+        const waveHeight =
+            (Math.sin(now * WAVE_A.speed + worldCol * WAVE_A.frequency) +
+                Math.sin(now * WAVE_B.speed + worldCol * WAVE_B.frequency)) /
+            2;
+        const offsetY =
+            (Math.round(waveHeight * WAVE_AMPLITUDE_SRC_PX) + WAVE_AMPLITUDE_SRC_PX) * scale;
+        ctx.drawImage(
+            img,
+            srcX + (col % tileSrcW),
+            srcY,
+            1,
+            tileSrcH,
+            baseX + col * scale,
+            baseY + offsetY,
+            scale,
+            item.h
+        );
+    }
+
+    ctx.globalAlpha = prevAlpha;
+    ctx.imageSmoothingEnabled = prevSmoothing;
+}
+
 export const DefaultWorldRenderer = {
     drawSolidBackground(ctx, item, color) {
         const totalW = Math.round(item.w) * (item.repeatX ?? 1);
@@ -140,9 +197,13 @@ export const DefaultWorldRenderer = {
         ctx.fillStyle = color;
         ctx.fillRect(item.x, item.y, totalW, totalH);
     },
-    drawEnvironmentItem(ctx, item) {
+    drawEnvironmentItem(ctx, item, { now, camera } = {}) {
         if (item.solidFill) {
             this.drawSolidBackground(ctx, item, item.solidFill);
+            return;
+        }
+        if (item.wave) {
+            drawWaveItem(ctx, item, now, camera);
             return;
         }
         drawEnvironmentItem(ctx, item);

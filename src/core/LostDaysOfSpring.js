@@ -20,6 +20,7 @@ import { ArtifactGalleryController } from "../systems/ArtifactGalleryController.
 import { TeleportController } from "../systems/TeleportController.js";
 import { HiddenWallController } from "../systems/HiddenWallController.js";
 import { HackPanelController } from "../systems/HackPanelController.js";
+import { WaterController } from "../systems/WaterController.js";
 import { TemporaryPlatformController } from "../systems/TemporaryPlatformController.js";
 import { CombatController } from "../systems/CombatController.js";
 import { ElevatorController } from "../systems/ElevatorController.js";
@@ -112,6 +113,9 @@ export class LostDaysOfSpring {
 
         // ====== HACK PANELS ======
         this.hackPanelController = new HackPanelController(this.temporaryPlatformController);
+
+        // ====== WATER ======
+        this.waterController = new WaterController();
 
         // ====== CAMERA ======
         this.cameraController = new CameraController(this.canvas.width, this.canvas.height);
@@ -245,6 +249,7 @@ export class LostDaysOfSpring {
             hiddenWallController: this.hiddenWallController,
             hackPanelController: this.hackPanelController,
             temporaryPlatformController: this.temporaryPlatformController,
+            waterController: this.waterController,
             checkpointManager: this.checkpointManager,
         });
         this.worldSize = loaded.worldSize;
@@ -481,6 +486,7 @@ export class LostDaysOfSpring {
 
         this.movePlayerX(now);
         this.movePlayerY(now);
+        this.waterController.update(this.player);
 
         this.updateEnemies(now);
         this.updateSpikesDamage(now);

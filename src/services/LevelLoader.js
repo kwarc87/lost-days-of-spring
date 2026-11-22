@@ -18,6 +18,7 @@ export const LevelLoader = {
             hiddenWallController,
             hackPanelController,
             temporaryPlatformController,
+            waterController,
             checkpointManager,
         } = controllers;
 
@@ -59,6 +60,7 @@ export const LevelLoader = {
             foregroundItems.push(...pool.foreground);
             platforms.push(...pool.platforms);
         }
+        waterController.setPools(levelData.pools);
         // Elevators first: same priority order as movePlayerY collision resolution.
         const solids = [...elevatorController.getElevators(), ...platforms];
         temporaryPlatformController.setTemporaryPlatforms(levelData.temporaryPlatforms, solids);

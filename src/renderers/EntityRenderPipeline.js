@@ -22,6 +22,7 @@ import { DefaultExitRenderer } from "./ExitRenderers.js";
 import { CheckpointRenderer } from "./CheckpointRenderer.js";
 import { HackPanelRenderer } from "./HackPanelRenderer.js";
 import { DefaultPlayerRenderer } from "./PlayerRenderers.js";
+import { SplashRenderer } from "./WaterRenderers.js";
 
 // Declarative table replacing the game's former per-entity drawX()/decorateDrawMethods()
 // wrapper methods. Every renderer's draw(ctx, obj, opts) shares the same call
@@ -139,6 +140,12 @@ export const ENTITY_RENDERERS = {
     player: {
         draw: DefaultPlayerRenderer.draw.bind(DefaultPlayerRenderer),
         mapDraw: MapPlayerRenderer.draw.bind(MapPlayerRenderer),
+        cull: false,
+    },
+    // `obj` is the WaterController; drops only exist near the player, so no culling
+    splash: {
+        draw: SplashRenderer.draw.bind(SplashRenderer),
+        mapDraw: () => null,
         cull: false,
     },
 };

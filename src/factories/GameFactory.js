@@ -1046,6 +1046,7 @@ export const GameFactory = {
             w: 16 * GameFactory.SCALE,
             h: 16 * GameFactory.SCALE,
             opacity: 0.75,
+            wave: true,
             ...rest,
         }),
         poolEdgeLeft: ({ x, y, ...rest } = {}) => ({
@@ -1523,11 +1524,19 @@ export const GameFactory = {
         // The pool body is a solid color by default (renderer fallback); pass a tile layout (e.g. "groundOnlyBottomClean") to texture it.
         pool: ({ id, x, y, w, h = 1, layout = "simple", color } = {}) => ({
             id,
+            // Area where the player counts as "in water" (world px); used for splash effects
+            waterZone: {
+                x: (x + 1) * GameFactory.GRID,
+                y: y * GameFactory.GRID,
+                w: (w - 2) * GameFactory.GRID,
+                h: GameFactory.GRID,
+            },
             foreground: [
                 GameFactory.grid.environment.poolEdgeLeft({ x, y }),
                 GameFactory.grid.environment.poolEdgeRight({ x: x + w - 1, y }),
-                GameFactory.grid.environment.poolGround({ x: x + 1, y: y + 1, repeatX: w - 2 }),
+                // Water first: the pool floor must cover the lower edge of the moving wave
                 GameFactory.grid.environment.water({ x: x + 1, y, repeatX: w - 2 }),
+                GameFactory.grid.environment.poolGround({ x: x + 1, y: y + 1, repeatX: w - 2 }),
             ],
             platforms: [
                 GameFactory.grid.underWater({

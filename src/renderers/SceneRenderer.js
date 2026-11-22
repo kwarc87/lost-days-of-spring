@@ -122,6 +122,8 @@ export const SceneRenderer = {
             drawEntity(ctx, game, "envForeground", i, now);
         }
 
+        drawEntity(ctx, game, "splash", game.waterController, now);
+
         if (game.mapView) {
             DefaultWorldRenderer.drawMapUndiscoveredMask(ctx, game.worldSize, game.mapDiscovery);
             drawEntity(ctx, game, "player", game.player, now);
