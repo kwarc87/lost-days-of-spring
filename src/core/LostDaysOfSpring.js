@@ -766,6 +766,8 @@ export class LostDaysOfSpring {
         this.hackPanelController.update(now, {
             player: this.player,
             isHackKeyDown: this.inputController.isDown("hack"),
+            onPlayerBlocked: (wall) =>
+                this.playerHealthController.applyRecoil(now, this.player, wall),
         });
     }
 

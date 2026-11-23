@@ -3,7 +3,8 @@ import { rectsCollide } from "../utils/collision.js";
 // Owns hack panel (hacking terminal) definitions and the hacking state machine:
 // idle -> hacking (key held inside hackZone, progress 0..1) -> active (linked temporary
 // platforms on for activationDuration) -> idle. Releasing the key or leaving the zone
-// resets progress.
+// resets progress. In "deactivate" mode the linked platforms are turned off for
+// activationDuration instead (and back on afterwards).
 export class HackPanelController {
     constructor(temporaryPlatformController) {
         this.temporaryPlatformController = temporaryPlatformController;
@@ -34,12 +35,12 @@ export class HackPanelController {
         }
     }
 
-    update(now, { player, isHackKeyDown }) {
+    update(now, { player, isHackKeyDown, onPlayerBlocked }) {
         for (const panel of this.hackPanels) {
             if (panel.active) {
-                this.updateActive(now, panel);
+                this.updateActive(now, panel, player, onPlayerBlocked);
             } else {
-                this.updateHacking(now, panel, player, isHackKeyDown);
+                this.updateHacking(now, panel, player, isHackKeyDown, onPlayerBlocked);
             }
         }
     }
@@ -64,16 +65,16 @@ export class HackPanelController {
         return panel.hackStartedAt !== null || (!player.airborne && player.vx === 0);
     }
 
-    updateActive(now, panel) {
+    updateActive(now, panel, player, onPlayerBlocked) {
         const remaining = panel.activeUntil - now;
         if (remaining <= 0) {
-            this.setActive(panel, false);
+            this.setActive(panel, false, player, onPlayerBlocked);
             return;
         }
         panel.activeRatio = remaining / panel.activationDuration;
     }
 
-    updateHacking(now, panel, player, isHackKeyDown) {
+    updateHacking(now, panel, player, isHackKeyDown, onPlayerBlocked) {
         if (!this.canHack(panel, player, isHackKeyDown)) {
             panel.hackStartedAt = null;
             panel.hackProgress = 0;
@@ -85,11 +86,11 @@ export class HackPanelController {
         panel.hackProgress = Math.min((now - panel.hackStartedAt) / panel.hackDuration, 1);
         if (panel.hackProgress >= 1) {
             panel.activeUntil = now + panel.activationDuration;
-            this.setActive(panel, true);
+            this.setActive(panel, true, player, onPlayerBlocked);
         }
     }
 
-    setActive(panel, active) {
+    setActive(panel, active, player, onPlayerBlocked) {
         panel.active = active;
         panel.hackStartedAt = null;
         panel.hackProgress = 0;
@@ -97,6 +98,15 @@ export class HackPanelController {
         if (!active) {
             panel.activeUntil = null;
         }
-        this.temporaryPlatformController.setActive(panel.platformIds, active);
+        const platformsActive = panel.mode === "deactivate" ? !active : active;
+        const appeared = this.temporaryPlatformController.setActive(
+            panel.platformIds,
+            platformsActive
+        );
+        // A wall that appears inside the player pushes them out (one-direction platforms don't block).
+        const wall = appeared.find((p) => p.type !== "oneDirection" && rectsCollide(player, p));
+        if (wall) {
+            onPlayerBlocked(wall);
+        }
     }
 }

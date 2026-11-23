@@ -255,10 +255,21 @@ export const GameFactory = {
     // A platform that is only "real" while active (solid by default, or e.g. "oneDirection").
     // Activation is driven by a hack panel (see HackPanelController), which lists the platform
     // ids it controls.
-    temporaryPlatform: ({ active = false, type = "solid", ...rest } = {}) => ({
-        ...GameFactory.solid(rest),
+    // recoilX/recoilY: knockback applied to the player when the platform appears inside them
+    // (same values as the default enemies).
+    temporaryPlatform: ({
+        active = false,
+        type = "solid",
+        layout = "boardTemporary",
+        recoilX = 12,
+        recoilY = 12,
+        ...rest
+    } = {}) => ({
+        ...GameFactory.solid({ layout, ...rest }),
         type,
         active,
+        recoilX,
+        recoilY,
     }),
     booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) => ({
         id,
@@ -617,13 +628,17 @@ export const GameFactory = {
         frozenDelay,
         ...rest,
     }),
-    // hackDuration: ms the player must hold the key; activationDuration: ms the linked
-    // temporary platforms stay active afterwards; platformIds: ids of the platforms it controls.
+    // hackDuration: ms the player must hold the key; activationDuration: ms the hack effect lasts;
+    // platformIds: ids of the platforms it controls.
+    // mode "activate": linked platforms are turned on for activationDuration (amber -> green).
+    // mode "deactivate": linked platforms (active in the level data) are turned off for
+    // activationDuration and then restored; screen colors are inverted (green -> amber).
     // hackProgress (0..1 fill) and activeRatio (1..0 remaining) are runtime state for the screens.
     hackPanel: ({
         id,
         x,
         y,
+        mode = "activate",
         hackDuration = 3000,
         activationDuration = 5000,
         platformIds = [],
@@ -632,6 +647,9 @@ export const GameFactory = {
         const w = 28 * GameFactory.SCALE;
         const h = 36 * GameFactory.SCALE;
         const zoneMargin = GameFactory.GRID * 2;
+        const isDeactivate = mode === "deactivate";
+        const amber = "#ffbf00";
+        const green = "#39ff6a";
         return {
             id,
             x,
@@ -648,6 +666,7 @@ export const GameFactory = {
                 w: w + zoneMargin * 2,
                 h: h + zoneMargin * 2,
             },
+            mode,
             hackDuration,
             activationDuration,
             platformIds,
@@ -659,10 +678,10 @@ export const GameFactory = {
             // Screen rects in unscaled sprite pixels (inside the lighter left/top border).
             statusScreen: { x: 3, y: 3, w: 7, h: 8 },
             progressScreen: { x: 13, y: 3, w: 7, h: 8 },
-            idleColor: "#ffbf00",
-            hackingColor: "#ffbf00",
-            onColor: "#39ff6a",
-            barColor: "#39ff6a",
+            idleColor: isDeactivate ? green : amber,
+            hackingColor: isDeactivate ? green : amber,
+            onColor: isDeactivate ? amber : green,
+            barColor: isDeactivate ? amber : green,
             blinkMs: 500,
             ...rest,
         };
@@ -1034,9 +1053,9 @@ export const GameFactory = {
         electronics: ({ x, y, ...rest } = {}) => ({
             x,
             y,
-            url: "textures/tilesets-2.png",
-            cordX: 32,
-            cordY: 128,
+            url: "textures/tilesets.png",
+            cordX: 96,
+            cordY: 294,
             w: 32 * GameFactory.SCALE,
             h: 16 * GameFactory.SCALE,
             ...rest,
@@ -1044,9 +1063,9 @@ export const GameFactory = {
         electronic001: ({ x, y, ...rest } = {}) => ({
             x,
             y,
-            url: "textures/tilesets-2.png",
-            cordX: 32,
-            cordY: 128,
+            url: "textures/tilesets.png",
+            cordX: 96,
+            cordY: 294,
             w: 16 * GameFactory.SCALE,
             h: 16 * GameFactory.SCALE,
             ...rest,
@@ -1054,9 +1073,9 @@ export const GameFactory = {
         electronic002: ({ x, y, ...rest } = {}) => ({
             x,
             y,
-            url: "textures/tilesets-2.png",
-            cordX: 48,
-            cordY: 128,
+            url: "textures/tilesets.png",
+            cordX: 112,
+            cordY: 294,
             w: 16 * GameFactory.SCALE,
             h: 16 * GameFactory.SCALE,
             ...rest,
@@ -1064,9 +1083,9 @@ export const GameFactory = {
         electronic003: ({ x, y, ...rest } = {}) => ({
             x,
             y,
-            url: "textures/tilesets-2.png",
-            cordX: 21,
-            cordY: 32,
+            url: "textures/tilesets.png",
+            cordX: 64,
+            cordY: 294,
             w: 16 * GameFactory.SCALE,
             h: 16 * GameFactory.SCALE,
             ...rest,

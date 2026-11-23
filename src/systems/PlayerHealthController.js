@@ -11,6 +11,13 @@ export class PlayerHealthController {
         player.life -= source.damage;
         player.lastHitTime = now;
         player.isHit = true;
+        this.applyRecoil(now, player, source, hitFromAbove, hitFromBelow);
+
+        this.checkDeath(now, player, onDeath);
+    }
+
+    // Knockback away from `source` (needs x, y, w, h, recoilX, recoilY) without any damage.
+    applyRecoil(now, player, source, hitFromAbove = false, hitFromBelow = false) {
         player.knockbackUntil = now + player.knockbackControlLock;
 
         const recoilXForce =
@@ -25,8 +32,6 @@ export class PlayerHealthController {
         const vx = hitFromLeft ? -recoilXForce : recoilXForce;
         const vy = hitFromBelow ? 0 : -recoilYForce;
         this.playerPhysicsController.applyKnockback(player, vx, vy);
-
-        this.checkDeath(now, player, onDeath);
     }
 
     canHeal(player) {

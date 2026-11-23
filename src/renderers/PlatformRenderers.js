@@ -437,6 +437,33 @@ const platformCaves = {
             { x: 272, y: 356 }
         ),
     },
+    boardTemporary: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3({ x: 208, y: 411 }, { x: 304, y: 411 }, { x: 272, y: 411 }),
+    },
+    boardTemporaryOneDirection: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 208, y: 411 },
+            [
+                { x: 248, y: 411 },
+                { x: 232, y: 411 },
+            ],
+            { x: 272, y: 411 }
+        ),
+    },
+    boardTemporaryRightCap: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3({ x: 304, y: 411 }, { x: 304, y: 411 }, { x: 272, y: 411 }),
+    },
+    boardTemporaryLeftCap: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3({ x: 208, y: 411 }, { x: 304, y: 411 }, { x: 304, y: 411 }),
+    },
+    temporarySpringWall: {
+        ...BASE_TILESET,
+        sprites: repeatAllTiles3x3({ x: 336, y: 411 }),
+    },
     booster: {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3(
@@ -451,14 +478,14 @@ const platformCaves = {
     },
     brick: {
         ...BASE_TILESET,
-        path: "textures/tilesets-2.png",
+        path: "textures/tilesets.png",
         sprites: repeatHorizontal3x3(
-            { x: 64, y: 0 },
+            { x: 336, y: 16 },
             [
-                { x: 64, y: 0 },
-                { x: 80, y: 0 },
+                { x: 336, y: 16 },
+                { x: 352, y: 16 },
             ],
-            { x: 80, y: 0 }
+            { x: 352, y: 16 }
         ),
     },
     // only 2 units size is allowed

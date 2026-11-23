@@ -21,7 +21,9 @@ export class TemporaryPlatformController {
         return this.temporaryPlatforms;
     }
 
+    // Returns the platforms that just became active.
     setActive(ids, active) {
+        const changed = [];
         for (const platform of this.temporaryPlatforms) {
             if (!ids.includes(platform.id) || platform.active === active) {
                 continue;
@@ -29,6 +31,7 @@ export class TemporaryPlatformController {
             platform.active = active;
             if (active) {
                 this.solids.push(platform);
+                changed.push(platform);
             } else {
                 const index = this.solids.indexOf(platform);
                 if (index !== -1) {
@@ -36,5 +39,6 @@ export class TemporaryPlatformController {
                 }
             }
         }
+        return changed;
     }
 }

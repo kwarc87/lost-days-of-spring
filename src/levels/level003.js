@@ -65,7 +65,6 @@ export const LEVEL_003 = {
         // inverted L cave
         GameFactory.grid.solid({ id: 36, x: 106, y: 128, w: 4, h: 6, layout: "groundTopRightEdgeCap" }),
         GameFactory.grid.solid({ id: 37, x: 109, y: 128, w: 4, h: 4, layout: "groundRightTopEdgeCap" }),
-        //GameFactory.grid.solid({ id: 38, x: 104, y: 131, w: 2, h: 2, layout: "metal" }),
         GameFactory.grid.solid({ id: 39, x: 112, y: 133, w: 10, h: 6 }),
         GameFactory.grid.solid({ id: 40, x: 121, y: 133, w: 10, h: 3, layout: "groundRightTopEdgeCap" }),
         GameFactory.grid.solid({ id: 41, x: 125, y: 129, w: 6, h: 5, layout: "groundTopRightEdgeCap" }),
@@ -95,6 +94,9 @@ export const LEVEL_003 = {
         GameFactory.grid.solid({ id: 84, x: 43, y: 109, w: 3, h: 2, layout: "groundBottomCap" }),
         GameFactory.grid.solid({ id: 85, x: 23, y: 103, w: 6, h: 2, layout: "groundTopCap" }),
         GameFactory.grid.solid({ id: 86, x: 13, y: 97, w: 5, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 38, x: 48, y: 102, w: 2, h: 2, layout: "metal" }),
+        GameFactory.grid.solid({ id: 98, x: 40, y: 95, w: 5, h: 3, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 99, x: 42, y: 97, w: 2, h: 2, layout: "groundBottomCap" }),
         
         // lonely island with coins heart
         GameFactory.grid.solid({ id: 65, x: 57, y: 112, w: 8, h: 1, layout: "board" }),
@@ -135,22 +137,28 @@ export const LEVEL_003 = {
         GameFactory.grid.hackPanel({ id: 1, x: 6, y: 139.5, activationDuration: 5000, platformIds: [3001, 3002, 3003, 3004, 3005] }),
         GameFactory.grid.hackPanel({ id: 2, x: 7.5, y: 99.5, activationDuration: 7000, platformIds: [3006, 3007, 3008, 3009] }),
         GameFactory.grid.hackPanel({ id: 3, x: 78, y: 126.5, activationDuration: 9000, platformIds: [3010] }),
+
+        GameFactory.grid.hackPanel({ id: 4, x: 34, y: 101.5, activationDuration: 5000, mode: "deactivate", platformIds: [3011] }),
     ],
     temporaryPlatforms: [
-        GameFactory.grid.temporaryPlatform({ id: 3001, x: 15, y: 119, w: 3, h: 1, layout: "board" }),
-        GameFactory.grid.temporaryPlatform({ id: 3002, x: 23, y: 131, w: 3, h: 1, layout: "board" }),
-        GameFactory.grid.temporaryPlatform({ id: 3003, x: 28, y: 127, w: 2, h: 1, layout: "boardLeftCap" }),
-        GameFactory.grid.temporaryPlatform({ id: 3004, x: 13, y: 138, w: 2, h: 1, layout: "boardLeftCap" }),
-        GameFactory.grid.temporaryPlatform({ id: 3005, x: 20, y: 126, w: 2, h: 1, layout: "boardRightCap" }),
+        GameFactory.grid.temporaryPlatform({ id: 3001, x: 15, y: 119, w: 3, h: 1 }),
+        GameFactory.grid.temporaryPlatform({ id: 3002, x: 23, y: 131, w: 3, h: 1 }),
+        GameFactory.grid.temporaryPlatform({ id: 3003, x: 28, y: 127, w: 2, h: 1, layout: "boardTemporaryLeftCap" }),
+        GameFactory.grid.temporaryPlatform({ id: 3004, x: 13, y: 138, w: 2, h: 1, layout: "boardTemporaryLeftCap" }),
+        GameFactory.grid.temporaryPlatform({ id: 3005, x: 20, y: 126, w: 2, h: 1, layout: "boardTemporaryRightCap" }),
 
         // one-direction platforms west side
-        GameFactory.grid.temporaryPlatform({ id: 3006, x: 1, y: 96, w: 4, h: 1, type: "oneDirection", layout: "boardOneDirection" }),
-        GameFactory.grid.temporaryPlatform({ id: 3007, x: 1, y: 85, w: 5, h: 1, type: "oneDirection", layout: "boardOneDirection" }),
-        GameFactory.grid.temporaryPlatform({ id: 3008, x: 1, y: 76, w: 5, h: 1, type: "oneDirection", layout: "boardOneDirection" }),
-        GameFactory.grid.temporaryPlatform({ id: 3009, x: 1, y: 68, w: 5, h: 1, type: "oneDirection", layout: "boardOneDirection" }),
+        GameFactory.grid.temporaryPlatform({ id: 3006, x: 1, y: 96, w: 4, h: 1, type: "oneDirection", layout: "boardTemporaryOneDirection" }),
+        GameFactory.grid.temporaryPlatform({ id: 3007, x: 1, y: 85, w: 5, h: 1, type: "oneDirection", layout: "boardTemporaryOneDirection" }),
+        GameFactory.grid.temporaryPlatform({ id: 3008, x: 1, y: 76, w: 5, h: 1, type: "oneDirection", layout: "boardTemporaryOneDirection" }),
+        GameFactory.grid.temporaryPlatform({ id: 3009, x: 1, y: 68, w: 5, h: 1, type: "oneDirection", layout: "boardTemporaryOneDirection" }),
 
         // pool with cannons
-        GameFactory.grid.temporaryPlatform({ id: 3010, x: 104, y: 130, w: 2, h: 1, layout: "boardLeftCap" }),
+        GameFactory.grid.temporaryPlatform({ id: 3010, x: 104, y: 130, w: 2, h: 1, layout: "boardTemporaryLeftCap" }),
+
+        // temporary spring wall
+        GameFactory.grid.temporaryPlatform({ id: 3011, x: 43, y: 99, w: 1, h: 5, active: true, layout: "temporarySpringWall",  }),
+
     ],
     hiddenWalls: [
         GameFactory.grid.cracks({ id: 2001, x: 3, y: 127, w: 9, h: 5, layout: "cracksOnlyRightTopClean" }),
