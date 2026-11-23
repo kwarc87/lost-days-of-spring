@@ -132,12 +132,25 @@ export const LEVEL_003 = {
         GameFactory.grid.solid({ id: 95, x: 87, y: 124, w: 7, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 96, x: 88, y: 125, w: 6, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 97, x: 89, y: 126, w: 5, h: 2, layout: "groundBottomRightEdgeCap" }),
+
+        GameFactory.grid.solid({ id: 107, x: 91, y: 134, w: 2, h: 2, layout: "metal" }),
+        GameFactory.grid.solid({ id: 108, x: 107, y: 131, w: 1, h: 1, layout: "metalSmall" }),
+        GameFactory.grid.solid({ id: 109, x: 91, y: 126, w: 1, h: 1, layout: "metalSmall" }),
+
+        // big pool
+        GameFactory.grid.solid({ id: 100, x: 125, y: 116, w: 9, h: 2, layout: "groundRightTopEdgeCap" }),
+        GameFactory.grid.solid({ id: 101, x: 125, y: 122, w: 9, h: 2, layout: "groundRightBottomEdgeCap" }),
+        GameFactory.grid.solid({ id: 102, x: 128, y: 117, w: 6, h: 2, layout: "groundBottomRightEdgeCap" }),
+        GameFactory.grid.solid({ id: 103, x: 130, y: 118, w: 4, h: 2, layout: "groundBottomRightEdgeCap" }),
+        GameFactory.grid.solid({ id: 104, x: 131, y: 119, w: 3, h: 2, layout: "groundBottomRightEdgeCap" }),
+
+        GameFactory.grid.solid({ id: 105, x: 305, y: 140, w: 3, h: 2, layout: "boardLeftCap" }),
+        GameFactory.grid.solid({ id: 106, x: 307, y: 112, w: 22, h: 32, layout: "groundTopCap" }),
     ],
     hackPanels: [
         GameFactory.grid.hackPanel({ id: 1, x: 6, y: 139.5, activationDuration: 5000, platformIds: [3001, 3002, 3003, 3004, 3005] }),
         GameFactory.grid.hackPanel({ id: 2, x: 7.5, y: 99.5, activationDuration: 7000, platformIds: [3006, 3007, 3008, 3009] }),
         GameFactory.grid.hackPanel({ id: 3, x: 78, y: 126.5, activationDuration: 9000, platformIds: [3010] }),
-
         GameFactory.grid.hackPanel({ id: 4, x: 34, y: 101.5, activationDuration: 5000, mode: "deactivate", platformIds: [3011] }),
     ],
     temporaryPlatforms: [
@@ -157,8 +170,7 @@ export const LEVEL_003 = {
         GameFactory.grid.temporaryPlatform({ id: 3010, x: 104, y: 130, w: 2, h: 1, layout: "boardTemporaryLeftCap" }),
 
         // temporary spring wall
-        GameFactory.grid.temporaryPlatform({ id: 3011, x: 43, y: 99, w: 1, h: 5, active: true, layout: "temporarySpringWall",  }),
-
+        GameFactory.grid.temporaryPlatform({ id: 3011, x: 42.5, y: 99, w: 1, h: 5, active: true, layout: "temporarySpringWall",  }),
     ],
     hiddenWalls: [
         GameFactory.grid.cracks({ id: 2001, x: 3, y: 127, w: 9, h: 5, layout: "cracksOnlyRightTopClean" }),
@@ -181,11 +193,11 @@ export const LEVEL_003 = {
     pools: [
         GameFactory.grid.pool({ id: 1, x: 32, y: 124, w: 12, h: 2 }),
         GameFactory.grid.pool({ id: 2, x: 92, y: 131, w: 15, h: 2 }),
-
         GameFactory.grid.pool({ id: 3, x: 148, y: 140, w: 160, h: 2 }),
     ],
     teleports: [
         GameFactory.grid.teleport({ id: 1, x: 2, y: 111, targetX: 35, targetY: 138 }),
+        GameFactory.grid.teleport({ id: 2, x: 126, y: 118, targetX: 305, targetY: 136 }),
     ],
     elevators: [
         GameFactory.grid.elevator({ id: 1001, startX: 83, startY: 112, w: 3, h: 1, targetX: 113, targetY: 112, speed: 6, waitTime: 1500 }),
@@ -346,7 +358,6 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallClean({ x: 48, y: 138, w: 2, h: 1 }),
 
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 37, y: 117, repeatY: 2 }),
-        GameFactory.grid.environment.wallBrickVerticalPattern({ x: 42, y: 100 }),
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 53, y: 138 }),
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 73, y: 138 }),
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 81, y: 140 }),
@@ -370,7 +381,7 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallSharpHole({ x: 87, y: 130 }),
     ],
     backgroundItems:[
-        //grass and flowers (fountain)
+        // grass and flowers (fountain)
         GameFactory.grid.environment.grass001({ x: 3, y: 124, repeatX: 3 }),
         GameFactory.grid.environment.grass001({ x: 1, y: 115 }),
         GameFactory.grid.environment.grass001({ x: 4, y: 115, repeatX: 3 }),
@@ -378,9 +389,7 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.grass002({ x: 6, y: 142, repeatX: 2 }),
         GameFactory.grid.environment.grass002({ x: 8, y: 124, repeatX: 3 }),
         ...GameFactory.grid.environment.grass({ x: 10, y: 142, w: 5 }),
-        GameFactory.grid.environment.plate001({ x: 16, y: 135 }),
         GameFactory.grid.environment.grass001({ x: 19, y: 142, repeatX: 2 }),
-        GameFactory.grid.environment.plate001({ x: 22, y: 138 }),
         ...GameFactory.grid.environment.grass({ x: 25, y: 142, w: 3 }),
         ...GameFactory.grid.environment.grass({ x: 32, y: 142, w: 3 }),
         ...GameFactory.grid.environment.grass({ x: 37, y: 142, w: 3 }),
@@ -388,6 +397,27 @@ export const LEVEL_003 = {
         ...GameFactory.grid.environment.grass({ x: 60, y: 133, w: 8 }),
         GameFactory.grid.environment.grass001({ x: 71, y: 133, repeatX: 4 }),
         GameFactory.grid.environment.grass001({ x: 61, y: 123, repeatX: 4 }),
+        ...GameFactory.grid.environment.grass({ x: 46, y: 142, w: 3 }),
+        GameFactory.grid.environment.grass001({ x: 53, y: 142, repeatX: 4 }),
+        GameFactory.grid.environment.grass001({ x: 59, y: 142, repeatX: 2 }),
+        GameFactory.grid.environment.grass001({ x: 50, y: 142 }),
+        ...GameFactory.grid.environment.grass({ x: 66, y: 142, w: 5 }),
+        GameFactory.grid.environment.grass001({ x: 71, y: 142, repeatX: 2 }),
+        GameFactory.grid.environment.grass001({ x: 77, y: 142 }),
+        GameFactory.grid.environment.grass002({ x: 79, y: 142 }),
+        GameFactory.grid.environment.grass002({ x: 83, y: 142, repeatX: 2 }),
+        GameFactory.grid.environment.grass001({ x: 88, y: 142 }),
+
+        //plates (fountain)
+        GameFactory.grid.environment.plate001({ x: 16, y: 135 }),
+        GameFactory.grid.environment.plate001({ x: 22, y: 138 }),
+        GameFactory.grid.environment.plate001({ x: 78, y: 129 }),
+        GameFactory.grid.environment.plate001({ x: 77, y: 116 }),
+        GameFactory.grid.environment.plate001({ x: 69, y: 124 }),
+
+        //grass and flowers (inverted L cave)
+        ...GameFactory.grid.environment.grass({ x: 113, y: 133, w: 11 }),
+        ...GameFactory.grid.environment.grass({ x: 109, y: 128, w: 3 }),
 
         //electronics (fountain)
         GameFactory.grid.environment.electronics({ x: 0, y: 134, w: 2, h: 2 }),
@@ -417,6 +447,11 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.electronics({ x: 68, y: 136, h: 1, w: 4 }),
         GameFactory.grid.environment.electronics({ x: 77, y: 127, h: 1, w: 2 }),
         GameFactory.grid.environment.electronics({ x: 83, y: 130, h: 2, w: 2 }),
+        GameFactory.grid.environment.electronics({ x: 60, y: 143, h: 1, w: 2 }),
+        GameFactory.grid.environment.electronics({ x: 83, y: 134, h: 1, w: 2 }),
+        GameFactory.grid.environment.electronic003({ x: 82, y: 134 }),
+        GameFactory.grid.environment.electronics({ x: 79, y: 130, h: 2, w: 2 }),
+        GameFactory.grid.environment.electronics({ x: 75, y: 117, h: 1, w: 4 }),
 
         // terminals
         GameFactory.grid.environment.terminalDirection({ x: 4, y: 116.25, direction: "right" }),
@@ -440,6 +475,28 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallInside({ x: 41, y: 137, repeatY: 2 }),
         GameFactory.grid.environment.wallPipe({ x: 61, y: 126 }),
         GameFactory.grid.environment.wallPipe({ x: 46, y: 136 }),
+        GameFactory.grid.environment.wallPlant001({ x: 52, y: 138 }),
+        GameFactory.grid.environment.wallPlant001({ x: 71, y: 138 }),
+
+        //wall elements (after the fountain)
+        GameFactory.grid.environment.wallInside({ x: 77, y: 122 }),
+        GameFactory.grid.environment.wallInside({ x: 64, y: 126 }),
+        GameFactory.grid.environment.wallInside({ x: 58, y: 137 }),
+        GameFactory.grid.environment.wallInside({ x: 79, y: 143 }),
+        GameFactory.grid.environment.wallInside({ x: 92, y: 125, repeatY: 2 }),
+        GameFactory.grid.environment.wallInside({ x: 91, y: 133 }),
+        GameFactory.grid.environment.wallPipe({ x: 94, y: 134 }),
+        GameFactory.grid.environment.wallPipe({ x: 103, y: 134 }),
+        GameFactory.grid.environment.wallInside({ x: 78, y: 135 }),
+        GameFactory.grid.environment.wallInside({ x: 61, y: 114 }),
+        GameFactory.grid.environment.wallInside({ x: 55, y: 107 }),
+        GameFactory.grid.environment.wallInside({ x: 83, y: 115 }),
+        GameFactory.grid.environment.wallInside({ x: 88, y: 118 }),
+        GameFactory.grid.environment.wallInside({ x: 82, y: 120 }),
+        GameFactory.grid.environment.wallInside({ x: 110, y: 129 }),
+        GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
+        GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
+        GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
 
         // jaws cave with elevator
         ...GameFactory.grid.environment.grass({ x: 113, y: 113, w: 3 }),
@@ -461,6 +518,11 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.flower002({ x: 13, y: 141 }),
         GameFactory.grid.environment.plant008({ x: 38, y: 131 }),
         GameFactory.grid.environment.plant007({ x: 40, y: 133 }),
+        GameFactory.grid.environment.plant008({ x: 93, y: 123 }),
+        GameFactory.grid.environment.plant002({ x: 57, y: 124 }),
+        GameFactory.grid.environment.plant002({ x: 63, y: 113 }),
+        GameFactory.grid.environment.plant002({ x: 68, y: 133 }),
+        GameFactory.grid.environment.plant001({ x: 53, y: 133 }),
 
         //grass
         GameFactory.grid.environment.grass001({ x: 42, y: 133 }),
@@ -476,10 +538,15 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallPlant001({ x: 56, y: 128 }),
         GameFactory.grid.environment.wallPlant001({ x: 65, y: 129 }),
 
+        // inverted L cave
+        GameFactory.grid.environment.plant001({ x: 107, y: 128 }),
+        GameFactory.grid.environment.flower002({ x: 119.75, y: 132 }),
+        GameFactory.grid.environment.wallPlant001({ x: 116, y: 123 }),
+        GameFactory.grid.environment.wallPlant001({ x: 124, y: 123 }),
+
         // jaws cave with elevator
         GameFactory.grid.environment.plant007({ x: 112.75, y: 113 }),
         GameFactory.grid.environment.plant007({ x: 107, y: 106 }),
-        
         GameFactory.grid.environment.plant008({ x: 119, y: 106 }),
         GameFactory.grid.environment.wallPlant001({ x: 115, y: 106 }),
         GameFactory.grid.environment.wallPlant001({ x: 111, y: 106 }),
@@ -489,5 +556,14 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.flower002({ x: 90, y: 109 }),
         GameFactory.grid.environment.flower002({ x: 113, y: 105 }),
         GameFactory.grid.environment.plant008({ x: 106, y: 113 }),
+        GameFactory.grid.environment.plant007({ x: 73, y: 106 }),
+        GameFactory.grid.environment.plant007({ x: 57.5, y: 113.75 }),
+        GameFactory.grid.environment.plant002({ x: 118, y: 112 }),
+
+        // pool with cannons
+        GameFactory.grid.environment.flower002({ x: 61, y: 126 }),
+        GameFactory.grid.environment.plant001({ x: 83, y: 133 }),
+        GameFactory.grid.environment.plant002({ x: 77, y: 129 }),
+        GameFactory.grid.environment.plant007({ x: 89, y: 125.5 }),
     ] 
 };

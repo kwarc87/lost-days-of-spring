@@ -12,6 +12,49 @@ export function repeatHorizontal3x3(left, mid, right) {
     };
 }
 
+// One-direction board strip; `x` is the source x of its left cap. In the tileset the
+// "arrow + seam" unit is 32 px wide and sits 8 px off the 16 px grid, so mid tiles are cut at
+// 8 px offsets and picked per column. An odd mid count reproduces the original strip; an even
+// one adds a smooth half tile on each side (two mid tiles get a single centered arrow instead).
+// Either way every arrow is complete and the strip stays symmetric.
+export function oneDirectionBoard3x3({ x, y }) {
+    const opening = { x: x + 16, y };
+    const arrow = { x: x + 32, y };
+    const seam = { x: x + 48, y };
+    const smoothStart = { x: x + 8, y };
+    const arrowLeft = { x: x + 24, y };
+    const arrowRight = { x: x + 40, y };
+    const closing = { x: x + 56, y };
+    // Two mid tiles are too narrow for "seam + arrow + seam", so the arrow is centered without seams.
+    const centeredArrowLeft = { x: x + 25, y };
+    const centeredArrowRight = { x: x + 41, y };
+
+    const mid = (col, cols) => {
+        const index = col - 1;
+        const count = cols - 2;
+        if (count === 2) {
+            return index === 0 ? centeredArrowLeft : centeredArrowRight;
+        }
+        if (count % 2 === 1) {
+            if (index === 0) {
+                return opening;
+            }
+            return index % 2 === 1 ? arrow : seam;
+        }
+        if (index === 0) {
+            return smoothStart;
+        }
+        if (index === count - 1) {
+            return closing;
+        }
+        return index % 2 === 1 ? arrowLeft : arrowRight;
+    };
+
+    // padLeft covers the dark tail of `closing` and the seam at the end of `centeredArrowRight`;
+    // on other tiles it redraws the same pixels.
+    return repeatHorizontal3x3({ x, y }, mid, { x: x + 64, y, padLeft: 2 });
+}
+
 export function repeatAllTiles3x3(tile) {
     return {
         tLeft: tile,

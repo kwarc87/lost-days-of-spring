@@ -1,5 +1,6 @@
 ﻿import {
     repeatHorizontal3x3,
+    oneDirectionBoard3x3,
     repeatAllTiles3x3,
     repeatTopRowOnly3x3,
     topCap3x3,
@@ -401,14 +402,7 @@ const platformCaves = {
     },
     boardOneDirection: {
         ...BASE_TILESET,
-        sprites: repeatHorizontal3x3(
-            { x: 32, y: 16 },
-            [
-                { x: 72, y: 16 },
-                { x: 56, y: 16 },
-            ],
-            { x: 96, y: 16 }
-        ),
+        sprites: oneDirectionBoard3x3({ x: 32, y: 16 }),
     },
     boardRightCap: {
         ...BASE_TILESET,
@@ -428,14 +422,7 @@ const platformCaves = {
     },
     iceOneDirection: {
         ...BASE_TILESET,
-        sprites: repeatHorizontal3x3(
-            { x: 208, y: 356 },
-            [
-                { x: 248, y: 356 },
-                { x: 232, y: 356 },
-            ],
-            { x: 272, y: 356 }
-        ),
+        sprites: oneDirectionBoard3x3({ x: 208, y: 356 }),
     },
     boardTemporary: {
         ...BASE_TILESET,
@@ -443,14 +430,7 @@ const platformCaves = {
     },
     boardTemporaryOneDirection: {
         ...BASE_TILESET,
-        sprites: repeatHorizontal3x3(
-            { x: 208, y: 411 },
-            [
-                { x: 248, y: 411 },
-                { x: 232, y: 411 },
-            ],
-            { x: 272, y: 411 }
-        ),
+        sprites: oneDirectionBoard3x3({ x: 208, y: 411 }),
     },
     boardTemporaryRightCap: {
         ...BASE_TILESET,
@@ -538,7 +518,12 @@ function getTileKey(col, row, cols, rows) {
     return "mid";
 }
 
-function pickSpriteVariant(spriteDef, key, col, row) {
+// A sprite def is a single sprite, an array of variants cycled per tile, or a function
+// `(col, cols) => sprite` for layouts that depend on the platform width.
+function pickSpriteVariant(spriteDef, key, col, row, cols) {
+    if (typeof spriteDef === "function") {
+        return spriteDef(col, cols);
+    }
     if (!Array.isArray(spriteDef)) {
         return spriteDef;
     }
@@ -656,7 +641,7 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
                     continue;
                 }
 
-                const sprite = pickSpriteVariant(spriteDef, key, col, row);
+                const sprite = pickSpriteVariant(spriteDef, key, col, row, cols);
                 if (!sprite) {
                     continue;
                 }
