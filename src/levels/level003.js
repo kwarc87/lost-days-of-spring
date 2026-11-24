@@ -132,10 +132,10 @@ export const LEVEL_003 = {
         GameFactory.grid.solid({ id: 95, x: 87, y: 124, w: 7, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 96, x: 88, y: 125, w: 6, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 97, x: 89, y: 126, w: 5, h: 2, layout: "groundBottomRightEdgeCap" }),
-
         GameFactory.grid.solid({ id: 107, x: 91, y: 134, w: 2, h: 2, layout: "metal" }),
         GameFactory.grid.solid({ id: 108, x: 107, y: 131, w: 1, h: 1, layout: "metalSmall" }),
         GameFactory.grid.solid({ id: 109, x: 91, y: 126, w: 1, h: 1, layout: "metalSmall" }),
+        GameFactory.grid.solid({ id: 110, x: 118, y: 123, w: 5, h: 2, layout: "groundBottomCap" }),
 
         // big pool
         GameFactory.grid.solid({ id: 100, x: 125, y: 116, w: 9, h: 2, layout: "groundRightTopEdgeCap" }),
@@ -143,15 +143,91 @@ export const LEVEL_003 = {
         GameFactory.grid.solid({ id: 102, x: 128, y: 117, w: 6, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 103, x: 130, y: 118, w: 4, h: 2, layout: "groundBottomRightEdgeCap" }),
         GameFactory.grid.solid({ id: 104, x: 131, y: 119, w: 3, h: 2, layout: "groundBottomRightEdgeCap" }),
-
         GameFactory.grid.solid({ id: 105, x: 305, y: 140, w: 3, h: 2, layout: "boardLeftCap" }),
         GameFactory.grid.solid({ id: 106, x: 307, y: 112, w: 22, h: 32, layout: "groundTopCap" }),
+
+        GameFactory.grid.solid({ id: 111, x: 126, y: 123, w: 7, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 112, x: 135, y: 106, w: 60, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 113, x: 136, y: 107, w: 40, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 114, x: 144, y: 108, w: 26, h: 2, layout: "groundBottomCap" }),
+
+        GameFactory.grid.solid({ id: 131, x: 148, y: 109, w: 6, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 132, x: 158, y: 109, w: 3, h: 2, layout: "groundBottomCap" }),
+
+        // sky island
+        GameFactory.grid.solid({ id: 115, x: 162, y: 128, w: 7, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 116, x: 162, y: 129, w: 7, h: 3 }),
+        GameFactory.grid.solid({ id: 117, x: 163, y: 131, w: 5, h: 2, layout: "groundBottomCap" }),
+
+        // sky island
+        GameFactory.grid.solid({ id: 118, x: 173, y: 123, w: 7, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 119, x: 173, y: 124, w: 7, h: 3 }),
+        GameFactory.grid.solid({ id: 120, x: 174, y: 126, w: 5, h: 2, layout: "groundBottomCap" }),
+
+        // sky island small
+        GameFactory.grid.solid({ id: 121, x: 185, y: 120, w: 3, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 122, x: 185, y: 121, w: 3, h: 3 }),
+
+        GameFactory.grid.solid({ id: 123, x: 194, y: 117, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 124, x: 166, y: 118, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 129, x: 201, y: 120, w: 2, h: 1, layout: "board" }),
+        GameFactory.grid.booster({ id: 134, x: 207, y: 139, w: 3, h: 1, boostSpeed: 42 }),
+
+        // sky island
+        GameFactory.grid.solid({ id: 125, x: 151, y: 116, w: 10, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 126, x: 151, y: 117, w: 10, h: 2 }),
+        GameFactory.grid.solid({ id: 127, x: 152, y: 118, w: 2, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 128, x: 158, y: 118, w: 2, h: 2, layout: "groundBottomCap" }),
+
+        // sky island
+        GameFactory.grid.solid({ id: 130, x: 211, y: 125, w: 9, h: 1, layout: "board" }),
+        GameFactory.grid.solid({ id: 131, x: 211, y: 126, w: 9, h: 3 }),
+        GameFactory.grid.solid({ id: 132, x: 212, y: 128, w: 7, h: 2, layout: "groundBottomCap" }),
+
+        // sky ice island small
+        GameFactory.grid.ice({ id: 133, x: 228, y: 128, w: 7, h: 1 }),
+        GameFactory.grid.solid({ id: 135, x: 228, y: 129, w: 7, h: 3 }),
+
+        // sky ice island
+        GameFactory.grid.ice({ id: 136, x: 242, y: 127, w: 9, h: 1 }),
+        GameFactory.grid.solid({ id: 137, x: 242, y: 128, w: 9, h: 3 }),
+        GameFactory.grid.solid({ id: 138, x: 244, y: 130, w: 5, h: 2, layout: "groundBottomCap" }),
+
+        // terminal
+        GameFactory.grid.solid({ id: 146, x: 190, y: 134, w: 4, h: 2 }),
+
+        // sky ice island small
+        GameFactory.grid.ice({ id: 139, x: 257, y: 131, w: 5, h: 1 }),
+        GameFactory.grid.solid({ id: 140, x: 257, y: 132, w: 5, h: 3 }),
+
+        // sky ice island small
+        GameFactory.grid.ice({ id: 141, x: 267, y: 135, w: 4, h: 1 }),
+        GameFactory.grid.solid({ id: 142, x: 267, y: 136, w: 4, h: 2 }),
+
+        // sky ice island small
+        GameFactory.grid.ice({ id: 143, x: 273, y: 130, w: 3, h: 1 }),
+        GameFactory.grid.solid({ id: 144, x: 273, y: 131, w: 3, h: 3 }),
+
+        GameFactory.grid.ice({ id: 145, x: 276, y: 126, w: 2, h: 1 }),
+        GameFactory.grid.ice({ id: 147, x: 271, y: 122, w: 3, h: 1 }),
+        GameFactory.grid.ice({ id: 148, x: 269, y: 118, w: 2, h: 1 }),
+        GameFactory.grid.ice({ id: 149, x: 263, y: 114, w: 3, h: 1 }),
+
+        // sky ice island small
+        GameFactory.grid.ice({ id: 150, x: 254, y: 115, w: 4, h: 1 }),
+        GameFactory.grid.solid({ id: 151, x: 254, y: 116, w: 4, h: 2 }),
+
+        // small pool in the sky
+        GameFactory.grid.solid({ id: 152, x: 233, y: 115, w: 2, h: 3 }),
+        GameFactory.grid.solid({ id: 153, x: 245, y: 115, w: 2, h: 3 }),
     ],
     hackPanels: [
         GameFactory.grid.hackPanel({ id: 1, x: 6, y: 139.5, activationDuration: 5000, platformIds: [3001, 3002, 3003, 3004, 3005] }),
         GameFactory.grid.hackPanel({ id: 2, x: 7.5, y: 99.5, activationDuration: 7000, platformIds: [3006, 3007, 3008, 3009] }),
         GameFactory.grid.hackPanel({ id: 3, x: 78, y: 126.5, activationDuration: 9000, platformIds: [3010] }),
         GameFactory.grid.hackPanel({ id: 4, x: 34, y: 101.5, activationDuration: 5000, mode: "deactivate", platformIds: [3011] }),
+        GameFactory.grid.hackPanel({ id: 5, x: 134, y: 139.5, activationDuration: 9000, platformIds: [3012] }),
+        GameFactory.grid.hackPanel({ id: 6, x: 191, y: 131.5, activationDuration: 8500, platformIds: [3013, 3014, 3015] }),
     ],
     temporaryPlatforms: [
         GameFactory.grid.temporaryPlatform({ id: 3001, x: 15, y: 119, w: 3, h: 1 }),
@@ -166,11 +242,19 @@ export const LEVEL_003 = {
         GameFactory.grid.temporaryPlatform({ id: 3008, x: 1, y: 76, w: 5, h: 1, type: "oneDirection", layout: "boardTemporaryOneDirection" }),
         GameFactory.grid.temporaryPlatform({ id: 3009, x: 1, y: 68, w: 5, h: 1, type: "oneDirection", layout: "boardTemporaryOneDirection" }),
 
-        // pool with cannons
-        GameFactory.grid.temporaryPlatform({ id: 3010, x: 104, y: 130, w: 2, h: 1, layout: "boardTemporaryLeftCap" }),
-
         // temporary spring wall
         GameFactory.grid.temporaryPlatform({ id: 3011, x: 42.5, y: 99, w: 1, h: 5, active: true, layout: "temporarySpringWall",  }),
+
+        // pool with cannons
+        GameFactory.grid.temporaryPlatform({ id: 3010, x: 104, y: 130, w: 2, h: 1, layout: "boardTemporaryLeftCap" }),
+        GameFactory.grid.temporaryPlatform({ id: 3012, x: 134, y: 120, w: 2, h: 1, layout: "boardTemporaryRightCap" }),
+
+        // big pool
+        GameFactory.grid.temporaryPlatform({ id: 3013, x: 207, y: 116, w: 2, h: 1 }),
+        GameFactory.grid.temporaryPlatform({ id: 3014, x: 213, y: 111, w: 8, h: 1 }),
+        GameFactory.grid.temporaryPlatform({ id: 3015, x: 213, y: 112, w: 8, h: 2, layout: "ground" }),
+
+
     ],
     hiddenWalls: [
         GameFactory.grid.cracks({ id: 2001, x: 3, y: 127, w: 9, h: 5, layout: "cracksOnlyRightTopClean" }),
@@ -189,11 +273,16 @@ export const LEVEL_003 = {
         GameFactory.grid.cracks({ id: 2008, x: 99, y: 106, w: 8, h: 5, layout: "cracksOnlyBottom" }),
         GameFactory.grid.cracks({ id: 2009, x: 91, y: 113, w: 8, h: 5, layout: "cracksOnlyTop" }),
         GameFactory.grid.cracks({ id: 2010, x: 113, y: 114, w: 7, h: 3, layout: "cracksOnlyLeftBottomClean" }),
+
+        // big pool
+        GameFactory.grid.cracks({ id: 2011, x: 153, y: 119, w: 6, h: 2, layout: "cracksBottomCap", group: "skyIslandA" }),
+        GameFactory.grid.cracks({ id: 2012, x: 153, y: 118, w: 6, h: 1, layout: "cracksSimple", group: "skyIslandA" }),
     ],
     pools: [
         GameFactory.grid.pool({ id: 1, x: 32, y: 124, w: 12, h: 2 }),
         GameFactory.grid.pool({ id: 2, x: 92, y: 131, w: 15, h: 2 }),
         GameFactory.grid.pool({ id: 3, x: 148, y: 140, w: 160, h: 2 }),
+        GameFactory.grid.pool({ id: 4, x: 234, y: 116, w: 12, h: 2, layout: "groundBottomCap" }),
     ],
     teleports: [
         GameFactory.grid.teleport({ id: 1, x: 2, y: 111, targetX: 35, targetY: 138 }),
@@ -208,6 +297,8 @@ export const LEVEL_003 = {
         GameFactory.grid.evilEye({ id: 3, startX: 16.5, targetX: 16.5, startY: 129, targetY: 135, speed: 2, health: 25, mainColor: "#000", secondaryColor: "#000" }),
         GameFactory.grid.sludge({ id: 4, startX: 60, targetX: 66, startY: 121, targetY: 121, speed: 1.25, health: 50, mainColor: "#fa9bdd", secondaryColor: "#fa9bdd" }),
         GameFactory.grid.evilEye({ id: 5, startX: 69, targetX: 73, startY: 128, targetY: 133, speed: 2, health: 25, mainColor: "#000", secondaryColor: "#000" }),
+        GameFactory.grid.slime({ id: 6, startX: 113, targetX: 125, startY: 131, targetY: 131, speed: 1.5, health: 25, mainColor: "#fff", secondaryColor: "#fa9bdd" }),
+        GameFactory.grid.evilEye({ id: 7, startX: 127, targetX: 127, startY: 136, targetY: 142, speed: 2, health: 25, mainColor: "#000", secondaryColor: "#000" }),
     ],
     cannons: [
         GameFactory.grid.cannon({ id: 1, x: 45, y: 127, targetY: 133 }),
@@ -253,9 +344,38 @@ export const LEVEL_003 = {
             ...GameFactory.grid.rowOfCollectibles({ startId: 92, count: 6, x: 92, y: 114 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 98, count: 6, x: 92, y: 115 }),
 
-            //underground 001
+            ...GameFactory.grid.rowOfCollectibles({ startId: 191, count: 3, x: 68, y: 115 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 194, count: 2, x: 70, y: 116 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 196, count: 2, x: 69, y: 117 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 198, count: 1, x: 69, y: 120 }),
+
+            // underground 001
             ...GameFactory.grid.rowOfCollectibles({ startId: 104, count: 35, x: 50, y: 140 }),
             ...GameFactory.grid.rowOfCollectibles({ startId: 139, count: 7, x: 60, y: 131 }),
+
+            // inverted L cave
+            ...GameFactory.grid.rowOfCollectibles({ startId: 146, count: 6, x: 132, y: 135 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 152, count: 6, x: 132, y: 136 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 158, count: 6, x: 132, y: 137 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 164, count: 6, x: 132, y: 138 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 170, count: 6, x: 141, y: 120 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 176, count: 6, x: 141, y: 121 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 182, count: 6, x: 141, y: 122 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 188, count: 3, x: 108, y: 125.5 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 199, count: 7, x: 126, y: 108 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 206, count: 7, x: 126, y: 114 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 213, count: 5, x: 126, y: 109 }),
+            ...GameFactory.grid.columnOfCollectibles({ startId: 218, count: 5, x: 132, y: 109 }),
+
+            // big pool
+            ...GameFactory.grid.rowOfCollectibles({ startId: 223, count: 3, x: 213, y: 108 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 226, count: 3, x: 213, y: 109 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 229, count: 3, x: 218, y: 108 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 232, count: 3, x: 218, y: 109 }),
+
+            ...GameFactory.grid.rowOfCollectibles({ startId: 235, count: 10, x: 235, y: 113 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 245, count: 10, x: 235, y: 114 }),
+            ...GameFactory.grid.rowOfCollectibles({ startId: 255, count: 10, x: 235, y: 115 }),
         ],
         splinters: [
             GameFactory.grid.splinters({ id: 1, x: 37, y: 115 }),
@@ -268,6 +388,14 @@ export const LEVEL_003 = {
             GameFactory.grid.splinters({ id: 8, x: 118, y: 115 }),
             GameFactory.grid.splinters({ id: 9, x: 102.5, y: 108 }),
             GameFactory.grid.splinters({ id: 10, x: 87.5, y: 140, }),
+            GameFactory.grid.splinters({ id: 11, x: 134.5, y: 133, }),
+            GameFactory.grid.splinters({ id: 12, x: 129, y: 111, }),
+            GameFactory.grid.splinters({ id: 13, x: 155.5, y: 119.5, }),
+            GameFactory.grid.splinters({ id: 14, x: 124, y: 124, }),
+            GameFactory.grid.splinters({ id: 15, x: 9, y: 109, }),
+            GameFactory.grid.splinters({ id: 16, x: 216.5, y: 108.5, }),
+            GameFactory.grid.splinters({ id: 17, x: 239.5, y: 109.5, }),
+            GameFactory.grid.splinters({ id: 18, x: 208, y: 140, }),
         ],
         heartContainers: [
             GameFactory.grid.heartContainers({ id: 1, x: 60.5, y: 108.5 }),
@@ -279,6 +407,11 @@ export const LEVEL_003 = {
             GameFactory.grid.artifact({ id: 4, x: 154, y: 137, cordX: 5, cordY: 5, message: MESSAGES.LEVEL_1.ARTIFACTS.PENDRIVE }), //pendrive
             GameFactory.grid.artifact({ id: 5, x: 102.5, y: 114, cordX: 4, cordY: 6, message: MESSAGES.LEVEL_1.ARTIFACTS.CASH }), //cash
             GameFactory.grid.artifact({ id: 6, x: 117, y: 108, cordX: 15, cordY: 9, message: MESSAGES.LEVEL_1.ARTIFACTS.FLOWER }), //flower
+            GameFactory.grid.artifact({ id: 7, x: 155.5, y: 111.5, cordX: 3, cordY: 2, message: MESSAGES.LEVEL_1.ARTIFACTS.SUNGLASSES }), //sunglasses
+            GameFactory.grid.artifact({ id: 8, x: 128.5, y: 120, cordX: 0, cordY: 7, message: MESSAGES.LEVEL_1.ARTIFACTS.BASEBALL_CAP }), //baseball cap
+            GameFactory.grid.artifact({ id: 9, x: 289, y: 138, cordX: 25, cordY: 13, message: MESSAGES.LEVEL_1.ARTIFACTS.COMPASS }), //compass
+            GameFactory.grid.artifact({ id: 10, x: 58, y: 121, cordX: 24, cordY: 8, message: MESSAGES.LEVEL_1.ARTIFACTS.WALKIE_TALKIE }), //walkie talkie
+
         ]
     },
     preBackgroundItems: [
@@ -299,6 +432,9 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallBrickRight({ x: 10.5, y: 136.5 }),
         GameFactory.grid.environment.wallBrickRight({ x: 10, y: 140.5 }),
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 5, y: 111 }),
+        GameFactory.grid.environment.electronics({ x: 8, y: 120, w: 2, h: 2 }),
+        GameFactory.grid.environment.electronics({ x: 5, y: 140, w: 3, h: 1 }),
+        GameFactory.grid.environment.electronics({ x: 7, y: 136, w: 2, h: 1 }),
 
         //wall 002 (fountain)
         GameFactory.grid.environment.wallSharpHole({ x: 39, y: 97 }),
@@ -362,14 +498,17 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 73, y: 138 }),
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 81, y: 140 }),
         GameFactory.grid.environment.wallBrickVerticalPattern({ x: 40, y: 122 }),
-        GameFactory.grid.environment.electronics({ x: 87, y: 140, w: 2, h: 1 }),
+        
+        GameFactory.grid.environment.electronic002({ x: 39, y: 119 }),
+        GameFactory.grid.environment.electronic001({ x: 42, y: 119 }),
+        GameFactory.grid.environment.electronics({ x: 33, y: 110, h: 1, w: 2 }),
 
-        //wall 003 (floor 0 - section available for double jump)
+        // wall 003 (floor 0 - section available for double jump)
         GameFactory.grid.environment.wallClean({ x: 7, y: 97, w: 3, h: 6 }),
         ...GameFactory.grid.environment.wallSharpLeftCol({ x: 5, y: 97, count: 6 }),
         ...GameFactory.grid.environment.wallSharpRightCol({ x: 10, y: 97, count: 6 }),
 
-        //wall 004 (pool with cannons)
+        // wall 004 (pool with cannons)
         ...GameFactory.grid.environment.wallSharpLeftCol({ x: 75, y: 124, count: 6 }),
         ...GameFactory.grid.environment.wallSharpRightCol({ x: 91, y: 127, count: 5 }),
         GameFactory.grid.environment.wallClean({ x: 77, y: 123, w: 3, h: 12 }),
@@ -379,6 +518,41 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallClean({ x: 89, y: 130, w: 2, h: 3 }),
         GameFactory.grid.environment.wallSharpHole({ x: 80, y: 126 }),
         GameFactory.grid.environment.wallSharpHole({ x: 87, y: 130 }),
+        GameFactory.grid.environment.electronics({ x: 87, y: 140, w: 2, h: 1 }),
+        GameFactory.grid.environment.electronics({ x: 77, y: 127, h: 1, w: 2 }),
+        GameFactory.grid.environment.electronics({ x: 83, y: 134, h: 1, w: 2 }),
+
+        // wall 005 (inverted L shape)
+        GameFactory.grid.environment.wallClean({ x: 114, y: 134, w: 32, h: 10 }),
+        GameFactory.grid.environment.wallClean({ x: 129, y: 131, w: 10, h: 4 }),
+        ...GameFactory.grid.environment.wallSharpLeftCol({ x: 112, y: 138, count: 5 }),
+        ...GameFactory.grid.environment.wallSharpRightCol({ x: 146, y: 138, count: 3 }),
+        GameFactory.grid.environment.wallInside({ x: 115, y: 140 }),
+        GameFactory.grid.environment.wallInside({ x: 123, y: 137, repeatX: 2 }),
+        GameFactory.grid.environment.wallInside({ x: 134, y: 136 }),
+        GameFactory.grid.environment.wallInside({ x: 137, y: 141 }),
+        GameFactory.grid.environment.wallBrickVerticalPattern({ x: 129, y: 138 }),
+        GameFactory.grid.environment.electronics({ x: 136, y: 133, w: 2, h: 2 }),
+        GameFactory.grid.environment.electronics({ x: 123, y: 139, w: 4, h: 1 }),
+
+        // wall 006 (big pool)
+        GameFactory.grid.environment.wallClean({ x: 190, y: 130, w: 4, h: 5 }),
+
+        ...GameFactory.grid.environment.wallSharpLeftCol({ x: 188, y: 131, count: 3 }),
+        GameFactory.grid.environment.wallSharpLeftTop({ x: 189, y: 134 }),
+        GameFactory.grid.environment.wallSharpLeftBottom({ x: 189, y: 130 }),
+        ...GameFactory.grid.environment.wallSharpRightCol({ x: 194, y: 131, count: 3 }),
+        GameFactory.grid.environment.wallSharpRightTop({ x: 193, y: 134 }),
+        GameFactory.grid.environment.wallSharpRightBottom({ x: 193, y: 130 }),
+
+        GameFactory.grid.environment.electronic003({ x: 191, y: 130, repeatX: 2 }),
+        GameFactory.grid.environment.electronic001({ x: 190, y: 131, repeatX: 4 }),
+        GameFactory.grid.environment.electronics({ x: 190, y: 132, w: 4, h: 1 }),
+        GameFactory.grid.environment.electronic003({ x: 190, y: 133 }),
+        GameFactory.grid.environment.electronic001({ x: 191, y: 133 }),
+        GameFactory.grid.environment.electronic002({ x: 192, y: 133 }),
+        GameFactory.grid.environment.electronic003({ x: 193, y: 133 }),
+
     ],
     backgroundItems:[
         // grass and flowers (fountain)
@@ -418,14 +592,17 @@ export const LEVEL_003 = {
         //grass and flowers (inverted L cave)
         ...GameFactory.grid.environment.grass({ x: 113, y: 133, w: 11 }),
         ...GameFactory.grid.environment.grass({ x: 109, y: 128, w: 3 }),
+        ...GameFactory.grid.environment.grass({ x: 127, y: 129, w: 2 }),
+        ...GameFactory.grid.environment.grass({ x: 131, y: 129, w: 3 }),
+        ...GameFactory.grid.environment.grass({ x: 135, y: 129, w: 2 }),
+        GameFactory.grid.environment.grass002({ x: 138, y: 129 }),
+        GameFactory.grid.environment.plate001({ x: 129, y: 129 }),
+        GameFactory.grid.environment.plate001({ x: 131, y: 122 }),
 
         //electronics (fountain)
         GameFactory.grid.environment.electronics({ x: 0, y: 134, w: 2, h: 2 }),
         GameFactory.grid.environment.electronics({ x: 1, y: 126, w: 2, h: 1 }),
-        GameFactory.grid.environment.electronics({ x: 5, y: 140, w: 3, h: 1 }),
         GameFactory.grid.environment.electronics({ x: 7, y: 107, w: 2, h: 1 }),
-        GameFactory.grid.environment.electronics({ x: 7, y: 136, w: 2, h: 1 }),
-        GameFactory.grid.environment.electronics({ x: 8, y: 120, w: 2, h: 2 }),
         GameFactory.grid.environment.electronics({ x: 9, y: 103, w: 2, h: 2 }),
         GameFactory.grid.environment.electronic002({ x: 12, y: 126 }),
         GameFactory.grid.environment.electronic003({ x: 14, y: 125 }),
@@ -438,20 +615,32 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.electronics({ x: 46, y: 125, w: 2, h: 2 }),
         GameFactory.grid.environment.electronic001({ x: 45, y: 125 }),
         GameFactory.grid.environment.electronics({ x: 40, y: 137, h: 4, w: 2 }),
-        GameFactory.grid.environment.electronic001({ x: 42, y: 119 }),
-        GameFactory.grid.environment.electronic002({ x: 39, y: 119 }),
-        GameFactory.grid.environment.electronics({ x: 33, y: 110, h: 1, w: 2 }),
         GameFactory.grid.environment.electronics({ x: 59, y: 116, h: 1, w: 4 }),
         GameFactory.grid.environment.electronics({ x: 53, y: 125, h: 2, w: 2 }),
         GameFactory.grid.environment.electronics({ x: 48, y: 134, h: 1, w: 4 }),
         GameFactory.grid.environment.electronics({ x: 68, y: 136, h: 1, w: 4 }),
-        GameFactory.grid.environment.electronics({ x: 77, y: 127, h: 1, w: 2 }),
         GameFactory.grid.environment.electronics({ x: 83, y: 130, h: 2, w: 2 }),
         GameFactory.grid.environment.electronics({ x: 60, y: 143, h: 1, w: 2 }),
-        GameFactory.grid.environment.electronics({ x: 83, y: 134, h: 1, w: 2 }),
         GameFactory.grid.environment.electronic003({ x: 82, y: 134 }),
         GameFactory.grid.environment.electronics({ x: 79, y: 130, h: 2, w: 2 }),
         GameFactory.grid.environment.electronics({ x: 75, y: 117, h: 1, w: 4 }),
+
+        //electronics (pool with cannons)
+        GameFactory.grid.environment.electronics({ x: 94, y: 122, h: 1, w: 2 }),
+        GameFactory.grid.environment.electronic002({ x: 97, y: 122, repeatX: 2 }),
+        GameFactory.grid.environment.electronic002({ x: 100, y: 122, repeatX: 2 }),
+        GameFactory.grid.environment.electronics({ x: 123, y: 118, h: 4, w: 2 }),
+        GameFactory.grid.environment.electronic003({ x: 128, y: 117 }),
+        GameFactory.grid.environment.electronic002({ x: 132, y: 119 }),
+        GameFactory.grid.environment.electronic002({ x: 122, y: 109 }),
+        GameFactory.grid.environment.electronic001({ x: 131, y: 118 }),
+        GameFactory.grid.environment.electronic001({ x: 125, y: 122 }),
+        GameFactory.grid.environment.electronic001({ x: 118, y: 116 }),
+        GameFactory.grid.environment.electronic001({ x: 109, y: 130 }),
+        GameFactory.grid.environment.electronic001({ x: 125, y: 133 }),
+        GameFactory.grid.environment.electronic001({ x: 129, y: 130, repeatX: 2 }),
+        GameFactory.grid.environment.electronic001({ x: 140, y: 126, repeatX: 2 }),
+        GameFactory.grid.environment.electronics({ x: 146, y: 136, h: 2, w: 2 }),
 
         // terminals
         GameFactory.grid.environment.terminalDirection({ x: 4, y: 116.25, direction: "right" }),
@@ -460,6 +649,7 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.terminalDirection({ x: 22.25, y: 139.25, direction: "up" }),
         GameFactory.grid.environment.terminalDirection({ x: 69, y: 125, direction: "right" }),
         GameFactory.grid.environment.terminalDirection({ x: 107, y: 129, direction: "right" }),
+        GameFactory.grid.environment.terminalDirection({ x: 146, y: 126, direction: "right" }),
         
         //wall elements (fountain)
         GameFactory.grid.environment.wallInside({ x: 1, y: 129 }),
@@ -494,6 +684,18 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.wallInside({ x: 88, y: 118 }),
         GameFactory.grid.environment.wallInside({ x: 82, y: 120 }),
         GameFactory.grid.environment.wallInside({ x: 110, y: 129 }),
+        GameFactory.grid.environment.wallBrickVerticalPattern({ x: 94, y: 139 }),
+        GameFactory.grid.environment.wallBrickVerticalPattern({ x: 106, y: 139 }),
+        GameFactory.grid.environment.wallBrickVerticalPattern({ x: 100, y: 139 }),
+        
+        //wall elements (inverted L cave)
+        GameFactory.grid.environment.wallInside({ x: 99, y: 134 }),
+        GameFactory.grid.environment.wallInside({ x: 113, y: 134 }),
+        GameFactory.grid.environment.wallInside({ x: 108, y: 135 }),
+        GameFactory.grid.environment.wallInside({ x: 118, y: 123 }),
+        GameFactory.grid.environment.wallInside({ x: 127, y: 131 }),
+        GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
+        GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
         GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
         GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
         GameFactory.grid.environment.wallInside({ x: 0, y: 0 }),
@@ -543,6 +745,26 @@ export const LEVEL_003 = {
         GameFactory.grid.environment.flower002({ x: 119.75, y: 132 }),
         GameFactory.grid.environment.wallPlant001({ x: 116, y: 123 }),
         GameFactory.grid.environment.wallPlant001({ x: 124, y: 123 }),
+        GameFactory.grid.environment.plant001({ x: 127, y: 116 }),
+        GameFactory.grid.environment.plant001({ x: 146, y: 125 }),
+        GameFactory.grid.environment.plant002({ x: 125, y: 116 }),
+        GameFactory.grid.environment.plant002({ x: 131, y: 116 }),
+        GameFactory.grid.environment.plant002({ x: 129, y: 122 }),
+        GameFactory.grid.environment.wallPlant001({ x: 129, y: 106 }),
+        GameFactory.grid.environment.wallPlant001({ x: 111, y: 131 }),
+        GameFactory.grid.environment.wallPlant001({ x: 102, y: 123 }),
+        GameFactory.grid.environment.plant007({ x: 119, y: 121 }),
+        GameFactory.grid.environment.plant007({ x: 126, y: 132 }),
+        GameFactory.grid.environment.plant007({ x: 104.5, y: 122 }),
+        GameFactory.grid.environment.plant007({ x: 98, y: 122.5 }),
+        GameFactory.grid.environment.plant008({ x: 109, y: 131 }),
+        GameFactory.grid.environment.plant008({ x: 92, y: 133 }),
+        GameFactory.grid.environment.plant008({ x: 139, y: 129 }),
+        GameFactory.grid.environment.plant007({ x: 114, y: 135 }),
+        GameFactory.grid.environment.plant008({ x: 121, y: 134 }),
+        GameFactory.grid.environment.plant008({ x: 118, y: 137 }),
+        GameFactory.grid.environment.plant007({ x: 140, y: 134 }),
+
 
         // jaws cave with elevator
         GameFactory.grid.environment.plant007({ x: 112.75, y: 113 }),

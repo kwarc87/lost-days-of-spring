@@ -110,6 +110,9 @@
 
             const debug = params.get("debug") === "true";
 
+            // Dev only: shows the whole map without fog of war
+            const revealMap = params.get("revealMap") === "true";
+
             const levelParam = parseInt(params.get("level"), 10);
             const startLevel = [2, 3].includes(levelParam) ? levelParam : 1;
 
@@ -120,7 +123,7 @@
 
             Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
                 document.getElementById("loading").classList.add("done");
-                const game = new LostDaysOfSpring("game", debug, initialHp);
+                const game = new LostDaysOfSpring("game", debug, initialHp, revealMap);
                 game.loadLevel(startLevel);
                 game.start();
             });

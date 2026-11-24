@@ -6,6 +6,24 @@ const SCALE = GameFactory.SCALE;
 const FW = 75;
 const FH = 48;
 
+// Jetpack fire sprite in tilesets.png.
+const JET_FIRE_SPRITE = { src: "textures/tilesets.png", sx: 208, sy: 294, w: 11, h: 13 };
+
+// Top-left of the fire in px inside a player frame (facing right), per sprite frame.
+// The jetpack sits at a slightly different spot in each pose, so every frame has its own offset.
+const JUMP_FIRE_OFFSETS = {
+    0: { x: 22, y: 24 },
+    1: { x: 26, y: 25 },
+    2: { x: 24, y: 24 },
+    3: { x: 23, y: 24 },
+    4: { x: 24, y: 30 },
+    5: { x: 24, y: 30 },
+};
+const JUMP_SHOOT_FIRE_OFFSETS = {
+    2: { x: 21, y: 26 },
+    7: { x: 21, y: 26 },
+};
+
 const ANIMS = {
     idle: {
         src: "textures/player/idle.png",
@@ -38,6 +56,7 @@ const ANIMS = {
         frames: [0, 1],
         fps: 12,
         offsetY: 4,
+        jetFireOffsets: JUMP_FIRE_OFFSETS,
         loop: false,
     },
     jumpDesc: {
@@ -46,6 +65,7 @@ const ANIMS = {
         fps: 12,
         delay: 400,
         offsetY: -4,
+        jetFireOffsets: JUMP_FIRE_OFFSETS,
         loop: false,
     },
     jumpShoot: {
@@ -53,6 +73,7 @@ const ANIMS = {
         frames: [2, 7],
         fps: 12,
         offsetY: 2,
+        jetFireOffsets: JUMP_SHOOT_FIRE_OFFSETS,
         loop: true,
     },
     shoot: {
@@ -187,6 +208,29 @@ function getCurrentFrame(player, animKey, anim, now) {
     return anim.frames[Math.min(frameIndex, anim.frames.length - 1)];
 }
 
+// Drawn before the body so the fire comes out from behind the jetpack.
+function drawJetFire(ctx, player, anim, spriteFrame, drawX, drawY, now) {
+    if (!(now < player.jetPackFireUntil)) {
+        return;
+    }
+    const offset = anim.jetFireOffsets?.[spriteFrame];
+    const img = getImg(JET_FIRE_SPRITE.src);
+    if (!offset || !img?.complete || !img.naturalWidth) {
+        return;
+    }
+    ctx.drawImage(
+        img,
+        JET_FIRE_SPRITE.sx,
+        JET_FIRE_SPRITE.sy,
+        JET_FIRE_SPRITE.w,
+        JET_FIRE_SPRITE.h,
+        drawX + offset.x * SCALE,
+        drawY + offset.y * SCALE,
+        JET_FIRE_SPRITE.w * SCALE,
+        JET_FIRE_SPRITE.h * SCALE
+    );
+}
+
 export const DefaultPlayerRenderer = {
     draw: (ctx, player, { debug = false, now = performance.now() } = {}) => {
         const animKey = getAnimKey(player);
@@ -213,6 +257,8 @@ export const DefaultPlayerRenderer = {
         if (player.facing === "left") {
             ctx.scale(-1, 1);
         }
+
+        drawJetFire(ctx, player, anim, spriteFrame, drawX, drawY, now);
 
         ctx.drawImage(img, spriteFrame * FW, 0, FW, frameH, drawX, drawY, dw, dh);
 

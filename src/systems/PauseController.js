@@ -64,6 +64,9 @@ export class PauseController {
         if (player.jetPackReadyAt) {
             player.jetPackReadyAt += pauseDuration;
         }
+        if (player.jetPackFireUntil) {
+            player.jetPackFireUntil += pauseDuration;
+        }
         if (player.carryStartAt) {
             player.carryStartAt += pauseDuration;
         }

@@ -93,8 +93,13 @@ export const SceneRenderer = {
             }
         }
 
-        for (const wall of game.hiddenWallController.getHiddenWalls()) {
-            drawEntity(ctx, game, "hiddenWall", wall, now);
+        // Everything from enemies to checkpoints is drawn before hidden walls so the walls
+        // conceal it until revealed.
+        for (const e of game.enemyController.getEnemies()) {
+            if (e.dead) {
+                continue;
+            }
+            drawEntity(ctx, game, "enemy", e, now);
         }
 
         for (const e of game.elevatorController.getElevators()) {
@@ -103,13 +108,6 @@ export const SceneRenderer = {
 
         for (const spike of game.combatController.getSpikes()) {
             drawEntity(ctx, game, "spike", spike, now);
-        }
-
-        for (const e of game.enemyController.getEnemies()) {
-            if (e.dead) {
-                continue;
-            }
-            drawEntity(ctx, game, "enemy", e, now);
         }
 
         for (const cannon of game.combatController.getCannons()) {
@@ -124,6 +122,10 @@ export const SceneRenderer = {
             drawEntity(ctx, game, "checkpoint", cp, now);
         }
 
+        for (const wall of game.hiddenWallController.getHiddenWalls()) {
+            drawEntity(ctx, game, "hiddenWall", wall, now);
+        }
+
         for (const i of game.foregroundItems) {
             drawEntity(ctx, game, "envForeground", i, now);
         }
@@ -131,7 +133,13 @@ export const SceneRenderer = {
         drawEntity(ctx, game, "splash", game.waterController, now);
 
         if (game.mapView) {
-            DefaultWorldRenderer.drawMapUndiscoveredMask(ctx, game.worldSize, game.mapDiscovery);
+            if (!game.revealMap) {
+                DefaultWorldRenderer.drawMapUndiscoveredMask(
+                    ctx,
+                    game.worldSize,
+                    game.mapDiscovery
+                );
+            }
             drawEntity(ctx, game, "player", game.player, now);
         }
 

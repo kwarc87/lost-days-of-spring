@@ -43,11 +43,17 @@ import { ArtifactGalleryRenderer } from "../renderers/ArtifactGalleryRenderer.js
 import { buildLevelStats, computePlayTimeMs } from "../utils/levelStats.js";
 
 export class LostDaysOfSpring {
-    constructor(canvasId, showDebug = true, initialHp = GameFactory.DEFAULT_MAX_LIFE) {
+    constructor(
+        canvasId,
+        showDebug = true,
+        initialHp = GameFactory.DEFAULT_MAX_LIFE,
+        revealMap = false
+    ) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext("2d");
         this.showDebug = showDebug;
         this.initialHp = initialHp;
+        this.revealMap = revealMap;
 
         // ====== INPUT ======
         this.keysMap = KEYS_MAP;

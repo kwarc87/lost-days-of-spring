@@ -213,11 +213,17 @@ export class PlayerPhysicsController {
             player.jumpPressedByUser = true;
             player.jumpPressedAt = 0;
         } else if (jumpBuffered && this.canJetPackJump(now, player)) {
-            player.vy = -player.jump;
+            // Keep the speed of a faster upward launch (e.g. a booster) instead of slowing the player down
+            const isRisingFasterThanJump = player.vy <= -player.jump;
+            player.vy = Math.min(player.vy, -player.jump);
             player.jetPackReadyAt = now + player.jetPackCooldown;
+            player.jetPackFireUntil = now + player.jetPackFireDuration;
             // Detach from the last platform so its air acceleration/deceleration (e.g. ice) no longer applies
             player.lastGroundId = null;
-            player.jumpPressedByUser = true;
+            // Skipped for a faster launch so releasing jump does not trigger the jump-height cut
+            if (!isRisingFasterThanJump) {
+                player.jumpPressedByUser = true;
+            }
             player.jumpPressedAt = 0;
         }
     }
