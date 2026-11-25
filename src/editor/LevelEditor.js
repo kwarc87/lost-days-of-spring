@@ -1,6 +1,7 @@
 import { LEVELS } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
 import { PHYSICS } from "../config/physics.js";
+import { KEYS_MAP } from "../config/keysMap.js";
 import { LevelLoader } from "../services/LevelLoader.js";
 import { CameraController } from "../systems/CameraController.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
@@ -18,12 +19,32 @@ import { MessageController } from "../systems/MessageController.js";
 import { PlayerPhysicsController } from "../systems/PlayerPhysicsController.js";
 import { EditorSceneRenderer } from "./EditorSceneRenderer.js";
 import { EditorPanel } from "./EditorPanel.js";
+import { EditorToggle } from "./EditorToggle.js";
 import { EDITOR_OBJECT_KINDS } from "./editorObjectKinds.js";
-import { findFirstFreeId } from "./levelEntryBuilder.js";
+import { findFirstFreeId, findIdAfterHighest } from "./levelEntryBuilder.js";
 
 // Served by the dev-server plugin in level-editor-plugin.js (dev only).
 const ADD_ENTRY_ENDPOINT = "/__level-editor/add-entry";
 const UNDO_ENDPOINT = "/__level-editor/undo";
+
+const HIDDEN_WALLS_TOGGLE_KEY = "KeyH";
+
+// Each id group lists the loaded objects whose ids a new object must not collide with
+// (the `id.group` of a kind in editorObjectKinds.js).
+const ID_GROUPS = {
+    // Everything that ends up in the platform/solid lists
+    solids: (editor) => [
+        editor.platforms,
+        editor.elevatorController.getElevators(),
+        editor.hiddenWallController.getHiddenWalls(),
+        editor.temporaryPlatformController.getTemporaryPlatforms(),
+    ],
+    coins: (editor) => [editor.collectibleController.getCoins()],
+    splinters: (editor) => [editor.collectibleController.getSplinters()],
+    spikes: (editor) => [editor.combatController.getSpikes()],
+    artifacts: (editor) => [editor.collectibleController.getArtifacts()],
+    hackPanels: (editor) => [editor.hackPanelController.getHackPanels()],
+};
 
 // Throws with the server's error message when the request fails.
 async function postToEditorServer(endpoint, body) {
@@ -38,6 +59,11 @@ async function postToEditorServer(endpoint, body) {
     }
 }
 
+// Keyboard shortcuts are ignored inside form fields (Ctrl+Z and Backspace edit the text there).
+function isTypingInForm(e) {
+    return Boolean(e.target.closest?.("input, select, textarea"));
+}
+
 // Level editor orchestrator: loads a level with the game's own LevelLoader (no update/physics),
 // lets the user pan with the left mouse button and add objects with the right one.
 // It also acts as the "state facade" for drawEntity(), like the game instance does.
@@ -50,8 +76,25 @@ export class LevelEditor {
         this.status = document.getElementById("editor-status");
         this.undoButton = document.getElementById("editor-undo");
 
+        // Debug off = preview: the level looks like in the game (no ids, hitboxes or grid).
+        this.debugToggle = new EditorToggle({
+            button: document.getElementById("editor-debug"),
+            urlParam: "debug",
+            key: KEYS_MAP.debugToggle,
+            onLabel: "Debug: on",
+            offLabel: "Debug: off (preview)",
+        });
+        // Hidden walls cover the secret rooms; hiding them lets you see and edit what is inside.
+        this.hiddenWallsToggle = new EditorToggle({
+            button: document.getElementById("editor-hidden-walls"),
+            urlParam: "hiddenWalls",
+            key: HIDDEN_WALLS_TOGGLE_KEY,
+            onLabel: "Hidden walls: shown",
+            offLabel: "Hidden walls: hidden",
+        });
+        this.toggles = [this.debugToggle, this.hiddenWallsToggle];
+
         // Read by drawEntity()
-        this.showDebug = true;
         this.mapView = false;
 
         this.cameraController = new CameraController(this.canvas.width, this.canvas.height);
@@ -75,6 +118,11 @@ export class LevelEditor {
         this.selectedTile = null;
 
         this.loop = this.loop.bind(this);
+    }
+
+    // Read by drawEntity()
+    get showDebug() {
+        return this.debugToggle.isOn;
     }
 
     loadLevel() {
@@ -118,7 +166,8 @@ export class LevelEditor {
         this.loadLevel();
         this.restoreCameraFromUrl();
         this.attachMouse();
-        this.attachUndo();
+        this.attachKeyboard();
+        this.undoButton.addEventListener("click", () => this.undoLastEntry());
         this.updateStatus();
         window.requestAnimationFrame(this.loop);
     }
@@ -149,6 +198,29 @@ export class LevelEditor {
         url.searchParams.set("camX", String(this.cameraController.camera.x));
         url.searchParams.set("camY", String(this.cameraController.camera.y));
         window.history.replaceState(null, "", url);
+    }
+
+    // ====== KEYBOARD ======
+
+    attachKeyboard() {
+        window.addEventListener("keydown", (e) => this.handleKeyDown(e));
+    }
+
+    handleKeyDown(e) {
+        if (isTypingInForm(e)) {
+            return;
+        }
+        if (e.ctrlKey && e.code === "KeyZ") {
+            e.preventDefault();
+            this.undoLastEntry();
+            return;
+        }
+        // Without modifiers, so browser shortcuts like Ctrl+H still work
+        const toggle = this.toggles.find((t) => t.key === e.code);
+        if (toggle && !e.ctrlKey && !e.altKey && !e.metaKey) {
+            e.preventDefault();
+            toggle.toggle();
+        }
     }
 
     // ====== MOUSE ======
@@ -231,7 +303,7 @@ export class LevelEditor {
 
     updateStatus() {
         const tile = this.hoveredTile ? `x: ${this.hoveredTile.x}, y: ${this.hoveredTile.y}` : "-";
-        this.status.textContent = `Level ${this.levelId} | tile ${tile} | LMB drag: move map | RMB: add object | Ctrl+Z: undo`;
+        this.status.textContent = `Level ${this.levelId} | tile ${tile} | LMB drag: move map | RMB: add object | Ctrl+Z: undo | ${KEYS_MAP.debugToggle}: debug | ${HIDDEN_WALLS_TOGGLE_KEY.replace("Key", "")}: hidden walls`;
     }
 
     // ====== ADDING OBJECTS ======
@@ -241,30 +313,30 @@ export class LevelEditor {
         this.panel.hide();
     }
 
-    // Ids of everything that ends up in the platform/solid lists, so a new id never collides.
-    collectUsedIds() {
-        const groups = [
-            this.platforms,
-            this.elevatorController.getElevators(),
-            this.hiddenWallController.getHiddenWalls(),
-            this.temporaryPlatformController.getTemporaryPlatforms(),
-        ];
+    collectUsedIds(group) {
         const ids = new Set();
-        for (const group of groups) {
-            for (const item of group) {
+        for (const items of ID_GROUPS[group](this)) {
+            for (const item of items) {
                 ids.add(item.id);
             }
         }
         return ids;
     }
 
+    getNewId(kind) {
+        if (kind.id === null) {
+            return null;
+        }
+        const usedIds = this.collectUsedIds(kind.id.group);
+        const findId = kind.id.block ? findIdAfterHighest : findFirstFreeId;
+        return findId(usedIds, kind.id.firstId);
+    }
+
     openForm(kindKey) {
         const kind = EDITOR_OBJECT_KINDS[kindKey];
-        const id =
-            kind.firstId === null ? null : findFirstFreeId(this.collectUsedIds(), kind.firstId);
         this.panel.showForm(
             kind,
-            { id, x: this.selectedTile.x, y: this.selectedTile.y },
+            { id: this.getNewId(kind), x: this.selectedTile.x, y: this.selectedTile.y },
             ({ factoryName, props }) => this.saveEntry(kindKey, factoryName, props),
             () => this.closePanel()
         );
@@ -289,18 +361,6 @@ export class LevelEditor {
     }
 
     // ====== UNDO ======
-
-    attachUndo() {
-        this.undoButton.addEventListener("click", () => this.undoLastEntry());
-        window.addEventListener("keydown", (e) => {
-            // Inside form fields Ctrl+Z keeps undoing typed text.
-            const isTyping = e.target.closest?.("input, select, textarea");
-            if (e.ctrlKey && e.code === "KeyZ" && !isTyping) {
-                e.preventDefault();
-                this.undoLastEntry();
-            }
-        });
-    }
 
     // Removes the most recently added entry; Vite reloads the page like after saving.
     async undoLastEntry() {

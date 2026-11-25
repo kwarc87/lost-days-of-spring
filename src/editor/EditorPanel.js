@@ -37,7 +37,7 @@ export class EditorPanel {
         if (id !== null) {
             const idOutput = document.createElement("output");
             idOutput.textContent = String(id);
-            form.append(createRow("id", idOutput));
+            form.append(createRow(kind.id.field, idOutput));
         }
 
         const prefilled = { x, y };
@@ -55,7 +55,7 @@ export class EditorPanel {
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             saveButton.disabled = true;
-            const props = id === null ? {} : { id };
+            const props = id === null ? {} : { [kind.id.field]: id };
             for (const { field, input } of inputs) {
                 const value = readInputValue(field, input);
                 if (value !== null) {
@@ -109,7 +109,7 @@ function createInput(field, initialValue) {
         input.type = "checkbox";
         return input;
     }
-    input.type = field.input;
+    input.type = field.input === "numberList" ? "text" : field.input;
     if (field.input === "number") {
         input.step = "any";
     }
@@ -124,6 +124,9 @@ function readInputValue(field, input) {
     }
     if (input.value === "") {
         return null;
+    }
+    if (field.input === "numberList") {
+        return input.value.split(",").map(Number);
     }
     return field.input === "number" ? Number(input.value) : input.value;
 }

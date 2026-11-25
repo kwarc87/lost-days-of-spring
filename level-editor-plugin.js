@@ -20,10 +20,9 @@ const ENTRY_BUILDER_MODULE = "/src/editor/levelEntryBuilder.js";
 const LOOPBACK_ADDRESSES = new Set(["127.0.0.1", "::1", "::ffff:127.0.0.1"]);
 const LOOPBACK_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
 
-// Level files are hand-formatted (prettier-ignore): sections are indented with 4 spaces,
-// their entries with 8.
-const ENTRY_INDENT = "        ";
-const SECTION_END_PATTERN = /^ {4}\]/;
+// Level files are hand-formatted (prettier-ignore): every nesting level is indented with
+// 4 more spaces, e.g. "    collectibles: {", "        coins: [", "            ...entries".
+const INDENT_STEP = "    ";
 
 function getLevelFilePath(root, level) {
     if (!Number.isInteger(level) || level < 1) {
@@ -55,27 +54,39 @@ function ensureTrailingComma(lines, sectionStart, sectionEnd) {
 }
 
 // Splits the source into lines and finds the lines that open and close the section.
-function findSection(source, section) {
+// A nested section path like "collectibles.coins" is found step by step: "collectibles: {"
+// first, then "coins: [" inside it, one indent step deeper.
+function findSection(source, sectionPath) {
     const eol = source.includes("\r\n") ? "\r\n" : "\n";
     const lines = source.split(eol);
-    const startPattern = new RegExp(`^ {4}${section}\\s*:\\s*\\[\\s*$`);
-    const sectionStart = lines.findIndex((line) => startPattern.test(line));
-    if (sectionStart === -1) {
-        throw new Error(`Section "${section}: [" not found in the level file`);
-    }
+    const names = sectionPath.split(".");
+    let sectionStart = -1;
+    let indent = "";
+    names.forEach((name, depth) => {
+        indent += INDENT_STEP;
+        const opening = depth === names.length - 1 ? "\\[" : "\\{";
+        const startPattern = new RegExp(`^${indent}${name}\\s*:\\s*${opening}\\s*$`);
+        sectionStart = lines.findIndex(
+            (line, index) => index > sectionStart && startPattern.test(line)
+        );
+        if (sectionStart === -1) {
+            throw new Error(`Section "${sectionPath}" not found in the level file`);
+        }
+    });
+    const endPattern = new RegExp(`^${indent}\\]`);
     const sectionEnd = lines.findIndex(
-        (line, index) => index > sectionStart && SECTION_END_PATTERN.test(line)
+        (line, index) => index > sectionStart && endPattern.test(line)
     );
     if (sectionEnd === -1) {
-        throw new Error(`End of section "${section}" not found in the level file`);
+        throw new Error(`End of section "${sectionPath}" not found in the level file`);
     }
-    return { eol, lines, sectionStart, sectionEnd };
+    return { eol, lines, sectionStart, sectionEnd, entryIndent: indent + INDENT_STEP };
 }
 
 export function insertEntryIntoSection(source, section, entryLine) {
-    const { eol, lines, sectionStart, sectionEnd } = findSection(source, section);
+    const { eol, lines, sectionStart, sectionEnd, entryIndent } = findSection(source, section);
     ensureTrailingComma(lines, sectionStart, sectionEnd);
-    lines.splice(sectionEnd, 0, ENTRY_INDENT + entryLine);
+    lines.splice(sectionEnd, 0, entryIndent + entryLine);
     return lines.join(eol);
 }
 
@@ -116,6 +127,9 @@ function assertTrustedRequest(req) {
 }
 
 function isAllowedValue(value) {
+    if (Array.isArray(value)) {
+        return value.every((item) => typeof item === "number" && Number.isFinite(item));
+    }
     return (
         typeof value === "string" ||
         typeof value === "boolean" ||
@@ -136,13 +150,13 @@ function validateEntryRequest(kinds, { kind: kindKey, factoryName, props }) {
         throw new Error("props must be an object");
     }
     const fieldNames = kind.fields.map((field) => field.name);
-    const allowedNames = new Set(kind.firstId === null ? fieldNames : ["id", ...fieldNames]);
+    const allowedNames = new Set(kind.id === null ? fieldNames : [kind.id.field, ...fieldNames]);
     for (const [name, value] of Object.entries(props)) {
         if (!allowedNames.has(name)) {
             throw new Error(`Field "${name}" is not allowed for ${kindKey}`);
         }
         if (!isAllowedValue(value)) {
-            throw new Error(`Field "${name}" must be a number, string or boolean`);
+            throw new Error(`Field "${name}" must be a number, string, boolean or list of numbers`);
         }
     }
     return kind;

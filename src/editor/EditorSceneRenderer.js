@@ -25,9 +25,15 @@ const LAYERS_BELOW_PLAYER = [
     ["cannon", (editor) => editor.combatController.getCannons()],
 ];
 
+const NO_ITEMS = [];
+
 const LAYERS_ABOVE_PLAYER = [
     ["checkpoint", (editor) => editor.checkpointManager.checkpoints],
-    ["hiddenWall", (editor) => editor.hiddenWallController.getHiddenWalls()],
+    [
+        "hiddenWall",
+        (editor) =>
+            editor.hiddenWallsToggle.isOn ? editor.hiddenWallController.getHiddenWalls() : NO_ITEMS,
+    ],
     ["envForeground", (editor) => editor.foregroundItems],
 ];
 
@@ -80,9 +86,12 @@ export const EditorSceneRenderer = {
         drawEntity(ctx, editor, "player", editor.player, now);
         drawLayers(ctx, editor, LAYERS_ABOVE_PLAYER, now);
 
-        DebugGridRenderer.draw(ctx, camera, editor.worldSize);
-        drawTeleports(ctx, editor.teleportController.getTeleports());
-        drawTileHighlight(ctx, editor.hoveredTile, "rgba(255, 255, 255, 0.6)");
+        // Debug off = preview: only the tile the new object is being added at stays marked.
+        if (editor.showDebug) {
+            DebugGridRenderer.draw(ctx, camera, editor.worldSize);
+            drawTeleports(ctx, editor.teleportController.getTeleports());
+            drawTileHighlight(ctx, editor.hoveredTile, "rgba(255, 255, 255, 0.6)");
+        }
         drawTileHighlight(ctx, editor.selectedTile, "yellow");
 
         ctx.restore();

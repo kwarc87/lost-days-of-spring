@@ -35,10 +35,14 @@
                 border-radius: 6px;
                 pointer-events: none;
             }
-            #editor-undo {
+            #editor-toolbar {
                 position: fixed;
                 top: 8px;
                 left: 8px;
+                display: flex;
+                gap: 8px;
+            }
+            #editor-toolbar button {
                 padding: 6px 10px;
                 font: inherit;
                 cursor: pointer;
@@ -84,7 +88,11 @@
     <body>
         <canvas id="editor" width="1920" height="1080"></canvas>
         <div id="editor-status"></div>
-        <button id="editor-undo" type="button">Undo last add</button>
+        <div id="editor-toolbar">
+            <button id="editor-undo" type="button">Undo last add</button>
+            <button id="editor-debug" type="button"></button>
+            <button id="editor-hidden-walls" type="button"></button>
+        </div>
         <aside id="editor-panel" hidden></aside>
         <script type="module">
             import { LevelEditor } from "./src/editor/LevelEditor.js";
