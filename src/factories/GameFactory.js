@@ -1832,7 +1832,7 @@ export const GameFactory = {
                 }),
             wallBrickLeft: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.wallBrickLeft({
-                    x: x * GameFactory.GRID - 21,
+                    x: x * GameFactory.GRID - 28,
                     y: y * GameFactory.GRID,
                     ...rest,
                 }),
