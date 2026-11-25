@@ -28,6 +28,7 @@ Read this file first; see `README.md` for the public description.
 | Command                | Purpose                                                    |
 | ---------------------- | ---------------------------------------------------------- |
 | `npm run dev`          | Vite dev server                                            |
+| `npm run editor`       | Vite dev server + opens the level editor (`editor.html`)   |
 | `npm run build`        | Production build to `dist/` (`base: /lost-days-of-spring/`) |
 | `npm run lint`         | ESLint (flat config, `eslint.config.js`)                   |
 | `npm run lint:fix`     | ESLint with autofix                                        |
@@ -107,6 +108,17 @@ Each logical subsystem lives in its own module under `src/systems/` (Camera, Che
 - Entity-specific map-view renderers (`Map*Renderer`) are interchangeable **Strategies** with the same `draw` interface.
 - Colors, sizes and per-type defaults belong in `GameFactory`, not hard-coded in renderers (add new colors to the factory if needed). Physics constants go to `src/config/physics.js`, key bindings to `src/config/keysMap.js`, story texts to `src/messages.js`.
 
+### Level editor (dev only)
+
+- Separate sub-app: `editor.html?level=N` (`npm run editor`), code in `src/editor/`. Not part of the production build (Vite builds only `index.html`).
+- Loads the level with the game's `LevelLoader` (no update/physics) and draws it in debug mode + grid via `EditorSceneRenderer`, which mirrors the world part of `SceneRenderer` – **keep both draw orders in sync** when adding an entity type.
+- Mouse: left drag pans the map (camera kept in `camX`/`camY` URL params), right click on a tile opens the panel to add one of the kinds from the `EDITOR_OBJECT_KINDS` table (`editorObjectKinds.js`).
+- Saving: the editor POSTs plain data `{ level, kind, factoryName, props }` to the dev-server plugin `level-editor-plugin.js`. The plugin validates it against `EDITOR_OBJECT_KINDS` (loaded with `server.ssrLoadModule`, so client and server share one table), builds the `GameFactory...({ ... }),` line itself (`buildEntryLine`) and inserts it before the closing `    ],` of the section in `src/levels/levelXXX.js`; Vite then reloads the page. It relies on the hand-formatted layout (section at 4 spaces, entries at 8) – keep level files in that shape.
+- Security: never accept source code from the client. Endpoints only accept loopback connections, `Content-Type: application/json` and a localhost `Origin` equal to `Host` (blocks LAN access and CSRF from other websites); prop values must be finite numbers, strings or booleans.
+- Undo (button / Ctrl+Z): the plugin keeps a per-level stack of added lines in dev-server memory (cleared on server restart) and removes the last one by exact line match, so manual edits elsewhere survive.
+- New ids = first free id across platforms/elevators/hidden walls/temporary platforms, starting at 1 (platforms), 2001 (hidden walls), 3001 (temporary platforms).
+- The editor's `ASSETS`/`FONTS` lists in `editor.html` must match those in `index.html`.
+
 ### Collision
 
 - Axis-aligned rectangles only (`rectsCollide` in `utils/collision.js`) – sufficient for now.
@@ -134,7 +146,7 @@ Each logical subsystem lives in its own module under `src/systems/` (Camera, Che
   - large tiled objects (big platforms/walls): `cullRange()` in `PlatformRenderers.js` draws only the visible tile rows/columns;
   - off-screen elevators skip player/enemy interaction and use a cheaper movement path (`isVisibleInCamera` in `ElevatorController`).
     New renderable objects must go through `drawEntity` (and set `cull: true` unless they are parallax/player). Large repeated objects need per-tile culling.
-- **Images are cached:** use `getImg(path)` from `utils/imgCache.js` – never `new Image()` in draw code. Add every new texture to the `ASSETS` list in `index.html` so it is preloaded before the game starts (the loading screen waits for it). Fonts are preloaded the same way.
+- **Images are cached:** use `getImg(path)` from `utils/imgCache.js` – never `new Image()` in draw code. Add every new texture to the `ASSETS` list in `index.html` (and `editor.html`) so it is preloaded before the game starts (the loading screen waits for it). Fonts are preloaded the same way.
 - Reuse offscreen canvases (see Player/Enemy/Collectible/Gallery renderers) for tinting/outlines instead of creating new ones per frame.
 - Debug HUD updates at a fixed human-readable interval, not every frame; keep new debug output cheap.
 - Check large level files before heavy iteration: `level001.js` (~3.6k lines) and `GameFactory.js` (~1.6k lines) – use `grep`/ranged views instead of reading them whole.

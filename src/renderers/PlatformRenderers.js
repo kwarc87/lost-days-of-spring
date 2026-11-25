@@ -113,7 +113,7 @@ const CRACKS_FULL = {
     bRight: { x: 256, y: 242, padRight: 4, padBottom: 8 },
 };
 
-const platformCaves = {
+export const platformCaves = {
     ground: {
         ...BASE_TILESET,
         midFill: "#3b1158",

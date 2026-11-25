@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Lost Days of Spring - level editor</title>
+        <link rel="icon" type="image/png" href="img/favicon.png" />
+        <link rel="stylesheet" href="fonts/fonts.css" />
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                overflow: hidden;
+                background: #000;
+                color: #e5e7eb;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+                font-size: 14px;
+            }
+            #editor {
+                display: block;
+                width: min(100vw, calc(100vh * 16 / 9));
+                image-rendering: pixelated;
+                cursor: grab;
+            }
+            #editor.dragging {
+                cursor: grabbing;
+            }
+            #editor-status {
+                position: fixed;
+                left: 8px;
+                bottom: 8px;
+                padding: 6px 10px;
+                background: rgba(15, 23, 32, 0.92);
+                border-radius: 6px;
+                pointer-events: none;
+            }
+            #editor-undo {
+                position: fixed;
+                top: 8px;
+                left: 8px;
+                padding: 6px 10px;
+                font: inherit;
+                cursor: pointer;
+            }
+            #editor-panel {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 280px;
+                max-height: 100%;
+                overflow-y: auto;
+                box-sizing: border-box;
+                padding: 12px 14px;
+                background: rgba(15, 23, 32, 0.95);
+                border-left: 1px solid rgba(255, 255, 255, 0.08);
+            }
+            #editor-panel h2 {
+                margin: 0 0 12px;
+                font-size: 16px;
+            }
+            #editor-panel label {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+            #editor-panel input:not([type="checkbox"]),
+            #editor-panel select {
+                width: 150px;
+                font: inherit;
+            }
+            #editor-panel button {
+                display: block;
+                width: 100%;
+                margin-top: 8px;
+                padding: 6px;
+                font: inherit;
+                cursor: pointer;
+            }
+        </style>
+    </head>
+    <body>
+        <canvas id="editor" width="1920" height="1080"></canvas>
+        <div id="editor-status"></div>
+        <button id="editor-undo" type="button">Undo last add</button>
+        <aside id="editor-panel" hidden></aside>
+        <script type="module">
+            import { LevelEditor } from "./src/editor/LevelEditor.js";
+            import { LEVELS } from "./src/levels/levelsConfig.js";
+            import { preloadImages, preloadFonts } from "./src/utils/imgCache.js";
+
+            // Keep in sync with ASSETS and FONTS in index.html
+            const ASSETS = [
+                "textures/all-props.png",
+                "textures/tilesets.png",
+                "textures/props.png",
+                "textures/skull.png",
+                "textures/gems-spritesheet.png",
+                "textures/walls.png",
+                "textures/hills.png",
+                "textures/icons.png",
+                "textures/background/background.png",
+                "textures/background/middleground.png",
+                "textures/player/idle.png",
+                "textures/player/walk.png",
+                "textures/player/walk-shoot.png",
+                "textures/player/jump.png",
+                "textures/player/jump-shoot.png",
+                "textures/player/crouch.png",
+                "textures/player/crouch-shoot.png",
+                "textures/player/shoot.png",
+                "textures/player/die.png",
+                "textures/player/hack.png",
+            ];
+
+            const FONTS = [
+                `400 14px "Silkscreen"`,
+                `700 13px "Silkscreen"`,
+                `bold 96px "Jacquard 12"`,
+            ];
+
+            const params = new URLSearchParams(window.location.search);
+            const levelParam = parseInt(params.get("level"), 10);
+            const levelId = LEVELS[levelParam] ? levelParam : 1;
+
+            Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
+                new LevelEditor("editor", levelId).start();
+            });
+        </script>
+    </body>
+</html>

@@ -3,6 +3,7 @@
     "version": "1.0.1",
     "scripts": {
         "dev": "vite",
+        "editor": "vite --open /lost-days-of-spring/editor.html",
         "build": "vite build",
         "bust-cache": "node cache-bust.js",
         "lint": "eslint .",

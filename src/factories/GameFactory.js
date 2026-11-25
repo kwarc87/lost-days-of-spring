@@ -1518,6 +1518,19 @@ export const GameFactory = {
                 startY: y * GameFactory.GRID + 8,
                 gap: gap * GameFactory.GRID,
             }).map((c) => ({ ...c, w: 48, h: 48 })),
+        // Block of w × h collectibles filled row by row (left to right, top to bottom);
+        // ids go from startId to startId + w * h - 1.
+        // Returns an array: spread it into the list, e.g. ...rectOfCollectibles({ startId: 1, x: 10, y: 20, w: 4, h: 2 }).
+        rectOfCollectibles: ({ startId, x, y, w, h, gap = 1 } = {}) =>
+            Array.from({ length: h }, (_, row) =>
+                GameFactory.grid.rowOfCollectibles({
+                    startId: startId + row * w,
+                    count: w,
+                    x,
+                    y: y + row * gap,
+                    gap,
+                })
+            ).flat(),
         rowOfSpikes: ({ startId, count, x, y, position = "down", damage = 1 } = {}) =>
             GameFactory.rowOfSpikes({
                 startId,
