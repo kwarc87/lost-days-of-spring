@@ -28,7 +28,7 @@ export function buildEntryLine(kind, factoryName, formProps) {
     const args = Object.entries(props)
         .map(([key, value]) => `${key}: ${formatValue(value)}`)
         .join(", ");
-    // Some factories (e.g. grass, wallSharpLeftCol) return an array that must be spread.
+    // Some factories (e.g. grass, rowOfSpikes) return an array that must be spread.
     const returnsArray = Array.isArray(kind.factoryOwner[factoryName](props));
     const spread = returnsArray ? "..." : "";
     return `${spread}${kind.factoryPath}.${factoryName}({ ${args} }),`;

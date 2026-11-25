@@ -38,9 +38,6 @@ const environmentItemKind = (label, section) => ({
         { name: "y", input: "number" },
         { name: "w", input: "number" },
         { name: "h", input: "number" },
-        { name: "repeatX", input: "number" },
-        { name: "repeatY", input: "number" },
-        { name: "count", input: "number" },
     ],
 });
 

@@ -926,14 +926,6 @@ export const GameFactory = {
             h: 16 * GameFactory.SCALE,
             ...rest,
         }),
-        wallSharpLeftCol: ({ x, y, count, ...rest } = {}) =>
-            Array.from({ length: count }, (_, i) =>
-                GameFactory.environment.wallSharpLeft({
-                    x,
-                    y: y + i * 16 * GameFactory.SCALE,
-                    ...rest,
-                })
-            ),
         wallSharpRightTop: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -1014,14 +1006,6 @@ export const GameFactory = {
             h: 16 * GameFactory.SCALE,
             ...rest,
         }),
-        wallSharpRightCol: ({ x, y, count, ...rest } = {}) =>
-            Array.from({ length: count }, (_, i) =>
-                GameFactory.environment.wallSharpRight({
-                    x,
-                    y: y + i * 16 * GameFactory.SCALE,
-                    ...rest,
-                })
-            ),
         wallSharpHole: ({ x, y, ...rest } = {}) => ({
             x,
             y,
@@ -1629,8 +1613,8 @@ export const GameFactory = {
                 GameFactory.grid.environment.poolEdgeLeft({ x, y }),
                 GameFactory.grid.environment.poolEdgeRight({ x: x + w - 1, y }),
                 // Water first: the pool floor must cover the lower edge of the moving wave
-                GameFactory.grid.environment.water({ x: x + 1, y, repeatX: w - 2 }),
-                GameFactory.grid.environment.poolGround({ x: x + 1, y: y + 1, repeatX: w - 2 }),
+                GameFactory.grid.environment.water({ x: x + 1, y, w: w - 2 }),
+                GameFactory.grid.environment.poolGround({ x: x + 1, y: y + 1, w: w - 2 }),
             ],
             platforms: [
                 GameFactory.grid.underWater({
@@ -1816,13 +1800,6 @@ export const GameFactory = {
                     y: y * GameFactory.GRID,
                     ...rest,
                 }),
-            wallSharpLeftCol: ({ x, y, count, ...rest } = {}) =>
-                GameFactory.environment.wallSharpLeftCol({
-                    x: x * GameFactory.GRID,
-                    y: y * GameFactory.GRID,
-                    count,
-                    ...rest,
-                }),
             wallSharpRightTop: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.wallSharpRightTop({
                     x: x * GameFactory.GRID,
@@ -1839,13 +1816,6 @@ export const GameFactory = {
                 GameFactory.environment.wallSharpRightBottom({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID,
-                    ...rest,
-                }),
-            wallSharpRightCol: ({ x, y, count, ...rest } = {}) =>
-                GameFactory.environment.wallSharpRightCol({
-                    x: x * GameFactory.GRID,
-                    y: y * GameFactory.GRID,
-                    count,
                     ...rest,
                 }),
             wallSharpHole: ({ x, y, ...rest } = {}) =>
@@ -1896,12 +1866,10 @@ export const GameFactory = {
                     y: y * GameFactory.GRID,
                     ...rest,
                 }),
-            electronics: ({ x, y, w, h, ...rest } = {}) =>
+            electronics: ({ x, y, ...rest } = {}) =>
                 GameFactory.environment.electronics({
                     x: x * GameFactory.GRID,
                     y: y * GameFactory.GRID,
-                    repeatX: Math.ceil(w / 2),
-                    repeatY: h,
                     ...rest,
                 }),
             electronic001: ({ x, y, ...rest } = {}) =>
@@ -1949,6 +1917,32 @@ export const GameFactory = {
         },
     },
 };
+
+// Decorator (higher-order function) for the grid environment factories: w/h are the area the item
+// covers in tiles, like in the other grid.* factories. The sprite is repeated to fill it, so the
+// base factories keep w/h as the size of ONE sprite and get repeatX/repeatY (the renderer and the
+// camera culling only know those two). They can be fractional, e.g. w: 3 of a 2-tile sprite
+// gives repeatX 1.5 and the renderer crops the last sprite.
+function withTileArea(createItem) {
+    return ({ w, h, ...rest } = {}) => {
+        const item = createItem(rest);
+        if (w !== undefined) {
+            item.repeatX = (w * GameFactory.GRID) / item.w;
+        }
+        if (h !== undefined) {
+            item.repeatY = (h * GameFactory.GRID) / item.h;
+        }
+        return item;
+    };
+}
+
+// These already handle w/h themselves (wallClean, grass) or return something else than one item.
+const TILE_AREA_EXCLUDED = new Set(["teleport", "wallClean", "grass"]);
+for (const [name, createItem] of Object.entries(GameFactory.grid.environment)) {
+    if (!TILE_AREA_EXCLUDED.has(name)) {
+        GameFactory.grid.environment[name] = withTileArea(createItem);
+    }
+}
 
 // Aliases: grass001 === plant003, grass002 === plant004 (same function, pixel and grid variants).
 GameFactory.environment.grass001 = GameFactory.environment.plant003;

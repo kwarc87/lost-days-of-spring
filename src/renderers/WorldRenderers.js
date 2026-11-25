@@ -112,18 +112,35 @@ function drawEnvironmentItem(ctx, item) {
         ctx.globalAlpha = opacity;
     }
 
+    // repeatX/repeatY may be fractional: the last cell of a row/column is then cropped.
     for (let row = 0; row < rows; row++) {
+        const rowShare = Math.min(1, rows - row);
+        const cellH = drawH * rowShare;
+        const cellSrcH = Math.round(srcH * rowShare);
         for (let col = 0; col < cols; col++) {
+            const colShare = Math.min(1, cols - col);
+            const cellW = drawW * colShare;
+            const cellSrcW = Math.round(srcW * colShare);
             const dx = baseX + col * drawW;
             const dy = baseY + row * drawH;
             if (rotate !== 0) {
                 ctx.save();
-                ctx.translate(dx + drawW / 2, dy + drawH / 2);
+                ctx.translate(dx + cellW / 2, dy + cellH / 2);
                 ctx.rotate((rotate * Math.PI) / 180);
-                ctx.drawImage(img, srcX, srcY, srcW, srcH, -drawW / 2, -drawH / 2, drawW, drawH);
+                ctx.drawImage(
+                    img,
+                    srcX,
+                    srcY,
+                    cellSrcW,
+                    cellSrcH,
+                    -cellW / 2,
+                    -cellH / 2,
+                    cellW,
+                    cellH
+                );
                 ctx.restore();
             } else {
-                ctx.drawImage(img, srcX, srcY, srcW, srcH, dx, dy, drawW, drawH);
+                ctx.drawImage(img, srcX, srcY, cellSrcW, cellSrcH, dx, dy, cellW, cellH);
             }
         }
     }
