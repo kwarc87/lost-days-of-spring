@@ -29,9 +29,11 @@ export class EditorPanel {
     }
 
     // onSave receives { factoryName, props } where props holds only the filled-in fields.
-    showForm(kind, { id, x, y }, onSave, onCancel) {
+    showForm(kindKey, kind, { id, x, y }, onSave, onCancel) {
+        const remembered = loadRememberedForm(kindKey);
         const form = document.createElement("form");
         const factorySelect = createSelect(kind.factoryNames, false);
+        restoreControlValue(factorySelect, remembered.factoryName);
         form.append(createRow("factory", factorySelect));
 
         if (id !== null) {
@@ -43,6 +45,9 @@ export class EditorPanel {
         const prefilled = { x, y };
         const inputs = kind.fields.map((field) => {
             const input = createInput(field, prefilled[field.name] ?? field.defaultValue);
+            if (!(field.name in prefilled)) {
+                restoreControlValue(input, remembered.fields[field.name]);
+            }
             form.append(createRow(field.name, input));
             return { field, input };
         });
@@ -55,6 +60,7 @@ export class EditorPanel {
         form.addEventListener("submit", (e) => {
             e.preventDefault();
             saveButton.disabled = true;
+            saveRememberedForm(kindKey, factorySelect, inputs, prefilled);
             const props = id === null ? {} : { [kind.id.field]: id };
             for (const { field, input } of inputs) {
                 const value = readInputValue(field, input);
@@ -129,4 +135,51 @@ function readInputValue(field, input) {
         return input.value.split(",").map(Number);
     }
     return field.input === "number" ? Number(input.value) : input.value;
+}
+
+// The editor page reloads after every save (Vite HMR), so the last used form values per kind
+// are kept in localStorage. Position (x, y) is never remembered – it comes from the clicked tile.
+const REMEMBERED_FORMS_KEY = "ldos_editor_forms";
+
+function loadAllRememberedForms() {
+    try {
+        return JSON.parse(localStorage.getItem(REMEMBERED_FORMS_KEY)) ?? {};
+    } catch {
+        return {};
+    }
+}
+
+function loadRememberedForm(kindKey) {
+    const saved = loadAllRememberedForms()[kindKey];
+    return { factoryName: saved?.factoryName, fields: saved?.fields ?? {} };
+}
+
+function saveRememberedForm(kindKey, factorySelect, inputs, prefilled) {
+    const fields = {};
+    for (const { field, input } of inputs) {
+        if (!(field.name in prefilled)) {
+            fields[field.name] = field.input === "checkbox" ? input.checked : input.value;
+        }
+    }
+    const all = loadAllRememberedForms();
+    all[kindKey] = { factoryName: factorySelect.value, fields };
+    localStorage.setItem(REMEMBERED_FORMS_KEY, JSON.stringify(all));
+}
+
+// Ignores values that no longer exist (e.g. a select option removed from the kinds table).
+function restoreControlValue(control, value) {
+    if (value === undefined) {
+        return;
+    }
+    if (control.type === "checkbox") {
+        control.checked = value === true;
+        return;
+    }
+    if (
+        control.tagName === "SELECT" &&
+        !Array.from(control.options).some((o) => o.value === value)
+    ) {
+        return;
+    }
+    control.value = value;
 }

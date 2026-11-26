@@ -700,8 +700,8 @@ export const LEVEL_001 = {
         // next id 609
     ],
     elevators: [
-        GameFactory.grid.elevator({ id: 1001, startX: 396, startY: 104, w: 6, h: 2, targetX: 456, targetY: 104, speed: 5.5, waitTime: 1500 }),
-        GameFactory.grid.elevator({ id: 1002, startX: 250, startY: 104, w: 8, h: 1, targetX: 152, targetY: 104, speed: 8, waitTime: 1500 }),
+        GameFactory.grid.elevator({ id: 1001, startX: 396, startY: 104, w: 6, h: 2, targetX: 456, targetY: 104, speed: 5.5, waitTime: 1500, layout: "bridgePink" }),
+        GameFactory.grid.elevator({ id: 1002, startX: 250, startY: 104, w: 8, h: 1, targetX: 152, targetY: 104, speed: 8, waitTime: 1500, layout: "bridgePink" }),
         GameFactory.grid.elevator({ id: 1003, startX: 57, startY: 113, w: 5, h: 1, targetX: 57, targetY: 80, speed: 7.5, waitTime: 1500 }),
 
         // moving rocks
@@ -711,21 +711,21 @@ export const LEVEL_001 = {
         GameFactory.grid.elevator({ id: 1007, startX: 289, startY: 56, w: 10, h: 4, targetX: 289, targetY: 76, speed: 4.5, waitTime: 150, layout: "solid", triggered: true, }),
 
         // a large amount of moving platforms
-        GameFactory.grid.elevator({ id: 1008, startX: 311, startY: 77, w: 4, h: 1, targetX: 311, targetY: 63, speed: 7.5, waitTime: 150, triggered: true }),
+        GameFactory.grid.elevator({ id: 1008, startX: 311, startY: 77, w: 4, h: 1, targetX: 311, targetY: 63, speed: 7.5, waitTime: 150, triggered: true, layout: "bridgePink" }),
         GameFactory.grid.elevator({ id: 1009, startX: 317, startY: 67, w: 4, h: 1, targetX: 317, targetY: 57, speed: 8.5, waitTime: 150, triggered: true }),
-        GameFactory.grid.elevator({ id: 1010, startX: 323, startY: 63, w: 4, h: 1, targetX: 323, targetY: 59, speed: 5.5, waitTime: 150, triggered: true }),
+        GameFactory.grid.elevator({ id: 1010, startX: 323, startY: 63, w: 4, h: 1, targetX: 323, targetY: 59, speed: 5.5, waitTime: 150, triggered: true, layout: "bridgePink" }),
         GameFactory.grid.elevator({ id: 1011, startX: 329, startY: 70, w: 4, h: 1, targetX: 329, targetY: 59, speed: 3.5, waitTime: 150, triggered: true }),
-        GameFactory.grid.elevator({ id: 1012, startX: 335, startY: 73, w: 4, h: 1, targetX: 335, targetY: 70, speed: 2.5, waitTime: 150, triggered: true }),
-        GameFactory.grid.elevator({ id: 1013, startX: 341, startY: 67, w: 4, h: 1, targetX: 341, targetY: 64, speed: 6.5, waitTime: 150, triggered: true }),
+        GameFactory.grid.elevator({ id: 1012, startX: 335, startY: 73, w: 4, h: 1, targetX: 335, targetY: 70, speed: 2.5, waitTime: 150, triggered: true, layout: "bridgePink" }),
+        GameFactory.grid.elevator({ id: 1013, startX: 341, startY: 67, w: 4, h: 1, targetX: 341, targetY: 64, speed: 6.5, waitTime: 150, triggered: true, layout: "bridgePink" }),
         GameFactory.grid.elevator({ id: 1014, startX: 347, startY: 75, w: 4, h: 1, targetX: 347, targetY: 69, speed: 3.5, waitTime: 150, triggered: true }),
         GameFactory.grid.elevator({ id: 1015, startX: 353, startY: 67, w: 4, h: 1, targetX: 353, targetY: 61, speed: 4.5, waitTime: 150, triggered: true }),
-        GameFactory.grid.elevator({ id: 1016, startX: 359, startY: 65, w: 4, h: 1, targetX: 359, targetY: 59, speed: 7.5, waitTime: 150, triggered: true }),
+        GameFactory.grid.elevator({ id: 1016, startX: 359, startY: 65, w: 4, h: 1, targetX: 359, targetY: 59, speed: 7.5, waitTime: 150, triggered: true, layout: "bridgePink" }),
         GameFactory.grid.elevator({ id: 1017, startX: 365, startY: 61, w: 4, h: 1, targetX: 365, targetY: 57, speed: 3.5, waitTime: 150, triggered: true }),
 
         // floor 3
-        GameFactory.grid.elevator({ id: 1018, startX: 482, startY: 46, w: 4, h: 2, targetX: 482, targetY: 34, speed: 5.5, waitTime: 1500 }),
-        GameFactory.grid.elevator({ id: 1019, startX: 474, startY: 34, w: 4, h: 2, targetX: 474, targetY: 46, speed: 5.5, waitTime: 1500 }),
-        GameFactory.grid.elevator({ id: 1020, startX: 203, startY: 40, w: 4, h: 1, targetX: 154, targetY: 40, speed: 5.5, waitTime: 1500 }),
+        GameFactory.grid.elevator({ id: 1018, startX: 482, startY: 46, w: 4, h: 2, targetX: 482, targetY: 34, speed: 5.5, waitTime: 1500, layout: "bridgePink" }),
+        GameFactory.grid.elevator({ id: 1019, startX: 474, startY: 34, w: 4, h: 2, targetX: 474, targetY: 46, speed: 5.5, waitTime: 1500, layout: "bridgePink" }),
+        GameFactory.grid.elevator({ id: 1020, startX: 203, startY: 40, w: 4, h: 1, targetX: 154, targetY: 40, speed: 5.5, waitTime: 1500, layout: "bridgePink" }),
 
         //floor 4
         GameFactory.grid.elevator({ id: 1021, startX: 229, startY: 22, w: 3, h: 1, targetX: 134, targetY: 22, speed: 6.5, waitTime: 1500 }),

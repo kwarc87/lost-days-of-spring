@@ -69,6 +69,22 @@ export function repeatAllTiles3x3(tile) {
     };
 }
 
+// Tiles alternate A, B, A, B... along the platform width (sprite def as a function of the column).
+export function alternatingTiles3x3(tileA, tileB) {
+    const pick = (col) => (col % 2 === 0 ? tileA : tileB);
+    return {
+        tLeft: pick,
+        tMid: pick,
+        tRight: pick,
+        left: pick,
+        mid: pick,
+        right: pick,
+        bLeft: pick,
+        bMid: pick,
+        bRight: pick,
+    };
+}
+
 // Only the top row gets a sprite; the remaining tiles are left empty.
 export function repeatTopRowOnly3x3(tile) {
     return {

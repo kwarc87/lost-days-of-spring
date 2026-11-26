@@ -336,6 +336,7 @@ export class LevelEditor {
     openForm(kindKey) {
         const kind = EDITOR_OBJECT_KINDS[kindKey];
         this.panel.showForm(
+            kindKey,
             kind,
             { id: this.getNewId(kind), x: this.selectedTile.x, y: this.selectedTile.y },
             ({ factoryName, props }) => this.saveEntry(kindKey, factoryName, props),

@@ -294,7 +294,7 @@ export const GameFactory = {
         targetY,
         speed,
         waitTime,
-        layout = "brick",
+        layout = "bridgePink001",
         triggered = false,
     } = {}) => {
         const dx = targetX - startX;

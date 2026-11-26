@@ -1,5 +1,6 @@
 ﻿import {
     repeatHorizontal3x3,
+    alternatingTiles3x3,
     oneDirectionBoard3x3,
     repeatAllTiles3x3,
     repeatTopRowOnly3x3,
@@ -50,6 +51,13 @@ const BASE_TILESET = {
     tileWidthSrc: 16,
     tileHeightSrc: 16,
     scale: GameFactory.SCALE,
+};
+
+// Bridge sprites overhang their hitbox (padTop/padBottom), so with h > 1 the rows are drawn
+// bottom-up: the upper row ends up on top and its overhang is not covered by the row below.
+const BRIDGE_TILESET = {
+    ...BASE_TILESET,
+    drawRowsBottomUp: true,
 };
 
 const GROUND_FULL = {
@@ -444,6 +452,11 @@ export const platformCaves = {
         ...BASE_TILESET,
         sprites: repeatAllTiles3x3({ x: 336, y: 411 }),
     },
+    // temporarySpringWall rotated for horizontal platforms
+    temporarySpringGround: {
+        ...BASE_TILESET,
+        sprites: repeatAllTiles3x3({ x: 364, y: 411 }),
+    },
     booster: {
         ...BASE_TILESET,
         sprites: repeatHorizontal3x3(
@@ -452,11 +465,27 @@ export const platformCaves = {
             { x: 272, y: 16, padRight: 6 }
         ),
     },
-    pipe: {
+    pipeVertical: {
         ...BASE_TILESET,
         sprites: repeatAllTiles3x3({ x: 176, y: 16 }),
     },
+    pipeHorizontal: {
+        ...BASE_TILESET,
+        sprites: repeatAllTiles3x3({ x: 304, y: 16 }),
+    },
     brick: {
+        ...BASE_TILESET,
+        path: "textures/tilesets.png",
+        sprites: repeatHorizontal3x3(
+            { x: 240, y: 294 },
+            [
+                { x: 240, y: 294 },
+                { x: 256, y: 294 },
+            ],
+            { x: 256, y: 294 }
+        ),
+    },
+    brickPink: {
         ...BASE_TILESET,
         path: "textures/tilesets.png",
         sprites: repeatHorizontal3x3(
@@ -480,6 +509,79 @@ export const platformCaves = {
         tileWidthSrc: 16,
         tileHeightSrc: 16,
         sprites: repeatAllTiles3x3({ x: 336, y: 96 }),
+    },
+    // Bridges: the 16 px tall hitbox is the platform itself, padTop/padBottom draw the rest of
+    // the sprite around it (same trick as the ground tiles).
+    // bridge001 is stretchable: 16 px caps taken from the two halves of the 32 px sprite, the
+    // middle repeats its centre, so any width of 2 or more tiles works.
+    bridge001: {
+        ...BRIDGE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 288, y: 441, padTop: 4, padBottom: 3 },
+            { x: 296, y: 441, padTop: 4, padBottom: 3 },
+            { x: 304, y: 441, padTop: 4, padBottom: 3 }
+        ),
+    },
+    // bridge002-005 are single sprites per tile, so use w = 2 (bridge002-004) or w = 6
+    // (bridge005), or multiples of that.
+    bridge002: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 32,
+        sprites: repeatAllTiles3x3({ x: 288, y: 441, padTop: 4, padBottom: 3 }),
+    },
+    bridge003: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 32,
+        sprites: repeatAllTiles3x3({ x: 320, y: 441, padTop: 4, padBottom: 15 }),
+    },
+    bridge004: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 32,
+        sprites: repeatAllTiles3x3({ x: 352, y: 441, padTop: 4, padBottom: 3 }),
+    },
+    bridge005: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 96,
+        sprites: repeatAllTiles3x3({ x: 177, y: 441, padTop: 6, padBottom: 45 }),
+    },
+    // Alternates bridge002 and bridge003 along the width. Each sprite is 32 px, so w must be
+    // even (2, 4, 6, ...).
+    bridge: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 32,
+        sprites: alternatingTiles3x3(
+            { x: 288, y: 441, padTop: 4, padBottom: 3 },
+            { x: 320, y: 441, padTop: 4, padBottom: 15 }
+        ),
+    },
+    // Pink variants: same layout as bridge001 (stretchable), bridge002 and bridge003.
+    bridgePink001: {
+        ...BRIDGE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 64, y: 457, padTop: 4, padBottom: 3 },
+            { x: 72, y: 457, padTop: 4, padBottom: 3 },
+            { x: 80, y: 457, padTop: 4, padBottom: 3 }
+        ),
+    },
+    bridgePink002: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 32,
+        sprites: repeatAllTiles3x3({ x: 64, y: 457, padTop: 4, padBottom: 3 }),
+    },
+    bridgePink003: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 32,
+        sprites: repeatAllTiles3x3({ x: 96, y: 457, padTop: 4, padBottom: 15 }),
+    },
+    // Alternates bridgePink002 and bridgePink003 along the width. Like bridgePink002/003 each
+    // sprite is 32 px, so w must be even (2, 4, 6, ...).
+    bridgePink: {
+        ...BRIDGE_TILESET,
+        tileWidthSrc: 32,
+        sprites: alternatingTiles3x3(
+            { x: 64, y: 457, padTop: 4, padBottom: 3 },
+            { x: 96, y: 457, padTop: 4, padBottom: 15 }
+        ),
     },
 };
 
@@ -629,7 +731,8 @@ function drawTiled(ctx, platform, def, showDebug, camera) {
 
     // --- Border tiles ---
     if (imgReady) {
-        for (let row = startRow; row <= endRow; row++) {
+        for (let i = startRow; i <= endRow; i++) {
+            const row = def.drawRowsBottomUp ? endRow - (i - startRow) : i;
             for (let col = startCol; col <= endCol; col++) {
                 const key = getTileKey(col, row, cols, rows);
                 if (key === "mid" && def.midFill) {
