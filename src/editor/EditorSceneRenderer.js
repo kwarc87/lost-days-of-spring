@@ -79,7 +79,7 @@ export const EditorSceneRenderer = {
         ctx.clearRect(0, 0, editor.canvas.width, editor.canvas.height);
         ctx.save();
 
-        DefaultWorldRenderer.drawBackground(ctx, editor.canvas, camera);
+        DefaultWorldRenderer.drawBackground(ctx, editor.canvas, camera, editor.background);
         ctx.translate(-camera.x, -camera.y);
 
         drawLayers(ctx, editor, LAYERS_BELOW_PLAYER, now);

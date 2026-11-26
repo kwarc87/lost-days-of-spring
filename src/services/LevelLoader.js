@@ -85,6 +85,7 @@ export const LevelLoader = {
             backgroundItems,
             preBackgroundItems,
             parallaxItems,
+            background: levelData.background,
             currentLevelCoinsCount,
             currentLevelSplintersCount,
             currentLevelArtifactsCount,

@@ -1,5 +1,12 @@
+import { GameFactory } from "../factories/GameFactory.js";
 import { getImg } from "../utils/imgCache.js";
 import { DefaultPlatformRenderer } from "./PlatformRenderers.js";
+
+const TITLE_BACKGROUND = GameFactory.backgrounds.planetDesert();
+const TITLE_LAYER_SWAY = [
+    { amplitude: 40, speed: 0.09, phase: 0 },
+    { amplitude: 80, speed: 0.12, phase: 1.2 },
+];
 
 const TITLE_FONT = `normal 112px "Jacquard 12"`;
 const PROMPT_FONT = `500 32px "Silkscreen", monospace`;
@@ -33,30 +40,21 @@ export const TitleScreenRenderer = {
         ctx.fillStyle = "#000000";
         ctx.fillRect(0, 0, w, h);
 
+        // Layers are drawn back to front, each one sways on its own sine wave.
         const t = performance.now() / 1000;
-        const offsetBack = Math.round(Math.sin(t * 0.09) * 40);
-        const offsetMid = Math.round(Math.sin(t * 0.12 + 1.2) * 80);
-
-        const bgBack = getImg("textures/background/background.png");
-        if (bgBack.complete && bgBack.naturalWidth > 0) {
-            const drawH = h;
-            const drawW = Math.round(bgBack.naturalWidth * (h / bgBack.naturalHeight));
-            const ox = ((offsetBack % drawW) + drawW) % drawW;
-            for (let x = ox - drawW; x < w; x += drawW) {
-                ctx.drawImage(bgBack, x, 0, drawW, drawH);
+        TITLE_BACKGROUND.layers.forEach((layer, index) => {
+            const { amplitude, speed, phase } = TITLE_LAYER_SWAY[index];
+            const offset = Math.round(Math.sin(t * speed + phase) * amplitude);
+            const img = getImg(layer.image);
+            if (!img.complete || img.naturalWidth === 0) {
+                return;
             }
-        }
-
-        // Middleground image tiled horizontally
-        const bg = getImg("textures/background/middleground.png");
-        if (bg.complete && bg.naturalWidth > 0) {
-            const drawH = h;
-            const drawW = Math.round(bg.naturalWidth * (h / bg.naturalHeight));
-            const ox = ((offsetMid % drawW) + drawW) % drawW;
+            const drawW = Math.round(img.naturalWidth * (h / img.naturalHeight));
+            const ox = ((offset % drawW) + drawW) % drawW;
             for (let x = ox - drawW; x < w; x += drawW) {
-                ctx.drawImage(bg, x, 0, drawW, drawH);
+                ctx.drawImage(img, x, 0, drawW, h);
             }
-        }
+        });
 
         // ── Title ──────────────────────────────────────────────
         ctx.font = TITLE_FONT;

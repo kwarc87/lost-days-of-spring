@@ -266,6 +266,7 @@ export class LostDaysOfSpring {
         this.backgroundItems = loaded.backgroundItems;
         this.preBackgroundItems = loaded.preBackgroundItems;
         this.parallaxItems = loaded.parallaxItems;
+        this.background = loaded.background;
         this.currentLevelCoinsCount = loaded.currentLevelCoinsCount;
         this.currentLevelSplintersCount = loaded.currentLevelSplintersCount;
         this.currentLevelArtifactsCount = loaded.currentLevelArtifactsCount;

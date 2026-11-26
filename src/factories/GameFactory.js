@@ -696,6 +696,55 @@ export const GameFactory = {
         h,
         reached,
     }),
+    // Screen-space backdrop: tiled image layers scrolled by camera X (parallaxX = scroll factor).
+    background: ({ color = "#000", layers = [] } = {}) => ({ color, layers }),
+    backgroundLayer: ({ image, parallaxX }) => ({ image, parallaxX }),
+    backgrounds: {
+        planetForest: () =>
+            GameFactory.background({
+                layers: [
+                    GameFactory.backgroundLayer({
+                        image: "textures/background/planet-forest/background.png",
+                        parallaxX: 0.01,
+                    }),
+                    GameFactory.backgroundLayer({
+                        image: "textures/background/planet-forest/middleground.png",
+                        parallaxX: 0.04,
+                    }),
+                ],
+            }),
+        planetDesert: () =>
+            GameFactory.background({
+                layers: [
+                    GameFactory.backgroundLayer({
+                        image: "textures/background/desert/sky.png",
+                        parallaxX: 0.01,
+                    }),
+                    GameFactory.backgroundLayer({
+                        image: "textures/background/desert/back.png",
+                        parallaxX: 0.04,
+                    }),
+                ],
+            }),
+        planetStars: () =>
+            GameFactory.background({
+                layers: [
+                    GameFactory.backgroundLayer({
+                        image: "textures/background/space-001/bg-back.png",
+                        parallaxX: 0.01,
+                    }),
+                    GameFactory.backgroundLayer({
+                        image: "textures/background/space-001/bg-starts.png",
+                        parallaxX: 0.04,
+                    }),
+                    GameFactory.backgroundLayer({
+                        image: "textures/background/space-001/bg-planet.png",
+                        parallaxX: 0.12,
+                    }),
+                ],
+            }),
+    },
+
     environment: {
         checkpointBack: ({ x, y, ...rest } = {}) => ({
             x,

@@ -11,6 +11,7 @@ export const LEVEL_003 = {
         x: GameFactory.GRID * 2,
         y: GameFactory.GRID * 121.75,
     },
+    background: GameFactory.backgrounds.planetDesert(),
     platforms: [
         //boxes (fountain)
         GameFactory.grid.solid({ id: 15, x: 28, y: 140, w: 4, h: 2, layout: "metal" }),

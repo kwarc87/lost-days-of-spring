@@ -147,6 +147,7 @@ export class LevelEditor {
         this.backgroundItems = loaded.backgroundItems;
         this.preBackgroundItems = loaded.preBackgroundItems;
         this.parallaxItems = loaded.parallaxItems;
+        this.background = loaded.background;
 
         // Drawn at the level start position as a reference point
         this.player = GameFactory.player({ weapon: GameFactory.weapon() });

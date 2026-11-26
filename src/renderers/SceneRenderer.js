@@ -17,7 +17,12 @@ export const SceneRenderer = {
         if (game.mapView) {
             DefaultWorldRenderer.drawMapBackground(ctx, game.canvas, game.worldSize);
         } else {
-            DefaultWorldRenderer.drawBackground(ctx, game.canvas, game.cameraController.camera);
+            DefaultWorldRenderer.drawBackground(
+                ctx,
+                game.canvas,
+                game.cameraController.camera,
+                game.background
+            );
             ctx.translate(-game.cameraController.camera.x, -game.cameraController.camera.y);
         }
 

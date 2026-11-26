@@ -244,22 +244,20 @@ export const DefaultWorldRenderer = {
         }
         ctx.restore();
     },
-    drawBackground(ctx, canvas, camera) {
+    drawBackground(ctx, canvas, camera, background) {
         const cw = canvas.width;
         const ch = canvas.height;
-        const planet = getImg("textures/background/background.png");
-        const forrest = getImg("textures/background/middleground.png");
 
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = background?.color ?? "#000";
         ctx.fillRect(0, 0, cw, ch);
 
         const prev = ctx.imageSmoothingEnabled;
         ctx.imageSmoothingEnabled = false;
 
-        // Layer 1 - background
-        drawLayer(ctx, planet, cw, ch, camera.x, 0.01);
-        // Layer 2 - forrest
-        drawLayer(ctx, forrest, cw, ch, camera.x, 0.04);
+        // Layers are listed back to front.
+        for (const layer of background?.layers ?? []) {
+            drawLayer(ctx, getImg(layer.image), cw, ch, camera.x, layer.parallaxX);
+        }
 
         ctx.imageSmoothingEnabled = prev;
     },

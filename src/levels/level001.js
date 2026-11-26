@@ -11,6 +11,7 @@ export const LEVEL_001 = {
         x: GameFactory.GRID * 2,
         y: GameFactory.GRID * 139.75,
     },
+    background: GameFactory.backgrounds.planetForest(),
     platforms: [
         // platforms behind floor 0
         GameFactory.grid.booster({ id: 21, x: 144, y: 141, w: 6, h: 1, boostSpeed: 28 }),
