@@ -39,7 +39,7 @@ Read this file first; see `README.md` for the public description.
 - ESLint rules to respect: `eqeqeq`, `curly: all` (always braces), `no-var`, `prefer-const`, `no-console` (warn), unused vars must start with `_`.
 - No private `#` methods/fields – the project does not use them. Constants are plain class fields or module constants.
 - Deployment: GitHub Actions (`.github/workflows/deploy.yml`) builds on push to `main` and publishes to GitHub Pages.
-- Dev URL params (parsed in `index.html`): `?debug=true`, `?level=2`, `?initialHp=N`. Debug overlay toggles with Backspace.
+- Dev URL params (parsed in `index.html`): `?debug=true`, `?level=2` or `?level=bonus001`, `?initialHp=N`. Debug overlay toggles with Backspace.
 - `.gitignore` covers `node_modules/`, `dist/`, `.vscode/`, logs, OS files. Do not commit build output.
 
 ## 4. Game state (what already exists)
@@ -65,7 +65,7 @@ index.html                 entry: preloads images/fonts, creates LostDaysOfSprin
 src/core/LostDaysOfSpring.js   game "orchestrator": owns state, fixed-timestep loop, input mode dispatch
 src/config/                keysMap.js (key bindings), physics.js (gravity etc.)
 src/factories/GameFactory.js   data factories for ALL game objects + colors/sizes (SCALE, GRID)
-src/levels/                level001.js, level002.js (plain data), levelsConfig.js (id -> structuredClone)
+src/levels/                level001.js, level002.js (story levels), bonus001.js (bonus/playground levels), levelsConfig.js (id -> structuredClone, STORY_LEVEL_IDS order)
 src/systems/               *Controller / *Manager classes – one logical subsystem each
 src/renderers/             stateless draw objects + SceneRenderer + EntityRenderPipeline
 src/services/              LevelLoader, CheckpointStorage (localStorage), MapDiscovery

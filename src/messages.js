@@ -66,7 +66,7 @@ export const MESSAGES = {
         SUBTITLE: "Congratulations Colin,",
         SUBTITLE2: "your adventure will continue soon.",
         SUBTITLE_COLOR: "#c8d6e5",
-        RESTART_HINT: { text: "ESC \u2013 restart level", color: "#7a8a99" },
+        CONTINUE_HINT: { text: "ESC \u2013 continue", color: "#7a8a99" },
         DEATHS_TEXT: (count) => `Deaths: ${count}`,
         DEATHS_COLOR: "#e85454",
     },

@@ -96,7 +96,7 @@
         <aside id="editor-panel" hidden></aside>
         <script type="module">
             import { LevelEditor } from "./src/editor/LevelEditor.js";
-            import { LEVELS } from "./src/levels/levelsConfig.js";
+            import { resolveLevelId } from "./src/levels/levelsConfig.js";
             import { preloadImages, preloadFonts } from "./src/utils/imgCache.js";
 
             // Keep in sync with ASSETS and FONTS in index.html
@@ -132,8 +132,7 @@
             ];
 
             const params = new URLSearchParams(window.location.search);
-            const levelParam = parseInt(params.get("level"), 10);
-            const levelId = LEVELS[levelParam] ? levelParam : 1;
+            const levelId = resolveLevelId(params.get("level")) ?? 1;
 
             Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
                 new LevelEditor("editor", levelId).start();

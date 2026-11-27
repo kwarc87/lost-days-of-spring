@@ -3,13 +3,14 @@ export function computePlayTimeMs(now, levelStartAt, totalPausedTime, accumulate
     return now - levelStartAt - totalPausedTime + accumulatedPlayTime;
 }
 
-// context: { player, enemies, currentLevelCoinsCount, currentLevelSplintersCount,
+// context: { player, enemies, artifacts, currentLevelCoinsCount, currentLevelSplintersCount,
 // currentLevelArtifactsCount, currentLevelEnemiesCount, levelStartAt, totalPausedTime,
 // accumulatedPlayTime, deathCount }
 export function buildLevelStats(completedAt, context) {
     const {
         player,
         enemies,
+        artifacts,
         currentLevelCoinsCount,
         currentLevelSplintersCount,
         currentLevelArtifactsCount,
@@ -36,5 +37,6 @@ export function buildLevelStats(completedAt, context) {
         deathCount,
         artifactsCount: player.artifactsCount,
         currentLevelArtifactsCount,
+        collectedArtifactIds: artifacts.filter((a) => a.collected).map((a) => a.id),
     };
 }

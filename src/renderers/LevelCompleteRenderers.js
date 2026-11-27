@@ -21,8 +21,8 @@ export const DefaultLevelCompleteRenderer = {
             playTime: stats.playTimeMs,
             deathsText: MESSAGES.LEVEL_COMPLETE.DEATHS_TEXT(stats.deathCount),
             deathsColor: MESSAGES.LEVEL_COMPLETE.DEATHS_COLOR,
-            extraRowText: MESSAGES.LEVEL_COMPLETE.RESTART_HINT.text,
-            extraRowColor: MESSAGES.LEVEL_COMPLETE.RESTART_HINT.color,
+            extraRowText: MESSAGES.LEVEL_COMPLETE.CONTINUE_HINT.text,
+            extraRowColor: MESSAGES.LEVEL_COMPLETE.CONTINUE_HINT.color,
         });
     },
 };

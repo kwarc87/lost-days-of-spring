@@ -1,4 +1,4 @@
-import { LEVELS } from "../levels/levelsConfig.js";
+import { LEVELS, getNextStoryLevelId } from "../levels/levelsConfig.js";
 import { GameFactory } from "../factories/GameFactory.js";
 import { CameraController } from "../systems/CameraController.js";
 import { PLAYER_DYING_DURATION_MS } from "../renderers/PlayerRenderers.js";
@@ -13,6 +13,7 @@ import { DefaultLevelCompleteRenderer } from "../renderers/LevelCompleteRenderer
 import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
+import { ProgressManager } from "../systems/ProgressManager.js";
 import { PauseController } from "../systems/PauseController.js";
 import { ExitController } from "../systems/ExitController.js";
 import { TitleScreenController } from "../systems/TitleScreenController.js";
@@ -61,8 +62,9 @@ export class LostDaysOfSpring {
 
         // ====== GAME STATE ======
         this.currentLevelId = null;
-        this.pendingReset = false;
+        this.pendingLevelId = null; // level to load at the start of the next update tick
         this.checkpointManager = new CheckpointManager();
+        this.progressManager = new ProgressManager();
         this.pauseController = new PauseController();
         this.deathCount = 0;
         this.mapView = false;
@@ -325,6 +327,9 @@ export class LostDaysOfSpring {
             GameFactory.playerRespawn({
                 player: this.player,
                 checkpoint: this.checkpointManager.getRespawn(),
+                loadout:
+                    this.progressManager.getLoadoutFor(this.currentLevelId) ??
+                    levelData.preconditions,
                 levelData,
                 posture: this.playerPostures.STANDING,
                 baseMaxLife: this.initialHp,
@@ -442,16 +447,27 @@ export class LostDaysOfSpring {
     }
 
     resetGame() {
-        // Defer level reload to the start of the next update tick to avoid
-        // mutating game state mid-loop (enemies, collectibles, bullets, etc.).
-        this.pendingReset = true;
+        this.loadLevelNextTick(this.currentLevelId);
+    }
+
+    // After a completed level the story continues from the level stored in progress
+    // (the last story level and bonus levels have no next level, so they just reload it).
+    leaveCompletedLevel() {
+        this.loadLevelNextTick(this.progressManager.getCurrentLevelId());
+    }
+
+    // Defer level load to the start of the next update tick to avoid
+    // mutating game state mid-loop (enemies, collectibles, bullets, etc.).
+    loadLevelNextTick(levelId) {
+        this.pendingLevelId = levelId;
     }
 
     update(now) {
-        // Process deferred reset at the top of the tick before any logic runs
-        if (this.pendingReset) {
-            this.pendingReset = false;
-            this.loadLevel(this.currentLevelId, now);
+        // Process deferred level load at the top of the tick before any logic runs
+        if (this.pendingLevelId !== null) {
+            const levelId = this.pendingLevelId;
+            this.pendingLevelId = null;
+            this.loadLevel(levelId, now);
             // `now` here is simulatedTime, not the wall clock loop() uses for lastTime/gameFadeIn.
             this.startLevel(now, performance.now());
             return;
@@ -459,7 +475,11 @@ export class LostDaysOfSpring {
 
         // Dismiss level-complete or game-over screen
         if (this.inputController.isDown("escape")) {
-            if (this.levelComplete || this.gameOver) {
+            if (this.levelComplete) {
+                this.leaveCompletedLevel();
+                return;
+            }
+            if (this.gameOver) {
                 this.resetGame();
                 return;
             }
@@ -588,10 +608,21 @@ export class LostDaysOfSpring {
                 this.playerPhysicsController.stopMovement(this.player);
                 this.combatController.stopShooting(this.player);
                 this.playerPhysicsController.cancelJumpCut(this.player);
+                this.recordLevelCompletion(now);
                 this.checkpointManager.clear();
                 this.galleryController.resetLastIndex();
             }
         }
+    }
+
+    // Must run before the checkpoint is cleared: the result is the only thing kept from the level.
+    recordLevelCompletion(now) {
+        this.progressManager.recordLevelCompleted(
+            this.currentLevelId,
+            this.buildLevelStats(now),
+            getNextStoryLevelId(this.currentLevelId),
+            { maxLife: this.player.maxLife, weapon: this.player.weapon }
+        );
     }
 
     // Apply gravity and enforce terminal velocity
@@ -805,7 +836,7 @@ export class LostDaysOfSpring {
     }
 
     drawTitleScreen() {
-        const hasSave = CheckpointStorage.load() !== null;
+        const hasSave = CheckpointStorage.load() !== null || this.progressManager.hasProgress();
         TitleScreenRenderer.draw(this.ctx, this.canvas, hasSave);
     }
 
@@ -824,6 +855,7 @@ export class LostDaysOfSpring {
         return buildLevelStats(completedAt, {
             player: this.player,
             enemies: this.enemyController.getEnemies(),
+            artifacts: this.collectibleController.getArtifacts(),
             currentLevelCoinsCount: this.currentLevelCoinsCount,
             currentLevelSplintersCount: this.currentLevelSplintersCount,
             currentLevelArtifactsCount: this.currentLevelArtifactsCount,
@@ -1061,8 +1093,11 @@ export class LostDaysOfSpring {
         this.start();
     }
 
+    // Back to the very beginning of the story: the level is taken from the cleared progress.
     resetProgress() {
         this.checkpointManager.clear();
+        this.progressManager.reset();
+        this.currentLevelId = this.progressManager.getCurrentLevelId();
         this.deathCount = 0;
         this.accumulatedPlayTime = 0;
         this.galleryController.resetLastIndex();

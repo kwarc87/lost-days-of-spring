@@ -132,9 +132,10 @@ export const GameFactory = {
     }),
     // Resolves respawn position/weapon/counters from a checkpoint (or level start
     // as fallback) and builds the full respawn state for the given player/posture.
-    // maxLife comes from the checkpoint (permanent heart upgrades) or falls back to baseMaxLife.
-    playerRespawn: ({ player, checkpoint, levelData, posture, baseMaxLife }) => {
-        const maxLife = checkpoint?.maxLife ?? baseMaxLife;
+    // maxLife and weapon: checkpoint (state inside the level) -> loadout (state the level
+    // starts with: carried over in story mode or the level's preconditions) -> defaults.
+    playerRespawn: ({ player, checkpoint, loadout, levelData, posture, baseMaxLife }) => {
+        const maxLife = checkpoint?.maxLife ?? loadout?.maxLife ?? baseMaxLife;
         return GameFactory.playerRespawnState({
             x: checkpoint?.x ?? levelData?.playerStart?.x ?? 0,
             y: checkpoint?.y ?? levelData?.playerStart?.y ?? 0,
@@ -143,7 +144,7 @@ export const GameFactory = {
             life: maxLife,
             maxLife,
             posture,
-            weapon: checkpoint?.weapon ?? GameFactory.weapon(),
+            weapon: checkpoint?.weapon ?? loadout?.weapon ?? GameFactory.weapon(),
             coinsCount: checkpoint?.coinsCount ?? 0,
             splintersCount: checkpoint?.splintersCount ?? 0,
             artifactsCount: checkpoint?.artifactsCount ?? 0,
@@ -531,6 +532,14 @@ export const GameFactory = {
         },
         ...overrides,
     }),
+    // Weapon from the first weapon upgrade pickup; also the starting weapon of later levels.
+    upgradedWeapon: () =>
+        GameFactory.weapon({
+            id: 2,
+            color: "#C1311B",
+            speed: 18,
+            ammo: { vx: 0, vy: 0, w: 12, h: 12, damage: 8 },
+        }),
     cannon: ({ id, x, y, targetY, ...rest } = {}) => ({
         id,
         x,

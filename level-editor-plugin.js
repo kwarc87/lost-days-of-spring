@@ -24,11 +24,20 @@ const LOOPBACK_HOSTNAMES = new Set(["localhost", "127.0.0.1", "[::1]"]);
 // 4 more spaces, e.g. "    collectibles: {", "        coins: [", "            ...entries".
 const INDENT_STEP = "    ";
 
-function getLevelFilePath(root, level) {
-    if (!Number.isInteger(level) || level < 1) {
-        throw new Error(`Invalid level: ${level}`);
+// The level id comes from the client, so it is validated strictly before it becomes a path:
+// story levels are positive integers (level001.js), bonus levels are "bonus" + 3 digits.
+function getLevelFileName(level) {
+    if (Number.isInteger(level) && level >= 1) {
+        return `level${String(level).padStart(3, "0")}.js`;
     }
-    const filePath = path.join(root, "src", "levels", `level${String(level).padStart(3, "0")}.js`);
+    if (typeof level === "string" && /^bonus\d{3}$/.test(level)) {
+        return `${level}.js`;
+    }
+    throw new Error(`Invalid level: ${level}`);
+}
+
+function getLevelFilePath(root, level) {
+    const filePath = path.join(root, "src", "levels", getLevelFileName(level));
     if (!fs.existsSync(filePath)) {
         throw new Error(`Level file not found: ${filePath}`);
     }

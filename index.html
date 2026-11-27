@@ -75,6 +75,7 @@
         </div>
         <script type="module">
             import { LostDaysOfSpring } from "./src/core/LostDaysOfSpring.js";
+            import { resolveLevelId } from "./src/levels/levelsConfig.js";
             import { preloadImages, preloadFonts } from "./src/utils/imgCache.js";
 
             const ASSETS = [
@@ -115,8 +116,8 @@
             // Dev only: shows the whole map without fog of war
             const revealMap = params.get("revealMap") === "true";
 
-            const levelParam = parseInt(params.get("level"), 10);
-            const startLevel = [2, 3].includes(levelParam) ? levelParam : 1;
+            // Dev only: jump straight to a level ("2", "bonus001"); otherwise the story progress decides
+            const devLevelId = resolveLevelId(params.get("level"));
 
             const initialHpParam = Number(params.get("initialHp"));
             // undefined falls back to the constructor default (GameFactory.DEFAULT_MAX_LIFE)
@@ -126,7 +127,7 @@
             Promise.all([preloadImages(ASSETS), preloadFonts(FONTS)]).then(() => {
                 document.getElementById("loading").classList.add("done");
                 const game = new LostDaysOfSpring("game", debug, initialHp, revealMap);
-                game.loadLevel(startLevel);
+                game.loadLevel(devLevelId ?? game.progressManager.getCurrentLevelId());
                 game.start();
             });
         </script>
