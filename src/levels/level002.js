@@ -324,6 +324,8 @@ export const LEVEL_002 = {
         GameFactory.grid.solid({ id: 249, x: 425, y: 141, w: 8, h: 2, layout: "groundTopCap" }),
         GameFactory.grid.solid({ id: 250, x: 414, y: 116, w: 2, h: 2 }),
         GameFactory.grid.solid({ id: 251, x: 418, y: 126, w: 2, h: 1, layout: "bridge003" }),
+        GameFactory.grid.solid({ id: 252, x: 411, y: 106, w: 40, h: 2, layout: "groundBottomCap" }),
+        GameFactory.grid.solid({ id: 253, x: 414, y: 107, w: 28, h: 2, layout: "groundBottomCap" }),
     ],
     hackPanels: [
         GameFactory.grid.hackPanel({ id: 1, x: 6, y: 139.5, activationDuration: 5000, platformIds: [3001, 3002, 3003, 3004, 3005] }),
@@ -1168,6 +1170,7 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.plate001({ x: 382, y: 124 }),
         GameFactory.grid.environment.plate001({ x: 402, y: 139 }),
         GameFactory.grid.environment.plate001({ x: 412, y: 130 }),
+        GameFactory.grid.environment.grass002({ x: 403, y: 130 }),
     ],
     foregroundItems: [
         //flowers and mushrooms (fountain)
@@ -1296,5 +1299,7 @@ export const LEVEL_002 = {
         GameFactory.grid.environment.wallPlant001({ x: 338, y: 115 }),
         GameFactory.grid.environment.wallPlant001({ x: 364, y: 118 }),
         GameFactory.grid.environment.wallPlant001({ x: 344, y: 132 }),
+        GameFactory.grid.environment.plant001({ x: 391, y: 132 }),
+        GameFactory.grid.environment.plant002({ x: 418, y: 139 }),
     ] 
 };

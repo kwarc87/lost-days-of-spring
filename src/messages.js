@@ -48,6 +48,21 @@ export const MESSAGES = {
         TIME_TEXT: (formatted) => `Time: ${formatted}`,
     },
 
+    // ── Level statistics (results of completed levels) ────────────────────────
+    LEVEL_STATS: {
+        TITLE: "LEVEL STATISTICS",
+        TITLE_COLOR: "#f5c542",
+        HEADER_COLOR: "#7a8a99",
+        NAME_COLOR: "#ffffff",
+        EMPTY_TEXT: "No levels completed yet.",
+        CLOSE_HINT: "ESC \u2013 close",
+        // levelId comes from object keys, so story ids arrive as strings ("1") as well.
+        LEVEL_NAME: (levelId) => {
+            const id = String(levelId);
+            return id.startsWith("bonus") ? `Bonus ${id.slice("bonus".length)}` : `Level ${id}`;
+        },
+    },
+
     // ── Game Over ─────────────────────────────────────────────────────────────
     GAME_OVER: {
         TITLE: "YOU'VE LOST",

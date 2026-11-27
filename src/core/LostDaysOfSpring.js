@@ -14,6 +14,8 @@ import { DefaultGameOverRenderer } from "../renderers/GameOverRenderer.js";
 import { CheckpointStorage } from "../services/CheckpointStorage.js";
 import { CheckpointManager } from "../systems/CheckpointManager.js";
 import { ProgressManager } from "../systems/ProgressManager.js";
+import { LevelStatsController } from "../systems/LevelStatsController.js";
+import { LevelStatsRenderer } from "../renderers/LevelStatsRenderer.js";
 import { PauseController } from "../systems/PauseController.js";
 import { ExitController } from "../systems/ExitController.js";
 import { TitleScreenController } from "../systems/TitleScreenController.js";
@@ -159,10 +161,12 @@ export class LostDaysOfSpring {
         };
 
         this.galleryController = new ArtifactGalleryController(new ArtifactGalleryRenderer());
+        this.levelStatsController = new LevelStatsController();
         this.inputRouter = new InputRouter(
             this.keysMap,
             this.titleScreenController,
             this.galleryController,
+            this.levelStatsController,
             this.pauseController
         );
 
@@ -179,6 +183,7 @@ export class LostDaysOfSpring {
         this.inputHandlers = {
             title: (e) => this.handleTitleScreenKeyDown(e),
             gallery: (e) => this.handleGalleryKeyDown(e),
+            levelStats: (e) => this.handleLevelStatsKeyDown(e),
             pause: (e) => this.handlePauseMenuKey(e.code),
             gameplay: (e) => this.handleGameplayKeyDown(e),
         };
@@ -402,6 +407,12 @@ export class LostDaysOfSpring {
         } else if (e.code === this.keysMap.right) {
             this.galleryController.navigateRight();
             this.animateGallery();
+        }
+    }
+
+    handleLevelStatsKeyDown(e) {
+        if (!e.repeat && (e.code === this.keysMap.escape || e.code === this.keysMap.pause)) {
+            this.closeLevelStats();
         }
     }
 
@@ -1071,6 +1082,13 @@ export class LostDaysOfSpring {
             return;
         }
 
+        if (action === PAUSE_MENU_ACTION.LEVEL_STATS) {
+            this.pauseController.close();
+            this.resumeFromPause();
+            this.openLevelStats();
+            return;
+        }
+
         if (action === PAUSE_MENU_ACTION.TOGGLE_FULLSCREEN) {
             // Stay in the pause menu; the label is redrawn on the "fullscreenchange" event.
             this.displayController.toggleFullscreen();
@@ -1146,6 +1164,21 @@ export class LostDaysOfSpring {
 
     closeArtifactGallery() {
         this.galleryController.deactivate();
+        this.resumeFromPause();
+        this.lastTime = performance.now();
+        this.start();
+    }
+
+    openLevelStats() {
+        this.levelStatsController.activate();
+        this.pauseController.beginFreeze(performance.now());
+        this.stop();
+        this.draw(this.simulatedTime);
+        LevelStatsRenderer.draw(this.ctx, this.canvas, this.progressManager.getCompletedLevels());
+    }
+
+    closeLevelStats() {
+        this.levelStatsController.deactivate();
         this.resumeFromPause();
         this.lastTime = performance.now();
         this.start();

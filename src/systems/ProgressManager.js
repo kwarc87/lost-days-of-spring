@@ -16,6 +16,10 @@ export class ProgressManager {
         return Object.keys(this.progress.completedLevels).length > 0;
     }
 
+    getCompletedLevels() {
+        return this.progress.completedLevels;
+    }
+
     // State the player carries into the level, or null when this level has no carried state
     // (e.g. it is played outside the story order) and its preconditions apply instead.
     getLoadoutFor(levelId) {

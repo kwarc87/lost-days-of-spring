@@ -1,11 +1,18 @@
-// Determines which key-handling mode is currently active (title/gallery/pause/
+// Determines which key-handling mode is currently active (title/gallery/levelStats/pause/
 // gameplay) and dispatches global toggles (debug/fullscreen) that fire regardless
 // of mode. Concrete per-mode key handling stays with the caller.
 export class InputRouter {
-    constructor(keysMap, titleScreenController, galleryController, pauseController) {
+    constructor(
+        keysMap,
+        titleScreenController,
+        galleryController,
+        levelStatsController,
+        pauseController
+    ) {
         this.keysMap = keysMap;
         this.titleScreenController = titleScreenController;
         this.galleryController = galleryController;
+        this.levelStatsController = levelStatsController;
         this.pauseController = pauseController;
     }
 
@@ -15,6 +22,9 @@ export class InputRouter {
         }
         if (this.galleryController.active) {
             return "gallery";
+        }
+        if (this.levelStatsController.active) {
+            return "levelStats";
         }
         if (this.pauseController.isPaused) {
             return "pause";

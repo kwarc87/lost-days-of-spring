@@ -15,6 +15,7 @@ export function getMenuItems(isFullscreen) {
     return [
         "Resume game",
         "Artifact gallery",
+        "Level statistics",
         isFullscreen ? "Exit fullscreen" : "Enter fullscreen",
         "Reset progress",
         "Return to main screen",
@@ -25,9 +26,10 @@ export function getMenuItems(isFullscreen) {
 export const PAUSE_MENU_ACTION = {
     RESUME: 0,
     GALLERY: 1,
-    TOGGLE_FULLSCREEN: 2,
-    RESET_PROGRESS: 3,
-    RETURN_TO_TITLE: 4,
+    LEVEL_STATS: 2,
+    TOGGLE_FULLSCREEN: 3,
+    RESET_PROGRESS: 4,
+    RETURN_TO_TITLE: 5,
 };
 
 export const PAUSE_MENU_ITEM_COUNT = Object.keys(PAUSE_MENU_ACTION).length;
