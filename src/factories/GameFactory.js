@@ -297,6 +297,7 @@ export const GameFactory = {
         waitTime,
         layout = "bridgePink001",
         triggered = false,
+        fastOutsideCamera = true,
     } = {}) => {
         const dx = targetX - startX;
         const dy = targetY - startY;
@@ -319,6 +320,7 @@ export const GameFactory = {
             waitTime,
             idleUntil: 0,
             triggered,
+            fastOutsideCamera,
             type: "elevator",
             layout,
         };
@@ -1459,6 +1461,7 @@ export const GameFactory = {
             waitTime,
             layout,
             triggered,
+            fastOutsideCamera,
         } = {}) =>
             GameFactory.elevator({
                 id,
@@ -1472,6 +1475,7 @@ export const GameFactory = {
                 waitTime,
                 layout,
                 triggered,
+                fastOutsideCamera,
             }),
         coins: ({ id, x, y, ...rest } = {}) =>
             GameFactory.collectible({

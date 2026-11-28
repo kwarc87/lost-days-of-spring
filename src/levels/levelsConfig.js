@@ -12,7 +12,9 @@ export const LEVELS = {
 };
 
 // Story levels in play order. Bonus levels are not part of the story chain.
-export const STORY_LEVEL_IDS = [1, 2];
+// TEMPORARY: only level 1 is playable in story mode, the next levels are unfinished.
+// Restore to [1, 2] when level 2 is ready (it is still reachable via ?level=2).
+export const STORY_LEVEL_IDS = [1];
 
 // Returns null after the last story level and for bonus levels.
 export function getNextStoryLevelId(levelId) {

@@ -74,6 +74,29 @@ export const EDITOR_OBJECT_KINDS = {
             { name: "active", input: "checkbox" },
         ],
     },
+    elevator: {
+        label: "Elevator",
+        section: "elevators",
+        id: solidId(1001),
+        factoryPath: "GameFactory.grid",
+        factoryOwner: GameFactory.grid,
+        factoryNames: ["elevator"],
+        // startX/startY and targetX/targetY are prefilled with the clicked tile – change the
+        // target to set where it moves (it can't be the same as the start).
+        // triggered: starts moving only after the player steps on it.
+        fields: [
+            { name: "startX", input: "number" },
+            { name: "startY", input: "number" },
+            { name: "targetX", input: "number" },
+            { name: "targetY", input: "number" },
+            { name: "w", input: "number", defaultValue: 4 },
+            { name: "h", input: "number", defaultValue: 1 },
+            { name: "speed", input: "number", defaultValue: 5 },
+            { name: "waitTime", input: "number", defaultValue: 1500 },
+            LAYOUT_FIELD,
+            { name: "triggered", input: "checkbox" },
+        ],
+    },
     coins: {
         label: "Coins",
         section: "collectibles.coins",
@@ -90,6 +113,18 @@ export const EDITOR_OBJECT_KINDS = {
         factoryPath: "GameFactory.grid",
         factoryOwner: GameFactory.grid,
         factoryNames: ["splinters"],
+        fields: [
+            { name: "x", input: "number" },
+            { name: "y", input: "number" },
+        ],
+    },
+    heart: {
+        label: "Heart",
+        section: "collectibles.hearts",
+        id: { field: "id", firstId: 1, group: "hearts", block: false },
+        factoryPath: "GameFactory.grid",
+        factoryOwner: GameFactory.grid,
+        factoryNames: ["hearts"],
         fields: [
             { name: "x", input: "number" },
             { name: "y", input: "number" },
@@ -126,6 +161,42 @@ export const EDITOR_OBJECT_KINDS = {
             { name: "position", input: "select", options: ["down", "up"] },
             { name: "damage", input: "number" },
         ],
+    },
+    enemy: {
+        label: "Enemy",
+        section: "enemies",
+        id: { field: "id", firstId: 1, group: "enemies", block: false },
+        factoryPath: "GameFactory.grid",
+        factoryOwner: GameFactory.grid,
+        factoryNames: ["slime", "evilEye", "sludge"],
+        // The enemy patrols between start and target (tile units). The form prefills both with
+        // the clicked tile – change the target to set the patrol range.
+        fields: [
+            { name: "startX", input: "number" },
+            { name: "targetX", input: "number" },
+            { name: "startY", input: "number" },
+            { name: "targetY", input: "number" },
+            { name: "speed", input: "number" },
+            { name: "health", input: "number" },
+            { name: "mainColor", input: "text" },
+            { name: "secondaryColor", input: "text" },
+        ],
+    },
+    checkpoint: {
+        label: "Checkpoint",
+        section: "checkpoints",
+        id: { field: "id", firstId: 1, group: "checkpoints", block: false },
+        factoryPath: "GameFactory.grid",
+        factoryOwner: GameFactory.grid,
+        factoryNames: ["checkpoint"],
+        // Same size as the existing checkpoints: 1 x 3 tiles.
+        fields: [
+            { name: "x", input: "number" },
+            { name: "y", input: "number" },
+            { name: "w", input: "number", defaultValue: 1 },
+            { name: "h", input: "number", defaultValue: 3 },
+        ],
+        fixedProps: { reached: false },
     },
     preBackgroundItem: environmentItemKind("Pre-background item", "preBackgroundItems"),
     backgroundItem: environmentItemKind("Background item", "backgroundItems"),

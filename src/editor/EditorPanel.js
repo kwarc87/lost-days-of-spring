@@ -1,3 +1,6 @@
+// Form fields prefilled from the clicked tile, and which tile axis each one takes.
+const TILE_PROP_AXIS = { x: "x", y: "y", startX: "x", startY: "y", targetX: "x", targetY: "y" };
+
 // Right-side DOM panel: first a menu with object kinds, then a small properties form.
 // Knows nothing about the level or saving – it only reports what the user picked/entered.
 export class EditorPanel {
@@ -42,7 +45,13 @@ export class EditorPanel {
             form.append(createRow(kind.id.field, idOutput));
         }
 
-        const prefilled = { x, y };
+        const tile = { x, y };
+        const prefilled = {};
+        for (const field of kind.fields) {
+            if (field.name in TILE_PROP_AXIS) {
+                prefilled[field.name] = tile[TILE_PROP_AXIS[field.name]];
+            }
+        }
         const inputs = kind.fields.map((field) => {
             const input = createInput(field, prefilled[field.name] ?? field.defaultValue);
             if (!(field.name in prefilled)) {

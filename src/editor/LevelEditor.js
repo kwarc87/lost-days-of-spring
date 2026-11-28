@@ -41,9 +41,12 @@ const ID_GROUPS = {
     ],
     coins: (editor) => [editor.collectibleController.getCoins()],
     splinters: (editor) => [editor.collectibleController.getSplinters()],
+    hearts: (editor) => [editor.collectibleController.getHearts()],
     spikes: (editor) => [editor.combatController.getSpikes()],
     artifacts: (editor) => [editor.collectibleController.getArtifacts()],
     hackPanels: (editor) => [editor.hackPanelController.getHackPanels()],
+    enemies: (editor) => [editor.enemyController.getEnemies()],
+    checkpoints: (editor) => [editor.checkpointManager.checkpoints],
 };
 
 // Throws with the server's error message when the request fails.

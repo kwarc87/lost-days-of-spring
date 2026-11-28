@@ -65,7 +65,9 @@ export class ElevatorController {
                 continue;
             }
 
-            const offScreen = !isVisibleInCamera(e, this.cameraMargin);
+            // Elevators with fastOutsideCamera=false keep their normal speed off-screen,
+            // so chains of timed elevators stay synchronized.
+            const offScreen = e.fastOutsideCamera && !isVisibleInCamera(e, this.cameraMargin);
             const speed = offScreen ? this.speedOutsideCamera : e.speed;
 
             const playerIsOnElevator = offScreen ? false : this.isPlayerOn(player, e.id);
