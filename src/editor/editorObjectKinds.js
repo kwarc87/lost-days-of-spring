@@ -69,8 +69,9 @@ export const EDITOR_OBJECT_KINDS = {
         factoryNames: ["temporaryPlatform"],
         fields: [
             ...TILE_RECT_FIELDS,
-            { name: "type", input: "select", options: ["solid", "oneDirection"] },
+            { name: "type", input: "select", options: ["solid", "oneDirection", "booster"] },
             LAYOUT_FIELD,
+            { name: "boostSpeed", input: "number" },
             { name: "active", input: "checkbox" },
         ],
     },

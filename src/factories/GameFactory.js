@@ -260,12 +260,14 @@ export const GameFactory = {
     // ids it controls.
     // recoilX/recoilY: knockback applied to the player when the platform appears inside them
     // (same values as the default enemies).
+    // boostSpeed: only used by type "booster" (launch speed, same as GameFactory.booster).
     temporaryPlatform: ({
         active = false,
         type = "solid",
         layout = "boardTemporary",
         recoilX = 12,
         recoilY = 12,
+        boostSpeed = 20,
         ...rest
     } = {}) => ({
         ...GameFactory.solid({ layout, ...rest }),
@@ -273,6 +275,7 @@ export const GameFactory = {
         active,
         recoilX,
         recoilY,
+        ...(type === "booster" && { boostSpeed }),
     }),
     booster: ({ id, x, y, w, h, boostSpeed = 20 } = {}) => ({
         id,

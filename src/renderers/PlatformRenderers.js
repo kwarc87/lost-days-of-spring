@@ -465,6 +465,14 @@ export const platformCaves = {
             { x: 272, y: 16, padRight: 6 }
         ),
     },
+    boosterTemporary: {
+        ...BASE_TILESET,
+        sprites: repeatHorizontal3x3(
+            { x: 208, y: 384, padLeft: 6 },
+            { x: 208, y: 384 },
+            { x: 272, y: 384, padRight: 6 }
+        ),
+    },
     pipeVertical: {
         ...BASE_TILESET,
         sprites: repeatAllTiles3x3({ x: 176, y: 16 }),
